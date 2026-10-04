@@ -1,0 +1,115 @@
+namespace StageTrack.Permissions;
+
+/// <summary>
+/// Permission names. Controllers use them as authorization policy names and the
+/// frontend hides menus/buttons with the same strings (see /api/account/me).
+/// </summary>
+public static class StageTrackPermissions
+{
+    public const string Prefix = "StageTrack";
+
+    public static class Equipment
+    {
+        public const string Default = Prefix + ".Equipment";
+        public const string Manage = Default + ".Manage";
+    }
+
+    public static class Labels
+    {
+        public const string Assign = Prefix + ".Labels.Assign";
+    }
+
+    public static class Customers
+    {
+        public const string Default = Prefix + ".Customers";
+        public const string Manage = Default + ".Manage";
+    }
+
+    public static class Projects
+    {
+        public const string Default = Prefix + ".Projects";
+        public const string Manage = Default + ".Manage";
+        public const string ChangeStatus = Default + ".ChangeStatus";
+    }
+
+    public static class Warehouse
+    {
+        public const string Default = Prefix + ".Warehouse";
+        public const string Scan = Default + ".Scan";
+    }
+
+    public static class Quotes
+    {
+        public const string Default = Prefix + ".Quotes";
+        public const string Manage = Default + ".Manage";
+    }
+
+    public static class Settings
+    {
+        public const string RentalFactors = Prefix + ".Settings.RentalFactors";
+        public const string StockLocations = Prefix + ".Settings.StockLocations";
+    }
+
+    public static class Identity
+    {
+        public const string Roles = Prefix + ".Identity.Roles";
+        public const string Users = Prefix + ".Identity.Users";
+        public const string Impersonate = Users + ".Impersonate";
+    }
+
+    /// <summary>
+    /// The permission tree shown on the role screen (ABP's PermissionDefinitionProvider equivalent).
+    /// A child can only be granted together with its parent, e.g. "manage" requires "view".
+    /// Display names live in the frontend locale files under "permissions".
+    /// </summary>
+    public static readonly IReadOnlyList<PermissionGroupDefinition> Groups =
+    [
+        new("Equipment",
+        [
+            new(Equipment.Default),
+            new(Equipment.Manage, Equipment.Default),
+            new(Labels.Assign, Equipment.Default)
+        ]),
+        new("Projects",
+        [
+            new(Projects.Default),
+            new(Projects.Manage, Projects.Default),
+            new(Projects.ChangeStatus, Projects.Default)
+        ]),
+        new("Warehouse",
+        [
+            new(Warehouse.Default),
+            new(Warehouse.Scan, Warehouse.Default)
+        ]),
+        new("Quotes",
+        [
+            new(Quotes.Default),
+            new(Quotes.Manage, Quotes.Default)
+        ]),
+        new("Customers",
+        [
+            new(Customers.Default),
+            new(Customers.Manage, Customers.Default)
+        ]),
+        new("Settings",
+        [
+            new(Settings.RentalFactors),
+            new(Settings.StockLocations)
+        ]),
+        new("Identity",
+        [
+            new(Identity.Roles),
+            new(Identity.Users),
+            new(Identity.Impersonate, Identity.Users)
+        ])
+    ];
+
+    public static IReadOnlyList<string> GetAll() => Groups.SelectMany(g => g.Permissions).Select(p => p.Name).ToList();
+
+    public static PermissionDefinition? Find(string name) =>
+        Groups.SelectMany(g => g.Permissions).FirstOrDefault(p => p.Name == name);
+}
+
+public record PermissionDefinition(string Name, string? Parent = null);
+
+public record PermissionGroupDefinition(string Name, IReadOnlyList<PermissionDefinition> Permissions);

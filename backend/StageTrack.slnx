@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/StageTrack.Application.Contracts/StageTrack.Application.Contracts.csproj" />
+    <Project Path="src/StageTrack.Application/StageTrack.Application.csproj" />
+    <Project Path="src/StageTrack.Domain.Shared/StageTrack.Domain.Shared.csproj" />
+    <Project Path="src/StageTrack.Domain/StageTrack.Domain.csproj" />
+    <Project Path="src/StageTrack.EntityFrameworkCore/StageTrack.EntityFrameworkCore.csproj" />
+    <Project Path="src/StageTrack.HttpApi.Host/StageTrack.HttpApi.Host.csproj" />
+    <Project Path="src/StageTrack.HttpApi/StageTrack.HttpApi.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/StageTrack.Domain.Tests/StageTrack.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

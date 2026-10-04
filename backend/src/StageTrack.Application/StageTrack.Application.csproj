@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\StageTrack.Domain\StageTrack.Domain.csproj" />
+    <ProjectReference Include="..\StageTrack.Application.Contracts\StageTrack.Application.Contracts.csproj" />
+  </ItemGroup>
+
+
+</Project>

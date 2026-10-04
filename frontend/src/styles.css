@@ -1,0 +1,100 @@
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-feature-settings: 'tnum';
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.page-header h3 {
+  margin: 0 !important;
+}
+
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(220px, 1fr));
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.calendar-grid {
+  overflow-x: auto;
+}
+
+.calendar-grid table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 900px;
+  table-layout: fixed;
+}
+
+.calendar-grid th,
+.calendar-grid td {
+  border: 1px solid var(--cal-border, rgba(128, 128, 128, 0.2));
+  padding: 0;
+  height: 28px;
+  font-size: 12px;
+}
+
+.calendar-grid th.today {
+  outline: 2px solid #1677ff;
+  outline-offset: -2px;
+}
+
+.calendar-bar {
+  height: 22px;
+  margin: 2px 0;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  line-height: 22px;
+  padding-inline: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.scan-feed-item {
+  animation: scan-in 0.25s ease-out;
+}
+
+@keyframes scan-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media print {
+  .no-print,
+  .ant-layout-sider,
+  .ant-layout-header,
+  .ant-modal-footer,
+  .ant-modal-close {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+}
