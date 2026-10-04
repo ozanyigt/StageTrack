@@ -1,0 +1,96 @@
+using StageTrack.Repositories;
+
+namespace StageTrack.Inventory;
+
+public class EquipmentFilter
+{
+    public string? Text { get; set; }
+    public IReadOnlyCollection<Guid>? FolderIds { get; set; }
+    public EquipmentType? Type { get; set; }
+    public bool IsArchived { get; set; }
+}
+
+public interface IEquipmentRepository : IRepository<Equipment>
+{
+    Task<bool> CodeExistsAsync(string code, Guid? excludeId = null, CancellationToken cancellationToken = default);
+
+    Task<List<Equipment>> GetPagedListAsync(EquipmentFilter filter, string? sorting, int skip, int take, CancellationToken cancellationToken = default);
+
+    Task<long> GetCountAsync(EquipmentFilter filter, CancellationToken cancellationToken = default);
+
+    /// <summary>Owned stock per equipment: device count for serialized items (repair/lost excluded), StockQuantity otherwise.</summary>
+    Task<Dictionary<Guid, int>> GetStockQuantitiesAsync(IReadOnlyCollection<Guid> equipmentIds, CancellationToken cancellationToken = default);
+
+    Task<List<Equipment>> SearchAsync(string? text, int take, CancellationToken cancellationToken = default);
+
+    Task<bool> AnyInFolderAsync(Guid folderId, CancellationToken cancellationToken = default);
+}
+
+public interface IEquipmentFolderRepository : IRepository<EquipmentFolder>
+{
+    Task<bool> HasChildrenAsync(Guid folderId, CancellationToken cancellationToken = default);
+
+    Task<int> GetMaxSortOrderAsync(Guid? parentId, CancellationToken cancellationToken = default);
+}
+
+public class EquipmentUnitFilter
+{
+    public string? Text { get; set; }
+    public Guid? EquipmentId { get; set; }
+    public UnitStatus? Status { get; set; }
+    public Guid? StockLocationId { get; set; }
+}
+
+/// <summary>Read model for device lists: the device plus the names needed to display it.</summary>
+public class EquipmentUnitListItem
+{
+    public required EquipmentUnit Unit { get; init; }
+    public required string EquipmentCode { get; init; }
+    public required string EquipmentName { get; init; }
+    public string? StockLocationName { get; init; }
+    public int? CurrentProjectNumber { get; init; }
+    public string? CurrentProjectName { get; init; }
+    public int LabelCount { get; init; }
+}
+
+public interface IEquipmentUnitRepository : IRepository<EquipmentUnit>
+{
+    Task<bool> InternalRefExistsAsync(string internalRef, Guid? excludeId = null, CancellationToken cancellationToken = default);
+
+    Task<List<EquipmentUnitListItem>> GetPagedListAsync(EquipmentUnitFilter filter, int skip, int take, CancellationToken cancellationToken = default);
+
+    Task<long> GetCountAsync(EquipmentUnitFilter filter, CancellationToken cancellationToken = default);
+
+    Task<EquipmentUnitListItem?> GetListItemAsync(Guid id, CancellationToken cancellationToken = default);
+
+    Task<bool> AnyForEquipmentAsync(Guid equipmentId, CancellationToken cancellationToken = default);
+
+    Task<bool> AnyInStockLocationAsync(Guid stockLocationId, CancellationToken cancellationToken = default);
+
+    Task<int> CountOutOnProjectAsync(Guid projectId, CancellationToken cancellationToken = default);
+
+    Task<Dictionary<UnitStatus, int>> GetStatusCountsAsync(Guid? equipmentId = null, CancellationToken cancellationToken = default);
+
+    Task<List<EquipmentUnit>> GetListOutOnProjectAsync(Guid projectId, CancellationToken cancellationToken = default);
+}
+
+/// <summary>Read model for a resolved label.</summary>
+public class LabelTarget
+{
+    public required EquipmentLabel Label { get; init; }
+    public required Equipment Equipment { get; init; }
+    public EquipmentUnit? Unit { get; init; }
+}
+
+public interface IEquipmentLabelRepository : IRepository<EquipmentLabel>
+{
+    Task<LabelTarget?> FindTargetByCodeAsync(string code, CancellationToken cancellationToken = default);
+
+    Task<List<EquipmentLabel>> GetListByEquipmentAsync(Guid equipmentId, CancellationToken cancellationToken = default);
+
+    Task<List<EquipmentLabel>> GetListByUnitAsync(Guid unitId, CancellationToken cancellationToken = default);
+}
+
+public interface IStockLocationRepository : IRepository<StockLocation>
+{
+}

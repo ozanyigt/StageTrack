@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\StageTrack.Domain.Shared\StageTrack.Domain.Shared.csproj" />
+  </ItemGroup>
+
+
+</Project>
