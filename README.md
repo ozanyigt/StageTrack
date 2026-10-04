@@ -124,3 +124,4 @@ Yetkilendirmede asıl projeye kalanlar: şirket bazlı rol, kullanıcıya özel 
 işlemi asıl yapanın kaydı), hatalı şifrede hesap kilitleme, yenileme token'ı / çerez tabanlı oturum, önyüz yetki
 sabitlerinin backend'den üretilmesi.
 "# StageTrack" 
+"# StageTrack" 
