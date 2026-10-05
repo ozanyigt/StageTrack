@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using StageTrack.Account;
 using StageTrack.Customers;
 using StageTrack.Dtos;
+using StageTrack.Projects;
 
 namespace StageTrack.Quotes;
 
@@ -71,6 +72,7 @@ public class QuoteListItemDto
     public int ProjectNumber { get; set; }
     public string ProjectName { get; set; } = null!;
     public string? CustomerName { get; set; }
+    public string? RejectionReason { get; set; }
 }
 
 public class QuoteLineDto
@@ -117,6 +119,44 @@ public class QuoteDto : QuoteListItemDto
 
     /// <summary>Section names already used on the quote, for the line editor.</summary>
     public List<string> SectionNames { get; set; } = [];
+
+    public ProjectStatus ProjectStatus { get; set; }
+
+    /// <summary>Newest revision of its quote number: only this one can be reopened after a rejection.</summary>
+    public bool IsLatestRevision { get; set; }
+}
+
+/// <summary>Which jobs the sales list shows.</summary>
+public enum QuoteJobView
+{
+    /// <summary>Jobs waiting for the customer's decision (draft / pending projects).</summary>
+    Active = 1,
+
+    /// <summary>Rejected or cancelled jobs.</summary>
+    Lost = 2,
+
+    All = 3
+}
+
+public class GetQuoteJobsInput : PagedRequestDto
+{
+    public string? Text { get; set; }
+    public QuoteJobView View { get; set; } = QuoteJobView.Active;
+}
+
+/// <summary>One row of the sales list: a job (project) with its newest quote and earlier revisions.</summary>
+public class QuoteJobDto
+{
+    public ProjectListItemDto Project { get; set; } = null!;
+    public QuoteListItemDto? LatestQuote { get; set; }
+
+    /// <summary>Every quote of the job, newest first (includes the latest).</summary>
+    public List<QuoteListItemDto> Quotes { get; set; } = [];
+}
+
+public class CreateQuoteJobInput : CreateUpdateProjectDto
+{
+    public Guid? RentalFactorProfileId { get; set; }
 }
 
 public class GetQuoteListInput : PagedRequestDto
@@ -189,6 +229,10 @@ public class CreateUpdateQuoteLineInput
 public class ChangeQuoteStatusInput
 {
     public QuoteStatus Status { get; set; }
+
+    /// <summary>Only for Rejected: why the customer declined.</summary>
+    [StringLength(QuoteConsts.MaxRejectionReasonLength)]
+    public string? Reason { get; set; }
 }
 
 public interface IQuoteAppService
@@ -210,6 +254,18 @@ public interface IQuoteAppService
     Task<QuoteDto> ChangeStatusAsync(Guid id, ChangeQuoteStatusInput input);
 
     Task<QuoteDto> ReviseAsync(Guid id);
+
+    /// <summary>Sales list: one row per job with its newest quote.</summary>
+    Task<PagedResultDto<QuoteJobDto>> GetJobsAsync(GetQuoteJobsInput input);
+
+    /// <summary>New job from the sales list: a pending project (reserving equipment) plus its first draft quote.</summary>
+    Task<QuoteDto> CreateJobAsync(CreateQuoteJobInput input);
+
+    /// <summary>Rejected job came back: new draft revision, the job returns to the sales list.</summary>
+    Task<QuoteDto> ReopenAsync(Guid id);
+
+    /// <summary>Draft quote: re-read the equipment planned on the job, keeping prices already set.</summary>
+    Task<QuoteDto> SyncFromProjectAsync(Guid id);
 
     Task DeleteAsync(Guid id);
 }

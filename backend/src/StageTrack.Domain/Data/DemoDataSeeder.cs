@@ -11,6 +11,7 @@ using StageTrack.Quotes;
 using StageTrack.Repositories;
 using StageTrack.Session;
 using StageTrack.Suppliers;
+using StageTrack.Tenants;
 using StageTrack.Warehouse;
 
 namespace StageTrack.Data;
@@ -23,6 +24,8 @@ namespace StageTrack.Data;
 /// </summary>
 public class DemoDataSeeder(
     ICompanyRepository companyRepository,
+    TenantManager tenantManager,
+    ITenantRepository tenantRepository,
     IRoleRepository roleRepository,
     UserManager userManager,
     IStockLocationRepository stockLocationRepository,
@@ -75,22 +78,31 @@ public class DemoDataSeeder(
     private readonly Dictionary<Guid, string> _unitLabels = new();
     private readonly Dictionary<string, string> _bulkLabels = new();
     private readonly Dictionary<string, AppUser> _users = new();
+    private Guid _tenantId;
 
     public async Task SeedAsync()
     {
-        if (await companyRepository.GetCountAsync() > 0)
+        if (await tenantRepository.CodeExistsAsync("STARAS"))
         {
             return;
         }
 
         logger.LogInformation("Seeding demo data...");
 
-        var tr = new Company(Guid.CreateVersion7(), "Staras Technical TR", "TR", "TRY", 20, "TR");
+        // Demo firm with an open-ended subscription; its two locations are Turkey and Dubai.
+        var tenant = await tenantManager.CreateAsync("Staras (demo)", "STARAS");
+        tenant.Update(tenant.Name, "Demo Yönetici", "admin@demo.local", null, null);
+        tenant.SetSubscription("Kurumsal", DateTime.Today.AddMonths(-1), null, null, null);
+        await tenantRepository.InsertAsync(tenant);
+        await unitOfWork.SaveChangesAsync();
+        _tenantId = tenant.Id;
+
+        var tr = new Company(Guid.CreateVersion7(), "Staras Technical TR", "TR", "TRY", 20, "TR", _tenantId);
         tr.SetRentmanWorkspace(TurkeyRentmanWorkspace);
         await companyRepository.InsertAsync(tr);
         await unitOfWork.SaveChangesAsync();
 
-        var ae = new Company(Guid.CreateVersion7(), "Staras Electronic Equipment Rental LLC", "AE", "AED", 5, "AE");
+        var ae = new Company(Guid.CreateVersion7(), "Staras Electronic Equipment Rental LLC", "AE", "AED", 5, "AE", _tenantId);
         ae.SetRentmanWorkspace(DubaiRentmanWorkspace);
         await companyRepository.InsertAsync(ae);
 
@@ -117,7 +129,7 @@ public class DemoDataSeeder(
     private async Task SeedIdentityAsync(Company tr, Company ae)
     {
         // The static admin role always resolves to every permission (see IUserRepository.GetPermissionsAsync).
-        var admin = new AppRole(Guid.CreateVersion7(), AppRole.AdminRoleName, isStatic: true);
+        var admin = new AppRole(Guid.CreateVersion7(), AppRole.AdminRoleName, _tenantId, isStatic: true);
 
         var warehouse = Role("warehouse",
             StageTrackPermissions.Equipment.Default, StageTrackPermissions.Labels.Assign,
@@ -151,7 +163,7 @@ public class DemoDataSeeder(
 
         AppRole Role(string name, params string[] permissions)
         {
-            var role = new AppRole(Guid.CreateVersion7(), name);
+            var role = new AppRole(Guid.CreateVersion7(), name, _tenantId);
             foreach (var permission in permissions)
             {
                 role.Grant(permission);
@@ -164,7 +176,7 @@ public class DemoDataSeeder(
     private async Task AddUserAsync(string userName, string fullName, string password, string email, string phone, string jobTitle,
         AppRole role, Company first, Company? second = null, string language = "tr")
     {
-        var user = await userManager.CreateAsync(userName, fullName, password, email, language);
+        var user = await userManager.CreateAsync(userName, fullName, password, email, language, _tenantId);
         user.Update(fullName, email, phone, jobTitle);
         user.AddRole(role.Id);
         user.AddCompany(first.Id);
@@ -517,8 +529,13 @@ public class DemoDataSeeder(
         await CreateProjectAsync(2373, "BLOK3 ANKARA KONSER", customers["ceo"], "Ankara Congresium", "#22c55e",
             Day(8), Day(11), Day(9), Day(10), locationId, [("k3", 6, null, null), ("sb18", 4, null, null), ("sharpy", 6, null, null)]);
 
+        // Lost job: the customer declined the quote, so the project was cancelled and reserves nothing.
+        var lost = await CreateProjectAsync(2355, "BAYİ TOPLANTISI - HİLTON BOMONTİ", customers["bkm"], "Hilton Bomonti", "#94a3b8",
+            Day(6), Day(7, 23), Day(7), Day(7, 23), locationId, [("vid301", 2, video, null), ("ad2", 6, sound, null)]);
+        await projectManager.ChangeStatusAsync(lost, ProjectStatus.Pending);
+
         await unitOfWork.SaveChangesAsync();
-        await SeedTurkishQuotesAsync(company, ella, amr, nil, uniq, longTermProfileId);
+        await SeedTurkishQuotesAsync(company, ella, amr, nil, uniq, longTermProfileId, iac, netflix, lost);
     }
 
     private async Task<Project> CreateProjectAsync(int number, string name, Guid customerId, string venue, string color,
@@ -606,7 +623,8 @@ public class DemoDataSeeder(
         }
     }
 
-    private async Task SeedTurkishQuotesAsync(Company company, Project ella, Project amr, Project nil, Project uniq, Guid longTermProfileId)
+    private async Task SeedTurkishQuotesAsync(Company company, Project ella, Project amr, Project nil, Project uniq, Guid longTermProfileId,
+        Project iac, Project netflix, Project lost)
     {
         var amrQuote = await quoteManager.CreateFromProjectAsync(amr, company, null, DateTime.Today.AddDays(-12));
         amrQuote.AddLine(QuoteLineType.Crew, null, "Ses ve ışık teknik ekip (4 kişi)", 4, 7500, applyFactor: true, discountPercent: 0, section: "PERSONEL VE NAKLİYE");
@@ -623,11 +641,36 @@ public class DemoDataSeeder(
         await quoteRepository.InsertAsync(ellaQuote);
         await unitOfWork.SaveChangesAsync();
         await quoteManager.ChangeStatusAsync(ellaQuote, QuoteStatus.Sent, ella);
+        await quoteManager.ChangeStatusAsync(ellaQuote, QuoteStatus.Accepted, ella);
 
         var nilQuote = await quoteManager.CreateFromProjectAsync(nil, company, null, DateTime.Today);
         nilQuote.AddLine(QuoteLineType.Crew, null, "Ses ve ışık teknik ekip (6 kişi)", 6, 7500, applyFactor: true, discountPercent: 0, section: "PERSONEL VE NAKLİYE");
         nilQuote.AddLine(QuoteLineType.Transport, null, "Nakliye - İstanbul / İzmir (tır)", 1, 45000, applyFactor: false, discountPercent: 0, section: "PERSONEL VE NAKLİYE");
+        nilQuote.UpdateHeader(DateTime.Today.AddDays(-3), DateTime.Today.AddDays(7), 0, company.DefaultVatRate, null);
         await quoteRepository.InsertAsync(nilQuote);
+        await unitOfWork.SaveChangesAsync();
+        // The customer asked for a discount: revision 2 is being prepared.
+        await quoteManager.ChangeStatusAsync(nilQuote, QuoteStatus.Sent, nil);
+        var nilRevision = quoteManager.Revise(nilQuote, DateTime.Today);
+        nilRevision.UpdateHeader(DateTime.Today, DateTime.Today.AddDays(7), 8, company.DefaultVatRate, "Müşteri talebi: %8 iskonto.");
+        await quoteRepository.InsertAsync(nilRevision);
+        await unitOfWork.SaveChangesAsync();
+
+        var iacQuote = await quoteManager.CreateFromProjectAsync(iac, company, null, DateTime.Today.AddDays(-1));
+        iacQuote.AddLine(QuoteLineType.Crew, null, "Görüntü ekibi (3 kişi)", 3, 6500, applyFactor: true, discountPercent: 0, section: "PERSONEL");
+        await quoteRepository.InsertAsync(iacQuote);
+        await unitOfWork.SaveChangesAsync();
+        await quoteManager.ChangeStatusAsync(iacQuote, QuoteStatus.Sent, iac);
+
+        var netflixQuote = await quoteManager.CreateFromProjectAsync(netflix, company, null, DateTime.Today);
+        await quoteRepository.InsertAsync(netflixQuote);
+        await unitOfWork.SaveChangesAsync();
+
+        var lostQuote = await quoteManager.CreateFromProjectAsync(lost, company, null, DateTime.Today.AddDays(-8));
+        await quoteRepository.InsertAsync(lostQuote);
+        await unitOfWork.SaveChangesAsync();
+        await quoteManager.ChangeStatusAsync(lostQuote, QuoteStatus.Sent, lost);
+        await quoteManager.ChangeStatusAsync(lostQuote, QuoteStatus.Rejected, lost, "Fiyat yüksek bulundu, rakip firmayla çalışılacak.");
         await unitOfWork.SaveChangesAsync();
 
         var uniqQuote = await quoteManager.CreateFromProjectAsync(uniq, company, longTermProfileId, DateTime.Today.AddDays(-275));
@@ -699,6 +742,7 @@ public class DemoDataSeeder(
         await quoteRepository.InsertAsync(quote);
         await unitOfWork.SaveChangesAsync();
         await quoteManager.ChangeStatusAsync(quote, QuoteStatus.Sent, gala);
+        await quoteManager.ChangeStatusAsync(quote, QuoteStatus.Accepted, gala);
         await unitOfWork.SaveChangesAsync();
     }
 

@@ -215,12 +215,15 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<int?>("RentmanWorkspaceId")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
-                        .IsUnique();
-
                     b.HasIndex("RentmanWorkspaceId");
+
+                    b.HasIndex("TenantId", "Code")
+                        .IsUnique();
 
                     b.ToTable("Companies");
                 });
@@ -314,10 +317,14 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique()
+                        .HasFilter("[TenantId] IS NOT NULL");
 
                     b.ToTable("Roles", (string)null);
                 });
@@ -374,6 +381,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -383,6 +393,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique();
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("Users", (string)null);
                 });
@@ -1356,6 +1368,10 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<int>("RentalDays")
                         .HasColumnType("int");
 
@@ -1525,6 +1541,77 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.ToTable("Suppliers");
                 });
 
+            modelBuilder.Entity("StageTrack.Tenants.Tenant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("ContactName")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("MaxLocations")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxUsers")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("PlanName")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Tenants");
+                });
+
             modelBuilder.Entity("StageTrack.Warehouse.WarehouseMovement", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1582,6 +1669,31 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasOne("StageTrack.Identity.AppUser", null)
                         .WithMany()
                         .HasForeignKey("AssignedUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("StageTrack.Companies.Company", b =>
+                {
+                    b.HasOne("StageTrack.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Identity.AppRole", b =>
+                {
+                    b.HasOne("StageTrack.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("StageTrack.Identity.AppUser", b =>
+                {
+                    b.HasOne("StageTrack.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 

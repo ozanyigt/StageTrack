@@ -25,4 +25,10 @@ public interface IQuoteRepository : IRepository<Quote>
     Task<List<QuoteListItem>> GetPagedListAsync(QuoteFilter filter, int skip, int take, CancellationToken cancellationToken = default);
 
     Task<long> GetCountAsync(QuoteFilter filter, CancellationToken cancellationToken = default);
+
+    /// <summary>All revisions of all quotes of a project (tracked, without lines).</summary>
+    Task<List<Quote>> GetListByProjectAsync(Guid projectId, CancellationToken cancellationToken = default);
+
+    /// <summary>Quotes of the given projects, newest revision first (for the sales list).</summary>
+    Task<List<QuoteListItem>> GetListByProjectIdsAsync(IReadOnlyCollection<Guid> projectIds, CancellationToken cancellationToken = default);
 }

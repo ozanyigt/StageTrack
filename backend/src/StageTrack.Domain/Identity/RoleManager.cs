@@ -4,18 +4,18 @@ namespace StageTrack.Identity;
 
 public class RoleManager(IRoleRepository roleRepository)
 {
-    public async Task<AppRole> CreateAsync(string name)
+    public async Task<AppRole> CreateAsync(string name, Guid? tenantId)
     {
         name = name.Trim();
-        await EnsureNameIsUniqueAsync(name, null);
-        return new AppRole(Guid.CreateVersion7(), name);
+        await EnsureNameIsUniqueAsync(tenantId, name, null);
+        return new AppRole(Guid.CreateVersion7(), name, tenantId);
     }
 
     public async Task RenameAsync(AppRole role, string name)
     {
         EnsureNotStatic(role);
         name = name.Trim();
-        await EnsureNameIsUniqueAsync(name, role.Id);
+        await EnsureNameIsUniqueAsync(role.TenantId, name, role.Id);
         role.Rename(name);
     }
 
@@ -62,9 +62,9 @@ public class RoleManager(IRoleRepository roleRepository)
         }
     }
 
-    private async Task EnsureNameIsUniqueAsync(string name, Guid? excludeId)
+    private async Task EnsureNameIsUniqueAsync(Guid? tenantId, string name, Guid? excludeId)
     {
-        if (await roleRepository.NameExistsAsync(name, excludeId))
+        if (await roleRepository.NameExistsAsync(tenantId, name, excludeId))
         {
             throw new BusinessException(StageTrackErrorCodes.RoleNameAlreadyExists).WithData("name", name);
         }

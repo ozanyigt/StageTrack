@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { changeLanguage, useAuth } from '../auth/AuthContext';
 import { LANGUAGES } from '../i18n';
 import { translateError } from '../utils/errors';
+import { ApiError } from '../api/http';
+import { session } from '../auth/session';
 
 function AuthShell({ children, width = 380 }: { children: ReactNode; width?: number }) {
   const { t, i18n } = useTranslation();
@@ -42,7 +44,11 @@ function AuthShell({ children, width = 380 }: { children: ReactNode; width?: num
 export function LoginPage() {
   const { t } = useTranslation();
   const { login } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+  // Signed out by the server (suspended firm, expired subscription): show why.
+  const [error, setError] = useState<string | null>(() => {
+    const reason = session.takeExpireReason();
+    return reason ? translateError(t, new ApiError(reason.code, 401, reason.details)) : null;
+  });
   const [loading, setLoading] = useState(false);
 
   const submit = async (values: { userName: string; password: string }) => {

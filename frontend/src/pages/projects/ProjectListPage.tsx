@@ -1,18 +1,16 @@
-import { PlusOutlined } from '@ant-design/icons';
-import { Badge, Button, Card, Flex, Input, Select, Space, Table, Typography } from 'antd';
+import { Badge, Card, Flex, Input, Select, Space, Table, Typography } from 'antd';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { projectApi } from '../../api/endpoints';
-import { PROJECT_STATUSES, type ProjectStatus } from '../../api/types';
+import { CONFIRMED_PROJECT_STATUSES, type ProjectStatus } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { ExportButton } from '../../components/ExcelButtons';
 import { ProjectStatusTag } from '../../components/StatusTags';
 import { fetchAllPages } from '../../utils/excel';
 import { useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
-import { ProjectFormModal } from './ProjectFormModal';
 
 const PAGE_SIZE = 25;
 
@@ -26,13 +24,14 @@ export function ProjectListPage() {
   const [statuses, setStatuses] = useState<ProjectStatus[]>(initialStatus ? [initialStatus] : []);
   const [text, setText] = useState('');
   const [page, setPage] = useState(1);
-  const [createOpen, setCreateOpen] = useState(false);
   const search = useDebounced(text, 300);
+  // Projects shows confirmed work only; jobs still waiting for the customer are on the Quotes page.
+  const effectiveStatuses = statuses.length > 0 ? statuses : CONFIRMED_PROJECT_STATUSES;
   const crewOnly = !can(Permissions.Projects) && can(Permissions.AssignedProjects);
 
   const list = useQuery({
-    queryKey: ['projects', search, statuses, page],
-    queryFn: () => projectApi.list({ text: search, statuses, skipCount: (page - 1) * PAGE_SIZE, maxResultCount: PAGE_SIZE }),
+    queryKey: ['projects', search, effectiveStatuses, page],
+    queryFn: () => projectApi.list({ text: search, statuses: effectiveStatuses, skipCount: (page - 1) * PAGE_SIZE, maxResultCount: PAGE_SIZE }),
     placeholderData: keepPreviousData,
   });
 
@@ -43,7 +42,7 @@ export function ProjectListPage() {
         <Space wrap>
           <ExportButton
             fileName={crewOnly ? t('nav.myProjects') : t('projects.title')}
-            load={() => fetchAllPages((skipCount, maxResultCount) => projectApi.list({ text: search, statuses, skipCount, maxResultCount }))}
+            load={() => fetchAllPages((skipCount, maxResultCount) => projectApi.list({ text: search, statuses: effectiveStatuses, skipCount, maxResultCount }))}
             columns={[
               { header: t('projects.number'), value: (p) => p.number, width: 10 },
               { header: t('projects.name'), value: (p) => p.name, width: 40 },
@@ -57,9 +56,7 @@ export function ProjectListPage() {
               { header: t('projects.plannedQuantity'), value: (p) => p.plannedQuantity, width: 10 },
             ]}
           />
-          {!crewOnly && can(Permissions.ProjectsManage) && (
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>{t('projects.create')}</Button>
-          )}
+          {!crewOnly && <Typography.Text type="secondary">{t('salesJobs.projectsHint')}</Typography.Text>}
         </Space>
       </div>
       <Card size="small">
@@ -68,7 +65,7 @@ export function ProjectListPage() {
             onChange={(e) => { setText(e.target.value); setPage(1); }} style={{ maxWidth: 320 }} />
           <Select mode="multiple" allowClear placeholder={t('projects.status')} value={statuses} style={{ minWidth: 260 }}
             onChange={(v) => { setStatuses(v); setPage(1); }}
-            options={PROJECT_STATUSES.map((s) => ({ value: s, label: t(`enums.projectStatus.${s}`) }))} />
+            options={[...CONFIRMED_PROJECT_STATUSES, 'Cancelled' as const].map((s) => ({ value: s, label: t(`enums.projectStatus.${s}`) }))} />
         </Flex>
         <Table
           size="small"
@@ -91,7 +88,6 @@ export function ProjectListPage() {
           ]}
         />
       </Card>
-      <ProjectFormModal open={createOpen} onClose={() => setCreateOpen(false)} onSaved={(p) => navigate(`/projects/${p.id}`)} />
     </>
   );
 }

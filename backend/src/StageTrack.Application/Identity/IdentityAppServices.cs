@@ -1,10 +1,12 @@
+using StageTrack.Authorization;
 using StageTrack.Dtos;
 using StageTrack.Permissions;
 using StageTrack.Session;
 
 namespace StageTrack.Identity;
 
-public class RoleAppService(IRoleRepository roleRepository, RoleManager roleManager) : IRoleAppService
+/// <summary>Roles of the signed-in user's firm.</summary>
+public class RoleAppService(IRoleRepository roleRepository, RoleManager roleManager, CurrentTenant currentTenant) : IRoleAppService
 {
     public Task<List<PermissionGroupDto>> GetPermissionDefinitionsAsync() =>
         Task.FromResult(StageTrackPermissions.Groups.Select(g => new PermissionGroupDto
@@ -15,37 +17,48 @@ public class RoleAppService(IRoleRepository roleRepository, RoleManager roleMana
 
     public async Task<List<RoleDto>> GetListAsync()
     {
-        var roles = await roleRepository.GetListAsync(includeDetails: true);
+        var roles = await roleRepository.GetListAsync(await currentTenant.GetIdAsync());
         var counts = await roleRepository.GetUserCountsAsync();
         return roles.Select(r => ToDto(r, counts.GetValueOrDefault(r.Id))).ToList();
     }
 
     public async Task<RoleDto> CreateAsync(CreateUpdateRoleDto input)
     {
-        var role = await roleManager.CreateAsync(input.Name);
+        var role = await roleManager.CreateAsync(input.Name, await currentTenant.GetIdAsync());
         await roleRepository.InsertAsync(role);
         return ToDto(role, 0);
     }
 
     public async Task<RoleDto> UpdateAsync(Guid id, CreateUpdateRoleDto input)
     {
-        var role = await roleRepository.GetAsync(id);
+        var role = await GetOwnAsync(id);
         await roleManager.RenameAsync(role, input.Name);
         return ToDto(role, (await roleRepository.GetUserCountsAsync()).GetValueOrDefault(id));
     }
 
     public async Task<RoleDto> UpdatePermissionsAsync(Guid id, UpdateRolePermissionsDto input)
     {
-        var role = await roleRepository.GetAsync(id);
+        var role = await GetOwnAsync(id);
         roleManager.SetPermissions(role, input.Permissions);
         return ToDto(role, (await roleRepository.GetUserCountsAsync()).GetValueOrDefault(id));
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        var role = await roleRepository.GetAsync(id);
+        var role = await GetOwnAsync(id);
         await roleManager.EnsureCanDeleteAsync(role);
         await roleRepository.DeleteAsync(role);
+    }
+
+    private async Task<AppRole> GetOwnAsync(Guid id)
+    {
+        var role = await roleRepository.GetAsync(id);
+        if (role.TenantId != await currentTenant.GetIdAsync())
+        {
+            throw new EntityNotFoundException(typeof(AppRole), id);
+        }
+
+        return role;
     }
 
     private static RoleDto ToDto(AppRole role, int userCount) => new()
@@ -77,7 +90,7 @@ public class UserAppService(
     public async Task<UserDto> CreateAsync(CreateUserDto input)
     {
         var acting = await GetActingUserAsync();
-        var user = await userManager.CreateAsync(input.UserName, input.FullName, input.Password, input.Email, input.Language);
+        var user = await userManager.CreateAsync(input.UserName, input.FullName, input.Password, input.Email, input.Language, acting.TenantId);
         user.Update(user.FullName, user.Email, input.Phone, input.JobTitle);
         await userManager.SetRolesAsync(user, input.RoleIds);
         userManager.SetCompanies(user, input.CompanyIds, acting);

@@ -39,6 +39,9 @@ public static class StageTrackDomainModule
         services.AddScoped<LabelTemplateManager>();
         services.AddScoped<AttachmentManager>();
         services.AddScoped<TransferManager>();
+        services.AddScoped<Tenants.TenantManager>();
+        services.AddScoped<Tenants.TenantProvisioningManager>();
+        services.AddScoped<Data.HostDataSeeder>();
 
         services.AddScoped<DemoDataSeeder>();
         return services;

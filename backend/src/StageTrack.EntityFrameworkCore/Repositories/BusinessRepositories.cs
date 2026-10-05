@@ -311,6 +311,25 @@ public class QuoteRepository(StageTrackDbContext dbContext) : EfRepository<Quote
     public Task<long> GetCountAsync(QuoteFilter filter, CancellationToken cancellationToken = default) =>
         ApplyFilter(filter).LongCountAsync(cancellationToken);
 
+    public Task<List<Quote>> GetListByProjectAsync(Guid projectId, CancellationToken cancellationToken = default) =>
+        DbSet.Where(q => q.ProjectId == projectId).ToListAsync(cancellationToken);
+
+    public Task<List<QuoteListItem>> GetListByProjectIdsAsync(IReadOnlyCollection<Guid> projectIds, CancellationToken cancellationToken = default) =>
+        (from quote in DbSet.Where(q => projectIds.Contains(q.ProjectId))
+         join project in DbContext.Projects on quote.ProjectId equals project.Id
+         join customer in DbContext.Customers on project.CustomerId equals customer.Id into customers
+         from customer in customers.DefaultIfEmpty()
+         orderby quote.Number descending, quote.Revision descending
+         select new QuoteListItem
+         {
+             Quote = quote,
+             ProjectNumber = project.Number,
+             ProjectName = project.Name,
+             CustomerName = customer != null ? customer.Name : null
+         })
+        .AsNoTracking()
+        .ToListAsync(cancellationToken);
+
     private IQueryable<Quote> ApplyFilter(QuoteFilter filter)
     {
         IQueryable<Quote> query = DbSet;

@@ -80,6 +80,17 @@ public static class StageTrackErrorCodes
     public const string QuoteLineNotFound = "Quote.LineNotFound";
     public const string QuoteInvalidStatusTransition = "Quote.InvalidStatusTransition";
     public const string QuoteHasNoLines = "Quote.HasNoLines";
+    public const string QuoteNotLatestRevision = "Quote.NotLatestRevision";
+    public const string TenantCodeAlreadyExists = "Tenant.CodeAlreadyExists";
+    public const string TenantSuspended = "Tenant.Suspended";
+    public const string TenantSubscriptionExpired = "Tenant.SubscriptionExpired";
+    public const string TenantSubscriptionNotStarted = "Tenant.SubscriptionNotStarted";
+    public const string TenantUserLimitReached = "Tenant.UserLimitReached";
+    public const string TenantLocationLimitReached = "Tenant.LocationLimitReached";
+    public const string TenantInvalidPeriod = "Tenant.InvalidPeriod";
+    public const string TenantInvalidLimit = "Tenant.InvalidLimit";
+    public const string CompanyCodeAlreadyExists = "Company.CodeAlreadyExists";
+    public const string QuoteJobAlreadyDecided = "Quote.JobAlreadyDecided";
 
     public const string RelationSelf = "Relation.Self";
     public const string RelationDuplicate = "Relation.Duplicate";

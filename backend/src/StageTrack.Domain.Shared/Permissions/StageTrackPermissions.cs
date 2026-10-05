@@ -73,6 +73,18 @@ public static class StageTrackPermissions
         public const string LabelTemplates = Prefix + ".Settings.LabelTemplates";
     }
 
+    /// <summary>
+    /// Platform administration (customer firms and subscriptions). Not part of <see cref="Groups"/>: firm roles can
+    /// never be granted these, and the platform admin does not get the firm permissions.
+    /// </summary>
+    public static class Host
+    {
+        public const string Tenants = Prefix + ".Host.Tenants";
+        public const string Impersonate = Tenants + ".Impersonate";
+
+        public static readonly IReadOnlyList<string> All = [Tenants, Impersonate];
+    }
+
     public static class Identity
     {
         public const string Roles = Prefix + ".Identity.Roles";

@@ -3,8 +3,8 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { crewApi, projectApi } from '../../api/endpoints';
-import type { Project, ProjectInput } from '../../api/types';
+import { crewApi, projectApi, quoteApi } from '../../api/endpoints';
+import type { Project, ProjectInput, Quote } from '../../api/types';
 import { CustomerSelect, StockLocationSelect } from '../../components/Selects';
 import { useErrorToast } from '../../utils/errors';
 import { toApiDateTime } from '../../utils/format';
@@ -27,10 +27,13 @@ interface Props {
   open: boolean;
   project?: Project | null;
   onClose: () => void;
-  onSaved: (project: Project) => void;
+  onSaved?: (project: Project) => void;
+  /** Sales list: create a new job (pending project + first draft quote) instead of a plain project. */
+  onJobCreated?: (quote: Quote) => void;
 }
 
-export function ProjectFormModal({ open, project, onClose, onSaved }: Props) {
+export function ProjectFormModal({ open, project, onClose, onSaved, onJobCreated }: Props) {
+  const jobMode = !project && !!onJobCreated;
   const { t } = useTranslation();
   const [form] = Form.useForm<FormValues>();
   const showError = useErrorToast();
@@ -60,7 +63,7 @@ export function ProjectFormModal({ open, project, onClose, onSaved }: Props) {
   }, [open, project, form]);
 
   const save = useMutation({
-    mutationFn: (v: FormValues) => {
+    mutationFn: (v: FormValues): Promise<Project | Quote> => {
       const input: ProjectInput = {
         name: v.name,
         customerId: v.customerId ?? null,
@@ -76,16 +79,20 @@ export function ProjectFormModal({ open, project, onClose, onSaved }: Props) {
         accountManagerId: v.accountManagerId ?? null,
         paymentTerms: v.paymentTerms?.trim() || null,
       };
+      if (jobMode) return quoteApi.createJob(input);
       return project ? projectApi.update(project.id, input) : projectApi.create(input);
     },
-    onSuccess: onSaved,
+    onSuccess: (result) => {
+      if (jobMode) onJobCreated?.(result as Quote);
+      else onSaved?.(result as Project);
+    },
     onError: showError,
   });
 
   return (
     <Modal
       open={open}
-      title={project ? t('projects.editTitle') : t('projects.createTitle')}
+      title={project ? t('projects.editTitle') : jobMode ? t('salesJobs.createTitle') : t('projects.createTitle')}
       onCancel={onClose}
       onOk={() => form.submit()}
       okText={t('common.save')}

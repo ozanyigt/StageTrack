@@ -247,7 +247,31 @@ export const quoteApi = {
   addLine: (id: T.Guid, input: T.QuoteLineInput) => post<T.Quote>(`/quotes/${id}/lines`, input),
   updateLine: (id: T.Guid, lineId: T.Guid, input: T.QuoteLineInput) => put<T.Quote>(`/quotes/${id}/lines/${lineId}`, input),
   removeLine: (id: T.Guid, lineId: T.Guid) => del<T.Quote>(`/quotes/${id}/lines/${lineId}`),
-  changeStatus: (id: T.Guid, status: T.QuoteStatus) => post<T.Quote>(`/quotes/${id}/status`, { status }),
+  changeStatus: (id: T.Guid, status: T.QuoteStatus, reason?: string | null) =>
+    post<T.Quote>(`/quotes/${id}/status`, { status, reason }),
   revise: (id: T.Guid) => post<T.Quote>(`/quotes/${id}/revise`),
+  /** Sales list: one row per job (project) with its newest quote. */
+  jobs: (params: T.PagedRequest & { text?: string; view: T.QuoteJobView }) => get<T.PagedResult<T.QuoteJob>>('/quotes/jobs', params),
+  /** New job: pending project + first draft quote. */
+  createJob: (input: T.ProjectInput & { rentalFactorProfileId?: T.Guid | null }) => post<T.Quote>('/quotes/jobs', input),
+  reopen: (id: T.Guid) => post<T.Quote>(`/quotes/${id}/reopen`),
+  syncFromProject: (id: T.Guid) => post<T.Quote>(`/quotes/${id}/sync-from-project`),
   remove: (id: T.Guid) => del(`/quotes/${id}`),
+};
+
+/** Platform administration: customer firms, subscriptions, locations and firm users. */
+export const hostApi = {
+  summary: () => get<T.HostSummary>('/host/tenants/summary'),
+  list: (params: T.PagedRequest & { text?: string }) => get<T.PagedResult<T.Tenant>>('/host/tenants', params),
+  get: (id: T.Guid) => get<T.TenantDetail>(`/host/tenants/${id}`),
+  create: (input: T.TenantInput & { location: T.TenantLocationInput; admin: T.TenantAdminInput }) =>
+    post<T.TenantDetail>('/host/tenants', input),
+  update: (id: T.Guid, input: T.TenantInput) => put<T.TenantDetail>(`/host/tenants/${id}`, input),
+  setActive: (id: T.Guid, isActive: boolean) => post<T.TenantDetail>(`/host/tenants/${id}/active`, { isActive }),
+  addLocation: (id: T.Guid, input: T.TenantLocationInput) => post<T.TenantDetail>(`/host/tenants/${id}/locations`, input),
+  updateLocation: (id: T.Guid, locationId: T.Guid, input: T.TenantLocationInput) =>
+    put<T.TenantDetail>(`/host/tenants/${id}/locations/${locationId}`, input),
+  resetPassword: (id: T.Guid, userId: T.Guid, newPassword: string) =>
+    post(`/host/tenants/${id}/users/${userId}/reset-password`, { newPassword }),
+  impersonate: (userId: T.Guid) => post<T.LoginResult>(`/host/tenants/users/${userId}/impersonate`),
 };

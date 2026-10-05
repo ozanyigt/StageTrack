@@ -40,7 +40,8 @@ http.interceptors.response.use(
     const status = error.response?.status ?? 0;
     const body = error.response?.data?.error;
     if (status === 401) {
-      session.expire();
+      // Suspended firm / expired subscription: the login page explains why the user was signed out.
+      session.expire(body && body.code !== 'Common.Unauthorized' ? { code: body.code, details: body.details ?? {} } : undefined);
     }
 
     if (body) {

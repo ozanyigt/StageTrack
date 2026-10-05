@@ -115,6 +115,11 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<StageTrackDbContext>();
     await db.Database.MigrateAsync();
+
+    // An empty database only gets the platform administrator; customer firms are created from the admin panel.
+    var hostAdmin = app.Configuration.GetSection(HostAdminOptions.Section).Get<HostAdminOptions>() ?? new HostAdminOptions();
+    await scope.ServiceProvider.GetRequiredService<HostDataSeeder>().SeedAsync(hostAdmin);
+
     if (app.Configuration.GetValue("Seed:DemoData", false))
     {
         await scope.ServiceProvider.GetRequiredService<DemoDataSeeder>().SeedAsync();

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { crewApi, projectApi, quoteApi, warehouseApi } from '../../api/endpoints';
 import type { Project, ProjectEquipment, ProjectSection, ProjectStatus } from '../../api/types';
+import { SALES_PROJECT_STATUSES } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { CollaborationPanel } from '../../components/CollaborationPanel';
 import { EquipmentSelect } from '../../components/Selects';
@@ -47,6 +48,8 @@ export function ProjectDetailPage() {
   const [sectionForm] = Form.useForm<{ name: string; parentId?: string | null }>();
 
   const project = useQuery({ queryKey: ['project', id], queryFn: () => projectApi.get(id!) });
+  // Draft / pending / lost jobs belong to the sales list (Quotes); confirmed work to Projects.
+  const isSalesStage = !!project.data && SALES_PROJECT_STATUSES.includes(project.data.status);
   const crewView = project.data?.isCrewView ?? true;
   const quotes = useQuery({
     queryKey: ['quotes', 'project', id],
@@ -62,6 +65,7 @@ export function ProjectDetailPage() {
   const setProject = (p: Project) => {
     queryClient.setQueryData(['project', id], p);
     queryClient.invalidateQueries({ queryKey: ['projects'] });
+    queryClient.invalidateQueries({ queryKey: ['quote-jobs'] });
     queryClient.invalidateQueries({ queryKey: ['dashboard'] });
   };
   const run = (promise: Promise<Project>) => promise.then(setProject).catch(showError);
@@ -74,7 +78,11 @@ export function ProjectDetailPage() {
   });
   const remove = useMutation({
     mutationFn: () => projectApi.remove(id!),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['projects'] }); navigate('/projects'); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['quote-jobs'] });
+      navigate(isSalesStage ? '/quotes' : '/projects');
+    },
     onError: showError,
   });
   const createQuote = useMutation({
@@ -323,7 +331,7 @@ export function ProjectDetailPage() {
     <>
       <div className="page-header">
         <Space align="center" wrap>
-          <Button icon={<ArrowLeftOutlined />} type="text" onClick={() => navigate('/projects')} aria-label={t('common.back')} />
+          <Button icon={<ArrowLeftOutlined />} type="text" onClick={() => navigate(isSalesStage && !crewView ? '/quotes' : '/projects')} aria-label={t('common.back')} />
           <span style={{ width: 12, height: 12, borderRadius: 3, background: p.color, display: 'inline-block' }} />
           <Typography.Title level={3}>{p.number} · {p.name}</Typography.Title>
           <ProjectStatusTag status={p.status} />
@@ -362,6 +370,10 @@ export function ProjectDetailPage() {
           message={t('projects.shortageAlert', { count: p.shortageCount })} description={t('projects.shortageHint')} />
       )}
       {crewView && <Alert type="info" showIcon style={{ marginBottom: 12 }} message={t('crewTab.crewViewHint')} />}
+      {!crewView && isSalesStage && (
+        <Alert type="info" showIcon style={{ marginBottom: 12 }}
+          message={t(p.status === 'Cancelled' ? 'salesJobs.lostJobHint' : 'salesJobs.salesJobHint')} />
+      )}
 
       <Card size="small">
         <Descriptions size="small" column={{ xs: 1, sm: 2, lg: 3 }}>

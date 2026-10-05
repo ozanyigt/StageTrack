@@ -3,9 +3,14 @@ using StageTrack.Repositories;
 
 namespace StageTrack.Companies;
 
-/// <summary>A legal entity using the system (e.g. Staras Technical TR, Staras Dubai). Owns all business data.</summary>
+/// <summary>
+/// A location of a customer firm (e.g. Staras Technical TR, Staras Dubai). Owns all business data; each location's
+/// data is separate. Belongs to one <see cref="Tenants.Tenant"/>.
+/// </summary>
 public class Company : AggregateRoot
 {
+    public Guid TenantId { get; private set; }
+
     public string Name { get; private set; } = null!;
     public string Code { get; private set; } = null!;
     public string DefaultCurrency { get; private set; } = null!;
@@ -22,9 +27,10 @@ public class Company : AggregateRoot
     {
     }
 
-    public Company(Guid id, string name, string code, string defaultCurrency, decimal defaultVatRate, string countryCode)
+    public Company(Guid id, string name, string code, string defaultCurrency, decimal defaultVatRate, string countryCode, Guid tenantId)
         : base(id)
     {
+        TenantId = tenantId;
         Name = name;
         Code = code;
         DefaultCurrency = defaultCurrency;
@@ -33,8 +39,20 @@ public class Company : AggregateRoot
     }
 
     public void SetRentmanWorkspace(int? workspaceId) => RentmanWorkspaceId = workspaceId;
+
+    /// <summary>Code is fixed after creation (it may be printed on documents).</summary>
+    public void Update(string name, string defaultCurrency, decimal defaultVatRate, string countryCode)
+    {
+        Name = name.Trim();
+        DefaultCurrency = defaultCurrency.Trim().ToUpperInvariant();
+        DefaultVatRate = defaultVatRate;
+        CountryCode = countryCode.Trim().ToUpperInvariant();
+    }
 }
 
 public interface ICompanyRepository : IRepository<Company>
 {
+    Task<bool> CodeExistsAsync(Guid tenantId, string code, CancellationToken cancellationToken = default);
+
+    Task<List<Company>> GetListByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default);
 }

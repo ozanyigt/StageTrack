@@ -9,6 +9,9 @@ public class AppRole : AggregateRoot
     /// <summary>Built-in keys (admin, warehouse, sales) are translated by the frontend; custom roles show the name as typed.</summary>
     public string Name { get; private set; } = null!;
 
+    /// <summary>The customer firm the role belongs to; null for the platform administrator role.</summary>
+    public Guid? TenantId { get; private set; }
+
     /// <summary>
     /// The built-in administrator role. It always holds every permission and can be neither edited nor
     /// deleted, so an administrator can never lock everybody out of role and user management.
@@ -21,8 +24,9 @@ public class AppRole : AggregateRoot
     {
     }
 
-    internal AppRole(Guid id, string name, bool isStatic = false) : base(id)
+    internal AppRole(Guid id, string name, Guid? tenantId, bool isStatic = false) : base(id)
     {
+        TenantId = tenantId;
         Name = name;
         IsStatic = isStatic;
     }

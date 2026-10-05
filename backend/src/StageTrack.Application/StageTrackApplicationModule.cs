@@ -25,6 +25,9 @@ public static class StageTrackApplicationModule
         services.AddScoped<PriceVisibility>();
         services.AddScoped<ImportRunner>();
         services.AddScoped<ProjectAccess>();
+        services.AddScoped<CurrentTenant>();
+        services.AddScoped<TenantAccessChecker>();
+        services.AddScoped<Host.ITenantAppService, Host.TenantAppService>();
         services.AddScoped<IAccountAppService, AccountAppService>();
         services.AddScoped<IRoleAppService, RoleAppService>();
         services.AddScoped<IUserAppService, UserAppService>();

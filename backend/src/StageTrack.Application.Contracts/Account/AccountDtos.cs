@@ -41,6 +41,14 @@ public class CurrentUserDto
 
     /// <summary>Full name of the admin who is signed in as this user; null in a normal session.</summary>
     public string? ImpersonatorName { get; set; }
+
+    /// <summary>Platform administrator (no firm): sees only the platform admin panel.</summary>
+    public bool IsHost { get; set; }
+
+    public string? TenantName { get; set; }
+
+    /// <summary>Last day of the firm's subscription, for the renewal warning; null when open-ended.</summary>
+    public DateTime? SubscriptionEndDate { get; set; }
 }
 
 public class SetLanguageInput
@@ -59,6 +67,9 @@ public interface IAccountAppService
 
     /// <summary>ABP-style "log in as this user": returns a token for the target user that also carries the admin's identity.</summary>
     Task<LoginResultDto> ImpersonateAsync(Guid userId);
+
+    /// <summary>Platform admin signs in as a user of a customer firm (support, presentations).</summary>
+    Task<LoginResultDto> ImpersonateFromHostAsync(Guid userId);
 
     /// <summary>Returns to the admin's own account.</summary>
     Task<LoginResultDto> EndImpersonationAsync();

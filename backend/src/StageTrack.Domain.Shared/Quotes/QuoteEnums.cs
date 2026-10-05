@@ -22,6 +22,7 @@ public static class QuoteConsts
     public const int MaxNumberLength = 32;
     public const int MaxDescriptionLength = 512;
     public const int MaxNotesLength = 4000;
+    public const int MaxRejectionReasonLength = 500;
     public const int MaxCurrencyLength = 3;
 }
 

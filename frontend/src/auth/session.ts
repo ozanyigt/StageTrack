@@ -25,6 +25,7 @@ function write(key: string, value: string | null) {
 }
 
 let memoryToken = read(TOKEN_KEY);
+let expireReason: { code: string; details: Record<string, unknown> } | null = null;
 let memoryCompany = read(COMPANY_KEY);
 
 export const session = {
@@ -39,10 +40,17 @@ export const session = {
     write(COMPANY_KEY, companyId);
   },
   /** Called on HTTP 401: clears the token and lets the auth context return to the login page. */
-  expire() {
+  expire(reason?: { code: string; details: Record<string, unknown> }) {
     if (!memoryToken) return;
+    if (reason) expireReason = reason;
     session.setToken(null);
     expiredListeners.forEach((l) => l());
+  },
+  /** Why the server ended the session (e.g. Tenant.Suspended); read once by the login page. */
+  takeExpireReason() {
+    const reason = expireReason;
+    expireReason = null;
+    return reason;
   },
   onExpired(listener: Listener) {
     expiredListeners.add(listener);

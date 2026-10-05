@@ -3,6 +3,7 @@ using StageTrack.Companies;
 using StageTrack.Identity;
 using StageTrack.Repositories;
 using StageTrack.Session;
+using StageTrack.Tenants;
 
 namespace StageTrack.Account;
 
@@ -17,6 +18,7 @@ public class AccountAppService(
     UserManager userManager,
     IUserRepository userRepository,
     ICompanyRepository companyRepository,
+    ITenantRepository tenantRepository,
     IAccessTokenGenerator tokenGenerator,
     ICurrentUser currentUser,
     ICurrentCompany currentCompany,
@@ -26,6 +28,11 @@ public class AccountAppService(
     public async Task<LoginResultDto> LoginAsync(LoginInput input)
     {
         var user = await userManager.ValidateCredentialsAsync(input.UserName, input.Password);
+        if (user.TenantId is { } tenantId)
+        {
+            TenantManager.EnsureCanUse(await tenantRepository.GetAsync(tenantId), DateTime.Today);
+        }
+
         await unitOfWork.SaveChangesAsync();
         return await IssueAsync(user, null);
     }
@@ -50,6 +57,17 @@ public class AccountAppService(
         userManager.EnsureCanImpersonate(impersonator, target, currentCompany.Id!.Value, currentUser.ImpersonatorId.HasValue);
 
         logger.LogWarning("Impersonation started: {Impersonator} ({ImpersonatorId}) is signed in as {Target} ({TargetId})",
+            impersonator.UserName, impersonator.Id, target.UserName, target.Id);
+        return await IssueAsync(target, impersonator);
+    }
+
+    public async Task<LoginResultDto> ImpersonateFromHostAsync(Guid userId)
+    {
+        var impersonator = await userRepository.GetAsync(currentUser.Id!.Value);
+        var target = await userRepository.GetAsync(userId);
+        UserManager.EnsureHostCanImpersonate(impersonator, target, currentUser.ImpersonatorId.HasValue);
+        TenantManager.EnsureCanUse(await tenantRepository.GetAsync(target.TenantId!.Value), DateTime.Today);
+        logger.LogWarning("Platform impersonation started: {Impersonator} ({ImpersonatorId}) is signed in as {Target} ({TargetId})",
             impersonator.UserName, impersonator.Id, target.UserName, target.Id);
         return await IssueAsync(target, impersonator);
     }
@@ -81,8 +99,12 @@ public class AccountAppService(
     private async Task<CurrentUserDto> BuildCurrentUserAsync(AppUser user, AppUser? impersonator)
     {
         var companies = await companyRepository.GetListByIdsAsync(user.Companies.Select(c => c.CompanyId));
+        var tenant = user.TenantId.HasValue ? await tenantRepository.FindAsync(user.TenantId.Value) : null;
         return new CurrentUserDto
         {
+            IsHost = user.IsHost,
+            TenantName = tenant?.Name,
+            SubscriptionEndDate = tenant?.EndDate,
             Id = user.Id,
             UserName = user.UserName,
             FullName = user.FullName,
