@@ -80,6 +80,26 @@ public static class StageTrackErrorCodes
     public const string QuoteLineNotFound = "Quote.LineNotFound";
     public const string QuoteInvalidStatusTransition = "Quote.InvalidStatusTransition";
     public const string QuoteHasNoLines = "Quote.HasNoLines";
+
+    public const string RelationSelf = "Relation.Self";
+    public const string RelationDuplicate = "Relation.Duplicate";
+    public const string SupplierNameAlreadyExists = "Supplier.NameAlreadyExists";
+    public const string SupplierInUse = "Supplier.InUse";
+    public const string SupplierDuplicate = "Supplier.Duplicate";
+    public const string RepairInvalidStatusTransition = "Repair.InvalidStatusTransition";
+    public const string RepairUnitRequired = "Repair.UnitRequired";
+    public const string InspectionNotConfigured = "Inspection.NotConfigured";
+    public const string SectionTooDeep = "Section.TooDeep";
+    public const string SectionNotFound = "Section.NotFound";
+    public const string CrewAlreadyAssigned = "Crew.AlreadyAssigned";
+    public const string CrewUserNotInCompany = "Crew.UserNotInCompany";
+    public const string TransferSameCompany = "Transfer.SameCompany";
+    public const string TransferNoWarehouse = "Transfer.NoWarehouse";
+    public const string TransferLabelConflict = "Transfer.LabelConflict";
+    public const string AttachmentTooLarge = "Attachment.TooLarge";
+    public const string AttachmentNotImage = "Attachment.NotImage";
+    public const string LabelTemplateInvalidSize = "LabelTemplate.InvalidSize";
+    public const string ImportInvalidRow = "Import.InvalidRow";
     public const string QuoteCannotDelete = "Quote.CannotDelete";
     public const string QuoteLineDescriptionRequired = "Quote.LineDescriptionRequired";
 }

@@ -25,7 +25,12 @@
     "userName": "Username",
     "password": "Password",
     "submit": "Sign in",
-    "demoUsers": "Demo: admin · depo · satis"
+    "demoUsers": "Demo: admin · depo · satis · teknisyen1 (member)",
+    "chooseLocation": "Hello {{name}}, which location are you working at?",
+    "country": {
+      "TR": "Türkiye",
+      "AE": "United Arab Emirates"
+    }
   },
   "layout": {
     "company": "Company",
@@ -33,7 +38,8 @@
     "logout": "Sign out",
     "toggleTheme": "Light/dark theme",
     "impersonating": "You are viewing the app as {{user}} (your account: {{admin}}). Actions are recorded under this user.",
-    "backToMyAccount": "Back to my account"
+    "backToMyAccount": "Back to my account",
+    "changeLocation": "Change location"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -52,7 +58,12 @@
     "rentalFactors": "Day multipliers",
     "stockLocations": "Stock locations",
     "users": "Users",
-    "roles": "Roles & permissions"
+    "roles": "Roles & permissions",
+    "myProjects": "My projects",
+    "repairs": "Repairs",
+    "suppliers": "Suppliers",
+    "crew": "Crew directory",
+    "labelTemplates": "Label templates"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -63,7 +74,11 @@
     "missing": "{{count}} missing",
     "shortageLines": "{{count}} lines · starts {{date}}",
     "devices": "Device status",
-    "recentMovements": "Recent warehouse activity"
+    "recentMovements": "Recent warehouse activity",
+    "myProjects": "My projects",
+    "noMyProjects": "No confirmed projects are assigned to you",
+    "openRepairs": "Open repairs",
+    "overdueInspections": "Overdue inspections"
   },
   "calendar": {
     "title": "Calendar",
@@ -129,7 +144,10 @@
     "project": "Project",
     "user": "User",
     "label": "Label",
-    "system": "System"
+    "system": "System",
+    "equipmentCode": "Equipment code",
+    "quantity": "Qty",
+    "note": "Note"
   },
   "projects": {
     "title": "Projects",
@@ -206,7 +224,23 @@
     "rentalPriceHint": "Multiplied by the day multiplier on quotes.",
     "dailyPrice": "Daily price",
     "weightKg": "Weight (kg)",
-    "volumeM3": "Volume (m³)"
+    "volumeM3": "Volume (m³)",
+    "countryOfOrigin": "Country of origin",
+    "currentA": "Current (A)",
+    "dimensions": "Dimensions (L × W × H)",
+    "exportFile": "Equipment list",
+    "heightCm": "Height (cm)",
+    "importFolder": "Folder path (e.g. VIDEO/Display)",
+    "importTemplate": "Equipment import template",
+    "importTitle": "Import equipment",
+    "lengthCm": "Length (cm)",
+    "packedPer": "Packed per",
+    "packedPerHint": "How many pieces go in one case/pack.",
+    "physical": "Physical properties",
+    "powerW": "Power (W)",
+    "renameFolder": "Edit folder",
+    "volumeAuto": "Calculated from dimensions: {{value}} m³",
+    "widthCm": "Width (cm)"
   },
   "units": {
     "title": "Devices (serial numbers)",
@@ -319,7 +353,9 @@
     "phone": "Phone",
     "address": "Address",
     "city": "City",
-    "country": "Country"
+    "country": "Country",
+    "importTitle": "Import customers",
+    "importTemplate": "customer-template"
   },
   "rentalFactors": {
     "title": "Day multipliers",
@@ -366,7 +402,16 @@
     "RentalFactorProfile": "multiplier profile",
     "StockLocation": "stock location",
     "Company": "company",
-    "AppUser": "user"
+    "AppUser": "user",
+    "Supplier": "supplier",
+    "Repair": "repair",
+    "UnitInspection": "inspection",
+    "LabelTemplate": "label template",
+    "Attachment": "file",
+    "Note": "note",
+    "TaskItem": "task",
+    "ProjectSection": "section",
+    "ProjectCrewMember": "crew member"
   },
   "enums": {
     "projectStatus": {
@@ -410,13 +455,26 @@
       "CheckOut": "Checked out",
       "CheckIn": "Checked in",
       "LabelAssigned": "Label linked",
-      "ProjectStatusChanged": "Status changed"
+      "ProjectStatusChanged": "Status changed",
+      "TransferOut": "Transfer (out)",
+      "TransferIn": "Transfer (in)"
     },
     "quoteLineType": {
       "Equipment": "Equipment",
       "Crew": "Crew",
       "Transport": "Transport",
       "Service": "Service"
+    },
+    "relationKind": {
+      "Content": "Content",
+      "Accessory": "Accessory",
+      "Alternative": "Alternative"
+    },
+    "repairStatus": {
+      "Open": "Open",
+      "InProgress": "In repair",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
     }
   },
   "errors": {
@@ -517,6 +575,45 @@
     "Impersonation": {
       "NotAllowed": "You cannot sign in as this user.",
       "NotActive": "You are not signed in as another user."
+    },
+    "Relation": {
+      "Self": "An item cannot be linked to itself.",
+      "Duplicate": "This item is already in the list."
+    },
+    "Supplier": {
+      "NameAlreadyExists": "A supplier named \"{{name}}\" already exists.",
+      "InUse": "This supplier is used by equipment, devices or repairs and cannot be deleted.",
+      "Duplicate": "This supplier is already linked to this item."
+    },
+    "Repair": {
+      "InvalidStatusTransition": "Repair status cannot change from {{from}} to {{to}}.",
+      "UnitRequired": "Select a device to repair serialized equipment."
+    },
+    "Inspection": {
+      "NotConfigured": "No periodic inspection is configured for this equipment."
+    },
+    "Section": {
+      "TooDeep": "Sections can be nested at most {{max}} levels.",
+      "NotFound": "Section not found."
+    },
+    "Crew": {
+      "AlreadyAssigned": "This person is already on the crew.",
+      "UserNotInCompany": "The selected user does not work at this location."
+    },
+    "Transfer": {
+      "SameCompany": "The devices are already at this location.",
+      "NoWarehouse": "No warehouse is defined at {{company}}.",
+      "LabelConflict": "Label {{code}} is linked to another device at the target location."
+    },
+    "Attachment": {
+      "TooLarge": "Files can be at most {{max}} MB.",
+      "NotImage": "Only image files can be uploaded."
+    },
+    "LabelTemplate": {
+      "InvalidSize": "The label dimensions are invalid."
+    },
+    "Import": {
+      "InvalidRow": "Invalid row: check the {{field}} column."
     }
   },
   "roles": {
@@ -538,7 +635,8 @@
     "builtin": {
       "admin": "Administrator",
       "warehouse": "Warehouse",
-      "sales": "Sales"
+      "sales": "Sales",
+      "member": "Member"
     }
   },
   "users": {
@@ -568,7 +666,9 @@
     "passwordReset": "Password changed",
     "impersonate": "Sign in as this user",
     "impersonateConfirm": "Sign in as {{name}}?",
-    "impersonateHint": "You will see the application with this user's permissions. Use the banner at the top to return to your own account at any time."
+    "impersonateHint": "You will see the application with this user's permissions. Use the banner at the top to return to your own account at any time.",
+    "phone": "Phone",
+    "jobTitle": "Job title"
   },
   "permissionGroups": {
     "Equipment": "Equipment",
@@ -577,7 +677,9 @@
     "Quotes": "Quotes",
     "Customers": "Customers",
     "Settings": "Settings",
-    "Identity": "User management"
+    "Identity": "User management",
+    "Maintenance": "Maintenance",
+    "Suppliers": "Suppliers"
   },
   "permissions": {
     "Equipment": "View equipment",
@@ -596,6 +698,314 @@
     "Settings_StockLocations": "Manage stock locations",
     "Identity_Roles": "Role and permission management",
     "Identity_Users": "User management",
-    "Identity_Users_Impersonate": "Sign in as another user"
+    "Identity_Users_Impersonate": "Sign in as another user",
+    "Equipment_Transfer": "Transfer devices to another location",
+    "Maintenance": "View repairs and inspections",
+    "Maintenance_Manage": "Record repairs and inspections",
+    "Suppliers": "View suppliers",
+    "Suppliers_Manage": "Add/edit suppliers",
+    "AssignedProjects": "See assigned projects (without prices)",
+    "Prices": "See prices and totals",
+    "Settings_LabelTemplates": "Manage label templates"
+  },
+  "excel": {
+    "export": "Excel",
+    "import": "Import",
+    "importHelp": "Download the template, fill it in and upload it. Rows whose code already exists update that record; others are created.",
+    "columns": "Columns",
+    "downloadTemplate": "Download template",
+    "chooseFile": "Choose Excel file",
+    "noRows": "No rows to import were found in the file.",
+    "result": "{{created}} created, {{updated}} updated, {{failed}} failed rows.",
+    "row": "Row",
+    "error": "Error"
+  },
+  "collab": {
+    "notes": "Notes",
+    "tasks": "Tasks",
+    "files": "Files",
+    "notePlaceholder": "Write a note…",
+    "noNotes": "No notes yet",
+    "editNote": "Edit note",
+    "deleteNoteConfirm": "Delete this note?",
+    "addTask": "Add task",
+    "editTask": "Edit task",
+    "noTasks": "No tasks",
+    "deleteTaskConfirm": "Delete this task?",
+    "taskTitle": "Task",
+    "taskDescription": "Description",
+    "assignedTo": "Assigned to",
+    "dueDate": "Due date",
+    "uploadFile": "Add file",
+    "noFiles": "No files",
+    "download": "Download",
+    "deleteFileConfirm": "Delete this file?"
+  },
+  "richText": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "bulletList": "Bulleted list",
+    "numberedList": "Numbered list",
+    "link": "Link",
+    "linkPrompt": "Link address"
+  },
+  "equipmentDetail": {
+    "tabs": {
+      "properties": "Properties",
+      "units": "Serial numbers",
+      "content": "Content",
+      "accessories": "Accessories",
+      "alternatives": "Alternatives",
+      "suppliers": "Suppliers",
+      "inspection": "Periodic inspection",
+      "repairs": "Repairs",
+      "stock": "Stock",
+      "history": "History"
+    },
+    "relationHint": {
+      "Content": "Default content: items that come along when this equipment is added to a project (e.g. the contents of a case). Listed under the item on the packing slip.",
+      "Accessory": "Accessories: items that can optionally be added together with this one (cables, clamps, etc.).",
+      "Alternative": "Alternatives: similar items suggested on a project when stock is short."
+    },
+    "addImage": "Add image",
+    "changeImage": "Change image",
+    "removeImageConfirm": "Remove the image?",
+    "noFolder": "No folder",
+    "createLabel": "Create label",
+    "scanLabel": "Scan",
+    "removeLabelConfirm": "Remove label \"{{code}}\"?",
+    "quantity": "Quantity",
+    "removeConfirm": "Remove?",
+    "partOf": "Items that contain this equipment",
+    "addSupplier": "Add supplier",
+    "editSupplier": "Edit supplier",
+    "supplier": "Supplier",
+    "supplierCode": "Supplier product code",
+    "purchasePrice": "Purchase price",
+    "preferred": "Preferred",
+    "inspectionSettings": "Inspection setting",
+    "intervalMonths": "Inspection interval (months)",
+    "intervalHint": "Leave empty to not track periodic inspections.",
+    "inspectionDescription": "What to check",
+    "dueDates": "Inspection dates per device",
+    "recordInspection": "Record inspection",
+    "lastInspection": "Last inspection",
+    "nextInspection": "Next inspection",
+    "inspectionHistory": "Inspection history",
+    "date": "Date",
+    "result": "Result",
+    "passed": "Passed",
+    "failed": "Failed",
+    "failedHint": "When switched off (failed) the device is put into repair.",
+    "inspector": "Inspector",
+    "openRepair": "Open repair",
+    "repairTitle": "Defect",
+    "repairDescription": "Description",
+    "repairSupplier": "Repairer / service",
+    "reportedAt": "Reported",
+    "cost": "Cost",
+    "noLocation": "No location",
+    "total": "Total",
+    "bulkStockHint": "For quantity-tracked equipment the stock is the stock quantity on the Properties tab."
+  },
+  "suppliers": {
+    "title": "Suppliers",
+    "create": "New supplier",
+    "edit": "Edit supplier",
+    "deleteConfirm": "Delete this supplier?",
+    "searchPlaceholder": "Search name, contact, email or tax no",
+    "name": "Company name",
+    "contactPerson": "Contact person",
+    "email": "Email",
+    "phone": "Phone",
+    "taxNumber": "Tax no",
+    "taxOffice": "Tax office",
+    "address": "Address",
+    "city": "City",
+    "country": "Country",
+    "website": "Website"
+  },
+  "crew": {
+    "title": "Crew directory",
+    "searchPlaceholder": "Search name, job title, phone or email",
+    "fullName": "Name",
+    "jobTitle": "Job title",
+    "phone": "Phone",
+    "email": "Email",
+    "roles": "Roles"
+  },
+  "repairs": {
+    "title": "Repairs",
+    "create": "New repair",
+    "edit": "Edit repair",
+    "number": "No",
+    "equipmentCode": "Equipment code",
+    "equipment": "Equipment",
+    "unit": "Device",
+    "quantity": "Qty",
+    "titleField": "Fault / job",
+    "description": "Description",
+    "status": "Status",
+    "reportedAt": "Reported",
+    "completedAt": "Completed",
+    "supplier": "Repairer / supplier",
+    "cost": "Cost",
+    "searchPlaceholder": "Search equipment, device or fault",
+    "onlyOpen": "Open only",
+    "changeStatus": "Status"
+  },
+  "sections": {
+    "section": "Section",
+    "none": "No section",
+    "add": "Add section",
+    "addSub": "Add sub-section",
+    "rename": "Edit section",
+    "name": "Section name",
+    "nameHint": "E.g. MAIN STAGE, CORRIDOR, SOUND SYSTEM",
+    "parent": "Parent section",
+    "topLevel": "Top-level section (no parent)",
+    "deleteConfirm": "Delete this section? Its equipment will be left without a section.",
+    "moveTo": "Move to section",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "includeAccessories": "Include accessories",
+    "alternatives": "Alternative equipment",
+    "noAlternatives": "No alternatives defined",
+    "availableCount": "{{count}} available",
+    "addAlternative": "Add {{count}}",
+    "dailyTotal": "Daily total"
+  },
+  "crewTab": {
+    "title": "Crew",
+    "pickPerson": "Select a person",
+    "function": "Function",
+    "add": "Add to crew",
+    "empty": "No crew assigned yet",
+    "name": "Name",
+    "jobTitle": "Job title",
+    "phone": "Phone",
+    "email": "Email",
+    "removeConfirm": "Remove this person from the crew?",
+    "crewViewHint": "You are on the crew of this project. You can view the material list and print the price-free packing slip."
+  },
+  "projectExtra": {
+    "accountManager": "Account manager",
+    "paymentTerms": "Payment terms",
+    "paymentTermsPlaceholder": "E.g. Invoiced after the event.",
+    "notesTasksFiles": "Notes · Tasks · Files",
+    "projectNumber": "Project no",
+    "currency": "Currency"
+  },
+  "packingSlip": {
+    "open": "Packing slip / material list (PDF)",
+    "title": "PACKING SLIP",
+    "createdAt": "Created on",
+    "timetable": "Timetable",
+    "out": "Out",
+    "in": "In",
+    "companySignature": "Company signature",
+    "customerSignature": "Customer signature"
+  },
+  "quoteSections": {
+    "sectionHint": "Lines with the same section name are grouped together on the quote.",
+    "lineNotes": "Line note"
+  },
+  "quotePrint": {
+    "contactPerson": "Contact person",
+    "preparedBy": "Prepared by",
+    "workDays": "Work days",
+    "equipment": "Equipment"
+  },
+  "unitGrid": {
+    "printLabels": "Create / print labels ({{count}})",
+    "archive": "Archive",
+    "archiveConfirm": "Archive the {{count}} selected devices?",
+    "archived": "Archived",
+    "showArchived": "Show archived",
+    "saveAndAddAnother": "Save and add another",
+    "importTitle": "Import serial numbers",
+    "labelCodeColumn": "Label code"
+  },
+  "transfer": {
+    "button": "Transfer to another location",
+    "title": "Transfer {{count}} devices",
+    "hint": "The devices move from {{from}} to the main warehouse of the selected location, together with their labels and history.",
+    "submit": "Transfer",
+    "done": "{{count}} devices were transferred to {{company}} / {{location}}."
+  },
+  "unitDetail": {
+    "tabDetails": "Details",
+    "tabRepairs": "Repairs",
+    "tabHistory": "History",
+    "createLabel": "Create label",
+    "scanLabel": "Scan",
+    "scanTitle": "Scan the existing label of {{ref}}",
+    "labelAlreadyHere": "Label \"{{code}}\" is already linked to this device.",
+    "labelInUse": "Label \"{{code}}\" is linked to another record: {{target}}",
+    "removeLabelConfirm": "Remove this label from the device?",
+    "restore": "Restore",
+    "archiveConfirm": "Archive this device? It can no longer go out on projects.",
+    "uploadImage": "Image",
+    "purchaseDate": "Purchase date",
+    "warrantyDate": "Warranty until",
+    "replacementDate": "Replacement date",
+    "supplier": "Supplier",
+    "nextInspection": "Next inspection",
+    "inspection": "Periodic inspection",
+    "inspectionInfo": "Every {{months}} months · last: {{last}} · next: {{next}}",
+    "noInspection": "No periodic inspection is configured for this equipment.",
+    "remark": "Remark",
+    "repairs": "Repairs",
+    "newRepair": "Send to repair",
+    "repairTitle": "Fault / job",
+    "repairDescription": "Description",
+    "repairHint": "The device becomes \"In repair\" when the repair is opened and returns to stock when it is completed.",
+    "reportedAt": "Reported",
+    "completedAt": "Completed",
+    "cost": "Cost",
+    "inspections": "Inspections",
+    "recordInspection": "Record inspection",
+    "inspectionDate": "Inspection date",
+    "result": "Result",
+    "passed": "Passed",
+    "failed": "Failed",
+    "failedHint": "A device that fails the inspection is sent to repair automatically.",
+    "inspector": "Inspected by",
+    "note": "Note"
+  },
+  "labelPrint": {
+    "title": "Print labels",
+    "template": "Label template",
+    "count": "{{count}} labels",
+    "newCreated": "New labels were created for {{count}} items without one (same QR format as Rentman).",
+    "noTemplate": "No label template yet. Add one under Settings › Label templates.",
+    "nothing": "Nothing selected to print.",
+    "printerHint": "Each label prints as its own page at the template size. In the printer dialog set the paper size to the label size and scale to 100%."
+  },
+  "labelTemplates": {
+    "title": "Label templates",
+    "create": "New template",
+    "edit": "Edit template",
+    "hint": "Defines the size of the QR labels and the information printed on them. No letterhead is used.",
+    "name": "Template name",
+    "size": "Size",
+    "widthMm": "Width",
+    "heightMm": "Height",
+    "qrSize": "QR size",
+    "fontSize": "Font size",
+    "fields": "Information on the label",
+    "showName": "Equipment name",
+    "showBrand": "Brand",
+    "showModel": "Model",
+    "showCode": "Equipment code",
+    "showInternalRef": "Internal reference",
+    "showSerialNumber": "Serial number",
+    "showCompanyName": "Company name",
+    "isDefault": "Default template",
+    "default": "Default",
+    "deleteConfirm": "Delete this template?",
+    "preview": "Preview (actual size)",
+    "previewHint": "The preview is shown at approximately actual size on screen."
   }
 }

@@ -32,11 +32,20 @@ public class QuoteManager(
 
         var equipmentIds = project.Equipment.Select(e => e.EquipmentId).ToList();
         var equipment = (await equipmentRepository.GetListByIdsAsync(equipmentIds)).ToDictionary(e => e.Id);
-        foreach (var line in project.Equipment.OrderBy(e => e.SortOrder))
+
+        // Lines without a section first, then every section in the order shown on the project.
+        var placements = new List<(Guid? SectionId, string? Path)> { (null, null) };
+        placements.AddRange(project.GetSectionOutline().Select(o => ((Guid?)o.Section.Id, (string?)o.Path)));
+
+        foreach (var (sectionId, path) in placements)
         {
-            if (equipment.TryGetValue(line.EquipmentId, out var item))
+            foreach (var line in project.Equipment.Where(e => e.SectionId == sectionId).OrderBy(e => e.SortOrder))
             {
-                quote.AddLine(QuoteLineType.Equipment, item.Id, item.Name, line.Quantity, item.RentalPrice, applyFactor: true, discountPercent: 0);
+                if (equipment.TryGetValue(line.EquipmentId, out var item))
+                {
+                    quote.AddLine(QuoteLineType.Equipment, item.Id, item.Name, line.Quantity, item.RentalPrice,
+                        applyFactor: true, discountPercent: 0, section: path, notes: line.Notes);
+                }
             }
         }
 
@@ -61,10 +70,11 @@ public class QuoteManager(
         quote.SetRentalPeriod(days, profile?.GetFactor(days) ?? days, profile?.Id);
     }
 
-    public async Task<QuoteLine> AddEquipmentLineAsync(Quote quote, Guid equipmentId, decimal quantity)
+    public async Task<QuoteLine> AddEquipmentLineAsync(Quote quote, Guid equipmentId, decimal quantity, string? section)
     {
         var equipment = await equipmentRepository.GetAsync(equipmentId, includeDetails: false);
-        return quote.AddLine(QuoteLineType.Equipment, equipment.Id, equipment.Name, quantity, equipment.RentalPrice, applyFactor: true, discountPercent: 0);
+        return quote.AddLine(QuoteLineType.Equipment, equipment.Id, equipment.Name, quantity, equipment.RentalPrice,
+            applyFactor: true, discountPercent: 0, section: section);
     }
 
     public async Task ChangeStatusAsync(Quote quote, QuoteStatus status, Project project)

@@ -18,8 +18,13 @@ import {
   UserOutlined,
   SafetyOutlined,
   UserSwitchOutlined,
+  EnvironmentOutlined,
+  ShopOutlined,
+  BuildOutlined,
+  IdcardOutlined,
+  QrcodeOutlined,
 } from '@ant-design/icons';
-import { Alert, Avatar, Button, Dropdown, Flex, Layout, Menu, Select, Typography, theme, type MenuProps } from 'antd';
+import { Alert, Avatar, Button, Dropdown, Flex, Layout, Menu, Select, Tag, Typography, theme, type MenuProps } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -34,7 +39,8 @@ export function AppLayout() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, company, can, logout, switchCompany, impersonating, endImpersonation } = useAuth();
+  const { user, company, can, logout, changeLocation, impersonating, endImpersonation } = useAuth();
+  const crewOnly = !can(Permissions.Projects) && can(Permissions.AssignedProjects);
   const showError = useErrorToast();
   const { mode, toggle } = useThemeMode();
   const { token } = theme.useToken();
@@ -54,7 +60,9 @@ export function AppLayout() {
         { key: '/warehouse/movements', icon: <HistoryOutlined />, label: t('nav.movements') },
       ].filter((i) => !('permission' in i) || can(i.permission as string)),
     },
-    { key: '/projects', icon: <ProjectOutlined />, label: t('nav.projects'), permission: Permissions.Projects },
+    ...(crewOnly
+      ? [{ key: '/projects', icon: <ProjectOutlined />, label: t('nav.myProjects') }]
+      : [{ key: '/projects', icon: <ProjectOutlined />, label: t('nav.projects'), permission: Permissions.Projects }]),
     { key: '/quotes', icon: <FileTextOutlined />, label: t('nav.quotes'), permission: Permissions.Quotes },
     {
       key: 'equipment',
@@ -64,9 +72,12 @@ export function AppLayout() {
       children: [
         { key: '/equipment', icon: <TagsOutlined />, label: t('nav.equipmentList') },
         { key: '/equipment/units', icon: <BarcodeOutlined />, label: t('nav.units') },
+        ...(can(Permissions.Maintenance) ? [{ key: '/maintenance/repairs', icon: <BuildOutlined />, label: t('nav.repairs') }] : []),
       ],
     },
     { key: '/customers', icon: <TeamOutlined />, label: t('nav.customers'), permission: Permissions.Customers },
+    { key: '/suppliers', icon: <ShopOutlined />, label: t('nav.suppliers'), permission: Permissions.Suppliers },
+    { key: '/crew', icon: <IdcardOutlined />, label: t('nav.crew') },
     {
       key: 'settings',
       icon: <SettingOutlined />,
@@ -76,6 +87,7 @@ export function AppLayout() {
         { key: '/settings/roles', icon: <SafetyOutlined />, label: t('nav.roles'), permission: Permissions.IdentityRoles },
         { key: '/settings/rental-factors', label: t('nav.rentalFactors'), permission: Permissions.RentalFactors },
         { key: '/settings/stock-locations', label: t('nav.stockLocations'), permission: Permissions.StockLocations },
+        { key: '/settings/label-templates', icon: <QrcodeOutlined />, label: t('nav.labelTemplates'), permission: Permissions.LabelTemplates },
       ].filter((i) => can(i.permission)),
     },
   ];
@@ -87,9 +99,9 @@ export function AppLayout() {
 
   const path = location.pathname;
   const selected =
-    ['/warehouse/scan', '/warehouse/movements', '/equipment/units', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/calendar']
+    ['/warehouse/scan', '/warehouse/movements', '/equipment/units', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/calendar']
       .find((p) => path.startsWith(p)) ??
-    ['/warehouse', '/projects', '/quotes', '/equipment', '/customers'].find((p) => path.startsWith(p)) ??
+    ['/warehouse', '/projects', '/quotes', '/equipment', '/customers', '/suppliers', '/crew'].find((p) => path.startsWith(p)) ??
     '/';
 
   return (
@@ -104,7 +116,7 @@ export function AppLayout() {
         style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'auto' }}
       >
         <Flex align="center" gap={10} style={{ padding: '18px 16px' }}>
-          <img src="/favicon.svg" width={30} height={30} alt="" />
+          <img src="/favicon.svg" width={32} height={32} alt="" />
           <div style={{ lineHeight: 1.2 }}>
             <Typography.Text strong style={{ color: '#fff', display: 'block' }}>StageTrack</Typography.Text>
             <Typography.Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>{company?.name}</Typography.Text>
@@ -138,18 +150,10 @@ export function AppLayout() {
             zIndex: 10,
           }}
         >
-          {user && user.companies.length > 1 && (
-            <Select
-              className="hide-mobile"
-              style={{ minWidth: 220 }}
-              value={company?.id}
-              onChange={(id) => {
-                switchCompany(id);
-                navigate('/');
-              }}
-              options={user.companies.map((c) => ({ value: c.id, label: c.name }))}
-              aria-label={t('layout.company')}
-            />
+          {company && (
+            <Tag icon={<EnvironmentOutlined />} color="geekblue" className="hide-mobile" style={{ marginInlineEnd: 'auto' }}>
+              {company.name}
+            </Tag>
           )}
           <Select
             value={i18n.language}
@@ -169,12 +173,25 @@ export function AppLayout() {
               items: [
                 { key: 'user', label: `${user?.userName} · ${(user?.roles ?? []).map((r) => roleLabel(t, r)).join(', ')}`, disabled: true },
                 { type: 'divider' },
+                ...((user?.companies.length ?? 0) > 1 && !impersonating
+                  ? [
+                      {
+                        key: 'location',
+                        icon: <EnvironmentOutlined />,
+                        label: t('layout.changeLocation'),
+                        onClick: () => {
+                          navigate('/');
+                          changeLocation();
+                        },
+                      },
+                    ]
+                  : []),
                 { key: 'logout', icon: <LogoutOutlined />, label: t('layout.logout'), onClick: logout },
               ],
             }}
           >
             <Button type="text">
-              <Avatar size="small" icon={<UserOutlined />} style={{ background: '#f97316' }} />
+              <Avatar size="small" icon={<UserOutlined />} style={{ background: '#4f46e5' }} />
               <span className="hide-mobile" style={{ marginInlineStart: 8 }}>{user?.fullName}</span>
             </Button>
           </Dropdown>

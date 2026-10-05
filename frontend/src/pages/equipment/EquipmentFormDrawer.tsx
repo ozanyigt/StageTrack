@@ -4,41 +4,39 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { equipmentApi, folderApi } from '../../api/endpoints';
 import { EQUIPMENT_TYPES, type Equipment, type EquipmentInput } from '../../api/types';
-import { useAuth } from '../../auth/AuthContext';
+import { Permissions, useAuth } from '../../auth/AuthContext';
 import { useErrorToast } from '../../utils/errors';
 import { buildFolderTree } from './folderTree';
 
 interface Props {
   open: boolean;
-  equipment?: (Equipment & { stockQuantity?: number }) | null;
   defaultFolderId?: string | null;
   onClose: () => void;
   onSaved: (equipment: Equipment) => void;
 }
 
-export function EquipmentFormDrawer({ open, equipment, defaultFolderId, onClose, onSaved }: Props) {
+/** Quick "new equipment" drawer; everything else (dimensions, content, suppliers…) is edited on the detail page. */
+export function EquipmentFormDrawer({ open, defaultFolderId, onClose, onSaved }: Props) {
   const { t } = useTranslation();
-  const { company } = useAuth();
+  const { company, can } = useAuth();
   const [form] = Form.useForm<EquipmentInput>();
   const queryClient = useQueryClient();
   const showError = useErrorToast();
   const { data: folders = [] } = useQuery({ queryKey: ['folders'], queryFn: folderApi.list });
   const isSerialized = Form.useWatch('isSerialized', form);
+  const showPrice = can(Permissions.Prices);
 
   useEffect(() => {
     if (!open) return;
     form.resetFields();
-    form.setFieldsValue(
-      equipment
-        ? { ...equipment, stockQuantity: equipment.stockQuantity ?? equipment.stock }
-        : { type: 'Physical', isSerialized: true, stockQuantity: 0, rentalPrice: 0, folderId: defaultFolderId ?? null },
-    );
-  }, [open, equipment, defaultFolderId, form]);
+    form.setFieldsValue({ type: 'Physical', isSerialized: true, stockQuantity: 0, rentalPrice: 0, packedPer: 1, folderId: defaultFolderId ?? null });
+  }, [open, defaultFolderId, form]);
 
   const save = useMutation({
-    mutationFn: (values: EquipmentInput) => (equipment ? equipmentApi.update(equipment.id, values) : equipmentApi.create(values)),
+    mutationFn: (values: EquipmentInput) => equipmentApi.create({ ...values, packedPer: 1, rentalPrice: showPrice ? values.rentalPrice : null }),
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ['equipment'] });
+      queryClient.invalidateQueries({ queryKey: ['folders'] });
       onSaved(saved);
     },
     onError: showError,
@@ -48,13 +46,15 @@ export function EquipmentFormDrawer({ open, equipment, defaultFolderId, onClose,
     <Drawer
       open={open}
       onClose={onClose}
-      width={520}
-      title={equipment ? t('equipment.editTitle') : t('equipment.createTitle')}
+      width={480}
+      title={t('equipment.createTitle')}
       destroyOnHidden
       extra={
         <Space>
           <Button onClick={onClose}>{t('common.cancel')}</Button>
-          <Button type="primary" loading={save.isPending} onClick={() => form.submit()}>{t('common.save')}</Button>
+          <Button type="primary" loading={save.isPending} onClick={() => form.submit()}>
+            {t('common.save')}
+          </Button>
         </Space>
       }
     >
@@ -87,20 +87,11 @@ export function EquipmentFormDrawer({ open, equipment, defaultFolderId, onClose,
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
         )}
-        <Form.Item name="rentalPrice" label={t('equipment.rentalPrice', { currency: company?.defaultCurrency })} extra={t('equipment.rentalPriceHint')}>
-          <InputNumber min={0} step={50} style={{ width: '100%' }} />
-        </Form.Item>
-        <Space.Compact block>
-          <Form.Item name="weightKg" label={t('equipment.weightKg')} style={{ flex: 1 }}>
-            <InputNumber min={0} style={{ width: '100%' }} />
+        {showPrice && (
+          <Form.Item name="rentalPrice" label={t('equipment.rentalPrice', { currency: company?.defaultCurrency })} extra={t('equipment.rentalPriceHint')}>
+            <InputNumber min={0} step={50} style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="volumeM3" label={t('equipment.volumeM3')} style={{ flex: 1 }}>
-            <InputNumber min={0} style={{ width: '100%' }} />
-          </Form.Item>
-        </Space.Compact>
-        <Form.Item name="notes" label={t('common.notes')}>
-          <Input.TextArea rows={3} />
-        </Form.Item>
+        )}
       </Form>
     </Drawer>
   );

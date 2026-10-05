@@ -1,6 +1,7 @@
 using StageTrack.Companies;
 using StageTrack.Customers;
 using StageTrack.Dtos;
+using StageTrack.Identity;
 using StageTrack.Inventory;
 using StageTrack.Pricing;
 using StageTrack.Projects;
@@ -16,6 +17,7 @@ public class QuoteAppService(
     ICompanyRepository companyRepository,
     IEquipmentRepository equipmentRepository,
     IRentalFactorProfileRepository profileRepository,
+    IUserRepository userRepository,
     QuoteManager quoteManager,
     ICurrentCompany currentCompany,
     IUnitOfWork unitOfWork) : IQuoteAppService
@@ -54,17 +56,18 @@ public class QuoteAppService(
         var quote = await quoteRepository.GetAsync(id);
         if (input.Type == QuoteLineType.Equipment && input.EquipmentId.HasValue)
         {
-            var line = await quoteManager.AddEquipmentLineAsync(quote, input.EquipmentId.Value, input.Quantity);
-            if (input.UnitPrice.HasValue || input.DiscountPercent > 0 || !string.IsNullOrWhiteSpace(input.Description))
+            var line = await quoteManager.AddEquipmentLineAsync(quote, input.EquipmentId.Value, input.Quantity, Clean(input.Section));
+            if (input.UnitPrice.HasValue || input.DiscountPercent > 0 || !string.IsNullOrWhiteSpace(input.Description) ||
+                !string.IsNullOrWhiteSpace(input.Notes))
             {
                 quote.UpdateLine(line.Id, line.Type, Describe(input.Description, line.Description), line.Quantity,
-                    input.UnitPrice ?? line.UnitPrice, input.ApplyFactor, input.DiscountPercent);
+                    input.UnitPrice ?? line.UnitPrice, input.ApplyFactor, input.DiscountPercent, line.Section, Clean(input.Notes));
             }
         }
         else
         {
             quote.AddLine(input.Type, null, Describe(input.Description, null), input.Quantity, input.UnitPrice ?? 0,
-                input.ApplyFactor, input.DiscountPercent);
+                input.ApplyFactor, input.DiscountPercent, Clean(input.Section), Clean(input.Notes));
         }
 
         await unitOfWork.SaveChangesAsync();
@@ -77,7 +80,7 @@ public class QuoteAppService(
         var current = quote.Lines.FirstOrDefault(l => l.Id == lineId)
                       ?? throw new BusinessException(StageTrackErrorCodes.QuoteLineNotFound);
         quote.UpdateLine(lineId, input.Type, Describe(input.Description, current.Description), input.Quantity,
-            input.UnitPrice ?? current.UnitPrice, input.ApplyFactor, input.DiscountPercent);
+            input.UnitPrice ?? current.UnitPrice, input.ApplyFactor, input.DiscountPercent, Clean(input.Section), Clean(input.Notes));
         await unitOfWork.SaveChangesAsync();
         return await BuildDtoAsync(quote);
     }
@@ -115,6 +118,8 @@ public class QuoteAppService(
         await quoteRepository.DeleteAsync(quote);
     }
 
+    private static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
     private static string Describe(string? description, string? fallback)
     {
         var value = string.IsNullOrWhiteSpace(description) ? fallback : description.Trim();
@@ -151,6 +156,11 @@ public class QuoteAppService(
         dto.UseEnd = project.UseEnd ?? project.PlanEnd;
         dto.Customer = customer?.ToDto();
         dto.Company = company.ToDto();
+        dto.PaymentTerms = project.PaymentTerms;
+        dto.PreparedByName = project.AccountManagerId.HasValue
+            ? (await userRepository.FindAsync(project.AccountManagerId.Value))?.FullName
+            : null;
+        dto.SectionNames = quote.Lines.Where(l => l.Section != null).OrderBy(l => l.SortOrder).Select(l => l.Section!).Distinct().ToList();
         dto.Lines = quote.Lines.OrderBy(l => l.SortOrder).Select(l => new QuoteLineDto
         {
             Id = l.Id,
@@ -163,7 +173,9 @@ public class QuoteAppService(
             UnitPrice = l.UnitPrice,
             ApplyFactor = l.ApplyFactor,
             DiscountPercent = l.DiscountPercent,
-            Total = l.Total
+            Total = l.Total,
+            Section = l.Section,
+            Notes = l.Notes
         }).ToList();
         return dto;
     }

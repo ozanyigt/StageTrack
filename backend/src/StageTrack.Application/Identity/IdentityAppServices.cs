@@ -78,6 +78,7 @@ public class UserAppService(
     {
         var acting = await GetActingUserAsync();
         var user = await userManager.CreateAsync(input.UserName, input.FullName, input.Password, input.Email, input.Language);
+        user.Update(user.FullName, user.Email, input.Phone, input.JobTitle);
         await userManager.SetRolesAsync(user, input.RoleIds);
         userManager.SetCompanies(user, input.CompanyIds, acting);
         return ToDto(user, acting);
@@ -87,7 +88,7 @@ public class UserAppService(
     {
         var acting = await GetActingUserAsync();
         var user = await GetInCurrentCompanyAsync(id);
-        user.Update(input.FullName.Trim(), input.Email);
+        user.Update(input.FullName.Trim(), input.Email, input.Phone, input.JobTitle);
         await userManager.SetRolesAsync(user, input.RoleIds);
         userManager.SetCompanies(user, input.CompanyIds, acting);
         return ToDto(user, acting);
@@ -128,6 +129,8 @@ public class UserAppService(
         Id = user.Id,
         UserName = user.UserName,
         FullName = user.FullName,
+        Phone = user.Phone,
+        JobTitle = user.JobTitle,
         Email = user.Email,
         IsActive = user.IsActive,
         Language = user.Language,

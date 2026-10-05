@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Badge, Button, Card, Flex, Input, Select, Table, Typography } from 'antd';
+import { Badge, Button, Card, Flex, Input, Select, Space, Table, Typography } from 'antd';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +7,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { projectApi } from '../../api/endpoints';
 import { PROJECT_STATUSES, type ProjectStatus } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
+import { ExportButton } from '../../components/ExcelButtons';
 import { ProjectStatusTag } from '../../components/StatusTags';
+import { fetchAllPages } from '../../utils/excel';
 import { useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
 import { ProjectFormModal } from './ProjectFormModal';
@@ -26,6 +28,7 @@ export function ProjectListPage() {
   const [page, setPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
   const search = useDebounced(text, 300);
+  const crewOnly = !can(Permissions.Projects) && can(Permissions.AssignedProjects);
 
   const list = useQuery({
     queryKey: ['projects', search, statuses, page],
@@ -36,10 +39,28 @@ export function ProjectListPage() {
   return (
     <>
       <div className="page-header">
-        <Typography.Title level={3}>{t('projects.title')}</Typography.Title>
-        {can(Permissions.ProjectsManage) && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>{t('projects.create')}</Button>
-        )}
+        <Typography.Title level={3}>{crewOnly ? t('nav.myProjects') : t('projects.title')}</Typography.Title>
+        <Space wrap>
+          <ExportButton
+            fileName={crewOnly ? t('nav.myProjects') : t('projects.title')}
+            load={() => fetchAllPages((skipCount, maxResultCount) => projectApi.list({ text: search, statuses, skipCount, maxResultCount }))}
+            columns={[
+              { header: t('projects.number'), value: (p) => p.number, width: 10 },
+              { header: t('projects.name'), value: (p) => p.name, width: 40 },
+              { header: t('projects.status'), value: (p) => t(`enums.projectStatus.${p.status}`), width: 16 },
+              { header: t('projects.customer'), value: (p) => p.customerName, width: 30 },
+              { header: t('projects.venue'), value: (p) => p.venue, width: 24 },
+              { header: t('projects.type'), value: (p) => p.projectType, width: 16 },
+              { header: t('projects.warehouse'), value: (p) => p.stockLocationName, width: 16 },
+              { header: t('projects.planStart'), value: (p) => new Date(p.planStart), width: 18 },
+              { header: t('projects.planEnd'), value: (p) => new Date(p.planEnd), width: 18 },
+              { header: t('projects.plannedQuantity'), value: (p) => p.plannedQuantity, width: 10 },
+            ]}
+          />
+          {!crewOnly && can(Permissions.ProjectsManage) && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>{t('projects.create')}</Button>
+          )}
+        </Space>
       </div>
       <Card size="small">
         <Flex gap={8} wrap style={{ marginBottom: 12 }}>

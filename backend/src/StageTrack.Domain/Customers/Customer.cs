@@ -53,6 +53,10 @@ public interface ICustomerRepository : IRepository<Customer>
     Task<List<Customer>> GetPagedListAsync(string? text, string? sorting, int skip, int take, CancellationToken cancellationToken = default);
 
     Task<long> GetCountAsync(string? text, CancellationToken cancellationToken = default);
+
+    Task<Customer?> FindByTaxNumberAsync(string taxNumber, CancellationToken cancellationToken = default);
+
+    Task<Customer?> FindByNameAsync(string name, CancellationToken cancellationToken = default);
 }
 
 public class CustomerManager(ICustomerRepository customerRepository, IProjectRepository projectRepository)

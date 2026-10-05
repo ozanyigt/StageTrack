@@ -22,6 +22,168 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("StageTrack.Collaboration.Attachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OwnerType")
+                        .HasColumnType("int");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerType", "OwnerId");
+
+                    b.ToTable("Attachments");
+                });
+
+            modelBuilder.Entity("StageTrack.Collaboration.Note", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OwnerType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerType", "OwnerId");
+
+                    b.ToTable("Notes");
+                });
+
+            modelBuilder.Entity("StageTrack.Collaboration.TaskItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AssignedUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OwnerType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedUserId");
+
+                    b.HasIndex("OwnerType", "OwnerId");
+
+                    b.ToTable("Tasks", (string)null);
+                });
+
             modelBuilder.Entity("StageTrack.Companies.Company", b =>
                 {
                     b.Property<Guid>("Id")
@@ -183,6 +345,10 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("JobTitle")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasMaxLength(8)
@@ -203,6 +369,10 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -278,17 +448,37 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CountryOfOrigin")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid?>("CreatorId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal?>("CurrentA")
+                        .HasColumnType("decimal(12,3)");
+
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid?>("FolderId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("HeightCm")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<Guid?>("ImageAttachmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("InspectionDescription")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("InspectionIntervalMonths")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsArchived")
                         .HasColumnType("bit");
@@ -305,6 +495,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<Guid?>("LastModifierId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal?>("LengthCm")
+                        .HasColumnType("decimal(12,3)");
+
                     b.Property<string>("Model")
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
@@ -317,6 +510,12 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<string>("Notes")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("PackedPer")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("PowerW")
+                        .HasColumnType("decimal(12,3)");
 
                     b.Property<decimal>("RentalPrice")
                         .HasColumnType("decimal(18,2)");
@@ -331,6 +530,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasColumnType("decimal(12,3)");
 
                     b.Property<decimal?>("WeightKg")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<decimal?>("WidthCm")
                         .HasColumnType("decimal(12,3)");
 
                     b.HasKey("Id");
@@ -448,6 +650,67 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.ToTable("EquipmentLabels");
                 });
 
+            modelBuilder.Entity("StageTrack.Inventory.EquipmentRelation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EquipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("RelatedEquipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RelatedEquipmentId");
+
+                    b.HasIndex("EquipmentId", "Kind", "RelatedEquipmentId")
+                        .IsUnique();
+
+                    b.ToTable("EquipmentRelations", (string)null);
+                });
+
+            modelBuilder.Entity("StageTrack.Inventory.EquipmentSupplier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EquipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsPreferred")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("PurchasePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SupplierCode")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<Guid>("SupplierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupplierId");
+
+                    b.HasIndex("EquipmentId", "SupplierId")
+                        .IsUnique();
+
+                    b.ToTable("EquipmentSuppliers", (string)null);
+                });
+
             modelBuilder.Entity("StageTrack.Inventory.EquipmentUnit", b =>
                 {
                     b.Property<Guid>("Id")
@@ -471,6 +734,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<Guid>("EquipmentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ImageAttachmentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("InternalRef")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -482,6 +748,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastInspectionDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("LastModificationTime")
                         .HasColumnType("datetime2");
 
@@ -489,8 +758,14 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(8000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PurchaseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ReplacementDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SerialNumber")
                         .HasMaxLength(128)
@@ -502,11 +777,19 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<Guid?>("StockLocationId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("SupplierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("WarrantyDate")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CurrentProjectId");
 
                     b.HasIndex("StockLocationId");
+
+                    b.HasIndex("SupplierId");
 
                     b.HasIndex("CompanyId", "InternalRef")
                         .IsUnique()
@@ -515,6 +798,78 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasIndex("EquipmentId", "Status");
 
                     b.ToTable("EquipmentUnits");
+                });
+
+            modelBuilder.Entity("StageTrack.Inventory.LabelTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("FontSizePt")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("HeightMm")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<int>("QrSizeMm")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("ShowBrand")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowCode")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowCompanyName")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowInternalRef")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowModel")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowName")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowSerialNumber")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("WidthMm")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LabelTemplates");
                 });
 
             modelBuilder.Entity("StageTrack.Inventory.StockLocation", b =>
@@ -567,6 +922,134 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasIndex("CompanyId");
 
                     b.ToTable("StockLocations");
+                });
+
+            modelBuilder.Entity("StageTrack.Maintenance.Repair", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid>("EquipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReportedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("SupplierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid?>("UnitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipmentId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.HasIndex("UnitId");
+
+                    b.HasIndex("CompanyId", "Number")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("Repairs");
+                });
+
+            modelBuilder.Entity("StageTrack.Maintenance.UnitInspection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EquipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("Passed")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("UnitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipmentId");
+
+                    b.HasIndex("UnitId", "Date");
+
+                    b.ToTable("UnitInspections");
                 });
 
             modelBuilder.Entity("StageTrack.Pricing.RentalFactorProfile", b =>
@@ -637,6 +1120,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AccountManagerId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Color")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -678,6 +1164,10 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
+                    b.Property<string>("PaymentTerms")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<DateTime>("PlanEnd")
                         .HasColumnType("datetime2");
 
@@ -706,6 +1196,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccountManagerId");
+
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("StockLocationId");
@@ -717,6 +1209,31 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasIndex("CompanyId", "PlanStart", "PlanEnd");
 
                     b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("StageTrack.Projects.ProjectCrewMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Function")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ProjectId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("ProjectCrew", (string)null);
                 });
 
             modelBuilder.Entity("StageTrack.Projects.ProjectEquipment", b =>
@@ -737,6 +1254,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("SectionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("SortOrder")
                         .HasColumnType("int");
 
@@ -747,6 +1267,32 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("ProjectEquipment", (string)null);
+                });
+
+            modelBuilder.Entity("StageTrack.Projects.ProjectSection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectSections", (string)null);
                 });
 
             modelBuilder.Entity("StageTrack.Quotes.Quote", b =>
@@ -866,11 +1412,19 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<Guid?>("EquipmentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("QuoteId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Section")
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
 
                     b.Property<int>("SortOrder")
                         .HasColumnType("int");
@@ -893,6 +1447,84 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.ToTable("QuoteLines", (string)null);
                 });
 
+            modelBuilder.Entity("StageTrack.Suppliers.Supplier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContactPerson")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("TaxNumber")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("TaxOffice")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Website")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId", "Name");
+
+                    b.ToTable("Suppliers");
+                });
+
             modelBuilder.Entity("StageTrack.Warehouse.WarehouseMovement", b =>
                 {
                     b.Property<Guid>("Id")
@@ -913,6 +1545,10 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<string>("LabelCode")
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<Guid?>("ProjectId")
                         .HasColumnType("uniqueidentifier");
@@ -939,6 +1575,14 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasIndex("ProjectId", "EquipmentId");
 
                     b.ToTable("WarehouseMovements");
+                });
+
+            modelBuilder.Entity("StageTrack.Collaboration.TaskItem", b =>
+                {
+                    b.HasOne("StageTrack.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("StageTrack.Identity.RolePermission", b =>
@@ -1002,6 +1646,36 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("StageTrack.Inventory.EquipmentRelation", b =>
+                {
+                    b.HasOne("StageTrack.Inventory.Equipment", null)
+                        .WithMany("Relations")
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StageTrack.Inventory.Equipment", null)
+                        .WithMany()
+                        .HasForeignKey("RelatedEquipmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Inventory.EquipmentSupplier", b =>
+                {
+                    b.HasOne("StageTrack.Inventory.Equipment", null)
+                        .WithMany("Suppliers")
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StageTrack.Suppliers.Supplier", null)
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("StageTrack.Inventory.EquipmentUnit", b =>
                 {
                     b.HasOne("StageTrack.Projects.Project", null)
@@ -1019,6 +1693,39 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .WithMany()
                         .HasForeignKey("StockLocationId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("StageTrack.Suppliers.Supplier", null)
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("StageTrack.Maintenance.Repair", b =>
+                {
+                    b.HasOne("StageTrack.Inventory.Equipment", null)
+                        .WithMany()
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StageTrack.Suppliers.Supplier", null)
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("StageTrack.Inventory.EquipmentUnit", null)
+                        .WithMany()
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("StageTrack.Maintenance.UnitInspection", b =>
+                {
+                    b.HasOne("StageTrack.Inventory.EquipmentUnit", null)
+                        .WithMany()
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("StageTrack.Pricing.RentalFactorStep", b =>
@@ -1032,6 +1739,11 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
             modelBuilder.Entity("StageTrack.Projects.Project", b =>
                 {
+                    b.HasOne("StageTrack.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AccountManagerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("StageTrack.Customers.Customer", null)
                         .WithMany()
                         .HasForeignKey("CustomerId")
@@ -1041,6 +1753,21 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .WithMany()
                         .HasForeignKey("StockLocationId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("StageTrack.Projects.ProjectCrewMember", b =>
+                {
+                    b.HasOne("StageTrack.Projects.Project", null)
+                        .WithMany("Crew")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StageTrack.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("StageTrack.Projects.ProjectEquipment", b =>
@@ -1053,6 +1780,15 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
                     b.HasOne("StageTrack.Projects.Project", null)
                         .WithMany("Equipment")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Projects.ProjectSection", b =>
+                {
+                    b.HasOne("StageTrack.Projects.Project", null)
+                        .WithMany("Sections")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1122,6 +1858,13 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Navigation("Roles");
                 });
 
+            modelBuilder.Entity("StageTrack.Inventory.Equipment", b =>
+                {
+                    b.Navigation("Relations");
+
+                    b.Navigation("Suppliers");
+                });
+
             modelBuilder.Entity("StageTrack.Pricing.RentalFactorProfile", b =>
                 {
                     b.Navigation("Steps");
@@ -1129,7 +1872,11 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
             modelBuilder.Entity("StageTrack.Projects.Project", b =>
                 {
+                    b.Navigation("Crew");
+
                     b.Navigation("Equipment");
+
+                    b.Navigation("Sections");
                 });
 
             modelBuilder.Entity("StageTrack.Quotes.Quote", b =>

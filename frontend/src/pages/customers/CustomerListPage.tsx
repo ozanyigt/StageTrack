@@ -6,7 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { customerApi } from '../../api/endpoints';
 import type { Customer } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
+import { ExportButton, ImportButton } from '../../components/ExcelButtons';
 import { useErrorToast } from '../../utils/errors';
+import { fetchAllPages, type ImportField } from '../../utils/excel';
 import { useDebounced } from '../../utils/useDebounced';
 
 const PAGE_SIZE = 25;
@@ -24,6 +26,18 @@ export function CustomerListPage() {
   const [editing, setEditing] = useState<Customer | 'new' | null>(null);
   const search = useDebounced(text, 300);
   const manage = can(Permissions.CustomersManage);
+
+  const importFields: ImportField[] = [
+    { key: 'name', header: t('customers.name'), required: true },
+    { key: 'taxNumber', header: t('customers.taxNumber') },
+    { key: 'taxOffice', header: t('customers.taxOffice') },
+    { key: 'contactPerson', header: t('customers.contactPerson') },
+    { key: 'email', header: t('customers.email') },
+    { key: 'phone', header: t('customers.phone') },
+    { key: 'address', header: t('customers.address') },
+    { key: 'city', header: t('customers.city') },
+    { key: 'country', header: t('customers.country') },
+  ];
 
   const list = useQuery({
     queryKey: ['customers', search, page],
@@ -53,7 +67,26 @@ export function CustomerListPage() {
     <>
       <div className="page-header">
         <Typography.Title level={3}>{t('customers.title')}</Typography.Title>
-        {manage && <Button type="primary" icon={<PlusOutlined />} onClick={() => open('new')}>{t('customers.create')}</Button>}
+        <Space wrap>
+          <ExportButton<Customer>
+            fileName={t('customers.title')}
+            load={() => fetchAllPages((skipCount, maxResultCount) => customerApi.list({ text: search, skipCount, maxResultCount }))}
+            columns={[
+              ...importFields.map((f) => ({ header: f.header, value: (c: Customer) => c[f.key as keyof Customer] })),
+              { header: t('common.notes'), value: (c: Customer) => c.notes },
+            ]}
+          />
+          {manage && (
+            <ImportButton
+              title={t('customers.importTitle')}
+              templateName={t('customers.importTemplate')}
+              fields={importFields}
+              onImport={(rows) => customerApi.import(rows as never)}
+              onDone={() => queryClient.invalidateQueries({ queryKey: ['customers'] })}
+            />
+          )}
+          {manage && <Button type="primary" icon={<PlusOutlined />} onClick={() => open('new')}>{t('customers.create')}</Button>}
+        </Space>
       </div>
       <Card size="small">
         <Input.Search allowClear placeholder={t('customers.searchPlaceholder')} value={text}

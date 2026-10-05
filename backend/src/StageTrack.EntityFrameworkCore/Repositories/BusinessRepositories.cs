@@ -29,6 +29,12 @@ public class CustomerRepository(StageTrackDbContext dbContext) : EfRepository<Cu
     public Task<long> GetCountAsync(string? text, CancellationToken cancellationToken = default) =>
         ApplyFilter(text).LongCountAsync(cancellationToken);
 
+    public Task<Customer?> FindByTaxNumberAsync(string taxNumber, CancellationToken cancellationToken = default) =>
+        DbSet.FirstOrDefaultAsync(c => c.TaxNumber == taxNumber, cancellationToken);
+
+    public Task<Customer?> FindByNameAsync(string name, CancellationToken cancellationToken = default) =>
+        DbSet.FirstOrDefaultAsync(c => c.Name == name, cancellationToken);
+
     private IQueryable<Customer> ApplyFilter(string? text)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -44,7 +50,8 @@ public class CustomerRepository(StageTrackDbContext dbContext) : EfRepository<Cu
 
 public class ProjectRepository(StageTrackDbContext dbContext) : EfRepository<Project>(dbContext), IProjectRepository
 {
-    protected override IQueryable<Project> WithDetails(IQueryable<Project> query) => query.Include(p => p.Equipment);
+    protected override IQueryable<Project> WithDetails(IQueryable<Project> query) =>
+        query.Include(p => p.Equipment).Include(p => p.Sections).Include(p => p.Crew).AsSplitQuery();
 
     public async Task<int> GetMaxNumberAsync(CancellationToken cancellationToken = default) =>
         await DbSet.MaxAsync(p => (int?)p.Number, cancellationToken) ?? 0;
@@ -99,7 +106,7 @@ public class ProjectRepository(StageTrackDbContext dbContext) : EfRepository<Pro
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.Status, x => x.Count, cancellationToken);
 
-    public Task<Dictionary<Guid, int>> GetPlannedQuantitiesAsync(IReadOnlyCollection<Guid> equipmentIds, DateTime start, DateTime end,
+    public Task<List<EquipmentReservation>> GetReservationsAsync(IReadOnlyCollection<Guid> equipmentIds, DateTime start, DateTime end,
         Guid? excludeProjectId, CancellationToken cancellationToken = default)
     {
         var ids = equipmentIds.Distinct().ToList();
@@ -111,10 +118,8 @@ public class ProjectRepository(StageTrackDbContext dbContext) : EfRepository<Pro
                       && (excludeProjectId == null || project.Id != excludeProjectId)
                 from line in project.Equipment
                 where ids.Contains(line.EquipmentId)
-                group line by line.EquipmentId
-                into g
-                select new { EquipmentId = g.Key, Quantity = g.Sum(x => x.Quantity) })
-            .ToDictionaryAsync(x => x.EquipmentId, x => x.Quantity, cancellationToken);
+                select new EquipmentReservation(line.EquipmentId, line.Quantity, project.PlanStart, project.PlanEnd))
+            .ToListAsync(cancellationToken);
     }
 
     private static IQueryable<Project> ApplyFilter(IQueryable<Project> query, ProjectFilter filter)
@@ -150,6 +155,11 @@ public class ProjectRepository(StageTrackDbContext dbContext) : EfRepository<Pro
         if (filter.StockLocationId.HasValue)
         {
             query = query.Where(p => p.StockLocationId == filter.StockLocationId);
+        }
+
+        if (filter.CrewUserId.HasValue)
+        {
+            query = query.Where(p => p.Crew.Any(c => c.UserId == filter.CrewUserId));
         }
 
         return query;

@@ -1,76 +1,115 @@
-import { DeleteOutlined, FolderAddOutlined, PlusOutlined } from '@ant-design/icons';
-import { App, Button, Card, Col, Flex, Form, Input, Modal, Row, Segmented, Table, Tag, Tree, TreeSelect, Typography } from 'antd';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { PlusOutlined } from '@ant-design/icons';
+import { Button, Card, Flex, Input, Segmented, Table, Tag, Typography } from 'antd';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { equipmentApi, folderApi } from '../../api/endpoints';
+import type { Equipment, EquipmentImportRow } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
-import { useErrorToast } from '../../utils/errors';
+import { ExportButton, ImportButton } from '../../components/ExcelButtons';
+import { fetchAllPages, type ImportField } from '../../utils/excel';
 import { useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
 import { EquipmentFormDrawer } from './EquipmentFormDrawer';
-import { buildFolderTree } from './folderTree';
 
 const PAGE_SIZE = 25;
 
 export function EquipmentListPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { can, company } = useAuth();
-  const { modal } = App.useApp();
   const f = useFormat();
-  const showError = useErrorToast();
   const queryClient = useQueryClient();
 
-  const [folderId, setFolderId] = useState<string | null>(null);
+  const folderId = params.get('folder');
   const [text, setText] = useState('');
   const [archived, setArchived] = useState(false);
   const [page, setPage] = useState(1);
+  const [pageFolder, setPageFolder] = useState(folderId);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [folderModal, setFolderModal] = useState(false);
-  const [folderForm] = Form.useForm<{ name: string; parentId?: string }>();
   const search = useDebounced(text, 300);
+  if (pageFolder !== folderId) {
+    setPageFolder(folderId);
+    setPage(1);
+  }
 
   const folders = useQuery({ queryKey: ['folders'], queryFn: folderApi.list });
+  const folderName = folders.data?.find((x) => x.id === folderId)?.name;
+  const filter = { folderId: folderId ?? undefined, includeSubfolders: true, text: search, isArchived: archived };
   const list = useQuery({
-    queryKey: ['equipment', folderId, search, archived, page],
-    queryFn: () =>
-      equipmentApi.list({ folderId: folderId ?? undefined, text: search, isArchived: archived, skipCount: (page - 1) * PAGE_SIZE, maxResultCount: PAGE_SIZE }),
+    queryKey: ['equipment', 'list', filter, page],
+    queryFn: () => equipmentApi.list({ ...filter, skipCount: (page - 1) * PAGE_SIZE, maxResultCount: PAGE_SIZE }),
     placeholderData: keepPreviousData,
   });
 
-  const createFolder = useMutation({
-    mutationFn: (v: { name: string; parentId?: string }) => folderApi.create(v),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['folders'] });
-      setFolderModal(false);
-    },
-    onError: showError,
-  });
-
-  const deleteFolder = useMutation({
-    mutationFn: (id: string) => folderApi.remove(id),
-    onSuccess: () => {
-      setFolderId(null);
-      queryClient.invalidateQueries({ queryKey: ['folders'] });
-    },
-    onError: showError,
-  });
-
-  const tree = buildFolderTree(folders.data ?? []);
   const manage = can(Permissions.EquipmentManage);
+  const currency = company?.defaultCurrency ?? 'TRY';
+  const showPrice = can(Permissions.Prices);
+
+  const importFields: ImportField[] = [
+    { key: 'code', header: t('equipment.code'), required: true },
+    { key: 'name', header: t('equipment.name'), required: true },
+    { key: 'brand', header: t('equipment.brand') },
+    { key: 'model', header: t('equipment.model') },
+    { key: 'folder', header: t('equipment.importFolder') },
+    { key: 'isSerialized', header: t('equipment.isSerialized'), type: 'boolean' },
+    { key: 'stockQuantity', header: t('equipment.stockQuantity'), type: 'number' },
+    ...(can(Permissions.Prices) ? [{ key: 'rentalPrice', header: t('equipment.dailyPrice'), type: 'number' as const }] : []),
+    { key: 'weightKg', header: t('equipment.weightKg'), type: 'number' },
+    { key: 'lengthCm', header: t('equipment.lengthCm'), type: 'number' },
+    { key: 'widthCm', header: t('equipment.widthCm'), type: 'number' },
+    { key: 'heightCm', header: t('equipment.heightCm'), type: 'number' },
+    { key: 'powerW', header: t('equipment.powerW'), type: 'number' },
+    { key: 'notes', header: t('common.notes') },
+  ];
 
   return (
     <>
       <div className="page-header">
-        <Typography.Title level={3}>{t('equipment.title')}</Typography.Title>
+        <Typography.Title level={3}>{folderName ?? t('equipment.title')}</Typography.Title>
         <Flex gap={8} wrap>
           <Segmented
             value={archived ? 'archived' : 'active'}
-            onChange={(v) => { setArchived(v === 'archived'); setPage(1); }}
-            options={[{ value: 'active', label: t('equipment.active') }, { value: 'archived', label: t('equipment.archived') }]}
+            onChange={(v) => {
+              setArchived(v === 'archived');
+              setPage(1);
+            }}
+            options={[
+              { value: 'active', label: t('equipment.active') },
+              { value: 'archived', label: t('equipment.archived') },
+            ]}
           />
+          <ExportButton<Equipment>
+            fileName={t('equipment.exportFile')}
+            load={() => fetchAllPages((skipCount, maxResultCount) => equipmentApi.list({ ...filter, skipCount, maxResultCount }))}
+            columns={[
+              { header: t('equipment.code'), value: (e) => e.code, width: 14 },
+              { header: t('equipment.name'), value: (e) => e.name, width: 40 },
+              { header: t('equipment.brand'), value: (e) => e.brand },
+              { header: t('equipment.model'), value: (e) => e.model },
+              { header: t('equipment.type'), value: (e) => t(`enums.equipmentType.${e.type}`) },
+              { header: t('equipment.tracking'), value: (e) => (e.isSerialized ? t('equipment.serialized') : t('equipment.bulk')) },
+              { header: t('equipment.stock'), value: (e) => e.stock },
+              ...(showPrice ? [{ header: t('equipment.dailyPrice'), value: (e: Equipment) => e.rentalPrice ?? null }] : []),
+              { header: t('equipment.weightKg'), value: (e) => e.weightKg },
+              { header: t('equipment.volumeM3'), value: (e) => e.volumeM3 },
+              { header: t('common.notes'), value: (e) => e.notes },
+            ]}
+          />
+          {manage && (
+            <ImportButton
+              title={t('equipment.importTitle')}
+              templateName={t('equipment.importTemplate')}
+              fields={importFields}
+              onImport={(rows) => equipmentApi.import(rows as unknown as EquipmentImportRow[])}
+              onDone={() => {
+                queryClient.invalidateQueries({ queryKey: ['equipment'] });
+                queryClient.invalidateQueries({ queryKey: ['folders'] });
+              }}
+            />
+          )}
           {manage && (
             <Button type="primary" icon={<PlusOutlined />} onClick={() => setDrawerOpen(true)}>
               {t('equipment.create')}
@@ -78,102 +117,61 @@ export function EquipmentListPage() {
           )}
         </Flex>
       </div>
-      <Row gutter={12}>
-        <Col xs={24} md={7} lg={6}>
-          <Card
-            size="small"
-            title={t('equipment.folders')}
-            style={{ marginBottom: 12 }}
-            extra={
-              manage && (
-                <Flex gap={4}>
-                  <Button size="small" type="text" icon={<FolderAddOutlined />} aria-label={t('equipment.addFolder')}
-                    onClick={() => { folderForm.resetFields(); folderForm.setFieldsValue({ parentId: folderId ?? undefined }); setFolderModal(true); }} />
-                  <Button size="small" type="text" danger icon={<DeleteOutlined />} disabled={!folderId} aria-label={t('common.delete')}
-                    onClick={() => modal.confirm({ title: t('equipment.deleteFolderConfirm'), onOk: () => deleteFolder.mutateAsync(folderId!) })} />
-                </Flex>
-              )
-            }
-          >
-            <Button type={folderId ? 'text' : 'link'} size="small" onClick={() => { setFolderId(null); setPage(1); }} style={{ paddingInline: 4 }}>
-              {t('equipment.allFolders')}
-            </Button>
-            <Tree
-              treeData={tree}
-              selectedKeys={folderId ? [folderId] : []}
-              onSelect={(keys) => { setFolderId((keys[0] as string) ?? null); setPage(1); }}
-              defaultExpandAll={false}
-              blockNode
-            />
-          </Card>
-        </Col>
-        <Col xs={24} md={17} lg={18}>
-          <Card size="small">
-            <Input.Search
-              allowClear
-              placeholder={t('equipment.searchPlaceholder')}
-              value={text}
-              onChange={(e) => { setText(e.target.value); setPage(1); }}
-              style={{ marginBottom: 12, maxWidth: 360 }}
-            />
-            <Table
-              size="small"
-              rowKey="id"
-              loading={list.isFetching}
-              dataSource={list.data?.items}
-              scroll={{ x: 760 }}
-              onRow={(e) => ({ onClick: () => navigate(`/equipment/${e.id}`), style: { cursor: 'pointer' } })}
-              pagination={{ current: page, pageSize: PAGE_SIZE, total: list.data?.totalCount, onChange: setPage, showSizeChanger: false }}
-              columns={[
-                { title: t('equipment.code'), dataIndex: 'code', width: 110 },
-                { title: t('equipment.name'), dataIndex: 'name', ellipsis: true },
-                { title: t('equipment.brand'), dataIndex: 'brand', width: 120, responsive: ['lg'] },
-                { title: t('equipment.model'), dataIndex: 'model', width: 140, responsive: ['xl'] },
-                {
-                  title: t('equipment.tracking'),
-                  dataIndex: 'isSerialized',
-                  width: 120,
-                  render: (v: boolean) => <Tag color={v ? 'blue' : 'default'}>{v ? t('equipment.serialized') : t('equipment.bulk')}</Tag>,
-                },
-                { title: t('equipment.stock'), dataIndex: 'stock', width: 80, align: 'end' },
-                {
-                  title: t('equipment.dailyPrice'),
-                  dataIndex: 'rentalPrice',
-                  width: 130,
-                  align: 'end',
-                  render: (v: number) => f.money(v, company?.defaultCurrency ?? 'TRY'),
-                },
-              ]}
-            />
-          </Card>
-        </Col>
-      </Row>
+      <Card size="small">
+        <Input.Search
+          allowClear
+          placeholder={t('equipment.searchPlaceholder')}
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            setPage(1);
+          }}
+          style={{ marginBottom: 12, maxWidth: 360 }}
+        />
+        <Table
+          size="small"
+          rowKey="id"
+          loading={list.isFetching}
+          dataSource={list.data?.items}
+          scroll={{ x: 760 }}
+          onRow={(e) => ({ onClick: () => navigate(`/equipment/${e.id}`), style: { cursor: 'pointer' } })}
+          pagination={{ current: page, pageSize: PAGE_SIZE, total: list.data?.totalCount, onChange: setPage, showSizeChanger: false }}
+          columns={[
+            { title: t('equipment.code'), dataIndex: 'code', width: 110 },
+            { title: t('equipment.name'), dataIndex: 'name', ellipsis: true },
+            { title: t('equipment.brand'), dataIndex: 'brand', width: 120, responsive: ['lg'] },
+            { title: t('equipment.model'), dataIndex: 'model', width: 140, responsive: ['xl'] },
+            {
+              title: t('equipment.tracking'),
+              dataIndex: 'isSerialized',
+              width: 120,
+              render: (v: boolean) => <Tag color={v ? 'blue' : 'default'}>{v ? t('equipment.serialized') : t('equipment.bulk')}</Tag>,
+            },
+            { title: t('equipment.stock'), dataIndex: 'stock', width: 80, align: 'end' },
+            ...(showPrice
+              ? [
+                  {
+                    title: t('equipment.dailyPrice'),
+                    dataIndex: 'rentalPrice',
+                    width: 130,
+                    align: 'end' as const,
+                    render: (v: number | null) => (v == null ? '—' : f.money(v, currency)),
+                  },
+                ]
+              : []),
+          ]}
+        />
+      </Card>
 
       <EquipmentFormDrawer
         open={drawerOpen}
         defaultFolderId={folderId}
         onClose={() => setDrawerOpen(false)}
-        onSaved={(e) => { setDrawerOpen(false); navigate(`/equipment/${e.id}`); }}
+        onSaved={(e) => {
+          setDrawerOpen(false);
+          navigate(`/equipment/${e.id}`);
+        }}
       />
-
-      <Modal
-        open={folderModal}
-        title={t('equipment.addFolder')}
-        onCancel={() => setFolderModal(false)}
-        onOk={() => folderForm.submit()}
-        okText={t('common.save')}
-        cancelText={t('common.cancel')}
-        confirmLoading={createFolder.isPending}
-      >
-        <Form form={folderForm} layout="vertical" onFinish={(v) => createFolder.mutate(v)}>
-          <Form.Item name="name" label={t('equipment.folderName')} rules={[{ required: true, message: t('validation.required') }]}>
-            <Input autoFocus />
-          </Form.Item>
-          <Form.Item name="parentId" label={t('equipment.parentFolder')}>
-            <TreeSelect allowClear treeDefaultExpandAll treeData={tree} />
-          </Form.Item>
-        </Form>
-      </Modal>
     </>
   );
 }

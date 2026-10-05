@@ -2,15 +2,18 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using StageTrack.Collaboration;
 using StageTrack.Companies;
 using StageTrack.Customers;
 using StageTrack.Entities;
 using StageTrack.Identity;
 using StageTrack.Inventory;
+using StageTrack.Maintenance;
 using StageTrack.Pricing;
 using StageTrack.Projects;
 using StageTrack.Quotes;
 using StageTrack.Session;
+using StageTrack.Suppliers;
 using StageTrack.Warehouse;
 
 namespace StageTrack.EntityFrameworkCore;
@@ -34,6 +37,13 @@ public class StageTrackDbContext(
     public DbSet<WarehouseMovement> WarehouseMovements => Set<WarehouseMovement>();
     public DbSet<RentalFactorProfile> RentalFactorProfiles => Set<RentalFactorProfile>();
     public DbSet<Quote> Quotes => Set<Quote>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<Repair> Repairs => Set<Repair>();
+    public DbSet<UnitInspection> UnitInspections => Set<UnitInspection>();
+    public DbSet<LabelTemplate> LabelTemplates => Set<LabelTemplate>();
+    public DbSet<Attachment> Attachments => Set<Attachment>();
+    public DbSet<Note> Notes => Set<Note>();
+    public DbSet<TaskItem> Tasks => Set<TaskItem>();
 
     /// <summary>Read by the global query filter on every query, so switching company needs no new context.</summary>
     protected Guid? CurrentCompanyId => currentCompany.Id;

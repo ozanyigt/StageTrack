@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { warehouseApi } from '../../api/endpoints';
-import { MOVEMENT_ACTIONS, type MovementAction } from '../../api/types';
+import { MOVEMENT_ACTIONS, type Movement, type MovementAction } from '../../api/types';
+import { ExportButton } from '../../components/ExcelButtons';
+import { fetchAllPages } from '../../utils/excel';
 import { useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
 
@@ -30,6 +32,23 @@ export function MovementsPage() {
     <>
       <div className="page-header">
         <Typography.Title level={3}>{t('movements.title')}</Typography.Title>
+        <ExportButton<Movement>
+          fileName={t('movements.title')}
+          load={() => fetchAllPages((skipCount, maxResultCount) => warehouseApi.movements({ text: search, action, skipCount, maxResultCount }))}
+          columns={[
+            { header: t('movements.time'), value: (m) => f.utcDateTime(m.creationTime) },
+            { header: t('movements.action'), value: (m) => t(`enums.movementAction.${m.action}`) },
+            { header: t('movements.equipmentCode'), value: (m) => m.equipmentCode },
+            { header: t('movements.equipment'), value: (m) => m.equipmentName },
+            { header: t('movements.unit'), value: (m) => m.unitInternalRef },
+            { header: t('movements.serialNumber'), value: (m) => m.unitSerialNumber },
+            { header: t('movements.project'), value: (m) => (m.projectNumber ? `${m.projectNumber} · ${m.projectName}` : null) },
+            { header: t('movements.user'), value: (m) => m.userFullName ?? t('movements.system') },
+            { header: t('movements.label'), value: (m) => m.labelCode },
+            { header: t('movements.quantity'), value: (m) => m.quantity },
+            { header: t('movements.note'), value: (m) => m.note },
+          ]}
+        />
       </div>
       <Card size="small">
         <Flex gap={8} wrap style={{ marginBottom: 12 }}>
@@ -44,7 +63,7 @@ export function MovementsPage() {
           rowKey="id"
           loading={list.isFetching}
           dataSource={list.data?.items}
-          scroll={{ x: 1000 }}
+          scroll={{ x: 1200 }}
           pagination={{ current: page, pageSize: PAGE_SIZE, total: list.data?.totalCount, onChange: setPage, showSizeChanger: false }}
           columns={[
             { title: t('movements.time'), dataIndex: 'creationTime', width: 140, render: (v) => f.utcDateTime(v) },
@@ -60,6 +79,7 @@ export function MovementsPage() {
             { title: t('movements.unit'), dataIndex: 'unitInternalRef', width: 140 },
             { title: t('movements.serialNumber'), dataIndex: 'unitSerialNumber', width: 130, responsive: ['xl'] },
             { title: t('movements.label'), dataIndex: 'labelCode', width: 110 },
+            { title: t('movements.note'), dataIndex: 'note', width: 220, ellipsis: true, render: (v) => v ?? '' },
           ]}
         />
       </Card>

@@ -1,12 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using StageTrack.Collaboration;
 using StageTrack.Companies;
 using StageTrack.Customers;
 using StageTrack.Identity;
 using StageTrack.Inventory;
+using StageTrack.Maintenance;
 using StageTrack.Pricing;
 using StageTrack.Projects;
 using StageTrack.Quotes;
+using StageTrack.Suppliers;
 using StageTrack.Warehouse;
 
 namespace StageTrack.EntityFrameworkCore;
@@ -43,6 +46,8 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         b.Property(x => x.NormalizedUserName).HasMaxLength(64).IsRequired();
         b.Property(x => x.FullName).HasMaxLength(128).IsRequired();
         b.Property(x => x.Email).HasMaxLength(256);
+        b.Property(x => x.Phone).HasMaxLength(32);
+        b.Property(x => x.JobTitle).HasMaxLength(128);
         b.Property(x => x.PasswordHash).HasMaxLength(512).IsRequired();
         b.Property(x => x.Language).HasMaxLength(8).IsRequired();
         b.HasIndex(x => x.NormalizedUserName).IsUnique();
@@ -126,9 +131,127 @@ public class EquipmentConfiguration : IEntityTypeConfiguration<Equipment>
         b.Property(x => x.RentalPrice).HasColumnType(ColumnTypes.Money);
         b.Property(x => x.WeightKg).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.VolumeM3).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.LengthCm).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.WidthCm).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.HeightCm).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.PowerW).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.CurrentA).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.CountryOfOrigin).HasMaxLength(EquipmentDetailConsts.MaxCountryLength);
+        b.Property(x => x.InspectionDescription).HasMaxLength(EquipmentDetailConsts.MaxInspectionDescriptionLength);
         b.HasIndex(x => new { x.CompanyId, x.Code }).IsUnique().HasFilter("[IsDeleted] = 0");
         b.HasIndex(x => new { x.CompanyId, x.FolderId });
         b.HasOne<EquipmentFolder>().WithMany().HasForeignKey(x => x.FolderId).OnDelete(DeleteBehavior.Restrict);
+        b.HasMany(x => x.Relations).WithOne().HasForeignKey(x => x.EquipmentId).OnDelete(DeleteBehavior.Cascade);
+        b.HasMany(x => x.Suppliers).WithOne().HasForeignKey(x => x.EquipmentId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class EquipmentRelationConfiguration : IEntityTypeConfiguration<EquipmentRelation>
+{
+    public void Configure(EntityTypeBuilder<EquipmentRelation> b)
+    {
+        b.ToTable("EquipmentRelations");
+        b.HasIndex(x => new { x.EquipmentId, x.Kind, x.RelatedEquipmentId }).IsUnique();
+        b.HasIndex(x => x.RelatedEquipmentId);
+        b.HasOne<Equipment>().WithMany().HasForeignKey(x => x.RelatedEquipmentId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class EquipmentSupplierConfiguration : IEntityTypeConfiguration<EquipmentSupplier>
+{
+    public void Configure(EntityTypeBuilder<EquipmentSupplier> b)
+    {
+        b.ToTable("EquipmentSuppliers");
+        b.Property(x => x.SupplierCode).HasMaxLength(EquipmentDetailConsts.MaxSupplierCodeLength);
+        b.Property(x => x.PurchasePrice).HasColumnType(ColumnTypes.Money);
+        b.HasIndex(x => new { x.EquipmentId, x.SupplierId }).IsUnique();
+        b.HasOne<Supplier>().WithMany().HasForeignKey(x => x.SupplierId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
+{
+    public void Configure(EntityTypeBuilder<Supplier> b)
+    {
+        b.Property(x => x.Name).HasMaxLength(256).IsRequired();
+        b.Property(x => x.ContactPerson).HasMaxLength(128);
+        b.Property(x => x.Email).HasMaxLength(256);
+        b.Property(x => x.Phone).HasMaxLength(32);
+        b.Property(x => x.TaxNumber).HasMaxLength(32);
+        b.Property(x => x.TaxOffice).HasMaxLength(128);
+        b.Property(x => x.Address).HasMaxLength(512);
+        b.Property(x => x.City).HasMaxLength(128);
+        b.Property(x => x.Country).HasMaxLength(128);
+        b.Property(x => x.Website).HasMaxLength(256);
+        b.Property(x => x.Notes).HasMaxLength(2000);
+        b.HasIndex(x => new { x.CompanyId, x.Name });
+    }
+}
+
+public class RepairConfiguration : IEntityTypeConfiguration<Repair>
+{
+    public void Configure(EntityTypeBuilder<Repair> b)
+    {
+        b.Property(x => x.Title).HasMaxLength(MaintenanceConsts.MaxTitleLength).IsRequired();
+        b.Property(x => x.Description).HasMaxLength(MaintenanceConsts.MaxDescriptionLength);
+        b.Property(x => x.Cost).HasColumnType(ColumnTypes.Money);
+        b.HasIndex(x => new { x.CompanyId, x.Number }).IsUnique().HasFilter("[IsDeleted] = 0");
+        b.HasIndex(x => x.UnitId);
+        b.HasOne<Equipment>().WithMany().HasForeignKey(x => x.EquipmentId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<EquipmentUnit>().WithMany().HasForeignKey(x => x.UnitId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<Supplier>().WithMany().HasForeignKey(x => x.SupplierId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class UnitInspectionConfiguration : IEntityTypeConfiguration<UnitInspection>
+{
+    public void Configure(EntityTypeBuilder<UnitInspection> b)
+    {
+        b.Property(x => x.Notes).HasMaxLength(MaintenanceConsts.MaxNotesLength);
+        b.HasIndex(x => new { x.UnitId, x.Date });
+        b.HasIndex(x => x.EquipmentId);
+        b.HasOne<EquipmentUnit>().WithMany().HasForeignKey(x => x.UnitId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class LabelTemplateConfiguration : IEntityTypeConfiguration<LabelTemplate>
+{
+    public void Configure(EntityTypeBuilder<LabelTemplate> b)
+    {
+        b.Property(x => x.Name).HasMaxLength(LabelTemplateConsts.MaxNameLength).IsRequired();
+        b.Property(x => x.FontSizePt).HasColumnType(ColumnTypes.Percent);
+    }
+}
+
+public class AttachmentConfiguration : IEntityTypeConfiguration<Attachment>
+{
+    public void Configure(EntityTypeBuilder<Attachment> b)
+    {
+        b.Property(x => x.FileName).HasMaxLength(CollaborationConsts.MaxFileNameLength).IsRequired();
+        b.Property(x => x.ContentType).HasMaxLength(CollaborationConsts.MaxContentTypeLength).IsRequired();
+        b.Property(x => x.Content).IsRequired();
+        b.HasIndex(x => new { x.OwnerType, x.OwnerId });
+    }
+}
+
+public class NoteConfiguration : IEntityTypeConfiguration<Note>
+{
+    public void Configure(EntityTypeBuilder<Note> b)
+    {
+        b.Property(x => x.Text).HasMaxLength(CollaborationConsts.MaxNoteLength).IsRequired();
+        b.HasIndex(x => new { x.OwnerType, x.OwnerId });
+    }
+}
+
+public class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
+{
+    public void Configure(EntityTypeBuilder<TaskItem> b)
+    {
+        b.ToTable("Tasks");
+        b.Property(x => x.Title).HasMaxLength(CollaborationConsts.MaxTaskTitleLength).IsRequired();
+        b.Property(x => x.Description).HasMaxLength(CollaborationConsts.MaxTaskDescriptionLength);
+        b.HasIndex(x => new { x.OwnerType, x.OwnerId });
+        b.HasOne<AppUser>().WithMany().HasForeignKey(x => x.AssignedUserId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -138,8 +261,9 @@ public class EquipmentUnitConfiguration : IEntityTypeConfiguration<EquipmentUnit
     {
         b.Property(x => x.SerialNumber).HasMaxLength(EquipmentUnitConsts.MaxSerialNumberLength);
         b.Property(x => x.InternalRef).HasMaxLength(EquipmentUnitConsts.MaxInternalRefLength).IsRequired();
-        b.Property(x => x.Notes).HasMaxLength(EquipmentUnitConsts.MaxNotesLength);
+        b.Property(x => x.Notes).HasMaxLength(EquipmentDetailConsts.MaxRemarkLength);
         b.HasIndex(x => new { x.CompanyId, x.InternalRef }).IsUnique().HasFilter("[IsDeleted] = 0");
+        b.HasOne<Supplier>().WithMany().HasForeignKey(x => x.SupplierId).OnDelete(DeleteBehavior.Restrict);
         b.HasIndex(x => new { x.EquipmentId, x.Status });
         b.HasIndex(x => x.CurrentProjectId);
         b.HasOne<Equipment>().WithMany().HasForeignKey(x => x.EquipmentId).OnDelete(DeleteBehavior.Restrict);
@@ -194,7 +318,32 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
         b.HasIndex(x => new { x.CompanyId, x.PlanStart, x.PlanEnd });
         b.HasOne<Customer>().WithMany().HasForeignKey(x => x.CustomerId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<StockLocation>().WithMany().HasForeignKey(x => x.StockLocationId).OnDelete(DeleteBehavior.Restrict);
+        b.Property(x => x.PaymentTerms).HasMaxLength(256);
         b.HasMany(x => x.Equipment).WithOne().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Cascade);
+        b.HasMany(x => x.Sections).WithOne().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Cascade);
+        b.HasMany(x => x.Crew).WithOne().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne<AppUser>().WithMany().HasForeignKey(x => x.AccountManagerId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class ProjectSectionConfiguration : IEntityTypeConfiguration<ProjectSection>
+{
+    public void Configure(EntityTypeBuilder<ProjectSection> b)
+    {
+        b.ToTable("ProjectSections");
+        b.Property(x => x.Name).HasMaxLength(128).IsRequired();
+    }
+}
+
+public class ProjectCrewMemberConfiguration : IEntityTypeConfiguration<ProjectCrewMember>
+{
+    public void Configure(EntityTypeBuilder<ProjectCrewMember> b)
+    {
+        b.ToTable("ProjectCrew");
+        b.Property(x => x.Function).HasMaxLength(128);
+        b.HasIndex(x => new { x.ProjectId, x.UserId }).IsUnique();
+        b.HasIndex(x => x.UserId);
+        b.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -214,6 +363,7 @@ public class WarehouseMovementConfiguration : IEntityTypeConfiguration<Warehouse
     public void Configure(EntityTypeBuilder<WarehouseMovement> b)
     {
         b.Property(x => x.LabelCode).HasMaxLength(EquipmentLabelConsts.MaxCodeLength);
+        b.Property(x => x.Note).HasMaxLength(256);
         b.HasIndex(x => new { x.CompanyId, x.CreationTime });
         b.HasIndex(x => new { x.ProjectId, x.EquipmentId });
         b.HasIndex(x => x.UnitId);
@@ -272,6 +422,8 @@ public class QuoteLineConfiguration : IEntityTypeConfiguration<QuoteLine>
     {
         b.ToTable("QuoteLines");
         b.Property(x => x.Description).HasMaxLength(QuoteConsts.MaxDescriptionLength).IsRequired();
+        b.Property(x => x.Section).HasMaxLength(260);
+        b.Property(x => x.Notes).HasMaxLength(1000);
         b.Property(x => x.Quantity).HasColumnType(ColumnTypes.Quantity);
         b.Property(x => x.UnitPrice).HasColumnType(ColumnTypes.Money);
         b.Property(x => x.DiscountPercent).HasColumnType(ColumnTypes.Percent);

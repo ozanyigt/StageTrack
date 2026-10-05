@@ -3,12 +3,14 @@ using StageTrack.Companies;
 using StageTrack.Customers;
 using StageTrack.Identity;
 using StageTrack.Inventory;
+using StageTrack.Maintenance;
 using StageTrack.Permissions;
 using StageTrack.Pricing;
 using StageTrack.Projects;
 using StageTrack.Quotes;
 using StageTrack.Repositories;
 using StageTrack.Session;
+using StageTrack.Suppliers;
 using StageTrack.Warehouse;
 
 namespace StageTrack.Data;
@@ -16,14 +18,13 @@ namespace StageTrack.Data;
 /// <summary>
 /// Creates a realistic demo data set (names taken from the customer's Rentman screens) relative to today,
 /// so the calendar and warehouse board always look "live". Runs only on an empty database.
-/// Every device gets a numeric label that imitates a Rentman QR code; a few Optoma projectors are left
-/// unlabeled on purpose to demonstrate linking an unknown label from the scan screen.
+/// Every device gets a label in the real Rentman QR format; a few devices are left unlabeled on purpose to
+/// demonstrate linking an existing Rentman label from the scan screen.
 /// </summary>
 public class DemoDataSeeder(
     ICompanyRepository companyRepository,
     IRoleRepository roleRepository,
     UserManager userManager,
-    IUserRepository userRepository,
     IStockLocationRepository stockLocationRepository,
     EquipmentFolderManager folderManager,
     IEquipmentFolderRepository folderRepository,
@@ -43,6 +44,14 @@ public class DemoDataSeeder(
     IRentalFactorProfileRepository rentalFactorRepository,
     QuoteManager quoteManager,
     IQuoteRepository quoteRepository,
+    SupplierManager supplierManager,
+    ISupplierRepository supplierRepository,
+    RepairManager repairManager,
+    IRepairRepository repairRepository,
+    InspectionManager inspectionManager,
+    IUnitInspectionRepository inspectionRepository,
+    LabelTemplateManager labelTemplateManager,
+    ILabelTemplateRepository labelTemplateRepository,
     IUnitOfWork unitOfWork,
     ICurrentCompany currentCompany,
     ILogger<DemoDataSeeder> logger)
@@ -50,15 +59,22 @@ public class DemoDataSeeder(
     /// <summary>Rentman workspace of Staras TR, as printed in its QR labels ({"ID":"19483","cmpID":16,"isCase":0}).</summary>
     private const int TurkeyRentmanWorkspace = 16;
 
+    /// <summary>Demo assumption: Dubai's real cmpID is still to be confirmed with the customer.</summary>
+    private const int DubaiRentmanWorkspace = 18;
+
     /// <summary>Demo label IDs start far above real Rentman IDs, so a real label never matches a fake device.</summary>
     private const int FirstLabelNumber = 900_000;
 
+    private const string PaymentTerms = "İş sonrası faturalandırılacaktır.";
+
     private int _nextLabel = FirstLabelNumber;
+    private int _labelWorkspace = TurkeyRentmanWorkspace;
 
     private readonly Dictionary<string, Equipment> _equipment = new();
     private readonly Dictionary<string, List<EquipmentUnit>> _units = new();
     private readonly Dictionary<Guid, string> _unitLabels = new();
     private readonly Dictionary<string, string> _bulkLabels = new();
+    private readonly Dictionary<string, AppUser> _users = new();
 
     public async Task SeedAsync()
     {
@@ -72,7 +88,11 @@ public class DemoDataSeeder(
         var tr = new Company(Guid.CreateVersion7(), "Staras Technical TR", "TR", "TRY", 20, "TR");
         tr.SetRentmanWorkspace(TurkeyRentmanWorkspace);
         await companyRepository.InsertAsync(tr);
-        var ae = await companyRepository.InsertAsync(new Company(Guid.CreateVersion7(), "Staras Electronic Equipment Rental LLC", "AE", "AED", 5, "AE"));
+        await unitOfWork.SaveChangesAsync();
+
+        var ae = new Company(Guid.CreateVersion7(), "Staras Electronic Equipment Rental LLC", "AE", "AED", 5, "AE");
+        ae.SetRentmanWorkspace(DubaiRentmanWorkspace);
+        await companyRepository.InsertAsync(ae);
 
         await SeedIdentityAsync(tr, ae);
         await unitOfWork.SaveChangesAsync();
@@ -84,132 +104,105 @@ public class DemoDataSeeder(
 
         using (currentCompany.Change(ae.Id))
         {
-            await stockLocationRepository.InsertAsync(new StockLocation(Guid.CreateVersion7(), "DIP1 DUBAI", StockLocationType.Warehouse, "Dubai Investments Park 1", "Dubai"));
-            var dubaiProfile = await rentalFactorManager.CreateAsync("Standard", 0.5m, [(1, 1m), (2, 1.5m), (3, 2m), (7, 4m)], isDefault: true);
-            await rentalFactorRepository.InsertAsync(dubaiProfile);
-            await unitOfWork.SaveChangesAsync();
+            await SeedDubaiAsync(ae);
         }
 
-        logger.LogInformation("Demo data seeded. Label codes {First} … {Last}.",
+        logger.LogInformation("Demo data seeded. Turkish label codes {First} … {Last}.",
             LabelCodeParser.Format(TurkeyRentmanWorkspace, false, FirstLabelNumber.ToString()),
-            LabelCodeParser.Format(TurkeyRentmanWorkspace, false, (_nextLabel - 1).ToString()));
+            LabelCodeParser.Format(TurkeyRentmanWorkspace, false, "9002xx"));
     }
+
+    // ---- Identity -------------------------------------------------------------------------------------------
 
     private async Task SeedIdentityAsync(Company tr, Company ae)
     {
         // The static admin role always resolves to every permission (see IUserRepository.GetPermissionsAsync).
         var admin = new AppRole(Guid.CreateVersion7(), AppRole.AdminRoleName, isStatic: true);
 
-        var warehouse = new AppRole(Guid.CreateVersion7(), "warehouse");
-        foreach (var permission in new[]
-                 {
-                     StageTrackPermissions.Equipment.Default, StageTrackPermissions.Labels.Assign,
-                     StageTrackPermissions.Projects.Default, StageTrackPermissions.Projects.ChangeStatus,
-                     StageTrackPermissions.Warehouse.Default, StageTrackPermissions.Warehouse.Scan
-                 })
+        var warehouse = Role("warehouse",
+            StageTrackPermissions.Equipment.Default, StageTrackPermissions.Labels.Assign,
+            StageTrackPermissions.Maintenance.Default, StageTrackPermissions.Maintenance.Manage,
+            StageTrackPermissions.Suppliers.Default,
+            StageTrackPermissions.Projects.Default, StageTrackPermissions.Projects.ChangeStatus,
+            StageTrackPermissions.Warehouse.Default, StageTrackPermissions.Warehouse.Scan);
+
+        var sales = Role("sales",
+            StageTrackPermissions.Equipment.Default, StageTrackPermissions.Customers.Default,
+            StageTrackPermissions.Customers.Manage, StageTrackPermissions.Projects.Default,
+            StageTrackPermissions.Projects.Manage, StageTrackPermissions.Projects.ChangeStatus,
+            StageTrackPermissions.Quotes.Default, StageTrackPermissions.Quotes.Manage,
+            StageTrackPermissions.Prices.View, StageTrackPermissions.Warehouse.Default);
+
+        // Crew members: only the confirmed projects they are assigned to, without any prices.
+        var member = Role("member", StageTrackPermissions.Projects.Assigned);
+
+        foreach (var role in new[] { admin, warehouse, sales, member })
         {
-            warehouse.Grant(permission);
+            await roleRepository.InsertAsync(role);
         }
 
-        var sales = new AppRole(Guid.CreateVersion7(), "sales");
-        foreach (var permission in new[]
-                 {
-                     StageTrackPermissions.Equipment.Default, StageTrackPermissions.Customers.Default,
-                     StageTrackPermissions.Customers.Manage, StageTrackPermissions.Projects.Default,
-                     StageTrackPermissions.Projects.Manage, StageTrackPermissions.Projects.ChangeStatus,
-                     StageTrackPermissions.Quotes.Default, StageTrackPermissions.Quotes.Manage,
-                     StageTrackPermissions.Warehouse.Default
-                 })
+        await AddUserAsync("admin", "Demo Yönetici", "Admin123!", "admin@demo.local", "+90 532 000 00 01", "Genel Müdür", admin, tr, ae);
+        await AddUserAsync("depo", "Depo Sorumlusu", "Depo123!", "depo@demo.local", "+90 532 000 00 02", "Depo Sorumlusu", warehouse, tr);
+        // The sales person works in Turkey and Dubai with one account; the location is picked at sign-in.
+        await AddUserAsync("satis", "Satış Temsilcisi", "Satis123!", "satis@demo.local", "+90 532 000 00 03", "Satış Temsilcisi", sales, tr, ae);
+        await AddUserAsync("teknisyen1", "Murat Yılmaz", "Teknik123!", "murat@demo.local", "+90 532 000 00 04", "Ses Teknisyeni", member, tr);
+        await AddUserAsync("teknisyen2", "Elif Kaya", "Teknik123!", "elif@demo.local", "+90 532 000 00 05", "Görüntü Teknisyeni", member, tr);
+        await AddUserAsync("dubai", "Dubai Operations", "Dubai123!", "dubai@demo.local", "+971 50 000 0006", "Operations Manager", admin, ae, language: "en");
+
+        AppRole Role(string name, params string[] permissions)
         {
-            sales.Grant(permission);
+            var role = new AppRole(Guid.CreateVersion7(), name);
+            foreach (var permission in permissions)
+            {
+                role.Grant(permission);
+            }
+
+            return role;
         }
-
-        await roleRepository.InsertAsync(admin);
-        await roleRepository.InsertAsync(warehouse);
-        await roleRepository.InsertAsync(sales);
-
-        var adminUser = await userManager.CreateAsync("admin", "Demo Yönetici", "Admin123!", "admin@demo.local");
-        adminUser.AddRole(admin.Id);
-        adminUser.AddCompany(tr.Id);
-        adminUser.AddCompany(ae.Id);
-
-        var depoUser = await userManager.CreateAsync("depo", "Depo Sorumlusu", "Depo123!", "depo@demo.local");
-        depoUser.AddRole(warehouse.Id);
-        depoUser.AddCompany(tr.Id);
-
-        var salesUser = await userManager.CreateAsync("satis", "Satış Temsilcisi", "Satis123!", "satis@demo.local");
-        salesUser.AddRole(sales.Id);
-        salesUser.AddCompany(tr.Id);
-
-        var dubaiUser = await userManager.CreateAsync("dubai", "Dubai Operations", "Dubai123!", "dubai@demo.local", "en");
-        dubaiUser.AddRole(admin.Id);
-        dubaiUser.AddCompany(ae.Id);
     }
+
+    private async Task AddUserAsync(string userName, string fullName, string password, string email, string phone, string jobTitle,
+        AppRole role, Company first, Company? second = null, string language = "tr")
+    {
+        var user = await userManager.CreateAsync(userName, fullName, password, email, language);
+        user.Update(fullName, email, phone, jobTitle);
+        user.AddRole(role.Id);
+        user.AddCompany(first.Id);
+        if (second is not null)
+        {
+            user.AddCompany(second.Id);
+        }
+
+        _users[userName] = user;
+    }
+
+    // ---- Turkey ---------------------------------------------------------------------------------------------
 
     private async Task SeedTurkeyAsync(Company company)
     {
         var gunesli = await stockLocationRepository.InsertAsync(new StockLocation(Guid.CreateVersion7(), "GÜNEŞLİ",
             StockLocationType.Warehouse, "Bağlar Mah. 63. Sok 7Z1 Bağcılar", "İstanbul"));
-        await stockLocationRepository.InsertAsync(new StockLocation(Guid.CreateVersion7(), "DIP1 DUBAI",
-            StockLocationType.StorageLocation, null, "Dubai"));
+        await stockLocationRepository.InsertAsync(new StockLocation(Guid.CreateVersion7(), "KARS DEPO",
+            StockLocationType.StorageLocation, "Merkez", "Kars"));
 
-        var folders = await SeedFoldersAsync();
-        await SeedEquipmentAsync(folders, gunesli.Id);
-        await unitOfWork.SaveChangesAsync();
+        var suppliers = await SeedSuppliersAsync(
+            ("audio", "Pro Audio Dağıtım A.Ş.", "Satış Ekibi", "satis@proaudio.example", "+90 212 000 10 10", "İstanbul"),
+            ("light", "Işık Market Ltd. Şti.", "Ahmet Demir", "info@isikmarket.example", "+90 212 000 20 20", "İstanbul"),
+            ("service", "Teknik Servis Merkezi", "Servis Kabul", "servis@teknikservis.example", "+90 216 000 30 30", "İstanbul"));
 
-        var standard = await rentalFactorManager.CreateAsync("Standart", 0.5m,
-            [(1, 1m), (2, 1.5m), (3, 2m), (4, 2.5m), (5, 3m), (7, 4m)], isDefault: true);
-        await rentalFactorRepository.InsertAsync(standard);
-        await unitOfWork.SaveChangesAsync();
-        var longTerm = await rentalFactorManager.CreateAsync("Uzun dönem / Sabit kurulum", 0.2m,
-            [(1, 1m), (7, 3m), (30, 8m), (90, 18m)], isDefault: false);
-        await rentalFactorRepository.InsertAsync(longTerm);
+        await SeedLabelTemplatesAsync();
 
-        var customers = await SeedCustomersAsync();
-        await unitOfWork.SaveChangesAsync();
+        var folders = await SeedFoldersAsync(
+            ("audio", "AUDIO", null), ("speaker", "Hoparlör", "audio"), ("amp", "Amfi", "audio"), ("console-a", "Mikser", "audio"),
+            ("mic", "Mikrofon", "audio"), ("cable-a", "Kablo", "audio"),
+            ("light", "LIGHT", null), ("moving", "Moving Head", "light"), ("wash", "Wash", "light"), ("profile", "Profil / Strobe", "light"),
+            ("console-l", "Işık Konsolu", "light"), ("cable-l", "Kablo", "light"),
+            ("video", "VIDEO", null), ("display", "Display", "video"), ("led", "Led Screen", "video"), ("projection", "Projeksiyon", "video"),
+            ("media", "Media Server", "video"), ("network", "Network", "video"),
+            ("truss", "TRUSS", null), ("rigging", "Motor / Vinç", "truss"));
 
-        await SeedProjectsAsync(company, customers, gunesli.Id, longTerm.Id);
-    }
-
-    private async Task<Dictionary<string, Guid>> SeedFoldersAsync()
-    {
-        var result = new Dictionary<string, Guid>();
-
-        async Task<Guid> Add(string key, string name, string? parentKey)
-        {
-            var folder = await folderManager.CreateAsync(name, parentKey is null ? null : result[parentKey]);
-            await folderRepository.InsertAsync(folder);
-            await unitOfWork.SaveChangesAsync();
-            result[key] = folder.Id;
-            return folder.Id;
-        }
-
-        await Add("audio", "AUDIO", null);
-        await Add("speaker", "Hoparlör", "audio");
-        await Add("amp", "Amfi", "audio");
-        await Add("console-a", "Mikser", "audio");
-        await Add("mic", "Mikrofon", "audio");
-        await Add("cable-a", "Kablo", "audio");
-        await Add("light", "LIGHT", null);
-        await Add("moving", "Moving Head", "light");
-        await Add("wash", "Wash", "light");
-        await Add("profile", "Profil / Strobe", "light");
-        await Add("console-l", "Işık Konsolu", "light");
-        await Add("cable-l", "Kablo", "light");
-        await Add("video", "VIDEO", null);
-        await Add("display", "Display", "video");
-        await Add("led", "Led Screen", "video");
-        await Add("projection", "Projeksiyon", "video");
-        await Add("media", "Media Server", "video");
-        await Add("network", "Network", "video");
-        await Add("truss", "TRUSS", null);
-        return result;
-    }
-
-    private async Task SeedEquipmentAsync(Dictionary<string, Guid> folders, Guid locationId)
-    {
         // key, code, name, brand, model, folder, units (0 = quantity tracked), stock, daily price (TRY), unit ref prefix
-        (string Key, string Code, string Name, string? Brand, string? Model, string Folder, int Units, int Stock, decimal Price, string Prefix)[] items =
+        await SeedEquipmentAsync(folders, gunesli.Id, suppliers,
         [
             ("k3", "AUD-001", "L-ACOUSTICS K3 LINE ARRAY SPEAKER", "L-Acoustics", "K3", "speaker", 12, 0, 4500, "K3"),
             ("sb18", "AUD-002", "L-ACOUSTICS SB18 SUB SPEAKER", "L-Acoustics", "SB18", "speaker", 8, 0, 2500, "SB18"),
@@ -244,14 +237,97 @@ public class DemoDataSeeder(
             ("ledfloor", "Led-047", "LED FLOOR 4.7MM (ROE - LED SCREEN FLOOR)", "ROE", "Black Marble 4.7", "led", 4, 0, 6500, "FLOOR"),
             ("truss3", "Truss-084", "HTS TRUSS 3M SECTION 45*45", "HTS", "45*45", "truss", 0, 40, 200, ""),
             ("truss2", "Truss-085", "HTS TRUSS 2M SECTION 45*45", "HTS", "45*45", "truss", 0, 30, 150, ""),
-            ("tower", "Truss-087", "HTS TRUSS 3M TOWER SECTION 45*45", "HTS", "45*45", "truss", 0, 16, 250, "")
-        ];
+            ("tower", "Truss-087", "HTS TRUSS 3M TOWER SECTION 45*45", "HTS", "45*45", "truss", 0, 16, 250, ""),
+            ("hoist", "Truss-104", "CM LODESTAR 1000KG CHAINHOIST", "CM", "Lodestar 1T", "rigging", 6, 0, 750, "LODESTAR"),
+            ("roof", "Truss-200", "TOTAL FABRICATIONS ROOF SYSTEM 12X10MT, 6 TOWERS H:8MT", "Total Fabrications", "Roof 12x10", "truss", 0, 1, 25000, "")
+        ]);
 
+        await SeedEquipmentDetailsAsync(suppliers);
+        await unitOfWork.SaveChangesAsync();
+
+        // Two wash spots are at the service, as in the customer's Rentman "Repairs" screen.
+        await AddRepairAsync("wash1200", 18, "Pan motoru arızalı", RepairStatus.InProgress, suppliers["service"], 3500);
+        await AddRepairAsync("wash1200", 19, "Lamba değişimi", RepairStatus.Open, null, null);
+        await unitOfWork.SaveChangesAsync();
+
+        var standard = await rentalFactorManager.CreateAsync("Standart", 0.5m,
+            [(1, 1m), (2, 1.5m), (3, 2m), (4, 2.5m), (5, 3m), (7, 4m)], isDefault: true);
+        await rentalFactorRepository.InsertAsync(standard);
+        await unitOfWork.SaveChangesAsync();
+        var longTerm = await rentalFactorManager.CreateAsync("Uzun dönem / Sabit kurulum", 0.2m,
+            [(1, 1m), (7, 3m), (30, 8m), (90, 18m)], isDefault: false);
+        await rentalFactorRepository.InsertAsync(longTerm);
+
+        var customers = await SeedCustomersAsync("Türkiye",
+            ("bkm", "BKM", "1780045123", "İstanbul", "Operasyon Ekibi"),
+            ("atlantis", "Atlantis Yapım", "1020304051", "Ankara", "Prodüksiyon"),
+            ("temacc", "TemaCC", "8350067712", "İstanbul", "Etkinlik Koordinatörü"),
+            ("pur", "Pür Recording Studios & Residence", "7310098234", "İstanbul", "Stüdyo Müdürü"),
+            ("sek", "ŞEK ORGANİZASYON", "8010023456", "İzmir", "Proje Sorumlusu"),
+            ("altus", "Altus Organizasyon A.Ş.", "0560087613", "Antalya", "Kongre Ekibi"),
+            ("promise", "Promise Turizm", "7330012987", "İstanbul", "Satın Alma"),
+            ("ciragan", "Çırağan Palace Kempinski", "2430056712", "İstanbul", "Banket"),
+            ("elli5", "Elli5 Event", "3250045671", "İstanbul", "Hesap Yöneticisi"),
+            ("ceo", "CEO Event Medya A.Ş.", "2070012345", "İstanbul", "Prodüksiyon"),
+            ("brand", "BrandCrafters & Co.", "1880076543", "İstanbul", "Marka Ekibi"),
+            ("regnum", "Regnum Carya Golf & Spa Resort", "7340023987", "Antalya", "Etkinlik Müdürü"));
+        await unitOfWork.SaveChangesAsync();
+
+        await SeedTurkishProjectsAsync(company, customers, gunesli.Id, longTerm.Id);
+    }
+
+    private async Task<Dictionary<string, Guid>> SeedSuppliersAsync(params (string Key, string Name, string Contact, string Email, string Phone, string City)[] items)
+    {
+        var result = new Dictionary<string, Guid>();
+        foreach (var item in items)
+        {
+            var supplier = await supplierManager.CreateAsync(item.Name);
+            supplier.Update(item.Contact, item.Email, item.Phone, null, null, null, item.City, "Türkiye", null, null);
+            await supplierRepository.InsertAsync(supplier);
+            result[item.Key] = supplier.Id;
+        }
+
+        await unitOfWork.SaveChangesAsync();
+        return result;
+    }
+
+    private async Task SeedLabelTemplatesAsync()
+    {
+        var video = new LabelTemplate(Guid.CreateVersion7(), "VİDEO EKİPMAN ETİKET 6x3 cm");
+        video.Update(video.Name, 60, 30, 20, 7);
+        video.SetFields(name: true, brand: true, model: true, code: false, internalRef: true, serialNumber: true, companyName: false);
+        await labelTemplateManager.SetDefaultAsync(video);
+        await labelTemplateRepository.InsertAsync(video);
+
+        var small = new LabelTemplate(Guid.CreateVersion7(), "KÜÇÜK ETİKET 4x2 cm");
+        small.Update(small.Name, 40, 20, 16, 5.5m);
+        small.SetFields(name: true, brand: false, model: false, code: true, internalRef: true, serialNumber: false, companyName: false);
+        await labelTemplateRepository.InsertAsync(small);
+        await unitOfWork.SaveChangesAsync();
+    }
+
+    private async Task<Dictionary<string, Guid>> SeedFoldersAsync(params (string Key, string Name, string? Parent)[] items)
+    {
+        var result = new Dictionary<string, Guid>();
+        foreach (var (key, name, parent) in items)
+        {
+            var folder = await folderManager.CreateAsync(name, parent is null ? null : result[parent]);
+            await folderRepository.InsertAsync(folder);
+            await unitOfWork.SaveChangesAsync();
+            result[key] = folder.Id;
+        }
+
+        return result;
+    }
+
+    private async Task SeedEquipmentAsync(Dictionary<string, Guid> folders, Guid locationId, Dictionary<string, Guid>? suppliers,
+        (string Key, string Code, string Name, string? Brand, string? Model, string Folder, int Units, int Stock, decimal Price, string Prefix)[] items)
+    {
         var random = new Random(42);
         foreach (var item in items)
         {
             var equipment = await equipmentManager.CreateAsync(item.Code, item.Name, EquipmentType.Physical, item.Units > 0);
-            equipment.Update(item.Name, item.Brand, item.Model, folders[item.Folder], EquipmentType.Physical, null, null, null);
+            equipment.Update(item.Name, item.Brand, item.Model, folders[item.Folder], EquipmentType.Physical, null, null);
             equipment.SetRentalPrice(item.Price);
             equipment.SetStockQuantity(item.Stock);
             await equipmentRepository.InsertAsync(equipment);
@@ -273,6 +349,10 @@ public class DemoDataSeeder(
                 // ROE floor cases are tracked in Rentman as one record per 10 panels ("FLOOR 321-330").
                 var internalRef = item.Key == "ledfloor" ? $"FLOOR {291 + i * 10}-{300 + i * 10}" : $"{item.Prefix} {i:000}";
                 var unit = await unitManager.CreateAsync(equipment, internalRef, serial, locationId);
+                var purchased = DateTime.Today.AddDays(-random.Next(120, 1100)).Date;
+                unit.UpdateDetails(purchased, purchased.AddYears(2), purchased.AddYears(8),
+                    suppliers is null ? null : item.Folder.StartsWith("speaker") || item.Folder is "amp" or "mic" ? suppliers["audio"]
+                        : item.Folder is "moving" or "wash" or "profile" ? suppliers["light"] : null);
                 await unitRepository.InsertAsync(unit);
                 units.Add(unit);
             }
@@ -295,35 +375,65 @@ public class DemoDataSeeder(
                 _unitLabels[unit.Id] = label.Code;
             }
         }
-
-        // Two wash spots are in repair, as in the customer's Rentman "Repairs" screen.
-        unitManager.ChangeStatus(_units["wash1200"][18], UnitStatus.InRepair);
-        unitManager.ChangeStatus(_units["wash1200"][19], UnitStatus.InRepair);
     }
 
-    private async Task<Dictionary<string, Guid>> SeedCustomersAsync()
+    /// <summary>Physical data, content, accessories, alternatives, suppliers and periodic inspections.</summary>
+    private async Task SeedEquipmentDetailsAsync(Dictionary<string, Guid> suppliers)
     {
-        (string Key, string Name, string Tax, string City, string Contact)[] items =
-        [
-            ("bkm", "BKM", "1780045123", "İstanbul", "Operasyon Ekibi"),
-            ("atlantis", "Atlantis Yapım", "1020304051", "Ankara", "Prodüksiyon"),
-            ("temacc", "TemaCC", "8350067712", "İstanbul", "Etkinlik Koordinatörü"),
-            ("pur", "Pür Recording Studios & Residence", "7310098234", "İstanbul", "Stüdyo Müdürü"),
-            ("sek", "ŞEK ORGANİZASYON", "8010023456", "İzmir", "Proje Sorumlusu"),
-            ("altus", "Altus Organizasyon A.Ş.", "0560087613", "Antalya", "Kongre Ekibi"),
-            ("promise", "Promise Turizm", "7330012987", "İstanbul", "Satın Alma"),
-            ("ciragan", "Çırağan Palace Kempinski", "2430056712", "İstanbul", "Banket"),
-            ("elli5", "Elli5 Event", "3250045671", "İstanbul", "Hesap Yöneticisi"),
-            ("ceo", "CEO Event Medya A.Ş.", "2070012345", "İstanbul", "Prodüksiyon"),
-            ("brand", "BrandCrafters & Co.", "1880076543", "İstanbul", "Marka Ekibi"),
-            ("regnum", "Regnum Carya Golf & Spa Resort", "7340023987", "Antalya", "Etkinlik Müdürü")
-        ];
+        _equipment["k3"].UpdatePhysical(130, 50, 35, 43, null, 1200, 5.5m, 1);
+        _equipment["sb18"].UpdatePhysical(70, 70, 55, 52, null, 900, 4m, 1);
+        _equipment["sharpy"].UpdatePhysical(42, 34, 60, 19.5m, null, 470, 2.1m, 2);
+        _equipment["vid020"].UpdatePhysical(36, 3, 23, 1.2m, null, 15, 0.1m, 1);
+        _equipment["vid301"].UpdatePhysical(60, 50, 25, 28, null, 1500, 6.5m, 1);
+        _equipment["ledfloor"].UpdatePhysical(80, 133, 99, 160, null, 2000, 9m, 10);
+        _equipment["roof"].UpdatePhysical(null, null, null, 1850, 12, null, null, 1);
 
+        // The roof system is a kit: its sections travel with it (printed indented on the packing slip).
+        await equipmentManager.AddRelationAsync(_equipment["roof"], EquipmentRelationKind.Content, _equipment["truss3"].Id, 12);
+        await equipmentManager.AddRelationAsync(_equipment["roof"], EquipmentRelationKind.Content, _equipment["tower"].Id, 12);
+        await equipmentManager.AddRelationAsync(_equipment["roof"], EquipmentRelationKind.Content, _equipment["hoist"].Id, 6);
+
+        await equipmentManager.AddRelationAsync(_equipment["k3"], EquipmentRelationKind.Accessory, _equipment["xlr"].Id, 2);
+        await equipmentManager.AddRelationAsync(_equipment["sharpy"], EquipmentRelationKind.Accessory, _equipment["dmx"].Id, 1);
+        await equipmentManager.AddRelationAsync(_equipment["sharpy"], EquipmentRelationKind.Alternative, _equipment["sharpyplus"].Id, 1);
+        await equipmentManager.AddRelationAsync(_equipment["sharpyplus"], EquipmentRelationKind.Alternative, _equipment["sharpy"].Id, 1);
+        await equipmentManager.AddRelationAsync(_equipment["vid042"], EquipmentRelationKind.Alternative, _equipment["vid039"].Id, 1);
+
+        await equipmentManager.AddSupplierAsync(_equipment["k3"], suppliers["audio"], "LA-K3-BLK", 385000, true);
+        await equipmentManager.AddSupplierAsync(_equipment["sharpy"], suppliers["light"], "CP-SHARPY", 142000, true);
+        await equipmentManager.AddSupplierAsync(_equipment["wash1200"], suppliers["light"], "CP-1200W", 98000, true);
+        await equipmentManager.AddSupplierAsync(_equipment["wash1200"], suppliers["service"], null, null, false);
+
+        // Chain hoists need a yearly rigging inspection: one is overdue, one has never been inspected.
+        var hoist = _equipment["hoist"];
+        hoist.SetInspection(12, "Yıllık zincir, fren ve kanca kontrolü (TS EN 14492-2).");
+        var hoists = _units["hoist"];
+        for (var i = 0; i < hoists.Count - 1; i++)
+        {
+            var monthsAgo = i == 4 ? 13 : 2 + i;
+            await inspectionRepository.InsertAsync(inspectionManager.Record(hoist, hoists[i], DateTime.Today.AddMonths(-monthsAgo), true,
+                "Zincir ve fren kontrol edildi, uygun."));
+        }
+    }
+
+    private async Task AddRepairAsync(string equipmentKey, int unitIndex, string title, RepairStatus status, Guid? supplierId, decimal? cost)
+    {
+        var equipment = _equipment[equipmentKey];
+        var unit = _units[equipmentKey][unitIndex];
+        var repair = await repairManager.CreateAsync(equipment, unit, 1, title, DateTime.Today.AddDays(-6));
+        repair.Update(title, "Depo kontrolünde tespit edildi.", supplierId, cost);
+        await repairManager.ChangeStatusAsync(repair, status, DateTime.UtcNow);
+        await repairRepository.InsertAsync(repair);
+        await unitOfWork.SaveChangesAsync();
+    }
+
+    private async Task<Dictionary<string, Guid>> SeedCustomersAsync(string country, params (string Key, string Name, string Tax, string City, string Contact)[] items)
+    {
         var result = new Dictionary<string, Guid>();
         foreach (var item in items)
         {
             var customer = await customerManager.CreateAsync(item.Name, item.Tax);
-            customer.Update(item.Name, item.City + " VD", item.Contact, null, null, null, item.City, "Türkiye", null);
+            customer.Update(item.Name, item.City + " VD", item.Contact, null, null, null, item.City, country, null);
             await customerRepository.InsertAsync(customer);
             result[item.Key] = customer.Id;
         }
@@ -331,20 +441,23 @@ public class DemoDataSeeder(
         return result;
     }
 
-    private async Task SeedProjectsAsync(Company company, Dictionary<string, Guid> customers, Guid locationId, Guid longTermProfileId)
+    private async Task SeedTurkishProjectsAsync(Company company, Dictionary<string, Guid> customers, Guid locationId, Guid longTermProfileId)
     {
         var today = DateTime.Today;
         DateTime Day(int offset, int hour = 8) => today.AddDays(offset).AddHours(hour);
+        const string sound = "SES SİSTEMİ", light = "IŞIK SİSTEMİ", video = "GÖRÜNTÜ SİSTEMİ", truss = "TRUSS";
 
         // Fixed installation running all year: most Sharpy Beams are tied up here, which creates real shortages.
         var uniq = await CreateProjectAsync(2039, "UNIQ HALL - SABİT SİSTEM", customers["bkm"], "UNIQ Hall", "#7c3aed",
             Day(-270), Day(90), null, null, locationId,
-            [("sharpy", 14), ("robin", 12), ("atomic", 4), ("etc", 4), ("ma2", 1), ("k3", 6), ("sb18", 4), ("cl5", 1)]);
+            [("sharpy", 14, light, null), ("robin", 12, light, null), ("atomic", 4, light, null), ("etc", 4, light, null),
+             ("ma2", 1, light, "FOH"), ("k3", 6, $"{sound}/Hoparlör", null), ("sb18", 4, $"{sound}/Hoparlör", null), ("cl5", 1, $"{sound}/Mikser", "FOH")],
+            crew: [("teknisyen1", "Ses teknisyeni")]);
         await CheckOutAllAsync(uniq);
         await projectManager.ChangeStatusAsync(uniq, ProjectStatus.OnLocation);
 
         var cerModern = await CreateProjectAsync(2147, "Atlantis Yapım CER-MODERN", customers["atlantis"], "IF Ankara", "#f97316",
-            Day(-24), Day(-12), Day(-22), Day(-14), locationId, [("vid039", 2), ("vid072", 2), ("xlr", 20)]);
+            Day(-24), Day(-12), Day(-22), Day(-14), locationId, [("vid039", 2, null, null), ("vid072", 2, null, null), ("xlr", 20, null, null)]);
         await CheckOutAllAsync(cerModern);
         await projectManager.ChangeStatusAsync(cerModern, ProjectStatus.OnLocation);
         await CheckInAllAsync(cerModern);
@@ -352,64 +465,101 @@ public class DemoDataSeeder(
 
         var pur = await CreateProjectAsync(2393, "PÜR STÜDYO PROJEKSİYON", customers["pur"], "Pür Recording Studios & Residence", "#f97316",
             Day(-3), Day(360), null, null, locationId,
-            [("vid301", 4), ("vid090", 1), ("vid060", 1), ("vid063", 1), ("vid072", 2)]);
+            [("vid301", 4, video, null), ("vid090", 1, video, null), ("vid060", 1, video, null), ("vid063", 1, video, null), ("vid072", 2, video, null)],
+            crew: [("teknisyen2", "Görüntü teknisyeni")]);
         await CheckOutAllAsync(pur);
         await projectManager.ChangeStatusAsync(pur, ProjectStatus.OnLocation);
 
         var amr = await CreateProjectAsync(2384, "AMR DIAB KONSER", customers["temacc"], "Ataköy Marina", "#f97316",
             Day(-2), Day(1, 23), Day(-1), Day(0, 23), locationId,
-            [("k3", 6), ("sb18", 4), ("larak", 2), ("cl5", 1), ("wash1200", 8), ("sharpyplus", 8), ("ma3", 1), ("truss3", 16), ("tower", 4)]);
+            [("k3", 6, $"{sound}/Hoparlör", null), ("sb18", 4, $"{sound}/Hoparlör", null), ("larak", 2, $"{sound}/Hoparlör", null),
+             ("cl5", 1, $"{sound}/Mikser", null), ("wash1200", 8, light, null), ("sharpyplus", 8, light, null), ("ma3", 1, light, null),
+             ("truss3", 16, truss, null), ("tower", 4, truss, null)],
+            crew: [("teknisyen1", "Ses teknisyeni")]);
         await CheckOutAllAsync(amr);
         await projectManager.ChangeStatusAsync(amr, ProjectStatus.OnLocation);
 
         var zorlu = await CreateProjectAsync(2386, "Zorlu PSM Chauvet 2 ekim", customers["promise"], "Zorlu PSM", "#22c55e",
-            Day(1), Day(3, 20), Day(2), Day(2, 23), locationId, [("strike", 8), ("robin", 6), ("dmx", 40)]);
+            Day(1), Day(3, 20), Day(2), Day(2, 23), locationId, [("strike", 8, light, null), ("robin", 6, light, null), ("dmx", 40, light, null)]);
         await CheckOutAllAsync(zorlu);
         await projectManager.ChangeStatusAsync(zorlu, ProjectStatus.Prepped);
 
         var ella = await CreateProjectAsync(2381, "Ella Event Toplantı Boğaziçi", customers["elli5"], "Çırağan Palace Kempinski", "#22c55e",
-            Day(0), Day(1, 22), Day(1), Day(1, 18), locationId, [("vid042", 2), ("vid034", 1), ("vid020", 4), ("ledfloor", 2), ("ad2", 4), ("112p", 2), ("xlr", 30)]);
+            Day(0), Day(1, 22), Day(1), Day(1, 18), locationId,
+            [("vid042", 2, $"{video}/Ana sahne", "Ayaklı kurulacak"), ("vid034", 1, $"{video}/Ana sahne", null),
+             ("ledfloor", 2, $"{video}/Ana sahne", null), ("vid020", 4, $"{video}/Koridor", "Sahne önü ön izleme"),
+             ("ad2", 4, sound, "2 adet el telsiz, 2 adet yedek"), ("112p", 2, sound, null), ("xlr", 30, sound, null)],
+            crew: [("teknisyen1", "Ses teknisyeni"), ("teknisyen2", "Görüntü teknisyeni")]);
         await projectManager.ChangeStatusAsync(ella, ProjectStatus.Confirmed);
 
         // Needs 16 Sharpy Beams while 14 are installed at UNIQ Hall: the demo shows the shortage warning.
         var teknofest = await CreateProjectAsync(2400, "Teknofest Şanlıurfa", customers["brand"], "Şanlıurfa GAP Arena", "#22c55e",
-            Day(2), Day(6, 22), Day(3), Day(5, 23), locationId, [("sharpy", 16), ("wash1200", 10), ("led045", 24), ("truss3", 20), ("ma3", 1)]);
+            Day(2), Day(6, 22), Day(3), Day(5, 23), locationId,
+            [("sharpy", 16, light, null), ("wash1200", 10, light, null), ("ma3", 1, light, null), ("led045", 24, video, "6x2 m ekran"),
+             ("roof", 1, truss, null), ("truss3", 20, truss, null)]);
         await projectManager.ChangeStatusAsync(teknofest, ProjectStatus.Confirmed);
 
         var nil = await CreateProjectAsync(2396, "NİL KARAİBRAHİMGİL - KONSER @İZMİR FUAR", customers["sek"], "İzmir Fuar Açıkhava", "#f97316",
-            Day(4), Day(6, 23), Day(5), Day(5, 23), locationId, [("k3", 6), ("sb18", 4), ("la8", 4), ("cl5", 1), ("robin", 8), ("sharpyplus", 12)]);
+            Day(4), Day(6, 23), Day(5), Day(5, 23), locationId,
+            [("k3", 6, $"{sound}/Hoparlör", null), ("sb18", 4, $"{sound}/Hoparlör", null), ("la8", 4, $"{sound}/Hoparlör", null),
+             ("cl5", 1, $"{sound}/Mikser", null), ("robin", 8, light, null), ("sharpyplus", 12, light, null)]);
         await projectManager.ChangeStatusAsync(nil, ProjectStatus.Pending);
 
         var iac = await CreateProjectAsync(2362, "Uluslararası Astronotik Kongresi (IAC) Antalya", customers["altus"], "Regnum Carya", "#f97316",
-            Day(5), Day(12), Day(6), Day(11), locationId, [("vid301", 2), ("led045", 16), ("vid063", 2), ("ad2", 8), ("dvx", 4)]);
+            Day(5), Day(12), Day(6), Day(11), locationId,
+            [("vid301", 2, video, null), ("led045", 16, video, null), ("vid063", 2, video, null), ("ad2", 8, sound, null), ("dvx", 4, sound, null)]);
         await projectManager.ChangeStatusAsync(iac, ProjectStatus.Pending);
 
         var netflix = await CreateProjectAsync(2329, "STAGERSBASE NETFLIX 7 ekim Uniq", customers["ciragan"], "Çırağan Palace Kempinski", "#22c55e",
-            Day(3), Day(5), Day(4), Day(4, 23), locationId, [("vid024", 2), ("etc", 2)]);
+            Day(3), Day(5), Day(4), Day(4, 23), locationId, [("vid024", 2, null, null), ("etc", 2, null, null)]);
         await projectManager.ChangeStatusAsync(netflix, ProjectStatus.Pending);
 
         await CreateProjectAsync(2373, "BLOK3 ANKARA KONSER", customers["ceo"], "Ankara Congresium", "#22c55e",
-            Day(8), Day(11), Day(9), Day(10), locationId, [("k3", 6), ("sb18", 4), ("sharpy", 6)]);
+            Day(8), Day(11), Day(9), Day(10), locationId, [("k3", 6, null, null), ("sb18", 4, null, null), ("sharpy", 6, null, null)]);
 
         await unitOfWork.SaveChangesAsync();
-        await SeedQuotesAsync(company, ella, amr, nil, uniq, longTermProfileId);
+        await SeedTurkishQuotesAsync(company, ella, amr, nil, uniq, longTermProfileId);
     }
 
     private async Task<Project> CreateProjectAsync(int number, string name, Guid customerId, string venue, string color,
         DateTime planStart, DateTime planEnd, DateTime? useStart, DateTime? useEnd, Guid locationId,
-        (string Key, int Quantity)[] equipment)
+        (string Key, int Quantity, string? Section, string? Note)[] equipment, (string User, string Function)[]? crew = null)
     {
         var project = await projectManager.CreateAsync(name, planStart, planEnd, number);
         project.Update(name, customerId, venue, color, "PRODÜKSİYON", locationId, null);
         project.SetUsePeriod(useStart, useEnd);
-        foreach (var (key, quantity) in equipment)
+        project.SetDocumentInfo(_users["satis"].Id, PaymentTerms);
+
+        foreach (var (key, quantity, section, note) in equipment)
         {
-            await projectManager.AddEquipmentAsync(project, _equipment[key].Id, quantity);
+            var line = await projectManager.AddEquipmentAsync(project, _equipment[key].Id, quantity, GetOrCreateSection(project, section));
+            if (note is not null)
+            {
+                project.UpdateEquipment(line.Id, line.Quantity, note);
+            }
+        }
+
+        foreach (var (user, function) in crew ?? [])
+        {
+            await projectManager.AddCrewAsync(project, _users[user].Id, function);
         }
 
         await projectRepository.InsertAsync(project);
         await unitOfWork.SaveChangesAsync();
         return project;
+    }
+
+    /// <summary>"SES SİSTEMİ/Hoparlör" → the "Hoparlör" sub-section of "SES SİSTEMİ", created when missing.</summary>
+    private static Guid? GetOrCreateSection(Project project, string? path)
+    {
+        Guid? parentId = null;
+        foreach (var name in (path ?? string.Empty).Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var section = project.Sections.FirstOrDefault(s => s.ParentId == parentId && s.Name == name) ?? project.AddSection(name, parentId);
+            parentId = section.Id;
+        }
+
+        return parentId;
     }
 
     private async Task CheckOutAllAsync(Project project)
@@ -456,11 +606,11 @@ public class DemoDataSeeder(
         }
     }
 
-    private async Task SeedQuotesAsync(Company company, Project ella, Project amr, Project nil, Project uniq, Guid longTermProfileId)
+    private async Task SeedTurkishQuotesAsync(Company company, Project ella, Project amr, Project nil, Project uniq, Guid longTermProfileId)
     {
         var amrQuote = await quoteManager.CreateFromProjectAsync(amr, company, null, DateTime.Today.AddDays(-12));
-        amrQuote.AddLine(QuoteLineType.Crew, null, "Ses ve ışık teknik ekip (4 kişi)", 4, 7500, applyFactor: true, discountPercent: 0);
-        amrQuote.AddLine(QuoteLineType.Transport, null, "Nakliye - İstanbul içi (kamyon)", 2, 9000, applyFactor: false, discountPercent: 0);
+        amrQuote.AddLine(QuoteLineType.Crew, null, "Ses ve ışık teknik ekip (4 kişi)", 4, 7500, applyFactor: true, discountPercent: 0, section: "PERSONEL VE NAKLİYE");
+        amrQuote.AddLine(QuoteLineType.Transport, null, "Nakliye - İstanbul içi (kamyon)", 2, 9000, applyFactor: false, discountPercent: 0, section: "PERSONEL VE NAKLİYE");
         amrQuote.UpdateHeader(amrQuote.IssueDate, DateTime.Today.AddDays(-2), 10, company.DefaultVatRate, null);
         await quoteRepository.InsertAsync(amrQuote);
         await unitOfWork.SaveChangesAsync();
@@ -468,15 +618,15 @@ public class DemoDataSeeder(
         await quoteManager.ChangeStatusAsync(amrQuote, QuoteStatus.Accepted, amr);
 
         var ellaQuote = await quoteManager.CreateFromProjectAsync(ella, company, null, DateTime.Today.AddDays(-4));
-        ellaQuote.AddLine(QuoteLineType.Crew, null, "Görüntü teknisyeni", 1, 6000, applyFactor: true, discountPercent: 0);
+        ellaQuote.AddLine(QuoteLineType.Crew, null, "Görüntü teknisyeni", 1, 6000, applyFactor: true, discountPercent: 0, section: "PERSONEL");
         ellaQuote.UpdateHeader(ellaQuote.IssueDate, DateTime.Today.AddDays(10), 5, company.DefaultVatRate, null);
         await quoteRepository.InsertAsync(ellaQuote);
         await unitOfWork.SaveChangesAsync();
         await quoteManager.ChangeStatusAsync(ellaQuote, QuoteStatus.Sent, ella);
 
         var nilQuote = await quoteManager.CreateFromProjectAsync(nil, company, null, DateTime.Today);
-        nilQuote.AddLine(QuoteLineType.Crew, null, "Ses ve ışık teknik ekip (6 kişi)", 6, 7500, applyFactor: true, discountPercent: 0);
-        nilQuote.AddLine(QuoteLineType.Transport, null, "Nakliye - İstanbul / İzmir (tır)", 1, 45000, applyFactor: false, discountPercent: 0);
+        nilQuote.AddLine(QuoteLineType.Crew, null, "Ses ve ışık teknik ekip (6 kişi)", 6, 7500, applyFactor: true, discountPercent: 0, section: "PERSONEL VE NAKLİYE");
+        nilQuote.AddLine(QuoteLineType.Transport, null, "Nakliye - İstanbul / İzmir (tır)", 1, 45000, applyFactor: false, discountPercent: 0, section: "PERSONEL VE NAKLİYE");
         await quoteRepository.InsertAsync(nilQuote);
         await unitOfWork.SaveChangesAsync();
 
@@ -488,6 +638,70 @@ public class DemoDataSeeder(
         await unitOfWork.SaveChangesAsync();
     }
 
+    // ---- Dubai ----------------------------------------------------------------------------------------------
+
+    /// <summary>A smaller catalog so the Dubai location is not empty after signing in there.</summary>
+    private async Task SeedDubaiAsync(Company company)
+    {
+        _labelWorkspace = DubaiRentmanWorkspace;
+        _nextLabel = 910_000;
+
+        var dip = await stockLocationRepository.InsertAsync(new StockLocation(Guid.CreateVersion7(), "DIP1 DUBAI",
+            StockLocationType.Warehouse, "Dubai Investments Park 1", "Dubai"));
+        await SeedLabelTemplatesAsync();
+
+        var folders = await SeedFoldersAsync(("audio", "AUDIO", null), ("light", "LIGHT", null), ("video", "VIDEO", null));
+        await SeedEquipmentAsync(folders, dip.Id, null,
+        [
+            ("ae-k2", "AUD-101", "L-ACOUSTICS K2 LINE ARRAY SPEAKER", "L-Acoustics", "K2", "audio", 8, 0, 950, "K2"),
+            ("ae-ks28", "AUD-102", "L-ACOUSTICS KS28 SUB SPEAKER", "L-Acoustics", "KS28", "audio", 4, 0, 600, "KS28"),
+            ("ae-dm3", "AUD-103", "YAMAHA DM3 MIXER", "Yamaha", "DM3", "audio", 2, 0, 450, "DM3"),
+            ("ae-sharpy", "Light-101", "CLAY PAKY SHARPY BEAM", "Clay Paky", "Sharpy", "light", 12, 0, 180, "SHARPY"),
+            ("ae-led", "Led-032", "UNILUMIN INDOOR P2.6 CURVE 50x50 CABINET", "Unilumin", "P2.6", "video", 48, 0, 60, "UNI"),
+            ("ae-proc", "VID-053", "4K LED PROCESSOR / SWITCHER", "Novastar", "VX1000", "video", 2, 0, 350, "PROC")
+        ]);
+
+        var profile = await rentalFactorManager.CreateAsync("Standard", 0.5m, [(1, 1m), (2, 1.5m), (3, 2m), (7, 4m)], isDefault: true);
+        await rentalFactorRepository.InsertAsync(profile);
+
+        var customers = await SeedCustomersAsync("UAE",
+            ("emaar", "Emaar Events LLC", "100234567800003", "Dubai", "Events Team"),
+            ("dwtc", "Dubai World Trade Centre", "100987654300003", "Dubai", "Venue Operations"),
+            ("atlantis", "Atlantis The Royal", "100555444300003", "Dubai", "Banqueting"));
+        await unitOfWork.SaveChangesAsync();
+
+        var today = DateTime.Today;
+        var gala = await projectManager.CreateAsync("EXPO CITY GALA DINNER", today.AddDays(3).AddHours(8), today.AddDays(5).AddHours(23));
+        gala.Update(gala.Name, customers["emaar"], "Expo City Dubai", "#0ea5e9", "PRODUCTION", dip.Id, null);
+        gala.SetUsePeriod(today.AddDays(4).AddHours(16), today.AddDays(4).AddHours(23));
+        gala.SetDocumentInfo(_users["satis"].Id, "Invoice after the event.");
+        var soundSection = gala.AddSection("SOUND", null);
+        var videoSection = gala.AddSection("VIDEO", null);
+        await projectManager.AddEquipmentAsync(gala, _equipment["ae-k2"].Id, 8, soundSection.Id);
+        await projectManager.AddEquipmentAsync(gala, _equipment["ae-ks28"].Id, 4, soundSection.Id);
+        await projectManager.AddEquipmentAsync(gala, _equipment["ae-dm3"].Id, 1, soundSection.Id);
+        await projectManager.AddEquipmentAsync(gala, _equipment["ae-led"].Id, 32, videoSection.Id);
+        await projectManager.AddEquipmentAsync(gala, _equipment["ae-proc"].Id, 1, videoSection.Id);
+        await projectRepository.InsertAsync(gala);
+        await projectManager.ChangeStatusAsync(gala, ProjectStatus.Confirmed);
+        await unitOfWork.SaveChangesAsync();
+
+        var summit = await projectManager.CreateAsync("DWTC TECH SUMMIT", today.AddDays(9).AddHours(8), today.AddDays(12).AddHours(22));
+        summit.Update(summit.Name, customers["dwtc"], "Dubai World Trade Centre", "#a855f7", "PRODUCTION", dip.Id, null);
+        await projectManager.AddEquipmentAsync(summit, _equipment["ae-sharpy"].Id, 12);
+        await projectManager.AddEquipmentAsync(summit, _equipment["ae-led"].Id, 24);
+        await projectRepository.InsertAsync(summit);
+        await projectManager.ChangeStatusAsync(summit, ProjectStatus.Pending);
+        await unitOfWork.SaveChangesAsync();
+
+        var quote = await quoteManager.CreateFromProjectAsync(gala, company, null, today.AddDays(-2));
+        quote.AddLine(QuoteLineType.Crew, null, "Technical crew (3 persons)", 3, 1500, applyFactor: true, discountPercent: 0, section: "CREW");
+        await quoteRepository.InsertAsync(quote);
+        await unitOfWork.SaveChangesAsync();
+        await quoteManager.ChangeStatusAsync(quote, QuoteStatus.Sent, gala);
+        await unitOfWork.SaveChangesAsync();
+    }
+
     /// <summary>Same content a Rentman QR label holds, so demo labels scan exactly like the real ones.</summary>
-    private string NextLabel() => $"{{\"ID\":\"{_nextLabel++}\",\"cmpID\":{TurkeyRentmanWorkspace},\"isCase\":0}}";
+    private string NextLabel() => $"{{\"ID\":\"{_nextLabel++}\",\"cmpID\":{_labelWorkspace},\"isCase\":0}}";
 }

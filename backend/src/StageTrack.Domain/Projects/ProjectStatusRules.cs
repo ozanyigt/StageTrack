@@ -10,6 +10,10 @@ public static class ProjectStatusRules
     public static readonly IReadOnlyList<ProjectStatus> Scannable =
         [ProjectStatus.Confirmed, ProjectStatus.Prepped, ProjectStatus.OnLocation];
 
+    /// <summary>Confirmed work that assigned crew members may see.</summary>
+    public static readonly IReadOnlyList<ProjectStatus> VisibleToCrew =
+        [ProjectStatus.Confirmed, ProjectStatus.Prepped, ProjectStatus.OnLocation, ProjectStatus.Returned];
+
     private static readonly Dictionary<ProjectStatus, ProjectStatus[]> Transitions = new()
     {
         [ProjectStatus.Draft] = [ProjectStatus.Pending, ProjectStatus.Confirmed, ProjectStatus.Cancelled],

@@ -13,7 +13,13 @@ public class ProjectFilter
     public DateTime? To { get; set; }
     public Guid? CustomerId { get; set; }
     public Guid? StockLocationId { get; set; }
+
+    /// <summary>Only projects this user is on the crew of (crew members' own view).</summary>
+    public Guid? CrewUserId { get; set; }
 }
+
+/// <summary>Planned quantity of one equipment on another project, with that project's planning period.</summary>
+public record EquipmentReservation(Guid EquipmentId, int Quantity, DateTime Start, DateTime End);
 
 public class ProjectListItem
 {
@@ -37,9 +43,7 @@ public interface IProjectRepository : IRepository<Project>
 
     Task<Dictionary<ProjectStatus, int>> GetStatusCountsAsync(CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Sum of planned quantities per equipment on reserving projects whose planning period overlaps [start, end].
-    /// </summary>
-    Task<Dictionary<Guid, int>> GetPlannedQuantitiesAsync(IReadOnlyCollection<Guid> equipmentIds, DateTime start, DateTime end,
+    /// <summary>Reservations of reserving projects whose planning period overlaps [start, end].</summary>
+    Task<List<EquipmentReservation>> GetReservationsAsync(IReadOnlyCollection<Guid> equipmentIds, DateTime start, DateTime end,
         Guid? excludeProjectId, CancellationToken cancellationToken = default);
 }

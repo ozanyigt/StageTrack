@@ -1,11 +1,13 @@
 using StageTrack.Projects;
+using StageTrack.Suppliers;
 
 namespace StageTrack.Inventory;
 
 public class EquipmentManager(
     IEquipmentRepository equipmentRepository,
     IEquipmentUnitRepository unitRepository,
-    IProjectRepository projectRepository)
+    IProjectRepository projectRepository,
+    ISupplierRepository supplierRepository)
 {
     public async Task<Equipment> CreateAsync(string code, string name, EquipmentType type, bool isSerialized)
     {
@@ -50,6 +52,24 @@ public class EquipmentManager(
         }
 
         equipment.Archive();
+    }
+
+    /// <summary>Content, accessory or alternative; the related equipment must exist and be active.</summary>
+    public async Task<EquipmentRelation> AddRelationAsync(Equipment equipment, EquipmentRelationKind kind, Guid relatedEquipmentId, int quantity)
+    {
+        var related = await equipmentRepository.GetAsync(relatedEquipmentId, includeDetails: false);
+        if (related.IsArchived)
+        {
+            throw new EntityNotFoundException(typeof(Equipment), relatedEquipmentId);
+        }
+
+        return equipment.AddRelation(kind, related.Id, quantity);
+    }
+
+    public async Task<EquipmentSupplier> AddSupplierAsync(Equipment equipment, Guid supplierId, string? supplierCode, decimal? purchasePrice, bool isPreferred)
+    {
+        var supplier = await supplierRepository.GetAsync(supplierId, includeDetails: false);
+        return equipment.AddSupplier(supplier.Id, supplierCode, purchasePrice, isPreferred);
     }
 
     private async Task EnsureCodeIsUniqueAsync(string code, Guid? excludeId)
