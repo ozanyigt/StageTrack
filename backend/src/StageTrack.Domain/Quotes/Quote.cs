@@ -24,6 +24,9 @@ public class Quote : CompanyAggregateRoot
     public decimal VatRate { get; private set; }
     public string? Notes { get; private set; }
 
+    /// <summary>Why the customer declined (price, dates, competitor…); kept for lost-business reporting.</summary>
+    public string? RejectionReason { get; private set; }
+
     public decimal Subtotal { get; private set; }
     public decimal DiscountAmount { get; private set; }
     public decimal NetTotal { get; private set; }
@@ -104,6 +107,41 @@ public class Quote : CompanyAggregateRoot
     }
 
     internal void SetStatus(QuoteStatus status) => Status = status;
+
+    internal void Reject(string? reason)
+    {
+        Status = QuoteStatus.Rejected;
+        RejectionReason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim();
+    }
+
+    /// <summary>Replaces the equipment lines (lines of other types stay as they are).</summary>
+    internal void ReplaceEquipmentLines(IEnumerable<(Guid EquipmentId, string Description, decimal Quantity, decimal UnitPrice, bool ApplyFactor,
+        decimal DiscountPercent, string? Section, string? Notes)> lines)
+    {
+        EnsureEditable();
+        foreach (var line in Lines.Where(l => l.Type == QuoteLineType.Equipment).ToList())
+        {
+            Lines.Remove(line);
+        }
+
+        // Equipment first (in project order), then personnel, transport and services keep their relative order.
+        var others = Lines.OrderBy(l => l.SortOrder).ToList();
+        var order = 1;
+        foreach (var item in lines)
+        {
+            var line = new QuoteLine(Guid.CreateVersion7(), Id, order++);
+            line.Set(QuoteLineType.Equipment, item.EquipmentId, item.Description, item.Quantity, item.UnitPrice, item.ApplyFactor, item.DiscountPercent);
+            line.SetPlacement(item.Section, item.Notes);
+            Lines.Add(line);
+        }
+
+        foreach (var line in others)
+        {
+            line.SetSortOrder(order++);
+        }
+
+        Recalculate();
+    }
 
     /// <summary>Copies everything except identity and status into a new draft with the next revision number.</summary>
     internal Quote CreateRevision(Guid id, DateTime issueDate)
@@ -221,6 +259,8 @@ public class QuoteLine : Entity
         ApplyFactor = applyFactor;
         DiscountPercent = discountPercent;
     }
+
+    internal void SetSortOrder(int sortOrder) => SortOrder = sortOrder;
 
     internal void SetPlacement(string? section, string? notes)
     {

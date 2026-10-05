@@ -32,8 +32,24 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
         b.Property(x => x.DefaultCurrency).HasMaxLength(QuoteConsts.MaxCurrencyLength).IsRequired();
         b.Property(x => x.DefaultVatRate).HasColumnType(ColumnTypes.Percent);
         b.Property(x => x.CountryCode).HasMaxLength(2).IsRequired();
-        b.HasIndex(x => x.Code).IsUnique();
+        b.HasIndex(x => new { x.TenantId, x.Code }).IsUnique();
         b.HasIndex(x => x.RentmanWorkspaceId);
+        b.HasOne<Tenants.Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class TenantConfiguration : IEntityTypeConfiguration<Tenants.Tenant>
+{
+    public void Configure(EntityTypeBuilder<Tenants.Tenant> b)
+    {
+        b.Property(x => x.Name).HasMaxLength(Tenants.TenantConsts.MaxNameLength).IsRequired();
+        b.Property(x => x.Code).HasMaxLength(Tenants.TenantConsts.MaxCodeLength).IsRequired();
+        b.Property(x => x.ContactName).HasMaxLength(Tenants.TenantConsts.MaxContactLength);
+        b.Property(x => x.Email).HasMaxLength(Tenants.TenantConsts.MaxEmailLength);
+        b.Property(x => x.Phone).HasMaxLength(Tenants.TenantConsts.MaxPhoneLength);
+        b.Property(x => x.Notes).HasMaxLength(Tenants.TenantConsts.MaxNotesLength);
+        b.Property(x => x.PlanName).HasMaxLength(Tenants.TenantConsts.MaxPlanLength).IsRequired();
+        b.HasIndex(x => x.Code).IsUnique();
     }
 }
 
@@ -51,6 +67,8 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         b.Property(x => x.PasswordHash).HasMaxLength(512).IsRequired();
         b.Property(x => x.Language).HasMaxLength(8).IsRequired();
         b.HasIndex(x => x.NormalizedUserName).IsUnique();
+        b.HasIndex(x => x.TenantId);
+        b.HasOne<Tenants.Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
 
         b.HasMany(x => x.Roles).WithOne().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         b.HasMany(x => x.Companies).WithOne().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
@@ -83,7 +101,8 @@ public class AppRoleConfiguration : IEntityTypeConfiguration<AppRole>
     {
         b.ToTable("Roles");
         b.Property(x => x.Name).HasMaxLength(64).IsRequired();
-        b.HasIndex(x => x.Name).IsUnique();
+        b.HasIndex(x => new { x.TenantId, x.Name }).IsUnique();
+        b.HasOne<Tenants.Tenant>().WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
         b.HasMany(x => x.Permissions).WithOne().HasForeignKey(x => x.RoleId).OnDelete(DeleteBehavior.Cascade);
     }
 }
@@ -400,6 +419,7 @@ public class QuoteConfiguration : IEntityTypeConfiguration<Quote>
         b.Property(x => x.Number).HasMaxLength(QuoteConsts.MaxNumberLength).IsRequired();
         b.Property(x => x.Currency).HasMaxLength(QuoteConsts.MaxCurrencyLength).IsRequired();
         b.Property(x => x.Notes).HasMaxLength(QuoteConsts.MaxNotesLength);
+        b.Property(x => x.RejectionReason).HasMaxLength(QuoteConsts.MaxRejectionReasonLength);
         b.Property(x => x.Factor).HasColumnType(ColumnTypes.Factor);
         b.Property(x => x.DiscountPercent).HasColumnType(ColumnTypes.Percent);
         b.Property(x => x.VatRate).HasColumnType(ColumnTypes.Percent);

@@ -40,6 +40,11 @@ export interface CurrentUser {
   companies: Company[];
   /** Set while an admin is signed in as this user. */
   impersonatorName?: string | null;
+  /** Platform administrator: sees only the platform admin panel. */
+  isHost: boolean;
+  tenantName?: string | null;
+  /** Last day of the firm's subscription (renewal warning). */
+  subscriptionEndDate?: string | null;
 }
 
 export interface LoginResult {
@@ -561,6 +566,8 @@ export interface QuoteListItem {
   projectNumber: number;
   projectName: string;
   customerName?: string | null;
+  /** Why the customer declined (rejected quotes). */
+  rejectionReason?: string | null;
 }
 
 export interface QuoteLine {
@@ -602,7 +609,25 @@ export interface Quote extends QuoteListItem {
   preparedByName?: string | null;
   paymentTerms?: string | null;
   sectionNames: string[];
+  projectStatus: ProjectStatus;
+  /** Only the newest revision can be reopened after a rejection. */
+  isLatestRevision: boolean;
 }
+
+/** Sales list views: waiting for the customer / lost (rejected, cancelled) / everything. */
+export const QUOTE_JOB_VIEWS = ['Active', 'Lost', 'All'] as const;
+export type QuoteJobView = (typeof QUOTE_JOB_VIEWS)[number];
+
+/** One job on the sales list with its newest quote and all revisions (newest first). */
+export interface QuoteJob {
+  project: ProjectListItem;
+  latestQuote?: QuoteListItem | null;
+  quotes: QuoteListItem[];
+}
+
+/** Project statuses shown under Projects; earlier (and lost) jobs live under Quotes. */
+export const CONFIRMED_PROJECT_STATUSES: ProjectStatus[] = ['Confirmed', 'Prepped', 'OnLocation', 'Returned'];
+export const SALES_PROJECT_STATUSES: ProjectStatus[] = ['Draft', 'Pending', 'Cancelled'];
 
 export interface QuoteHeaderInput {
   issueDate: string;
@@ -857,4 +882,88 @@ export interface CustomerImportRow {
   address?: string | null;
   city?: string | null;
   country?: string | null;
+}
+
+// Platform administration (customer firms / subscriptions)
+export const TENANT_STATUSES = ['Active', 'Suspended', 'Expired', 'NotStarted'] as const;
+export type TenantStatus = (typeof TENANT_STATUSES)[number];
+
+export interface Tenant {
+  id: Guid;
+  name: string;
+  code: string;
+  contactName?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  notes?: string | null;
+  isActive: boolean;
+  status: TenantStatus;
+  planName: string;
+  startDate: string;
+  endDate?: string | null;
+  maxUsers?: number | null;
+  maxLocations?: number | null;
+  userCount: number;
+  locationCount: number;
+  creationTime: string;
+  daysLeft?: number | null;
+}
+
+export interface TenantLocation extends Company {
+  rentmanWorkspaceId?: number | null;
+}
+
+export interface TenantUser {
+  id: Guid;
+  userName: string;
+  fullName: string;
+  email?: string | null;
+  isActive: boolean;
+  roles: string[];
+  creationTime: string;
+}
+
+export interface TenantDetail extends Tenant {
+  locations: TenantLocation[];
+  users: TenantUser[];
+}
+
+export interface HostSummary {
+  total: number;
+  active: number;
+  suspended: number;
+  expired: number;
+  expiringSoon: number;
+}
+
+export interface TenantInput {
+  name: string;
+  code: string;
+  contactName?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  notes?: string | null;
+  planName: string;
+  startDate: string;
+  endDate?: string | null;
+  maxUsers?: number | null;
+  maxLocations?: number | null;
+}
+
+export interface TenantLocationInput {
+  name: string;
+  code: string;
+  currency: string;
+  vatRate: number;
+  countryCode: string;
+  rentmanWorkspaceId?: number | null;
+  warehouseName?: string | null;
+}
+
+export interface TenantAdminInput {
+  userName: string;
+  fullName: string;
+  email?: string | null;
+  password: string;
+  language: string;
 }

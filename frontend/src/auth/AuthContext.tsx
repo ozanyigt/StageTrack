@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { accountApi } from '../api/endpoints';
+import { accountApi, hostApi } from '../api/endpoints';
 import type { Company, CurrentUser, LoginResult } from '../api/types';
 import i18n from '../i18n';
 import { session } from './session';
@@ -23,6 +23,8 @@ interface AuthState {
   /** Reloads the user's permissions, e.g. after a role of the current user was edited. */
   refresh: () => Promise<void>;
   impersonate: (userId: string) => Promise<void>;
+  /** Platform admin signs in as a user of a customer firm. */
+  impersonateFromHost: (userId: string) => Promise<void>;
   endImpersonation: () => Promise<void>;
 }
 
@@ -91,6 +93,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const impersonate = useCallback(async (userId: string) => applyLogin(await accountApi.impersonate(userId)), [applyLogin]);
 
+  const impersonateFromHost = useCallback(async (userId: string) => {
+    applyLogin(await hostApi.impersonate(userId));
+    setChoosingLocation(false);
+  }, [applyLogin]);
+
   const endImpersonation = useCallback(async () => applyLogin(await accountApi.endImpersonation()), [applyLogin]);
 
   const chooseLocation = useCallback(
@@ -122,9 +129,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       can: (permission: string) => permissions.has(permission),
       refresh,
       impersonate,
+      impersonateFromHost,
       endImpersonation,
     };
-  }, [user, companyId, loading, login, logout, choosingLocation, chooseLocation, changeLocation, cancelLocationChoice, refresh, impersonate, endImpersonation]);
+  }, [user, companyId, loading, login, logout, choosingLocation, chooseLocation, changeLocation, cancelLocationChoice, refresh, impersonate, impersonateFromHost, endImpersonation]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -142,6 +150,8 @@ export async function changeLanguage(code: string, signedIn: boolean) {
 }
 
 export const Permissions = {
+  HostTenants: 'StageTrack.Host.Tenants',
+  HostImpersonate: 'StageTrack.Host.Tenants.Impersonate',
   Equipment: 'StageTrack.Equipment',
   EquipmentManage: 'StageTrack.Equipment.Manage',
   EquipmentTransfer: 'StageTrack.Equipment.Transfer',

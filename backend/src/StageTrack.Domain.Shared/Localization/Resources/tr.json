@@ -86,5 +86,16 @@
   "Attachment.TooLarge": "Dosya en fazla {max} MB olabilir.",
   "Attachment.NotImage": "Yalnızca resim dosyası yüklenebilir.",
   "LabelTemplate.InvalidSize": "Etiket ölçüleri geçersiz.",
-  "Import.InvalidRow": "Satır geçersiz: {field} alanını kontrol edin."
+  "Import.InvalidRow": "Satır geçersiz: {field} alanını kontrol edin.",
+  "Quote.NotLatestRevision": "Yalnızca en son revizyon yeniden açılabilir.",
+  "Quote.JobAlreadyDecided": "Bu işin bir teklifi zaten kabul edilmiş.",
+  "Tenant.CodeAlreadyExists": "{code} kodlu bir firma zaten var.",
+  "Tenant.Suspended": "Firmanızın hesabı askıya alınmış. Lütfen bizimle iletişime geçin.",
+  "Tenant.SubscriptionExpired": "Firmanızın aboneliği {date} tarihinde sona erdi. Yenilemek için bizimle iletişime geçin.",
+  "Tenant.SubscriptionNotStarted": "Firmanızın aboneliği {date} tarihinde başlayacak.",
+  "Tenant.UserLimitReached": "Abonelik paketinizdeki kullanıcı limitine ({max}) ulaşıldı.",
+  "Tenant.LocationLimitReached": "Abonelik paketindeki lokasyon limitine ({max}) ulaşıldı.",
+  "Tenant.InvalidPeriod": "Bitiş tarihi başlangıçtan önce olamaz.",
+  "Tenant.InvalidLimit": "Limit en az 1 olmalıdır.",
+  "Company.CodeAlreadyExists": "Bu firmada {code} kodlu bir lokasyon zaten var."
 }

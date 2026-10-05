@@ -212,6 +212,22 @@ public class QuotesController(IQuoteAppService appService) : ControllerBase
     [Authorize(StageTrackPermissions.Quotes.Manage)]
     public Task<QuoteDto> ReviseAsync(Guid id) => appService.ReviseAsync(id);
 
+    [HttpGet("jobs")]
+    public Task<PagedResultDto<QuoteJobDto>> GetJobsAsync([FromQuery] GetQuoteJobsInput input) => appService.GetJobsAsync(input);
+
+    [HttpPost("jobs")]
+    [Authorize(StageTrackPermissions.Quotes.Manage)]
+    [Authorize(StageTrackPermissions.Projects.Manage)]
+    public Task<QuoteDto> CreateJobAsync(CreateQuoteJobInput input) => appService.CreateJobAsync(input);
+
+    [HttpPost("{id:guid}/reopen")]
+    [Authorize(StageTrackPermissions.Quotes.Manage)]
+    public Task<QuoteDto> ReopenAsync(Guid id) => appService.ReopenAsync(id);
+
+    [HttpPost("{id:guid}/sync-from-project")]
+    [Authorize(StageTrackPermissions.Quotes.Manage)]
+    public Task<QuoteDto> SyncFromProjectAsync(Guid id) => appService.SyncFromProjectAsync(id);
+
     [HttpDelete("{id:guid}")]
     [Authorize(StageTrackPermissions.Quotes.Manage)]
     public Task DeleteAsync(Guid id) => appService.DeleteAsync(id);

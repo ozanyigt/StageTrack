@@ -86,5 +86,16 @@
   "Attachment.TooLarge": "الحد الأقصى لحجم الملف {max} ميغابايت.",
   "Attachment.NotImage": "يمكن رفع ملفات الصور فقط.",
   "LabelTemplate.InvalidSize": "أبعاد الملصق غير صالحة.",
-  "Import.InvalidRow": "صف غير صالح: تحقق من العمود {field}."
+  "Import.InvalidRow": "صف غير صالح: تحقق من العمود {field}.",
+  "Quote.NotLatestRevision": "يمكن إعادة فتح أحدث مراجعة فقط.",
+  "Quote.JobAlreadyDecided": "تم قبول عرض سعر لهذا العمل بالفعل.",
+  "Tenant.CodeAlreadyExists": "توجد شركة بالرمز {code} بالفعل.",
+  "Tenant.Suspended": "تم إيقاف حساب شركتكم. يرجى التواصل معنا.",
+  "Tenant.SubscriptionExpired": "انتهى اشتراك شركتكم في {date}. يرجى التواصل معنا للتجديد.",
+  "Tenant.SubscriptionNotStarted": "يبدأ اشتراك شركتكم في {date}.",
+  "Tenant.UserLimitReached": "تم الوصول إلى حد المستخدمين في اشتراككم ({max}).",
+  "Tenant.LocationLimitReached": "تم الوصول إلى حد المواقع في الاشتراك ({max}).",
+  "Tenant.InvalidPeriod": "لا يمكن أن يكون تاريخ النهاية قبل تاريخ البداية.",
+  "Tenant.InvalidLimit": "يجب أن يكون الحد 1 على الأقل.",
+  "Company.CodeAlreadyExists": "لدى هذه الشركة موقع بالرمز {code} بالفعل."
 }

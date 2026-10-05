@@ -25,7 +25,7 @@
     "userName": "Kullanıcı adı",
     "password": "Şifre",
     "submit": "Giriş yap",
-    "demoUsers": "Demo: admin · depo · satis · teknisyen1 (üye)",
+    "demoUsers": "StageTrack hesabınızla giriş yapın.",
     "chooseLocation": "Merhaba {{name}}, hangi lokasyonda çalışacaksınız?",
     "country": {
       "TR": "Türkiye",
@@ -39,7 +39,8 @@
     "toggleTheme": "Açık/koyu tema",
     "impersonating": "Şu anda {{user}} olarak görüntülüyorsunuz (asıl hesap: {{admin}}). Yaptığınız işlemler bu kullanıcı adına kaydedilir.",
     "backToMyAccount": "Hesabıma dön",
-    "changeLocation": "Lokasyon değiştir"
+    "changeLocation": "Lokasyon değiştir",
+    "backToPlatform": "Platform yönetimine dön"
   },
   "nav": {
     "dashboard": "Gösterge paneli",
@@ -63,7 +64,8 @@
     "repairs": "Tamirler",
     "suppliers": "Tedarikçiler",
     "crew": "Ekip rehberi",
-    "labelTemplates": "Etiket şablonları"
+    "labelTemplates": "Etiket şablonları",
+    "tenants": "Firmalar"
   },
   "dashboard": {
     "welcome": "Hoş geldiniz, {{name}}",
@@ -554,7 +556,9 @@
       "InvalidStatusTransition": "Teklif durumu \"{{from}}\" durumundan \"{{to}}\" durumuna geçemez.",
       "HasNoLines": "Teklifi göndermeden önce en az bir satır ekleyin.",
       "CannotDelete": "Yalnızca taslak teklifler silinebilir.",
-      "LineDescriptionRequired": "Satır için bir açıklama girin."
+      "LineDescriptionRequired": "Satır için bir açıklama girin.",
+      "NotLatestRevision": "Yalnızca en son revizyon yeniden açılabilir.",
+      "JobAlreadyDecided": "Bu işin bir teklifi zaten kabul edilmiş."
     },
     "Role": {
       "NameAlreadyExists": "\"{{name}}\" adında bir rol zaten var.",
@@ -614,6 +618,19 @@
     },
     "Import": {
       "InvalidRow": "Satır geçersiz: {{field}} alanını kontrol edin."
+    },
+    "Tenant": {
+      "CodeAlreadyExists": "{{code}} kodlu bir firma zaten var.",
+      "Suspended": "Firmanızın hesabı askıya alınmış. Lütfen bizimle iletişime geçin.",
+      "SubscriptionExpired": "Firmanızın aboneliği {{date}} tarihinde sona erdi. Yenilemek için bizimle iletişime geçin.",
+      "SubscriptionNotStarted": "Firmanızın aboneliği {{date}} tarihinde başlayacak.",
+      "UserLimitReached": "Abonelik paketinizdeki kullanıcı limitine ({{max}}) ulaşıldı.",
+      "LocationLimitReached": "Abonelik paketindeki lokasyon limitine ({{max}}) ulaşıldı.",
+      "InvalidPeriod": "Bitiş tarihi başlangıçtan önce olamaz.",
+      "InvalidLimit": "Limit en az 1 olmalıdır."
+    },
+    "Company": {
+      "CodeAlreadyExists": "Bu firmada {{code}} kodlu bir lokasyon zaten var."
     }
   },
   "roles": {
@@ -1007,5 +1024,135 @@
     "deleteConfirm": "Şablon silinsin mi?",
     "preview": "Önizleme (gerçek ölçü)",
     "previewHint": "Önizleme ekranda yaklaşık gerçek boyutta gösterilir."
-  }
+  },
+  "salesJobs": {
+    "newQuote": "Yeni teklif",
+    "createTitle": "Yeni teklif / iş",
+    "job": "İş",
+    "jobStatus": "İş durumu",
+    "latestQuote": "Son teklif",
+    "noQuote": "Teklif yok",
+    "revisionCount": "{{count}} revizyon",
+    "rejectionReason": "Ret sebebi",
+    "projectsHint": "Yalnızca onaylı işler. Yeni iş Teklifler'den eklenir.",
+    "view": {
+      "Active": "Onay bekleyen",
+      "Lost": "Kaybedilen",
+      "All": "Tümü"
+    },
+    "viewHint": {
+      "Active": "Müşteri kararı beklenen işler. Teklif \"Kabul edildi\" yapılınca iş otomatik olarak Projeler'e geçer.",
+      "Lost": "Reddedilen teklifler ve iptal edilen işler. Müşteri geri dönerse teklifte \"Yeniden aç\".",
+      "All": "Tüm işler ve teklifleri."
+    },
+    "salesJobHint": "Bu iş teklif aşamasında. Teklif kabul edilince onaylanır ve Projeler'e geçer.",
+    "lostJobHint": "Bu iş kaybedildi (teklif reddedildi). Ekipman rezervasyonu düştü; müşteri dönerse teklifte \"Yeniden aç\".",
+    "acceptConfirmTitle": "Teklif kabul edildi mi?",
+    "acceptConfirm": "İş onaylanacak ve Projeler'e taşınacak. Bu işin diğer açık revizyonları kapatılır.",
+    "acceptedMoved": "Teklif kabul edildi; {{number}} numaralı iş Projeler'e taşındı.",
+    "acceptedBanner": "Bu teklif kabul edildi; iş Projeler'de.",
+    "openProject": "Projeyi aç",
+    "rejectTitle": "Teklif reddedildi",
+    "rejectHelp": "Kısa bir sebep seçin veya yazın. Başka açık revizyon yoksa iş iptal edilir ve ekipman rezervasyonu düşer.",
+    "reasonPlaceholder": "Ret sebebi",
+    "reasons": {
+      "price": "Fiyat yüksek bulundu",
+      "dates": "Tarihler uymadı",
+      "competitor": "Rakip firma seçildi",
+      "cancelled": "Etkinlik iptal oldu",
+      "budget": "Bütçe onaylanmadı"
+    },
+    "rejectedCancelled": "Teklif reddedildi; iş Kaybedilenler'e taşındı.",
+    "rejectedBanner": "Bu teklif reddedildi.",
+    "reasonLabel": "Sebep: {{reason}}",
+    "reopen": "Yeniden aç",
+    "reopened": "Yeni revizyon oluşturuldu; iş tekrar onay bekleyenlerde.",
+    "sync": "Ekipmandan güncelle",
+    "syncTitle": "Ekipman satırları güncellensin mi?",
+    "syncConfirm": "Teklifteki ekipman satırları işte planlanan ekipmana göre yeniden oluşturulur. Daha önce girdiğiniz fiyat ve iskontolar korunur; personel, nakliye ve hizmet satırlarına dokunulmaz.",
+    "synced": "Ekipman satırları güncellendi."
+  },
+  "host": {
+    "title": "Firmalar",
+    "panel": "Platform yönetimi",
+    "subtitle": "Abone firmalar, abonelikler ve lokasyonlar",
+    "newTenant": "Yeni firma",
+    "editTenant": "Firma ve abonelik",
+    "search": "Firma adı, kod veya yetkili ara",
+    "summary": {
+      "total": "Toplam firma",
+      "active": "Aktif",
+      "expiringSoon": "Süresi yaklaşan",
+      "suspendedOrExpired": "Askıda / süresi dolmuş"
+    },
+    "status": {
+      "Active": "Aktif",
+      "Suspended": "Askıda",
+      "Expired": "Süresi doldu",
+      "NotStarted": "Başlamadı"
+    },
+    "name": "Firma adı",
+    "code": "Firma kodu",
+    "codeHint": "Kısa ve benzersiz bir kod",
+    "contactName": "Yetkili kişi",
+    "email": "E-posta",
+    "phone": "Telefon",
+    "notes": "Notlar",
+    "subscription": "Abonelik",
+    "plan": "Paket",
+    "plans": {
+      "starter": "Başlangıç",
+      "pro": "Profesyonel",
+      "enterprise": "Kurumsal"
+    },
+    "period": "Abonelik dönemi",
+    "startDate": "Başlangıç",
+    "endDate": "Bitiş",
+    "openEnded": "Süresiz",
+    "endDateHint": "Boş bırakılırsa süresiz.",
+    "daysLeft": "{{count}} gün kaldı",
+    "expiredDaysAgo": "{{count}} gün önce bitti",
+    "maxUsers": "Kullanıcı limiti",
+    "maxLocations": "Lokasyon limiti",
+    "unlimited": "Sınırsız",
+    "usage": "{{used}} / {{max}}",
+    "users": "Kullanıcılar",
+    "locations": "Lokasyonlar",
+    "firstLocation": "İlk lokasyon",
+    "firstLocationHint": "Firmanın çalışacağı ilk şube/ülke. Ayrı lokasyonların (örn. Dubai) verileri birbirinden ayrıdır.",
+    "adminUser": "Firma yöneticisi",
+    "adminUserHint": "Firmanın tüm yetkilere sahip ilk kullanıcısı. Kullanıcı adı tüm platformda benzersiz olmalıdır.",
+    "userName": "Kullanıcı adı",
+    "fullName": "Ad soyad",
+    "password": "Şifre",
+    "language": "Dil",
+    "locationName": "Lokasyon adı",
+    "locationCode": "Kod",
+    "currency": "Para birimi",
+    "vatRate": "KDV %",
+    "country": "Ülke kodu",
+    "rentmanWorkspace": "Rentman çalışma alanı (cmpID)",
+    "rentmanWorkspaceHint": "Mevcut Rentman QR etiketlerindeki cmpID. Bilinmiyorsa boş bırakın.",
+    "warehouseName": "İlk depo adı",
+    "addLocation": "Lokasyon ekle",
+    "editLocation": "Lokasyonu düzenle",
+    "suspend": "Askıya al",
+    "activate": "Aktifleştir",
+    "suspendConfirm": "Firma askıya alınsın mı? Firmanın tüm kullanıcılarının oturumu hemen kapanır ve giriş yapamazlar.",
+    "loginAs": "Bu kullanıcı olarak gir",
+    "loginAsHint": "Sunum veya destek için firmanın içine girersiniz; üstteki banttan platform yönetimine dönebilirsiniz.",
+    "resetPassword": "Şifre sıfırla",
+    "newPassword": "Yeni şifre",
+    "passwordReset": "Şifre güncellendi.",
+    "roles": "Roller",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "created": "Firma oluşturuldu.",
+    "saved": "Kaydedildi.",
+    "createdAt": "Oluşturma",
+    "detail": "Detay",
+    "backToList": "Firmalar",
+    "statusColumn": "Durum"
+  },
+  "subscriptionWarning": "Aboneliğiniz {{date}} tarihinde sona eriyor ({{count}} gün kaldı). Yenilemek için bizimle iletişime geçin."
 }

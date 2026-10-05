@@ -23,11 +23,13 @@ import {
   BuildOutlined,
   IdcardOutlined,
   QrcodeOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons';
 import { Alert, Avatar, Button, Dropdown, Flex, Layout, Menu, Select, Tag, Typography, theme, type MenuProps } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
 import { changeLanguage, Permissions, roleLabel, useAuth } from '../auth/AuthContext';
 import { useErrorToast } from '../utils/errors';
 import { LANGUAGES } from '../i18n';
@@ -46,7 +48,13 @@ export function AppLayout() {
   const { token } = theme.useToken();
   const [collapsed, setCollapsed] = useState(false);
 
-  const items: Item[] = [
+  const hostItems: Item[] = [{ key: '/', icon: <ApartmentOutlined />, label: t('nav.tenants') }];
+
+  // Renewal warning for firm users in the last days of the subscription.
+  const subscriptionDaysLeft = user?.subscriptionEndDate ? dayjs(user.subscriptionEndDate).startOf('day').diff(dayjs().startOf('day'), 'day') : null;
+  const showSubscriptionWarning = !user?.isHost && subscriptionDaysLeft !== null && subscriptionDaysLeft <= 14;
+
+  const items: Item[] = user?.isHost ? hostItems : [
     { key: '/', icon: <DashboardOutlined />, label: t('nav.dashboard') },
     { key: '/calendar', icon: <CalendarOutlined />, label: t('nav.calendar'), permission: Permissions.Projects },
     {
@@ -101,7 +109,7 @@ export function AppLayout() {
   const selected =
     ['/warehouse/scan', '/warehouse/movements', '/equipment/units', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/calendar']
       .find((p) => path.startsWith(p)) ??
-    ['/warehouse', '/projects', '/quotes', '/equipment', '/customers', '/suppliers', '/crew'].find((p) => path.startsWith(p)) ??
+    ['/warehouse', '/projects', '/quotes', '/equipment', '/customers', '/suppliers', '/crew'].find((p) => path.startsWith(p) && !user?.isHost) ??
     '/';
 
   return (
@@ -119,7 +127,7 @@ export function AppLayout() {
           <img src="/favicon.svg" width={32} height={32} alt="" />
           <div style={{ lineHeight: 1.2 }}>
             <Typography.Text strong style={{ color: '#fff', display: 'block' }}>StageTrack</Typography.Text>
-            <Typography.Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>{company?.name}</Typography.Text>
+            <Typography.Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>{user?.isHost ? t('host.panel') : company?.name}</Typography.Text>
           </div>
         </Flex>
         <Menu
@@ -150,10 +158,16 @@ export function AppLayout() {
             zIndex: 10,
           }}
         >
-          {company && (
-            <Tag icon={<EnvironmentOutlined />} color="geekblue" className="hide-mobile" style={{ marginInlineEnd: 'auto' }}>
-              {company.name}
+          {user?.isHost ? (
+            <Tag icon={<ApartmentOutlined />} color="purple" className="hide-mobile" style={{ marginInlineEnd: 'auto' }}>
+              {t('host.panel')}
             </Tag>
+          ) : (
+            company && (
+              <Tag icon={<EnvironmentOutlined />} color="geekblue" className="hide-mobile" style={{ marginInlineEnd: 'auto' }}>
+                {user?.tenantName && user.tenantName !== company.name ? `${user.tenantName} · ${company.name}` : company.name}
+              </Tag>
+            )
           )}
           <Select
             value={i18n.language}
@@ -204,10 +218,18 @@ export function AppLayout() {
             icon={<UserSwitchOutlined />}
             message={t('layout.impersonating', { user: user?.fullName, admin: user?.impersonatorName })}
             action={
-              <Button size="small" type="primary" onClick={() => endImpersonation().then(() => navigate('/settings/users')).catch(showError)}>
+              <Button size="small" type="primary" onClick={() => endImpersonation().then(() => navigate('/')).catch(showError)}>
                 {t('layout.backToMyAccount')}
               </Button>
             }
+          />
+        )}
+        {showSubscriptionWarning && !impersonating && (
+          <Alert
+            className="no-print"
+            type={subscriptionDaysLeft! <= 3 ? 'error' : 'warning'}
+            banner
+            message={t('subscriptionWarning', { date: dayjs(user!.subscriptionEndDate).format('DD.MM.YYYY'), count: Math.max(0, subscriptionDaysLeft!) })}
           />
         )}
         <Layout.Content style={{ padding: 16 }}>

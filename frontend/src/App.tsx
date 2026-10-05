@@ -22,6 +22,8 @@ import { RepairListPage } from './pages/maintenance/RepairListPage';
 import { SupplierListPage } from './pages/suppliers/SupplierListPage';
 import { CrewDirectoryPage } from './pages/crew/CrewDirectoryPage';
 import { PackingSlipPrintPage } from './pages/projects/PackingSlipPrintPage';
+import { HostTenantsPage } from './pages/host/HostTenantsPage';
+import { HostTenantDetailPage } from './pages/host/HostTenantDetailPage';
 import { ProjectListPage } from './pages/projects/ProjectListPage';
 import { ProjectDetailPage } from './pages/projects/ProjectDetailPage';
 import { CalendarPage } from './pages/projects/CalendarPage';
@@ -87,6 +89,18 @@ function AppRoutes() {
     );
   }
 
+  if (user.isHost) {
+    return (
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route index element={<HostTenantsPage />} />
+          <Route path="host/tenants/:id" element={<HostTenantDetailPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    );
+  }
+
   if (choosingLocation) {
     return <LocationPickerPage />;
   }
@@ -116,6 +130,7 @@ function AppRoutes() {
         <Route path="crew" element={<CrewDirectoryPage />} />
         <Route path="quotes" element={<Guard permission={Permissions.Quotes}><QuoteListPage /></Guard>} />
         <Route path="quotes/:id" element={<Guard permission={Permissions.Quotes}><QuoteEditorPage /></Guard>} />
+        <Route path="quotes/jobs/:id" element={<Guard permission={Permissions.Quotes}><ProjectDetailPage /></Guard>} />
         <Route path="customers" element={<Guard permission={Permissions.Customers}><CustomerListPage /></Guard>} />
         <Route path="settings/rental-factors" element={<Guard permission={Permissions.RentalFactors}><RentalFactorsPage /></Guard>} />
         <Route path="settings/users" element={<Guard permission={Permissions.IdentityUsers}><UsersPage /></Guard>} />

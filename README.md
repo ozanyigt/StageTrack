@@ -18,18 +18,28 @@ cd backend/src/StageTrack.HttpApi.Host && dotnet run      # http://localhost:508
 cd frontend && npm install && npm run dev                 # http://localhost:5180
 ```
 
-İlk açılışta veritabanı oluşturulur ve demo verisi yüklenir. Demoyu sıfırlamak için `reset-demo-db.cmd`.
+İlk açılışta veritabanı oluşturulur; içinde **yalnızca platform yöneticisi** vardır (test verisi yok).
+Veritabanını sıfırlamak için `reset-demo-db.cmd`.
 
 | Kullanıcı | Şifre | Rol |
 | --- | --- | --- |
-| admin | Admin123! | Tüm yetkiler, TR + Dubai şirketleri |
-| depo | Depo123! | Depo: okutma, etiket bağlama |
-| satis | Satis123! | Proje, müşteri, teklif |
-| dubai | Dubai123! | Yalnızca Dubai şirketi |
-| teknisyen1 / teknisyen2 | Teknik123! | Üye: yalnızca atandığı onaylı projeler, fiyatsız malzeme listesi |
+| admin | Admin123! | Platform yöneticisi (firmalar, abonelikler) |
 
-Birden fazla lokasyona erişen kullanıcı girişte Rentman'deki gibi lokasyon seçer (Staras TR / Staras Dubai); sonradan
-sağ üstteki kullanıcı menüsünden "Lokasyon değiştir".
+Platform yöneticisi hesabı `backend/src/StageTrack.HttpApi.Host/appsettings.Development.json` içindeki `HostAdmin`
+bölümünden gelir; sunum/üretim öncesi şifreyi değiştirin. Eski Staras demo verisi gerekirse aynı dosyada
+`"Seed": { "DemoData": true }` yapıp veritabanını sıfırlayın (STARAS firması + test kullanıcıları gelir).
+
+## Platform yönetimi (abonelik)
+
+- Platform yöneticisi girişte **Firmalar** panelini görür: toplam / aktif / süresi yaklaşan / askıda firma sayıları.
+- **Yeni firma:** firma bilgileri, abonelik (paket, başlangıç–bitiş, kullanıcı ve lokasyon limiti), ilk lokasyon
+  (para birimi, KDV, Rentman cmpID) ve firma yöneticisi tek formda. Firma açılırken ilk depo, varsayılan etiket şablonu,
+  gün çarpanı tablosu ve hazır roller (Yönetici, Depo, Satış, Üye) otomatik oluşturulur.
+- Firma detayında lokasyon ekleme (örn. Dubai; her lokasyonun verisi ayrı), kullanıcı listesi, şifre sıfırlama ve
+  **Bu kullanıcı olarak gir** (sunumda firmanın içine girip veri eklemek için; üstteki banttan geri dönülür).
+- **Askıya al** veya abonelik bitişi geçince firmanın tüm kullanıcılarının oturumu hemen kapanır, giriş ekranında
+  sebebi yazar. Bitişe 14 gün kala firma kullanıcıları uyarı bandı görür.
+- Kullanıcı ve lokasyon limitleri aşılamaz; kullanıcı adları tüm platformda benzersizdir.
 
 ### Telefonla okutma
 
@@ -71,10 +81,23 @@ biçiminde yazılabilir.
    iskonto ve KDV değiştirin, Yazdır/PDF.
 6. **Ayarlar → Gün çarpanları** → firmanın kendi çarpan tablosunu ekleme/çıkarma, önizleme.
 7. Sağ üstten dil **Arapça** → tüm arayüz sağdan sola; kullanıcı menüsü → "Lokasyon değiştir" → **Dubai** (AED, %5 KDV).
+   (Demo senaryosu `Seed:DemoData` açıkken geçerlidir.)
 8. **Ayarlar → Roller ve yetkiler** → yeni rol (örn. "Muhasebe"), yetki ağacından yalnızca Teklifler'i işaretleyin.
    Alt yetki işaretlenince üstü de işaretlenir; Yönetici rolü kilitlidir.
 9. **Ayarlar → Kullanıcılar** → yeni kullanıcı, rol ve şirket atama; Depo Sorumlusu satırında
    **"Bu kullanıcı olarak gir"** → menü anında daralır, üstte sarı bant çıkar → "Hesabıma dön".
+
+## Satış akışı: Teklifler → Projeler
+
+- **Teklifler** menüsü işleri listeler (her iş tek satır, son teklif + revizyon sayısı; satır açılınca eski revizyonlar).
+  Görünümler: *Onay bekleyen* (Taslak/Beklemede işler), *Kaybedilen* (reddedilen/iptal), *Tümü*.
+- **Yeni teklif** butonu müşteri, tarih ve mekânla yeni bir iş açar (Beklemede, ekipmanı rezerve eder) ve ilk taslak
+  teklifi oluşturur. Ekipman iş sayfasında planlanır; teklifte **Ekipmandan güncelle** satırları yeniler (girilen fiyat
+  ve iskontolar korunur).
+- Teklif **Kabul edildi** yapılınca iş otomatik onaylanır ve **Projeler**'e geçer; işin diğer açık revizyonları kapanır.
+- Teklif **Reddedildi** yapılırken sebep sorulur; başka açık revizyon yoksa iş iptal edilir, rezervasyon düşer ve iş
+  Kaybedilenler'e geçer. Müşteri dönerse **Yeniden aç** yeni revizyon oluşturur, iş tekrar Onay bekleyenlere döner.
+- **Projeler** yalnızca onaylı ve sonraki durumlardaki işleri gösterir; buradan yeni proje eklenmez.
 
 ## Düzeltme turu 1 ile gelenler
 

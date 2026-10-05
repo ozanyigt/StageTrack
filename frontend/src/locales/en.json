@@ -25,7 +25,7 @@
     "userName": "Username",
     "password": "Password",
     "submit": "Sign in",
-    "demoUsers": "Demo: admin · depo · satis · teknisyen1 (member)",
+    "demoUsers": "Sign in with your StageTrack account.",
     "chooseLocation": "Hello {{name}}, which location are you working at?",
     "country": {
       "TR": "Türkiye",
@@ -39,7 +39,8 @@
     "toggleTheme": "Light/dark theme",
     "impersonating": "You are viewing the app as {{user}} (your account: {{admin}}). Actions are recorded under this user.",
     "backToMyAccount": "Back to my account",
-    "changeLocation": "Change location"
+    "changeLocation": "Change location",
+    "backToPlatform": "Back to platform administration"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -63,7 +64,8 @@
     "repairs": "Repairs",
     "suppliers": "Suppliers",
     "crew": "Crew directory",
-    "labelTemplates": "Label templates"
+    "labelTemplates": "Label templates",
+    "tenants": "Firms"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -554,7 +556,9 @@
       "InvalidStatusTransition": "Quote status cannot change from \"{{from}}\" to \"{{to}}\".",
       "HasNoLines": "Add at least one line before sending the quote.",
       "CannotDelete": "Only draft quotes can be deleted.",
-      "LineDescriptionRequired": "Enter a description for the line."
+      "LineDescriptionRequired": "Enter a description for the line.",
+      "NotLatestRevision": "Only the latest revision can be reopened.",
+      "JobAlreadyDecided": "A quote of this job has already been accepted."
     },
     "Role": {
       "NameAlreadyExists": "A role named \"{{name}}\" already exists.",
@@ -614,6 +618,19 @@
     },
     "Import": {
       "InvalidRow": "Invalid row: check the {{field}} column."
+    },
+    "Tenant": {
+      "CodeAlreadyExists": "A firm with code {{code}} already exists.",
+      "Suspended": "Your firm's account is suspended. Please contact us.",
+      "SubscriptionExpired": "Your firm's subscription ended on {{date}}. Please contact us to renew.",
+      "SubscriptionNotStarted": "Your firm's subscription starts on {{date}}.",
+      "UserLimitReached": "The user limit of your subscription ({{max}}) has been reached.",
+      "LocationLimitReached": "The location limit of the subscription ({{max}}) has been reached.",
+      "InvalidPeriod": "The end date cannot be before the start date.",
+      "InvalidLimit": "Limits must be at least 1."
+    },
+    "Company": {
+      "CodeAlreadyExists": "This firm already has a location with code {{code}}."
     }
   },
   "roles": {
@@ -1007,5 +1024,135 @@
     "deleteConfirm": "Delete this template?",
     "preview": "Preview (actual size)",
     "previewHint": "The preview is shown at approximately actual size on screen."
-  }
+  },
+  "salesJobs": {
+    "newQuote": "New quote",
+    "createTitle": "New quote / job",
+    "job": "Job",
+    "jobStatus": "Job status",
+    "latestQuote": "Latest quote",
+    "noQuote": "No quote",
+    "revisionCount": "{{count}} revisions",
+    "rejectionReason": "Rejection reason",
+    "projectsHint": "Confirmed work only. New jobs are added from Quotes.",
+    "view": {
+      "Active": "Awaiting decision",
+      "Lost": "Lost",
+      "All": "All"
+    },
+    "viewHint": {
+      "Active": "Jobs waiting for the customer's decision. When a quote is marked \"Accepted\" the job moves to Projects automatically.",
+      "Lost": "Rejected quotes and cancelled jobs. If the customer comes back, use \"Reopen\" on the quote.",
+      "All": "All jobs and their quotes."
+    },
+    "salesJobHint": "This job is in the quoting stage. It is confirmed and moves to Projects when its quote is accepted.",
+    "lostJobHint": "This job was lost (quote rejected). Its equipment is no longer reserved; use \"Reopen\" on the quote if the customer comes back.",
+    "acceptConfirmTitle": "Was the quote accepted?",
+    "acceptConfirm": "The job will be confirmed and moved to Projects. Other open revisions of this job are closed.",
+    "acceptedMoved": "Quote accepted; job {{number}} moved to Projects.",
+    "acceptedBanner": "This quote was accepted; the job is in Projects.",
+    "openProject": "Open project",
+    "rejectTitle": "Quote rejected",
+    "rejectHelp": "Pick or type a short reason. If no other revision is open, the job is cancelled and its equipment reservation released.",
+    "reasonPlaceholder": "Rejection reason",
+    "reasons": {
+      "price": "Price too high",
+      "dates": "Dates did not fit",
+      "competitor": "Went with a competitor",
+      "cancelled": "Event cancelled",
+      "budget": "Budget not approved"
+    },
+    "rejectedCancelled": "Quote rejected; the job moved to Lost.",
+    "rejectedBanner": "This quote was rejected.",
+    "reasonLabel": "Reason: {{reason}}",
+    "reopen": "Reopen",
+    "reopened": "A new revision was created; the job is awaiting a decision again.",
+    "sync": "Update from equipment",
+    "syncTitle": "Update the equipment lines?",
+    "syncConfirm": "The quote's equipment lines are rebuilt from the equipment planned on the job. Prices and discounts you already entered are kept; personnel, transport and service lines are not touched.",
+    "synced": "Equipment lines updated."
+  },
+  "host": {
+    "title": "Firms",
+    "panel": "Platform administration",
+    "subtitle": "Subscribed firms, subscriptions and locations",
+    "newTenant": "New firm",
+    "editTenant": "Firm and subscription",
+    "search": "Search firm name, code or contact",
+    "summary": {
+      "total": "Total firms",
+      "active": "Active",
+      "expiringSoon": "Expiring soon",
+      "suspendedOrExpired": "Suspended / expired"
+    },
+    "status": {
+      "Active": "Active",
+      "Suspended": "Suspended",
+      "Expired": "Expired",
+      "NotStarted": "Not started"
+    },
+    "name": "Firm name",
+    "code": "Firm code",
+    "codeHint": "A short, unique code",
+    "contactName": "Contact person",
+    "email": "E-mail",
+    "phone": "Phone",
+    "notes": "Notes",
+    "subscription": "Subscription",
+    "plan": "Plan",
+    "plans": {
+      "starter": "Starter",
+      "pro": "Professional",
+      "enterprise": "Enterprise"
+    },
+    "period": "Subscription period",
+    "startDate": "Start",
+    "endDate": "End",
+    "openEnded": "Open-ended",
+    "endDateHint": "Leave empty for an open-ended subscription.",
+    "daysLeft": "{{count}} days left",
+    "expiredDaysAgo": "Ended {{count}} days ago",
+    "maxUsers": "User limit",
+    "maxLocations": "Location limit",
+    "unlimited": "Unlimited",
+    "usage": "{{used}} / {{max}}",
+    "users": "Users",
+    "locations": "Locations",
+    "firstLocation": "First location",
+    "firstLocationHint": "The firm's first branch/country. Each location (e.g. Dubai) has its own separate data.",
+    "adminUser": "Firm administrator",
+    "adminUserHint": "The firm's first user with every permission. User names are unique across the platform.",
+    "userName": "User name",
+    "fullName": "Full name",
+    "password": "Password",
+    "language": "Language",
+    "locationName": "Location name",
+    "locationCode": "Code",
+    "currency": "Currency",
+    "vatRate": "VAT %",
+    "country": "Country code",
+    "rentmanWorkspace": "Rentman workspace (cmpID)",
+    "rentmanWorkspaceHint": "The cmpID in existing Rentman QR labels. Leave empty if unknown.",
+    "warehouseName": "First warehouse name",
+    "addLocation": "Add location",
+    "editLocation": "Edit location",
+    "suspend": "Suspend",
+    "activate": "Activate",
+    "suspendConfirm": "Suspend this firm? All its users are signed out immediately and cannot sign in.",
+    "loginAs": "Sign in as this user",
+    "loginAsHint": "You enter the firm for a presentation or support; use the banner at the top to return to platform administration.",
+    "resetPassword": "Reset password",
+    "newPassword": "New password",
+    "passwordReset": "Password updated.",
+    "roles": "Roles",
+    "active": "Active",
+    "inactive": "Inactive",
+    "created": "Firm created.",
+    "saved": "Saved.",
+    "createdAt": "Created",
+    "detail": "Details",
+    "backToList": "Firms",
+    "statusColumn": "Status"
+  },
+  "subscriptionWarning": "Your subscription ends on {{date}} ({{count}} days left). Please contact us to renew."
 }

@@ -4,6 +4,9 @@ namespace StageTrack.Identity;
 
 public class AppUser : AggregateRoot, IAuditedObject
 {
+    /// <summary>The customer firm; null for platform administrators.</summary>
+    public Guid? TenantId { get; private set; }
+
     public string UserName { get; private set; } = null!;
     public string NormalizedUserName { get; private set; } = null!;
     public string FullName { get; private set; } = null!;
@@ -32,8 +35,9 @@ public class AppUser : AggregateRoot, IAuditedObject
     {
     }
 
-    internal AppUser(Guid id, string userName, string fullName, string? email, string language) : base(id)
+    internal AppUser(Guid id, string userName, string fullName, string? email, string language, Guid? tenantId) : base(id)
     {
+        TenantId = tenantId;
         UserName = userName;
         NormalizedUserName = Normalize(userName);
         FullName = fullName;
@@ -105,6 +109,8 @@ public class AppUser : AggregateRoot, IAuditedObject
     }
 
     public bool HasCompany(Guid companyId) => Companies.Any(c => c.CompanyId == companyId);
+
+    public bool IsHost => TenantId is null;
 }
 
 public class UserRole

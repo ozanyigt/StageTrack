@@ -86,5 +86,16 @@
   "Attachment.TooLarge": "Files can be at most {max} MB.",
   "Attachment.NotImage": "Only image files can be uploaded.",
   "LabelTemplate.InvalidSize": "The label dimensions are invalid.",
-  "Import.InvalidRow": "Invalid row: check the {field} column."
+  "Import.InvalidRow": "Invalid row: check the {field} column.",
+  "Quote.NotLatestRevision": "Only the latest revision can be reopened.",
+  "Quote.JobAlreadyDecided": "A quote of this job has already been accepted.",
+  "Tenant.CodeAlreadyExists": "A firm with code {code} already exists.",
+  "Tenant.Suspended": "Your firm's account is suspended. Please contact us.",
+  "Tenant.SubscriptionExpired": "Your firm's subscription ended on {date}. Please contact us to renew.",
+  "Tenant.SubscriptionNotStarted": "Your firm's subscription starts on {date}.",
+  "Tenant.UserLimitReached": "The user limit of your subscription ({max}) has been reached.",
+  "Tenant.LocationLimitReached": "The location limit of the subscription ({max}) has been reached.",
+  "Tenant.InvalidPeriod": "The end date cannot be before the start date.",
+  "Tenant.InvalidLimit": "Limits must be at least 1.",
+  "Company.CodeAlreadyExists": "This firm already has a location with code {code}."
 }

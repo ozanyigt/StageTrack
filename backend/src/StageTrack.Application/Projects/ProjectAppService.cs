@@ -248,7 +248,7 @@ public class ProjectAppService(
         return Task.CompletedTask;
     }
 
-    private static void Apply(Project project, CreateUpdateProjectDto input)
+    internal static void Apply(Project project, CreateUpdateProjectDto input)
     {
         project.Update(input.Name.Trim(), input.CustomerId, input.Venue, input.Color, input.ProjectType, input.StockLocationId, input.Notes);
         project.SetPlanPeriod(input.PlanStart, input.PlanEnd);

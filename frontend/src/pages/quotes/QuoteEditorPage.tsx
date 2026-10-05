@@ -1,8 +1,9 @@
 import {
   ArrowLeftOutlined, CopyOutlined, DeleteOutlined, EditOutlined, PlusOutlined, PrinterOutlined, ToolOutlined,
+  SyncOutlined, UndoOutlined,
 } from '@ant-design/icons';
 import {
-  App, Button, Card, Checkbox, Col, DatePicker, Descriptions, Divider, Flex, Form, Input, InputNumber, Modal, Row, Select, Skeleton,
+  Alert, App, Button, Card, Checkbox, Col, DatePicker, Descriptions, Divider, Flex, Form, Input, InputNumber, Modal, Row, Select, Skeleton,
   Space, Table, Tag, Typography, AutoComplete, type TableColumnsType,
 } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -62,6 +63,8 @@ export function QuoteEditorPage() {
   const [headerForm] = Form.useForm<HeaderForm>();
   const [lineForm] = Form.useForm<QuoteLineInput>();
   const [lineModal, setLineModal] = useState<{ line?: QuoteLine; equipment?: boolean } | null>(null);
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   const quote = useQuery({ queryKey: ['quote', id], queryFn: () => quoteApi.get(id!) });
   const profiles = useQuery({ queryKey: ['rental-factors'], queryFn: rentalFactorApi.list });
@@ -85,6 +88,9 @@ export function QuoteEditorPage() {
   const apply = (updated: Quote) => {
     queryClient.setQueryData(['quote', id], updated);
     queryClient.invalidateQueries({ queryKey: ['quotes'] });
+    queryClient.invalidateQueries({ queryKey: ['quote-jobs'] });
+    queryClient.invalidateQueries({ queryKey: ['project', updated.projectId] });
+    queryClient.invalidateQueries({ queryKey: ['projects'] });
   };
 
   const saveHeader = useMutation({
@@ -111,7 +117,42 @@ export function QuoteEditorPage() {
   });
 
   const removeLine = useMutation({ mutationFn: (lineId: string) => quoteApi.removeLine(id!, lineId), onSuccess: apply, onError: showError });
-  const changeStatus = useMutation({ mutationFn: (s: QuoteStatus) => quoteApi.changeStatus(id!, s), onSuccess: apply, onError: showError });
+  const changeStatus = useMutation({
+    mutationFn: ({ status, reason }: { status: QuoteStatus; reason?: string }) => quoteApi.changeStatus(id!, status, reason),
+    onSuccess: (u) => {
+      apply(u);
+      setRejectOpen(false);
+      if (u.status === 'Accepted') message.success(t('salesJobs.acceptedMoved', { number: u.projectNumber }));
+      if (u.status === 'Rejected' && u.projectStatus === 'Cancelled') message.info(t('salesJobs.rejectedCancelled'));
+    },
+    onError: showError,
+  });
+  const reopen = useMutation({
+    mutationFn: () => quoteApi.reopen(id!),
+    onSuccess: (r) => { apply(r); message.success(t('salesJobs.reopened')); navigate(`/quotes/${r.id}`); },
+    onError: showError,
+  });
+  const syncFromProject = useMutation({
+    mutationFn: () => quoteApi.syncFromProject(id!),
+    onSuccess: (u) => { apply(u); message.success(t('salesJobs.synced')); },
+    onError: showError,
+  });
+  const onStatus = (s: QuoteStatus) => {
+    if (s === 'Rejected') {
+      setRejectReason('');
+      setRejectOpen(true);
+    } else if (s === 'Accepted') {
+      modal.confirm({
+        title: t('salesJobs.acceptConfirmTitle'),
+        content: t('salesJobs.acceptConfirm'),
+        okText: t('quotes.markAccepted'),
+        cancelText: t('common.cancel'),
+        onOk: () => changeStatus.mutateAsync({ status: s }),
+      });
+    } else {
+      changeStatus.mutate({ status: s });
+    }
+  };
   const revise = useMutation({
     mutationFn: () => quoteApi.revise(id!),
     onSuccess: (r) => { queryClient.invalidateQueries({ queryKey: ['quotes'] }); navigate(`/quotes/${r.id}`); },
@@ -119,7 +160,11 @@ export function QuoteEditorPage() {
   });
   const remove = useMutation({
     mutationFn: () => quoteApi.remove(id!),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['quotes'] }); navigate('/quotes'); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['quotes'] });
+      queryClient.invalidateQueries({ queryKey: ['quote-jobs'] });
+      navigate('/quotes');
+    },
     onError: showError,
   });
 
@@ -172,19 +217,34 @@ export function QuoteEditorPage() {
     <>
       <div className="page-header">
         <Space align="center" wrap>
-          <Button icon={<ArrowLeftOutlined />} type="text" onClick={() => navigate(-1)} aria-label={t('common.back')} />
+          <Button icon={<ArrowLeftOutlined />} type="text" onClick={() => navigate(`/quotes/jobs/${q.projectId}`)} aria-label={t('common.back')} />
           <Typography.Title level={3}>{q.number} / R{q.revision}</Typography.Title>
           <QuoteStatusTag status={q.status} />
         </Space>
         <Space wrap>
           {can(Permissions.QuotesManage) && q.allowedStatuses.map((s) => (
             <Button key={s} type={s === 'Accepted' ? 'primary' : 'default'} danger={s === 'Rejected'} loading={changeStatus.isPending}
-              onClick={() => changeStatus.mutate(s)}>
+              onClick={() => onStatus(s)}>
               {t(statusAction[s] ?? `enums.quoteStatus.${s}`)}
             </Button>
           ))}
-          {can(Permissions.QuotesManage) && (q.status === 'Sent' || q.status === 'Rejected') && (
+          {can(Permissions.QuotesManage) && q.status === 'Sent' && (
             <Button icon={<CopyOutlined />} loading={revise.isPending} onClick={() => revise.mutate()}>{t('quotes.revise')}</Button>
+          )}
+          {can(Permissions.QuotesManage) && q.status === 'Rejected' && q.isLatestRevision && (
+            <Button icon={<UndoOutlined />} loading={reopen.isPending} onClick={() => reopen.mutate()}>{t('salesJobs.reopen')}</Button>
+          )}
+          {editable && (
+            <Button icon={<SyncOutlined />} loading={syncFromProject.isPending}
+              onClick={() => modal.confirm({
+                title: t('salesJobs.syncTitle'),
+                content: t('salesJobs.syncConfirm'),
+                okText: t('salesJobs.sync'),
+                cancelText: t('common.cancel'),
+                onOk: () => syncFromProject.mutateAsync(),
+              })}>
+              {t('salesJobs.sync')}
+            </Button>
           )}
           <Button icon={<PrinterOutlined />} onClick={() => window.open(`/quotes/${q.id}/print`, '_blank')}>{t('quotes.print')}</Button>
           {editable && (
@@ -194,6 +254,40 @@ export function QuoteEditorPage() {
         </Space>
       </div>
 
+      {q.status === 'Rejected' && (
+        <Alert
+          type="error"
+          showIcon
+          style={{ marginBottom: 12 }}
+          message={t('salesJobs.rejectedBanner')}
+          description={q.rejectionReason ? t('salesJobs.reasonLabel', { reason: q.rejectionReason }) : undefined}
+        />
+      )}
+      {q.status === 'Accepted' && (
+        <Alert type="success" showIcon style={{ marginBottom: 12 }} message={t('salesJobs.acceptedBanner')}
+          action={<Button size="small" onClick={() => navigate(`/projects/${q.projectId}`)}>{t('salesJobs.openProject')}</Button>} />
+      )}
+      <Modal
+        open={rejectOpen}
+        title={t('salesJobs.rejectTitle')}
+        onCancel={() => setRejectOpen(false)}
+        onOk={() => changeStatus.mutate({ status: 'Rejected', reason: rejectReason.trim() || undefined })}
+        okText={t('quotes.markRejected')}
+        okButtonProps={{ danger: true, loading: changeStatus.isPending }}
+        cancelText={t('common.cancel')}
+        destroyOnHidden
+      >
+        <Typography.Paragraph type="secondary">{t('salesJobs.rejectHelp')}</Typography.Paragraph>
+        <Space wrap style={{ marginBottom: 8 }}>
+          {(['price', 'dates', 'competitor', 'cancelled', 'budget'] as const).map((k) => (
+            <Tag.CheckableTag key={k} checked={rejectReason === t(`salesJobs.reasons.${k}`)} onChange={() => setRejectReason(t(`salesJobs.reasons.${k}`))}>
+              {t(`salesJobs.reasons.${k}`)}
+            </Tag.CheckableTag>
+          ))}
+        </Space>
+        <Input.TextArea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} maxLength={500} autoSize={{ minRows: 2 }}
+          placeholder={t('salesJobs.reasonPlaceholder')} />
+      </Modal>
       <Row gutter={[12, 12]}>
         <Col xs={24} xl={16}>
           <Card size="small">

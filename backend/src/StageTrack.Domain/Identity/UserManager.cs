@@ -1,23 +1,31 @@
 using Microsoft.AspNetCore.Identity;
+using StageTrack.Tenants;
 
 namespace StageTrack.Identity;
 
 public class UserManager(
     IUserRepository userRepository,
     IRoleRepository roleRepository,
+    TenantManager tenantManager,
     IPasswordHasher<AppUser> passwordHasher)
 {
     public const int MinPasswordLength = 8;
 
-    public async Task<AppUser> CreateAsync(string userName, string fullName, string password, string? email = null, string language = "tr")
+    /// <param name="tenantId">The customer firm; null only for platform administrators. Checks the firm's user limit.</param>
+    public async Task<AppUser> CreateAsync(string userName, string fullName, string password, string? email, string language, Guid? tenantId)
     {
         userName = userName.Trim();
+        if (tenantId.HasValue)
+        {
+            await tenantManager.EnsureCanAddUserAsync(tenantId.Value);
+        }
+
         if (await userRepository.UserNameExistsAsync(userName))
         {
             throw new BusinessException(StageTrackErrorCodes.UserNameAlreadyExists).WithData("userName", userName);
         }
 
-        var user = new AppUser(Guid.CreateVersion7(), userName, fullName.Trim(), email, language);
+        var user = new AppUser(Guid.CreateVersion7(), userName, fullName.Trim(), email, language, tenantId);
         SetPassword(user, password);
         return await userRepository.InsertAsync(user);
     }
@@ -69,7 +77,7 @@ public class UserManager(
         }
 
         var existing = await roleRepository.GetListByIdsAsync(roleIds);
-        if (existing.Count != roleIds.Distinct().Count())
+        if (existing.Count != roleIds.Distinct().Count() || existing.Any(r => r.TenantId != user.TenantId))
         {
             throw new EntityNotFoundException(typeof(AppRole));
         }
@@ -107,7 +115,17 @@ public class UserManager(
     /// </summary>
     public void EnsureCanImpersonate(AppUser impersonator, AppUser target, Guid companyId, bool alreadyImpersonating)
     {
-        if (alreadyImpersonating || impersonator.Id == target.Id || !target.IsActive || !target.HasCompany(companyId))
+        if (alreadyImpersonating || impersonator.Id == target.Id || !target.IsActive || !target.HasCompany(companyId) ||
+            target.TenantId != impersonator.TenantId)
+        {
+            throw new BusinessException(StageTrackErrorCodes.ImpersonationNotAllowed);
+        }
+    }
+
+    /// <summary>The platform admin may sign in as any active user of a customer firm (support, presentations).</summary>
+    public static void EnsureHostCanImpersonate(AppUser impersonator, AppUser target, bool alreadyImpersonating)
+    {
+        if (alreadyImpersonating || !impersonator.IsHost || target.IsHost || !target.IsActive)
         {
             throw new BusinessException(StageTrackErrorCodes.ImpersonationNotAllowed);
         }

@@ -19,6 +19,7 @@ public class QuoteAppService(
     IRentalFactorProfileRepository profileRepository,
     IUserRepository userRepository,
     QuoteManager quoteManager,
+    ProjectManager projectManager,
     ICurrentCompany currentCompany,
     IUnitOfWork unitOfWork) : IQuoteAppService
 {
@@ -97,7 +98,72 @@ public class QuoteAppService(
     {
         var quote = await quoteRepository.GetAsync(id);
         var project = await projectRepository.GetAsync(quote.ProjectId);
-        await quoteManager.ChangeStatusAsync(quote, input.Status, project);
+        await quoteManager.ChangeStatusAsync(quote, input.Status, project, input.Reason);
+        await unitOfWork.SaveChangesAsync();
+        return await BuildDtoAsync(quote);
+    }
+
+    public async Task<PagedResultDto<QuoteJobDto>> GetJobsAsync(GetQuoteJobsInput input)
+    {
+        var filter = new ProjectFilter
+        {
+            Text = input.Text,
+            Statuses = input.View switch
+            {
+                QuoteJobView.Active => [ProjectStatus.Draft, ProjectStatus.Pending],
+                QuoteJobView.Lost => [ProjectStatus.Cancelled],
+                _ => null
+            }
+        };
+
+        var total = await projectRepository.GetCountAsync(filter);
+        var projects = await projectRepository.GetPagedListAsync(filter, input.Sorting, input.SkipCount, input.MaxResultCount);
+        var quotes = (await quoteRepository.GetListByProjectIdsAsync(projects.Select(p => p.Project.Id).ToList()))
+            .ToLookup(q => q.Quote.ProjectId);
+
+        var items = projects.Select(p =>
+        {
+            var jobQuotes = quotes[p.Project.Id].Select(q => q.ToDto()).ToList();
+            return new QuoteJobDto
+            {
+                Project = p.ToDto(),
+                Quotes = jobQuotes,
+                LatestQuote = jobQuotes.FirstOrDefault()
+            };
+        }).ToList();
+        return new PagedResultDto<QuoteJobDto>(total, items);
+    }
+
+    public async Task<QuoteDto> CreateJobAsync(CreateQuoteJobInput input)
+    {
+        var project = await projectManager.CreateAsync(input.Name, input.PlanStart, input.PlanEnd);
+        ProjectAppService.Apply(project, input);
+        await projectManager.ChangeStatusAsync(project, ProjectStatus.Pending);
+        await projectRepository.InsertAsync(project);
+        await unitOfWork.SaveChangesAsync();
+
+        var company = await companyRepository.GetAsync(currentCompany.Id!.Value);
+        var quote = await quoteManager.CreateFromProjectAsync(project, company, input.RentalFactorProfileId, DateTime.Today);
+        await quoteRepository.InsertAsync(quote);
+        await unitOfWork.SaveChangesAsync();
+        return await BuildDtoAsync(quote);
+    }
+
+    public async Task<QuoteDto> ReopenAsync(Guid id)
+    {
+        var quote = await quoteRepository.GetAsync(id);
+        var project = await projectRepository.GetAsync(quote.ProjectId);
+        var revision = await quoteManager.ReopenAsync(quote, project, DateTime.Today);
+        await quoteRepository.InsertAsync(revision);
+        await unitOfWork.SaveChangesAsync();
+        return await BuildDtoAsync(revision);
+    }
+
+    public async Task<QuoteDto> SyncFromProjectAsync(Guid id)
+    {
+        var quote = await quoteRepository.GetAsync(id);
+        var project = await projectRepository.GetAsync(quote.ProjectId);
+        await quoteManager.SyncFromProjectAsync(quote, project);
         await unitOfWork.SaveChangesAsync();
         return await BuildDtoAsync(quote);
     }
@@ -157,6 +223,9 @@ public class QuoteAppService(
         dto.Customer = customer?.ToDto();
         dto.Company = company.ToDto();
         dto.PaymentTerms = project.PaymentTerms;
+        dto.ProjectStatus = project.Status;
+        dto.IsLatestRevision = !(await quoteRepository.GetListByProjectAsync(project.Id))
+            .Any(q => q.Number == quote.Number && q.Revision > quote.Revision);
         dto.PreparedByName = project.AccountManagerId.HasValue
             ? (await userRepository.FindAsync(project.AccountManagerId.Value))?.FullName
             : null;

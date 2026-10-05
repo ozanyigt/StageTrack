@@ -31,13 +31,19 @@ public interface IUserRepository : IRepository<AppUser>
 
     /// <summary>Active users of the company with their role names, for the crew directory.</summary>
     Task<List<(AppUser User, List<string> Roles)>> GetDirectoryAsync(Guid companyId, CancellationToken cancellationToken = default);
+
+    /// <summary>All users of a customer firm with their role names (platform admin view).</summary>
+    Task<List<(AppUser User, List<string> Roles)>> GetListByTenantAsync(Guid tenantId, CancellationToken cancellationToken = default);
 }
 
 public interface IRoleRepository : IRepository<AppRole>
 {
-    Task<AppRole?> FindByNameAsync(string name, CancellationToken cancellationToken = default);
+    /// <summary>Roles of a customer firm (null = platform roles).</summary>
+    Task<List<AppRole>> GetListAsync(Guid? tenantId, CancellationToken cancellationToken = default);
 
-    Task<bool> NameExistsAsync(string name, Guid? excludeId = null, CancellationToken cancellationToken = default);
+    Task<AppRole?> FindByNameAsync(Guid? tenantId, string name, CancellationToken cancellationToken = default);
+
+    Task<bool> NameExistsAsync(Guid? tenantId, string name, Guid? excludeId = null, CancellationToken cancellationToken = default);
 
     Task<Dictionary<Guid, int>> GetUserCountsAsync(CancellationToken cancellationToken = default);
 }

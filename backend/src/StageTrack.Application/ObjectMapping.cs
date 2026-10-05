@@ -233,6 +233,7 @@ internal static class ObjectMapping
         dto.ProjectNumber = projectNumber;
         dto.ProjectName = projectName;
         dto.CustomerName = customerName;
+        dto.RejectionReason = q.RejectionReason;
         return dto;
     }
 
