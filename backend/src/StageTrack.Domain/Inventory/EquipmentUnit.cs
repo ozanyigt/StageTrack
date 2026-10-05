@@ -19,8 +19,20 @@ public class EquipmentUnit : CompanyAggregateRoot
     /// <summary>Project the device is checked out to while <see cref="Status"/> is OnProject.</summary>
     public Guid? CurrentProjectId { get; private set; }
 
+    /// <summary>Free remark; formatted text (sanitized HTML) from the device page.</summary>
     public string? Notes { get; private set; }
+
     public bool IsArchived { get; private set; }
+
+    public DateTime? PurchaseDate { get; private set; }
+    public DateTime? WarrantyDate { get; private set; }
+
+    /// <summary>Planned replacement (end of life) date.</summary>
+    public DateTime? ReplacementDate { get; private set; }
+
+    public Guid? SupplierId { get; private set; }
+    public Guid? ImageAttachmentId { get; private set; }
+    public DateTime? LastInspectionDate { get; private set; }
 
     private EquipmentUnit()
     {
@@ -44,6 +56,28 @@ public class EquipmentUnit : CompanyAggregateRoot
         Notes = notes;
     }
 
+    public void UpdateDetails(DateTime? purchaseDate, DateTime? warrantyDate, DateTime? replacementDate, Guid? supplierId)
+    {
+        PurchaseDate = purchaseDate;
+        WarrantyDate = warrantyDate;
+        ReplacementDate = replacementDate;
+        SupplierId = supplierId;
+    }
+
+    public void SetImage(Guid? attachmentId) => ImageAttachmentId = attachmentId;
+
+    /// <summary>Next periodic inspection, from the last one and the equipment's interval.</summary>
+    public DateTime? GetNextInspectionDate(int? intervalMonths) =>
+        intervalMonths is null ? null : (LastInspectionDate ?? PurchaseDate)?.AddMonths(intervalMonths.Value);
+
+    internal void RecordInspection(DateTime date)
+    {
+        if (LastInspectionDate is null || date > LastInspectionDate)
+        {
+            LastInspectionDate = date;
+        }
+    }
+
     internal void CheckOut(Guid projectId)
     {
         Status = UnitStatus.OnProject;
@@ -59,6 +93,16 @@ public class EquipmentUnit : CompanyAggregateRoot
     internal void SetStatus(UnitStatus status) => Status = status;
 
     internal void Archive() => IsArchived = true;
+
+    internal void Restore() => IsArchived = false;
+
+    /// <summary>Moves the device to another location (company); called only by the transfer manager.</summary>
+    internal void MoveToCompany(Guid companyId, Guid equipmentId, Guid stockLocationId)
+    {
+        CompanyId = companyId;
+        EquipmentId = equipmentId;
+        StockLocationId = stockLocationId;
+    }
 
     /// <summary>Devices in repair or lost are not counted as available stock.</summary>
     public bool CountsAsStock => !IsArchived && Status is UnitStatus.InStock or UnitStatus.OnProject;

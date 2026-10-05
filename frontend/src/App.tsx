@@ -9,11 +9,19 @@ import { AuthProvider, Permissions, useAuth } from './auth/AuthContext';
 import { ThemeProvider, useThemeMode } from './components/ThemeMode';
 import { AppLayout } from './components/AppLayout';
 import { isRtl } from './i18n';
-import { LoginPage } from './pages/LoginPage';
+import { LocationPickerPage, LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { EquipmentListPage } from './pages/equipment/EquipmentListPage';
 import { EquipmentDetailPage } from './pages/equipment/EquipmentDetailPage';
 import { UnitListPage } from './pages/equipment/UnitListPage';
+import { EquipmentLayout } from './pages/equipment/EquipmentLayout';
+import { UnitDetailPage } from './pages/equipment/UnitDetailPage';
+import { LabelPrintPage } from './pages/equipment/LabelPrintPage';
+import { LabelTemplatesPage } from './pages/settings/LabelTemplatesPage';
+import { RepairListPage } from './pages/maintenance/RepairListPage';
+import { SupplierListPage } from './pages/suppliers/SupplierListPage';
+import { CrewDirectoryPage } from './pages/crew/CrewDirectoryPage';
+import { PackingSlipPrintPage } from './pages/projects/PackingSlipPrintPage';
 import { ProjectListPage } from './pages/projects/ProjectListPage';
 import { ProjectDetailPage } from './pages/projects/ProjectDetailPage';
 import { CalendarPage } from './pages/projects/CalendarPage';
@@ -46,7 +54,7 @@ function Themed({ children }: { children: ReactNode }) {
       renderEmpty={() => <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('common.noData')} />}
       theme={{
         algorithm: mode === 'dark' ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
-        token: { colorPrimary: '#f97316', borderRadius: 6 },
+        token: { colorPrimary: '#4f46e5', borderRadius: 6 },
       }}
     >
       <AntApp>{children}</AntApp>
@@ -54,14 +62,18 @@ function Themed({ children }: { children: ReactNode }) {
   );
 }
 
-function Guard({ permission, children }: { permission?: string; children: ReactNode }) {
+/** Renders the page when the user has the permission (or any of the permissions in the array). */
+function Guard({ permission, children }: { permission?: string | string[]; children: ReactNode }) {
   const { can } = useAuth();
-  if (permission && !can(permission)) return <Navigate to="/" replace />;
+  const required = permission === undefined ? [] : Array.isArray(permission) ? permission : [permission];
+  if (required.length > 0 && !required.some(can)) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
+const ProjectAccess = [Permissions.Projects, Permissions.AssignedProjects];
+
 function AppRoutes() {
-  const { user, loading } = useAuth();
+  const { user, loading, choosingLocation } = useAuth();
 
   if (loading) {
     return <Spin size="large" fullscreen />;
@@ -75,21 +87,33 @@ function AppRoutes() {
     );
   }
 
+  if (choosingLocation) {
+    return <LocationPickerPage />;
+  }
+
   return (
     <Routes>
       <Route path="/quotes/:id/print" element={<Guard permission={Permissions.Quotes}><QuotePrintPage /></Guard>} />
+      <Route path="/projects/:id/packing-slip" element={<Guard permission={ProjectAccess}><PackingSlipPrintPage /></Guard>} />
+      <Route path="/labels/print" element={<Guard permission={Permissions.Equipment}><LabelPrintPage /></Guard>} />
       <Route element={<AppLayout />}>
         <Route index element={<DashboardPage />} />
         <Route path="calendar" element={<Guard permission={Permissions.Projects}><CalendarPage /></Guard>} />
-        <Route path="projects" element={<Guard permission={Permissions.Projects}><ProjectListPage /></Guard>} />
-        <Route path="projects/:id" element={<Guard permission={Permissions.Projects}><ProjectDetailPage /></Guard>} />
+        <Route path="projects" element={<Guard permission={ProjectAccess}><ProjectListPage /></Guard>} />
+        <Route path="projects/:id" element={<Guard permission={ProjectAccess}><ProjectDetailPage /></Guard>} />
         <Route path="warehouse" element={<Guard permission={Permissions.Warehouse}><WarehouseBoardPage /></Guard>} />
         <Route path="warehouse/scan" element={<Guard permission={Permissions.WarehouseScan}><ScanPage /></Guard>} />
         <Route path="warehouse/scan/:projectId" element={<Guard permission={Permissions.WarehouseScan}><ScanPage /></Guard>} />
         <Route path="warehouse/movements" element={<Guard permission={Permissions.Warehouse}><MovementsPage /></Guard>} />
-        <Route path="equipment" element={<Guard permission={Permissions.Equipment}><EquipmentListPage /></Guard>} />
-        <Route path="equipment/units" element={<Guard permission={Permissions.Equipment}><UnitListPage /></Guard>} />
-        <Route path="equipment/:id" element={<Guard permission={Permissions.Equipment}><EquipmentDetailPage /></Guard>} />
+        <Route path="equipment" element={<Guard permission={Permissions.Equipment}><EquipmentLayout /></Guard>}>
+          <Route index element={<EquipmentListPage />} />
+          <Route path="units" element={<UnitListPage />} />
+          <Route path="units/:id" element={<UnitDetailPage />} />
+          <Route path=":id" element={<EquipmentDetailPage />} />
+        </Route>
+        <Route path="maintenance/repairs" element={<Guard permission={Permissions.Maintenance}><RepairListPage /></Guard>} />
+        <Route path="suppliers" element={<Guard permission={Permissions.Suppliers}><SupplierListPage /></Guard>} />
+        <Route path="crew" element={<CrewDirectoryPage />} />
         <Route path="quotes" element={<Guard permission={Permissions.Quotes}><QuoteListPage /></Guard>} />
         <Route path="quotes/:id" element={<Guard permission={Permissions.Quotes}><QuoteEditorPage /></Guard>} />
         <Route path="customers" element={<Guard permission={Permissions.Customers}><CustomerListPage /></Guard>} />
@@ -97,6 +121,7 @@ function AppRoutes() {
         <Route path="settings/users" element={<Guard permission={Permissions.IdentityUsers}><UsersPage /></Guard>} />
         <Route path="settings/roles" element={<Guard permission={Permissions.IdentityRoles}><RolesPage /></Guard>} />
         <Route path="settings/stock-locations" element={<Guard permission={Permissions.StockLocations}><StockLocationsPage /></Guard>} />
+        <Route path="settings/label-templates" element={<Guard permission={Permissions.LabelTemplates}><LabelTemplatesPage /></Guard>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

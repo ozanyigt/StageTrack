@@ -8,6 +8,12 @@ public class AppUser : AggregateRoot, IAuditedObject
     public string NormalizedUserName { get; private set; } = null!;
     public string FullName { get; private set; } = null!;
     public string? Email { get; private set; }
+
+    /// <summary>Shown in the crew directory so colleagues can reach each other.</summary>
+    public string? Phone { get; private set; }
+
+    /// <summary>Job title, e.g. "Ses teknisyeni", "Depo sorumlusu".</summary>
+    public string? JobTitle { get; private set; }
     public string PasswordHash { get; private set; } = null!;
     public bool IsActive { get; private set; } = true;
 
@@ -41,10 +47,12 @@ public class AppUser : AggregateRoot, IAuditedObject
 
     public void SetLanguage(string language) => Language = language;
 
-    public void Update(string fullName, string? email)
+    public void Update(string fullName, string? email, string? phone, string? jobTitle)
     {
         FullName = fullName;
         Email = email;
+        Phone = phone;
+        JobTitle = jobTitle;
     }
 
     internal void SetActive(bool isActive) => IsActive = isActive;

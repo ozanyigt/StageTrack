@@ -40,6 +40,8 @@ public class EquipmentUnitManager(IEquipmentUnitRepository unitRepository)
         unit.SetStatus(status);
     }
 
+    public void Restore(EquipmentUnit unit) => unit.Restore();
+
     public void Archive(EquipmentUnit unit)
     {
         if (unit.Status == UnitStatus.OnProject)

@@ -98,3 +98,50 @@ body {
     background: #fff !important;
   }
 }
+
+.rich-text p,
+.rich-text div {
+  margin: 0 0 4px;
+}
+
+.rich-text ul,
+.rich-text ol {
+  margin: 0 0 4px;
+  padding-inline-start: 20px;
+}
+
+/* Equipment module: folder tree stays on the left while lists and detail pages change on the right. */
+.master-detail {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.master-detail > .master {
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 96px);
+  overflow: auto;
+}
+
+@media (max-width: 992px) {
+  .master-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .master-detail > .master {
+    position: static;
+    max-height: 280px;
+  }
+}
+
+.location-card {
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.location-card:hover {
+  border-color: #6366f1;
+  transform: translateY(-1px);
+}

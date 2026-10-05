@@ -75,22 +75,24 @@ public class Quote : CompanyAggregateRoot
     }
 
     public QuoteLine AddLine(QuoteLineType type, Guid? equipmentId, string description, decimal quantity,
-        decimal unitPrice, bool applyFactor, decimal discountPercent)
+        decimal unitPrice, bool applyFactor, decimal discountPercent, string? section = null, string? notes = null)
     {
         EnsureEditable();
         var line = new QuoteLine(Guid.CreateVersion7(), Id, Lines.Count + 1);
         line.Set(type, equipmentId, description, quantity, unitPrice, applyFactor, discountPercent);
+        line.SetPlacement(section, notes);
         Lines.Add(line);
         Recalculate();
         return line;
     }
 
     public void UpdateLine(Guid lineId, QuoteLineType type, string description, decimal quantity, decimal unitPrice,
-        bool applyFactor, decimal discountPercent)
+        bool applyFactor, decimal discountPercent, string? section, string? notes)
     {
         EnsureEditable();
         var line = GetLine(lineId);
         line.Set(type, line.EquipmentId, description, quantity, unitPrice, applyFactor, discountPercent);
+        line.SetPlacement(section, notes);
         Recalculate();
     }
 
@@ -120,6 +122,7 @@ public class Quote : CompanyAggregateRoot
         {
             var newLine = new QuoteLine(Guid.CreateVersion7(), id, line.SortOrder);
             newLine.Set(line.Type, line.EquipmentId, line.Description, line.Quantity, line.UnitPrice, line.ApplyFactor, line.DiscountPercent);
+            newLine.SetPlacement(line.Section, line.Notes);
             copy.Lines.Add(newLine);
         }
 
@@ -181,6 +184,12 @@ public class QuoteLine : Entity
     public decimal DiscountPercent { get; private set; }
     public decimal Total { get; private set; }
 
+    /// <summary>Section path copied from the project ("Ses / Hoparlör"); lines are grouped by it on the document.</summary>
+    public string? Section { get; private set; }
+
+    /// <summary>Remark printed under the line, e.g. "10 adet headset / 2 adet el telsiz".</summary>
+    public string? Notes { get; private set; }
+
     private QuoteLine()
     {
     }
@@ -211,6 +220,12 @@ public class QuoteLine : Entity
         UnitPrice = Math.Max(0, unitPrice);
         ApplyFactor = applyFactor;
         DiscountPercent = discountPercent;
+    }
+
+    internal void SetPlacement(string? section, string? notes)
+    {
+        Section = string.IsNullOrWhiteSpace(section) ? null : section.Trim();
+        Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
     }
 
     internal void Calculate(decimal factor)

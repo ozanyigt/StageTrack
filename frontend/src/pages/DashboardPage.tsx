@@ -1,5 +1,5 @@
-import { WarningOutlined } from '@ant-design/icons';
-import { Card, Col, Empty, List, Row, Skeleton, Statistic, Table, Tag, Typography } from 'antd';
+import { BuildOutlined, CalendarOutlined, EnvironmentOutlined, SafetyCertificateOutlined, WarningOutlined } from '@ant-design/icons';
+import { Card, Col, Empty, Flex, List, Row, Skeleton, Statistic, Table, Tag, Typography } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
@@ -20,6 +20,50 @@ export function DashboardPage() {
 
   const activeStatuses = PROJECT_STATUSES.filter((s) => !['Returned', 'Cancelled', 'Draft'].includes(s));
 
+  // Crew members only see the confirmed projects they are assigned to.
+  if (!can(Permissions.Projects) && can(Permissions.AssignedProjects)) {
+    return (
+      <>
+        <div className="page-header">
+          <Typography.Title level={3}>{t('dashboard.welcome', { name: user?.fullName })}</Typography.Title>
+        </div>
+        <Card size="small" title={t('dashboard.myProjects')} extra={<Link to="/projects">{t('common.viewAll')}</Link>}>
+          {data.myProjects.length === 0 ? (
+            <Empty description={t('dashboard.noMyProjects')} />
+          ) : (
+            <Row gutter={[12, 12]}>
+              {data.myProjects.map((p) => (
+                <Col xs={24} md={12} xl={8} key={p.id}>
+                  <Card
+                    size="small"
+                    hoverable
+                    onClick={() => navigate(`/projects/${p.id}`)}
+                    style={{ borderInlineStart: `4px solid ${p.color}` }}
+                  >
+                    <Flex justify="space-between" align="start" gap={8}>
+                      <Typography.Text strong>
+                        {p.number} · {p.name}
+                      </Typography.Text>
+                      <ProjectStatusTag status={p.status} />
+                    </Flex>
+                    <Typography.Text type="secondary" style={{ display: 'block', marginTop: 6 }}>
+                      <CalendarOutlined /> {f.period(p.useStart ?? p.planStart, p.useEnd ?? p.planEnd)}
+                    </Typography.Text>
+                    {p.venue && (
+                      <Typography.Text type="secondary" style={{ display: 'block' }}>
+                        <EnvironmentOutlined /> {p.venue}
+                      </Typography.Text>
+                    )}
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          )}
+        </Card>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="page-header">
@@ -36,6 +80,31 @@ export function DashboardPage() {
           </Col>
         ))}
       </Row>
+      )}
+
+      {can(Permissions.Maintenance) && (
+        <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
+          <Col xs={12} md={6}>
+            <Card size="small" hoverable onClick={() => navigate('/maintenance/repairs')}>
+              <Statistic
+                title={t('dashboard.openRepairs')}
+                value={data.openRepairs}
+                prefix={<BuildOutlined />}
+                valueStyle={data.openRepairs > 0 ? { color: '#fa8c16' } : undefined}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} md={6}>
+            <Card size="small" hoverable onClick={() => navigate('/equipment/units')}>
+              <Statistic
+                title={t('dashboard.overdueInspections')}
+                value={data.overdueInspections}
+                prefix={<SafetyCertificateOutlined />}
+                valueStyle={data.overdueInspections > 0 ? { color: '#cf1322' } : undefined}
+              />
+            </Card>
+          </Col>
+        </Row>
       )}
 
       <Row gutter={[12, 12]} style={{ marginTop: 12 }}>

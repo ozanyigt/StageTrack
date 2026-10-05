@@ -6,6 +6,29 @@ namespace StageTrack.Repositories;
 
 public class EquipmentRepository(StageTrackDbContext dbContext) : EfRepository<Equipment>(dbContext), IEquipmentRepository
 {
+    protected override IQueryable<Equipment> WithDetails(IQueryable<Equipment> query) =>
+        query.Include(e => e.Relations).Include(e => e.Suppliers);
+
+    public Task<Equipment?> FindByCodeAsync(string code, CancellationToken cancellationToken = default) =>
+        WithDetails(DbSet).FirstOrDefaultAsync(e => e.Code == code, cancellationToken);
+
+    public async Task<List<(Equipment Container, int Quantity)>> GetContainersAsync(Guid equipmentId, CancellationToken cancellationToken = default)
+    {
+        var rows = await (from relation in DbContext.Set<EquipmentRelation>()
+                          where relation.RelatedEquipmentId == equipmentId && relation.Kind == EquipmentRelationKind.Content
+                          join container in DbSet on relation.EquipmentId equals container.Id
+                          select new { container, relation.Quantity })
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+        return rows.Select(r => (r.container, r.Quantity)).ToList();
+    }
+
+    public Task<List<Equipment>> GetListWithRelationsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.Distinct().ToList();
+        return DbSet.Include(e => e.Relations).Where(e => idList.Contains(e.Id)).ToListAsync(cancellationToken);
+    }
+
     public Task<bool> CodeExistsAsync(string code, Guid? excludeId = null, CancellationToken cancellationToken = default) =>
         DbSet.AnyAsync(e => e.Code == code && (excludeId == null || e.Id != excludeId), cancellationToken);
 
@@ -90,6 +113,13 @@ public class EquipmentFolderRepository(StageTrackDbContext dbContext) : EfReposi
 
     public async Task<int> GetMaxSortOrderAsync(Guid? parentId, CancellationToken cancellationToken = default) =>
         await DbSet.Where(f => f.ParentId == parentId).MaxAsync(f => (int?)f.SortOrder, cancellationToken) ?? 0;
+
+    public Task<Dictionary<Guid, int>> GetEquipmentCountsAsync(CancellationToken cancellationToken = default) =>
+        DbContext.Equipment
+            .Where(e => !e.IsArchived && e.FolderId != null)
+            .GroupBy(e => e.FolderId!.Value)
+            .Select(g => new { FolderId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.FolderId, x => x.Count, cancellationToken);
 }
 
 public class EquipmentUnitRepository(StageTrackDbContext dbContext) : EfRepository<EquipmentUnit>(dbContext), IEquipmentUnitRepository
@@ -114,6 +144,8 @@ public class EquipmentUnitRepository(StageTrackDbContext dbContext) : EfReposito
          from location in locations.DefaultIfEmpty()
          join project in DbContext.Projects on unit.CurrentProjectId equals project.Id into projects
          from project in projects.DefaultIfEmpty()
+         join supplier in DbContext.Suppliers on unit.SupplierId equals supplier.Id into suppliers
+         from supplier in suppliers.DefaultIfEmpty()
          select new EquipmentUnitListItem
          {
              Unit = unit,
@@ -122,7 +154,9 @@ public class EquipmentUnitRepository(StageTrackDbContext dbContext) : EfReposito
              StockLocationName = location != null ? location.Name : null,
              CurrentProjectNumber = project != null ? project.Number : null,
              CurrentProjectName = project != null ? project.Name : null,
-             LabelCount = DbContext.EquipmentLabels.Count(l => l.UnitId == unit.Id)
+             LabelCount = DbContext.EquipmentLabels.Count(l => l.UnitId == unit.Id),
+             SupplierName = supplier != null ? supplier.Name : null,
+             InspectionIntervalMonths = equipment.InspectionIntervalMonths
          })
         .AsNoTracking();
 
@@ -144,12 +178,39 @@ public class EquipmentUnitRepository(StageTrackDbContext dbContext) : EfReposito
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.Status, x => x.Count, cancellationToken);
 
+    public Task<int> CountOverdueInspectionsAsync(DateTime today, CancellationToken cancellationToken = default) =>
+        (from unit in DbSet
+         join equipment in DbContext.Equipment on unit.EquipmentId equals equipment.Id
+         where !unit.IsArchived && equipment.InspectionIntervalMonths != null &&
+               (unit.LastInspectionDate ?? unit.PurchaseDate) != null &&
+               (unit.LastInspectionDate ?? unit.PurchaseDate)!.Value.AddMonths(equipment.InspectionIntervalMonths.Value) < today
+         select unit.Id).CountAsync(cancellationToken);
+
     public Task<List<EquipmentUnit>> GetListOutOnProjectAsync(Guid projectId, CancellationToken cancellationToken = default) =>
         DbSet.Where(u => u.CurrentProjectId == projectId).OrderBy(u => u.InternalRef).ToListAsync(cancellationToken);
 
+    public async Task<List<UnitStockRow>> GetStockRowsAsync(Guid equipmentId, CancellationToken cancellationToken = default)
+    {
+        var rows = await DbSet
+            .Where(u => u.EquipmentId == equipmentId && !u.IsArchived)
+            .GroupBy(u => new { u.StockLocationId, u.Status })
+            .Select(g => new { g.Key.StockLocationId, g.Key.Status, Count = g.Count() })
+            .ToListAsync(cancellationToken);
+        return rows.Select(r => new UnitStockRow(r.StockLocationId, r.Status, r.Count)).ToList();
+    }
+
+    public Task<List<EquipmentUnit>> GetListByEquipmentAsync(Guid equipmentId, bool includeArchived, CancellationToken cancellationToken = default) =>
+        DbSet.Where(u => u.EquipmentId == equipmentId && (includeArchived || !u.IsArchived)).OrderBy(u => u.InternalRef).ToListAsync(cancellationToken);
+
+    public Task<EquipmentUnit?> FindByInternalRefAsync(string internalRef, CancellationToken cancellationToken = default) =>
+        DbSet.FirstOrDefaultAsync(u => u.InternalRef == internalRef, cancellationToken);
+
     private IQueryable<EquipmentUnit> ApplyFilter(IQueryable<EquipmentUnit> query, EquipmentUnitFilter filter)
     {
-        query = query.Where(u => !u.IsArchived);
+        if (!filter.IncludeArchived)
+        {
+            query = query.Where(u => !u.IsArchived);
+        }
 
         if (filter.EquipmentId.HasValue)
         {
@@ -201,10 +262,22 @@ public class EquipmentLabelRepository(StageTrackDbContext dbContext) : EfReposit
 
     public Task<List<EquipmentLabel>> GetListByUnitAsync(Guid unitId, CancellationToken cancellationToken = default) =>
         DbSet.Where(l => l.UnitId == unitId).OrderBy(l => l.Code).ToListAsync(cancellationToken);
+
+    public Task<List<string>> GetCodesByTypeAsync(LabelType type, CancellationToken cancellationToken = default) =>
+        DbSet.IgnoreQueryFilters().Where(l => l.Type == type).Select(l => l.Code).ToListAsync(cancellationToken);
+
+    public Task<List<EquipmentLabel>> GetListByUnitsAsync(IReadOnlyCollection<Guid> unitIds, CancellationToken cancellationToken = default)
+    {
+        var ids = unitIds.Distinct().ToList();
+        return DbSet.Where(l => l.UnitId != null && ids.Contains(l.UnitId.Value)).OrderBy(l => l.CreationTime).ToListAsync(cancellationToken);
+    }
 }
 
 public class StockLocationRepository(StageTrackDbContext dbContext) : EfRepository<StockLocation>(dbContext), IStockLocationRepository
 {
     public override Task<List<StockLocation>> GetListAsync(bool includeDetails = false, CancellationToken cancellationToken = default) =>
         DbSet.OrderBy(l => l.Name).ToListAsync(cancellationToken);
+
+    public Task<StockLocation?> FindFirstWarehouseAsync(CancellationToken cancellationToken = default) =>
+        DbSet.Where(l => l.IsActive && l.Type == StockLocationType.Warehouse).OrderBy(l => l.CreationTime).FirstOrDefaultAsync(cancellationToken);
 }

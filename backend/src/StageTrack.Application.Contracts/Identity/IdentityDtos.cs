@@ -42,6 +42,8 @@ public class UserDto
     public string UserName { get; set; } = null!;
     public string FullName { get; set; } = null!;
     public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public string? JobTitle { get; set; }
     public bool IsActive { get; set; }
     public string Language { get; set; } = null!;
     public DateTime CreationTime { get; set; }
@@ -65,6 +67,12 @@ public class CreateUserDto
     [EmailAddress, StringLength(256)]
     public string? Email { get; set; }
 
+    [StringLength(32)]
+    public string? Phone { get; set; }
+
+    [StringLength(128)]
+    public string? JobTitle { get; set; }
+
     [Required, StringLength(128)]
     public string Password { get; set; } = null!;
 
@@ -82,6 +90,12 @@ public class UpdateUserDto
 
     [EmailAddress, StringLength(256)]
     public string? Email { get; set; }
+
+    [StringLength(32)]
+    public string? Phone { get; set; }
+
+    [StringLength(128)]
+    public string? JobTitle { get; set; }
 
     public List<Guid> RoleIds { get; set; } = [];
     public List<Guid> CompanyIds { get; set; } = [];

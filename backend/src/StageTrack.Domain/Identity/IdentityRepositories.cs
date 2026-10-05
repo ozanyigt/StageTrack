@@ -28,6 +28,9 @@ public interface IUserRepository : IRepository<AppUser>
     Task<List<UserListItem>> GetPagedListAsync(Guid companyId, string? text, int skip, int take, CancellationToken cancellationToken = default);
 
     Task<long> GetCountAsync(Guid companyId, string? text, CancellationToken cancellationToken = default);
+
+    /// <summary>Active users of the company with their role names, for the crew directory.</summary>
+    Task<List<(AppUser User, List<string> Roles)>> GetDirectoryAsync(Guid companyId, CancellationToken cancellationToken = default);
 }
 
 public interface IRoleRepository : IRepository<AppRole>

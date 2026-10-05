@@ -1,15 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
+using StageTrack.Collaboration;
 using StageTrack.Companies;
 using StageTrack.Customers;
 using StageTrack.Identity;
 using StageTrack.Inventory;
+using StageTrack.Maintenance;
 using StageTrack.Pricing;
 using StageTrack.Projects;
 using StageTrack.Quotes;
 using StageTrack.Repositories;
 using StageTrack.Session;
+using StageTrack.Suppliers;
 using StageTrack.Warehouse;
 
 namespace StageTrack.EntityFrameworkCore;
@@ -34,6 +37,13 @@ public static class StageTrackEntityFrameworkCoreModule
         services.AddScoped<IWarehouseMovementRepository, WarehouseMovementRepository>();
         services.AddScoped<IRentalFactorProfileRepository, RentalFactorProfileRepository>();
         services.AddScoped<IQuoteRepository, QuoteRepository>();
+        services.AddScoped<ISupplierRepository, SupplierRepository>();
+        services.AddScoped<IRepairRepository, RepairRepository>();
+        services.AddScoped<IUnitInspectionRepository, UnitInspectionRepository>();
+        services.AddScoped<ILabelTemplateRepository, LabelTemplateRepository>();
+        services.AddScoped<IAttachmentRepository, AttachmentRepository>();
+        services.AddScoped<INoteRepository, NoteRepository>();
+        services.AddScoped<ITaskItemRepository, TaskItemRepository>();
         return services;
     }
 }

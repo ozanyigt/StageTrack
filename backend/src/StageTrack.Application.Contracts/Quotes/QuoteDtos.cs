@@ -86,6 +86,8 @@ public class QuoteLineDto
     public bool ApplyFactor { get; set; }
     public decimal DiscountPercent { get; set; }
     public decimal Total { get; set; }
+    public string? Section { get; set; }
+    public string? Notes { get; set; }
 }
 
 public class QuoteDto : QuoteListItemDto
@@ -110,6 +112,11 @@ public class QuoteDto : QuoteListItemDto
     public DateTime? UseEnd { get; set; }
     public CustomerDto? Customer { get; set; }
     public CompanyDto Company { get; set; } = null!;
+    public string? PreparedByName { get; set; }
+    public string? PaymentTerms { get; set; }
+
+    /// <summary>Section names already used on the quote, for the line editor.</summary>
+    public List<string> SectionNames { get; set; } = [];
 }
 
 public class GetQuoteListInput : PagedRequestDto
@@ -171,6 +178,12 @@ public class CreateUpdateQuoteLineInput
 
     [Range(0, 100)]
     public decimal DiscountPercent { get; set; }
+
+    [StringLength(260)]
+    public string? Section { get; set; }
+
+    [StringLength(1000)]
+    public string? Notes { get; set; }
 }
 
 public class ChangeQuoteStatusInput

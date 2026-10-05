@@ -19,6 +19,9 @@ public class WarehouseMovement : AggregateRoot, IMultiCompany, IHasCreationTime
     public string? LabelCode { get; private set; }
     public Guid? UserId { get; private set; }
 
+    /// <summary>Extra context, e.g. the other location of a transfer.</summary>
+    public string? Note { get; private set; }
+
     private WarehouseMovement()
     {
     }
@@ -34,6 +37,15 @@ public class WarehouseMovement : AggregateRoot, IMultiCompany, IHasCreationTime
         LabelCode = labelCode;
         UserId = userId;
     }
+
+    /// <summary>Log line for a device sent to (or received from) another location; the company is set explicitly.</summary>
+    internal static WarehouseMovement CreateTransfer(MovementAction action, Guid companyId, Guid equipmentId, Guid unitId,
+        Guid? userId, string otherLocation) =>
+        new(Guid.CreateVersion7(), action, equipmentId, unitId, null, 1, null, userId)
+        {
+            CompanyId = companyId,
+            Note = otherLocation
+        };
 }
 
 public record ProjectEquipmentBalance(Guid EquipmentId, int CheckedOut, int CheckedIn)

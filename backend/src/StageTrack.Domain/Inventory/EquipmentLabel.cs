@@ -33,4 +33,11 @@ public class EquipmentLabel : CompanyAggregateRoot
         EquipmentId = equipmentId;
         UnitId = unitId;
     }
+
+    /// <summary>Follows its device to another location (company); called only by the transfer manager.</summary>
+    internal void MoveToCompany(Guid companyId, Guid equipmentId)
+    {
+        CompanyId = companyId;
+        EquipmentId = equipmentId;
+    }
 }

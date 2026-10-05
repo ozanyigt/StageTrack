@@ -26,6 +26,10 @@ cd frontend && npm install && npm run dev                 # http://localhost:518
 | depo | Depo123! | Depo: okutma, etiket bağlama |
 | satis | Satis123! | Proje, müşteri, teklif |
 | dubai | Dubai123! | Yalnızca Dubai şirketi |
+| teknisyen1 / teknisyen2 | Teknik123! | Üye: yalnızca atandığı onaylı projeler, fiyatsız malzeme listesi |
+
+Birden fazla lokasyona erişen kullanıcı girişte Rentman'deki gibi lokasyon seçer (Staras TR / Staras Dubai); sonradan
+sağ üstteki kullanıcı menüsünden "Lokasyon değiştir".
 
 ### Telefonla okutma
 
@@ -66,11 +70,31 @@ biçiminde yazılabilir.
 5. **Teklif** → 2400 projesinden "Teklif oluştur": katalog fiyatları + gün çarpanı; personel/nakliye ekleyin,
    iskonto ve KDV değiştirin, Yazdır/PDF.
 6. **Ayarlar → Gün çarpanları** → firmanın kendi çarpan tablosunu ekleme/çıkarma, önizleme.
-7. Sağ üstten dil **Arapça** → tüm arayüz sağdan sola; şirket seçiciden **Dubai** (AED, %5 KDV).
+7. Sağ üstten dil **Arapça** → tüm arayüz sağdan sola; kullanıcı menüsü → "Lokasyon değiştir" → **Dubai** (AED, %5 KDV).
 8. **Ayarlar → Roller ve yetkiler** → yeni rol (örn. "Muhasebe"), yetki ağacından yalnızca Teklifler'i işaretleyin.
    Alt yetki işaretlenince üstü de işaretlenir; Yönetici rolü kilitlidir.
 9. **Ayarlar → Kullanıcılar** → yeni kullanıcı, rol ve şirket atama; Depo Sorumlusu satırında
    **"Bu kullanıcı olarak gir"** → menü anında daralır, üstte sarı bant çıkar → "Hesabıma dön".
+
+## Düzeltme turu 1 ile gelenler
+
+- **Ekipman:** solda sabit klasör ağacı; detayda Özellikler (yerinde düzenleme, ölçü/ağırlık/güç), Seri numaraları
+  (düzenlenebilir grid, çoklu seçim → etiket basma / Dubai'ye transfer / arşiv), İçerik, Aksesuarlar, Alternatifler,
+  Tedarikçiler, Periyodik muayene, Tamirler, Stok, Hareket kaydı; resim, not/görev/dosya.
+- **Seri numarası detayı:** Detay / Tamirler / Geçmiş; tarihler, tedarikçi, biçimli açıklama, etiketler
+  ("Etiket oluştur" ve mevcut etiketi "Okut"-bağla), resim, not/görev/dosya.
+- **Etiketler:** Ayarlar → Etiket şablonları (mm ölçü, QR boyutu, gösterilecek alanlar). Yeni etiketler Rentman ile
+  aynı JSON formatında (`{"ID":"80000001","cmpID":16,"isCase":0}`), 80.000.000'dan başlar; birden fazla cihaz tek
+  seferde basılır, her etiket bir sayfa (etiket yazıcısı modelinden bağımsız).
+- **Excel:** tüm listelerde dışa aktarım; ekipman, seri numarası ve müşteri için içe aktarım (aynı kod / iç ref /
+  vergi no varsa günceller, hatalı satırları satır numarasıyla raporlar).
+- **Projeler:** kullanıcı tanımlı bölümler (2 seviye, örn. "ANA SAHNE / Koridor"), bölüme ekipman ekleme
+  (aksesuarlarla), eksikte alternatif önerisi, ekip ataması, irsaliye (fiyatsız, bölümlü) ve fiyatlı teklif çıktısı
+  (bölüm ara toplamları + KDV). Çıkışı yapılmış malzeme o projede eksik gösterilmez.
+- **Fiyat yetkisi** (`StageTrack.Prices`) olmayan kullanıcı hiçbir fiyatı görmez. **Üye** rolü yalnızca atandığı onaylı
+  projeleri ve fiyatsız malzeme listesini görür. Ekip rehberi herkese açık.
+- **Tedarikçiler, Tamirler, periyodik muayene**; panoda açık tamir ve gecikmiş muayene sayıları.
+- **Lokasyonlar arası transfer:** TR'deki cihaz Dubai'ye (etiketleriyle) transfer edilir, iki tarafa hareket kaydı düşer.
 
 ## Yetkilendirme
 
@@ -83,8 +107,6 @@ biçiminde yazılabilir.
   engellidir. Başlangıç/bitiş sunucu loguna yazılır.
 - Yönetici yalnızca çalıştığı şirketin kullanıcılarını görür ve yalnızca kendi erişebildiği şirketleri atayabilir.
 - Şifre kuralı: en az 8 karakter, harf ve rakam.
-
-Ekranda QR göstermek için: Ekipman → bir cihaz satırında QR simgesi (yazdırılabilir).
 
 ## Mimari
 
@@ -117,11 +139,9 @@ sahip olduğunu ve koddaki her anahtarın ve her backend hata kodunun çevirisi 
 
 ## Demo kapsamı dışında (sonraki fazlar)
 
-e-İrsaliye / e-Fatura, ekip planlama, bakım/muayene ekranları, alt kiralama, kombinasyon (case) yönetimi,
-Rentman'den otomatik veri aktarımı (API/Excel), RFID.
+e-İrsaliye / e-Fatura, ekip vardiya/ücret planlama, alt kiralama, kombinasyon (case) yönetimi,
+Rentman API'sinden otomatik veri aktarımı, RFID.
 
 Yetkilendirmede asıl projeye kalanlar: şirket bazlı rol, kullanıcıya özel yetki, denetim kaydı (audit log, simülasyonda
 işlemi asıl yapanın kaydı), hatalı şifrede hesap kilitleme, yenileme token'ı / çerez tabanlı oturum, önyüz yetki
 sabitlerinin backend'den üretilmesi.
-"# StageTrack" 
-"# StageTrack" 

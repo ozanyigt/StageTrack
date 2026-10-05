@@ -1,4 +1,6 @@
+using StageTrack.Identity;
 using StageTrack.Inventory;
+using StageTrack.Session;
 using StageTrack.Warehouse;
 
 namespace StageTrack.Projects;
@@ -6,7 +8,9 @@ namespace StageTrack.Projects;
 public class ProjectManager(
     IProjectRepository projectRepository,
     IEquipmentRepository equipmentRepository,
-    IWarehouseMovementRepository movementRepository)
+    IWarehouseMovementRepository movementRepository,
+    IUserRepository userRepository,
+    ICurrentCompany currentCompany)
 {
     /// <summary>
     /// New projects continue from the highest existing number. Projects imported from Rentman pass
@@ -18,7 +22,7 @@ public class ProjectManager(
         return new Project(Guid.CreateVersion7(), number, name.Trim(), planStart, planEnd);
     }
 
-    public async Task<ProjectEquipment> AddEquipmentAsync(Project project, Guid equipmentId, int quantity)
+    public async Task<ProjectEquipment> AddEquipmentAsync(Project project, Guid equipmentId, int quantity, Guid? sectionId = null)
     {
         var equipment = await equipmentRepository.GetAsync(equipmentId, includeDetails: false);
         if (equipment.IsArchived)
@@ -26,7 +30,19 @@ public class ProjectManager(
             throw new EntityNotFoundException(typeof(Equipment), equipmentId);
         }
 
-        return project.AddEquipment(equipment.Id, quantity);
+        return project.AddEquipment(equipment.Id, quantity, sectionId);
+    }
+
+    /// <summary>Only users who work in this location can be put on its projects.</summary>
+    public async Task<ProjectCrewMember> AddCrewAsync(Project project, Guid userId, string? function)
+    {
+        var user = await userRepository.GetAsync(userId);
+        if (!user.HasCompany(currentCompany.Id!.Value))
+        {
+            throw new BusinessException(StageTrackErrorCodes.CrewUserNotInCompany);
+        }
+
+        return project.AddCrew(user.Id, function);
     }
 
     public async Task ChangeStatusAsync(Project project, ProjectStatus status)

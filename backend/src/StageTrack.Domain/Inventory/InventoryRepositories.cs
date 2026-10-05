@@ -24,13 +24,27 @@ public interface IEquipmentRepository : IRepository<Equipment>
     Task<List<Equipment>> SearchAsync(string? text, int take, CancellationToken cancellationToken = default);
 
     Task<bool> AnyInFolderAsync(Guid folderId, CancellationToken cancellationToken = default);
+
+    Task<Equipment?> FindByCodeAsync(string code, CancellationToken cancellationToken = default);
+
+    /// <summary>Equipment that has <paramref name="equipmentId"/> as default content, with the quantity.</summary>
+    Task<List<(Equipment Container, int Quantity)>> GetContainersAsync(Guid equipmentId, CancellationToken cancellationToken = default);
+
+    /// <summary>Equipment (with relations) whose relation lists contain the given ids; used to show reverse links.</summary>
+    Task<List<Equipment>> GetListWithRelationsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default);
 }
+
+/// <summary>Device count per stock location and status, for the equipment "Stock" tab.</summary>
+public record UnitStockRow(Guid? StockLocationId, UnitStatus Status, int Count);
 
 public interface IEquipmentFolderRepository : IRepository<EquipmentFolder>
 {
     Task<bool> HasChildrenAsync(Guid folderId, CancellationToken cancellationToken = default);
 
     Task<int> GetMaxSortOrderAsync(Guid? parentId, CancellationToken cancellationToken = default);
+
+    /// <summary>Active equipment directly in each folder (sub-folders not included).</summary>
+    Task<Dictionary<Guid, int>> GetEquipmentCountsAsync(CancellationToken cancellationToken = default);
 }
 
 public class EquipmentUnitFilter
@@ -39,6 +53,7 @@ public class EquipmentUnitFilter
     public Guid? EquipmentId { get; set; }
     public UnitStatus? Status { get; set; }
     public Guid? StockLocationId { get; set; }
+    public bool IncludeArchived { get; set; }
 }
 
 /// <summary>Read model for device lists: the device plus the names needed to display it.</summary>
@@ -51,6 +66,8 @@ public class EquipmentUnitListItem
     public int? CurrentProjectNumber { get; init; }
     public string? CurrentProjectName { get; init; }
     public int LabelCount { get; init; }
+    public string? SupplierName { get; init; }
+    public int? InspectionIntervalMonths { get; init; }
 }
 
 public interface IEquipmentUnitRepository : IRepository<EquipmentUnit>
@@ -71,7 +88,16 @@ public interface IEquipmentUnitRepository : IRepository<EquipmentUnit>
 
     Task<Dictionary<UnitStatus, int>> GetStatusCountsAsync(Guid? equipmentId = null, CancellationToken cancellationToken = default);
 
+    /// <summary>Active devices whose periodic inspection (last inspection, else purchase date + interval) is before <paramref name="today"/>.</summary>
+    Task<int> CountOverdueInspectionsAsync(DateTime today, CancellationToken cancellationToken = default);
+
     Task<List<EquipmentUnit>> GetListOutOnProjectAsync(Guid projectId, CancellationToken cancellationToken = default);
+
+    Task<List<UnitStockRow>> GetStockRowsAsync(Guid equipmentId, CancellationToken cancellationToken = default);
+
+    Task<List<EquipmentUnit>> GetListByEquipmentAsync(Guid equipmentId, bool includeArchived, CancellationToken cancellationToken = default);
+
+    Task<EquipmentUnit?> FindByInternalRefAsync(string internalRef, CancellationToken cancellationToken = default);
 }
 
 /// <summary>Read model for a resolved label.</summary>
@@ -89,8 +115,14 @@ public interface IEquipmentLabelRepository : IRepository<EquipmentLabel>
     Task<List<EquipmentLabel>> GetListByEquipmentAsync(Guid equipmentId, CancellationToken cancellationToken = default);
 
     Task<List<EquipmentLabel>> GetListByUnitAsync(Guid unitId, CancellationToken cancellationToken = default);
+
+    Task<List<string>> GetCodesByTypeAsync(LabelType type, CancellationToken cancellationToken = default);
+
+    /// <summary>Labels of many devices at once, for printing.</summary>
+    Task<List<EquipmentLabel>> GetListByUnitsAsync(IReadOnlyCollection<Guid> unitIds, CancellationToken cancellationToken = default);
 }
 
 public interface IStockLocationRepository : IRepository<StockLocation>
 {
+    Task<StockLocation?> FindFirstWarehouseAsync(CancellationToken cancellationToken = default);
 }

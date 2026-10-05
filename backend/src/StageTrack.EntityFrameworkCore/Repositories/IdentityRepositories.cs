@@ -65,6 +65,22 @@ public class UserRepository(StageTrackDbContext dbContext) : EfRepository<AppUse
     public Task<long> GetCountAsync(Guid companyId, string? text, CancellationToken cancellationToken = default) =>
         ApplyFilter(companyId, text).LongCountAsync(cancellationToken);
 
+    public async Task<List<(AppUser User, List<string> Roles)>> GetDirectoryAsync(Guid companyId, CancellationToken cancellationToken = default)
+    {
+        var rows = await DbSet
+            .Where(u => u.IsActive && u.Companies.Any(c => c.CompanyId == companyId))
+            .OrderBy(u => u.FullName)
+            .Select(u => new
+            {
+                User = u,
+                Roles = DbContext.Set<UserRole>().Where(ur => ur.UserId == u.Id)
+                    .Join(DbContext.Roles, ur => ur.RoleId, r => r.Id, (_, r) => r.Name).ToList()
+            })
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+        return rows.Select(r => (r.User, r.Roles)).ToList();
+    }
+
     private IQueryable<AppUser> ApplyFilter(Guid companyId, string? text)
     {
         var query = DbSet.Where(u => u.Companies.Any(c => c.CompanyId == companyId));

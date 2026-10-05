@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using StageTrack.Dtos;
+using StageTrack.Imports;
 
 namespace StageTrack.Customers;
 
@@ -69,4 +70,6 @@ public interface ICustomerAppService
     Task<CustomerDto> UpdateAsync(Guid id, CreateUpdateCustomerDto input);
 
     Task DeleteAsync(Guid id);
+
+    Task<ImportResultDto> ImportAsync(List<CustomerImportRow> rows);
 }

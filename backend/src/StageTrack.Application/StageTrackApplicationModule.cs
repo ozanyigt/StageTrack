@@ -1,12 +1,16 @@
 using Microsoft.Extensions.DependencyInjection;
 using StageTrack.Account;
 using StageTrack.Authorization;
+using StageTrack.Collaboration;
+using StageTrack.Common;
 using StageTrack.Customers;
 using StageTrack.Dashboard;
 using StageTrack.Identity;
 using StageTrack.Inventory;
+using StageTrack.Maintenance;
 using StageTrack.Projects;
 using StageTrack.Quotes;
+using StageTrack.Suppliers;
 using StageTrack.Warehouse;
 
 namespace StageTrack;
@@ -18,6 +22,9 @@ public static class StageTrackApplicationModule
         services.AddStageTrackDomain();
 
         services.AddScoped<IPermissionChecker, PermissionChecker>();
+        services.AddScoped<PriceVisibility>();
+        services.AddScoped<ImportRunner>();
+        services.AddScoped<ProjectAccess>();
         services.AddScoped<IAccountAppService, AccountAppService>();
         services.AddScoped<IRoleAppService, RoleAppService>();
         services.AddScoped<IUserAppService, UserAppService>();
@@ -32,6 +39,12 @@ public static class StageTrackApplicationModule
         services.AddScoped<IWarehouseAppService, WarehouseAppService>();
         services.AddScoped<IRentalFactorProfileAppService, RentalFactorProfileAppService>();
         services.AddScoped<IQuoteAppService, QuoteAppService>();
+        services.AddScoped<ILabelTemplateAppService, LabelTemplateAppService>();
+        services.AddScoped<ICrewAppService, CrewAppService>();
+        services.AddScoped<ISupplierAppService, SupplierAppService>();
+        services.AddScoped<IRepairAppService, RepairAppService>();
+        services.AddScoped<IInspectionAppService, InspectionAppService>();
+        services.AddScoped<ICollaborationAppService, CollaborationAppService>();
         return services;
     }
 }

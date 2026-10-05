@@ -1,9 +1,9 @@
-import { ColorPicker, DatePicker, Form, Input, Modal } from 'antd';
-import { useMutation } from '@tanstack/react-query';
+import { ColorPicker, DatePicker, Form, Input, Modal, Select } from 'antd';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { projectApi } from '../../api/endpoints';
+import { crewApi, projectApi } from '../../api/endpoints';
 import type { Project, ProjectInput } from '../../api/types';
 import { CustomerSelect, StockLocationSelect } from '../../components/Selects';
 import { useErrorToast } from '../../utils/errors';
@@ -19,6 +19,8 @@ interface FormValues {
   projectType?: string;
   stockLocationId?: string;
   notes?: string;
+  accountManagerId?: string | null;
+  paymentTerms?: string;
 }
 
 interface Props {
@@ -32,6 +34,7 @@ export function ProjectFormModal({ open, project, onClose, onSaved }: Props) {
   const { t } = useTranslation();
   const [form] = Form.useForm<FormValues>();
   const showError = useErrorToast();
+  const directory = useQuery({ queryKey: ['crew-directory'], queryFn: crewApi.directory, enabled: open });
 
   useEffect(() => {
     if (!open) return;
@@ -47,6 +50,8 @@ export function ProjectFormModal({ open, project, onClose, onSaved }: Props) {
         projectType: project.projectType ?? undefined,
         stockLocationId: project.stockLocationId ?? undefined,
         notes: project.notes ?? undefined,
+        accountManagerId: project.accountManagerId ?? null,
+        paymentTerms: project.paymentTerms ?? undefined,
       });
     } else {
       const start = dayjs().add(1, 'day').hour(8).minute(0);
@@ -68,6 +73,8 @@ export function ProjectFormModal({ open, project, onClose, onSaved }: Props) {
         projectType: v.projectType ?? null,
         stockLocationId: v.stockLocationId ?? null,
         notes: v.notes ?? null,
+        accountManagerId: v.accountManagerId ?? null,
+        paymentTerms: v.paymentTerms?.trim() || null,
       };
       return project ? projectApi.update(project.id, input) : projectApi.create(input);
     },
@@ -111,6 +118,17 @@ export function ProjectFormModal({ open, project, onClose, onSaved }: Props) {
         </Form.Item>
         <Form.Item name="color" label={t('projects.color')}>
           <ColorPicker presets={[{ label: '', colors: ['#22c55e', '#f97316', '#7c3aed', '#1677ff', '#ef4444', '#eab308'] }]} />
+        </Form.Item>
+        <Form.Item name="accountManagerId" label={t('projectExtra.accountManager')}>
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            options={(directory.data ?? []).map((u) => ({ value: u.userId, label: u.jobTitle ? `${u.fullName} · ${u.jobTitle}` : u.fullName }))}
+          />
+        </Form.Item>
+        <Form.Item name="paymentTerms" label={t('projectExtra.paymentTerms')}>
+          <Input maxLength={256} placeholder={t('projectExtra.paymentTermsPlaceholder')} />
         </Form.Item>
         <Form.Item name="notes" label={t('common.notes')}>
           <Input.TextArea rows={3} />

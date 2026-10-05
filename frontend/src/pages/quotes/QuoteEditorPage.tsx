@@ -3,7 +3,7 @@ import {
 } from '@ant-design/icons';
 import {
   App, Button, Card, Checkbox, Col, DatePicker, Descriptions, Divider, Flex, Form, Input, InputNumber, Modal, Row, Select, Skeleton,
-  Space, Table, Tag, Typography,
+  Space, Table, Tag, Typography, AutoComplete, type TableColumnsType,
 } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs, { type Dayjs } from 'dayjs';
@@ -27,6 +27,20 @@ interface HeaderForm {
   discountPercent: number;
   vatRate: number;
   notes?: string | null;
+}
+
+/** Lines grouped under their section, in the order sections first appear; lines without a section come first. */
+function groupBySection(lines: QuoteLine[]) {
+  const sorted = [...lines].sort((a, b) => a.sortOrder - b.sortOrder);
+  const groups: { name: string | null; lines: QuoteLine[] }[] = [];
+  const none = sorted.filter((l) => !l.section);
+  if (none.length) groups.push({ name: null, lines: none });
+  sorted.filter((l) => l.section).forEach((l) => {
+    const g = groups.find((x) => x.name === l.section);
+    if (g) g.lines.push(l);
+    else groups.push({ name: l.section!, lines: [l] });
+  });
+  return groups;
 }
 
 const statusAction: Partial<Record<QuoteStatus, string>> = {
@@ -123,6 +137,36 @@ export function QuoteEditorPage() {
 
   if (quote.isLoading || !q) return <Skeleton active />;
   const money = (v: number) => f.money(v, q.currency);
+  const groups = groupBySection(q.lines);
+  const lineColumns: TableColumnsType<QuoteLine> = [
+                { title: t('quotes.lineType'), dataIndex: 'type', width: 110, render: (v) => <Tag>{t(`enums.quoteLineType.${v}`)}</Tag> },
+                {
+                  title: t('quotes.description'),
+                  render: (_, l) => (
+                    <>
+                      {l.equipmentCode ? `${l.equipmentCode} · ${l.description}` : l.description}
+                      {l.notes && <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12, whiteSpace: 'pre-wrap' }}>{l.notes}</Typography.Text>}
+                    </>
+                  ),
+                },
+                { title: t('quotes.quantity'), dataIndex: 'quantity', width: 70, align: 'end', render: (v) => f.number(v) },
+                { title: t('quotes.unitPrice'), dataIndex: 'unitPrice', width: 120, align: 'end', render: money },
+                {
+                  title: t('quotes.factor'), dataIndex: 'applyFactor', width: 80, align: 'center',
+                  render: (v: boolean) => (v ? <Tag color="orange">×{f.number(q.factor)}</Tag> : '—'),
+                },
+                { title: t('quotes.discount'), dataIndex: 'discountPercent', width: 80, align: 'end', render: (v) => (v ? `%${f.number(v)}` : '—') },
+                { title: t('quotes.total'), dataIndex: 'total', width: 130, align: 'end', render: money },
+                {
+                  title: '', width: 80,
+                  render: (_, l) => editable && (
+                    <Space size={2}>
+                      <Button size="small" type="text" icon={<EditOutlined />} aria-label={t('common.edit')} onClick={() => openLine(l)} />
+                      <Button size="small" type="text" danger icon={<DeleteOutlined />} aria-label={t('common.delete')} onClick={() => removeLine.mutate(l.id)} />
+                    </Space>
+                  ),
+                },
+              ];
 
   return (
     <>
@@ -172,34 +216,20 @@ export function QuoteEditorPage() {
               </Space>
             )}
           >
-            <Table
-              size="small"
-              rowKey="id"
-              pagination={false}
-              dataSource={q.lines}
-              scroll={{ x: 820 }}
-              columns={[
-                { title: t('quotes.lineType'), dataIndex: 'type', width: 110, render: (v) => <Tag>{t(`enums.quoteLineType.${v}`)}</Tag> },
-                { title: t('quotes.description'), render: (_, l) => (l.equipmentCode ? `${l.equipmentCode} · ${l.description}` : l.description), ellipsis: true },
-                { title: t('quotes.quantity'), dataIndex: 'quantity', width: 70, align: 'end', render: (v) => f.number(v) },
-                { title: t('quotes.unitPrice'), dataIndex: 'unitPrice', width: 120, align: 'end', render: money },
-                {
-                  title: t('quotes.factor'), dataIndex: 'applyFactor', width: 80, align: 'center',
-                  render: (v: boolean) => (v ? <Tag color="orange">×{f.number(q.factor)}</Tag> : '—'),
-                },
-                { title: t('quotes.discount'), dataIndex: 'discountPercent', width: 80, align: 'end', render: (v) => (v ? `%${f.number(v)}` : '—') },
-                { title: t('quotes.total'), dataIndex: 'total', width: 130, align: 'end', render: money },
-                {
-                  title: '', width: 80,
-                  render: (_, l) => editable && (
-                    <Space size={2}>
-                      <Button size="small" type="text" icon={<EditOutlined />} aria-label={t('common.edit')} onClick={() => openLine(l)} />
-                      <Button size="small" type="text" danger icon={<DeleteOutlined />} aria-label={t('common.delete')} onClick={() => removeLine.mutate(l.id)} />
-                    </Space>
-                  ),
-                },
-              ]}
-            />
+            {groups.length === 0 ? (
+              <Table size="small" rowKey="id" pagination={false} dataSource={[]} columns={lineColumns} />
+            ) : (
+              groups.map((g) => (
+                <div key={g.name ?? '__none__'} style={{ marginBottom: 8 }}>
+                  {(g.name || groups.length > 1) && (
+                    <Typography.Text strong style={{ display: 'block', padding: '6px 8px', background: 'rgba(99,102,241,0.08)', borderRadius: 4 }}>
+                      {g.name ?? t('sections.none')}
+                    </Typography.Text>
+                  )}
+                  <Table size="small" rowKey="id" pagination={false} dataSource={g.lines} scroll={{ x: 820 }} columns={lineColumns} />
+                </div>
+              ))
+            )}
           </Card>
         </Col>
 
@@ -313,6 +343,16 @@ export function QuoteEditorPage() {
               </Form.Item>
             </Col>
           </Row>
+          <Form.Item name="section" label={t('sections.section')} extra={t('quoteSections.sectionHint')}>
+            <AutoComplete
+              allowClear
+              options={(q.sectionNames ?? []).map((s) => ({ value: s }))}
+              filterOption={(input, option) => (option?.value ?? '').toLocaleLowerCase().includes(input.toLocaleLowerCase())}
+            />
+          </Form.Item>
+          <Form.Item name="notes" label={t('quoteSections.lineNotes')}>
+            <Input.TextArea autoSize={{ minRows: 1, maxRows: 4 }} maxLength={1000} />
+          </Form.Item>
           <Form.Item name="applyFactor" valuePropName="checked">
             <Checkbox>{t('quotes.applyFactor')}</Checkbox>
           </Form.Item>

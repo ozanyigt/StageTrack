@@ -25,7 +25,12 @@
     "userName": "Kullanıcı adı",
     "password": "Şifre",
     "submit": "Giriş yap",
-    "demoUsers": "Demo: admin · depo · satis"
+    "demoUsers": "Demo: admin · depo · satis · teknisyen1 (üye)",
+    "chooseLocation": "Merhaba {{name}}, hangi lokasyonda çalışacaksınız?",
+    "country": {
+      "TR": "Türkiye",
+      "AE": "Birleşik Arap Emirlikleri"
+    }
   },
   "layout": {
     "company": "Şirket",
@@ -33,7 +38,8 @@
     "logout": "Çıkış yap",
     "toggleTheme": "Açık/koyu tema",
     "impersonating": "Şu anda {{user}} olarak görüntülüyorsunuz (asıl hesap: {{admin}}). Yaptığınız işlemler bu kullanıcı adına kaydedilir.",
-    "backToMyAccount": "Hesabıma dön"
+    "backToMyAccount": "Hesabıma dön",
+    "changeLocation": "Lokasyon değiştir"
   },
   "nav": {
     "dashboard": "Gösterge paneli",
@@ -52,7 +58,12 @@
     "rentalFactors": "Gün çarpanları",
     "stockLocations": "Stok lokasyonları",
     "users": "Kullanıcılar",
-    "roles": "Roller ve yetkiler"
+    "roles": "Roller ve yetkiler",
+    "myProjects": "Projelerim",
+    "repairs": "Tamirler",
+    "suppliers": "Tedarikçiler",
+    "crew": "Ekip rehberi",
+    "labelTemplates": "Etiket şablonları"
   },
   "dashboard": {
     "welcome": "Hoş geldiniz, {{name}}",
@@ -63,7 +74,11 @@
     "missing": "{{count}} eksik",
     "shortageLines": "{{count}} kalem · başlangıç {{date}}",
     "devices": "Cihaz durumu",
-    "recentMovements": "Son depo hareketleri"
+    "recentMovements": "Son depo hareketleri",
+    "myProjects": "Projelerim",
+    "noMyProjects": "Size atanmış onaylı proje yok",
+    "openRepairs": "Açık tamirler",
+    "overdueInspections": "Gecikmiş muayeneler"
   },
   "calendar": {
     "title": "Takvim",
@@ -129,7 +144,10 @@
     "project": "Proje",
     "user": "Kullanıcı",
     "label": "Etiket",
-    "system": "Sistem"
+    "system": "Sistem",
+    "equipmentCode": "Ekipman kodu",
+    "quantity": "Adet",
+    "note": "Açıklama"
   },
   "projects": {
     "title": "Projeler",
@@ -206,7 +224,23 @@
     "rentalPriceHint": "Teklifte gün çarpanı ile çarpılır.",
     "dailyPrice": "Günlük fiyat",
     "weightKg": "Ağırlık (kg)",
-    "volumeM3": "Hacim (m³)"
+    "volumeM3": "Hacim (m³)",
+    "countryOfOrigin": "Menşe ülke",
+    "currentA": "Akım (A)",
+    "dimensions": "Ölçüler (U × G × Y)",
+    "exportFile": "Ekipman listesi",
+    "heightCm": "Yükseklik (cm)",
+    "importFolder": "Klasör yolu (örn. VIDEO/Display)",
+    "importTemplate": "Ekipman içe aktarma şablonu",
+    "importTitle": "Ekipman içe aktar",
+    "lengthCm": "Uzunluk (cm)",
+    "packedPer": "Paket adedi",
+    "packedPerHint": "Bir kasada/pakette kaç adet bulunur.",
+    "physical": "Fiziksel özellikler",
+    "powerW": "Güç (W)",
+    "renameFolder": "Klasörü düzenle",
+    "volumeAuto": "Ölçülerden hesaplandı: {{value}} m³",
+    "widthCm": "Genişlik (cm)"
   },
   "units": {
     "title": "Cihazlar (seri numaraları)",
@@ -319,7 +353,9 @@
     "phone": "Telefon",
     "address": "Adres",
     "city": "Şehir",
-    "country": "Ülke"
+    "country": "Ülke",
+    "importTitle": "Müşterileri içe aktar",
+    "importTemplate": "musteri-sablonu"
   },
   "rentalFactors": {
     "title": "Gün çarpanları",
@@ -366,7 +402,16 @@
     "RentalFactorProfile": "çarpan profili",
     "StockLocation": "stok lokasyonu",
     "Company": "şirket",
-    "AppUser": "kullanıcı"
+    "AppUser": "kullanıcı",
+    "Supplier": "tedarikçi",
+    "Repair": "tamir",
+    "UnitInspection": "muayene",
+    "LabelTemplate": "etiket şablonu",
+    "Attachment": "dosya",
+    "Note": "not",
+    "TaskItem": "görev",
+    "ProjectSection": "bölüm",
+    "ProjectCrewMember": "ekip üyesi"
   },
   "enums": {
     "projectStatus": {
@@ -410,13 +455,26 @@
       "CheckOut": "Çıkış",
       "CheckIn": "Dönüş",
       "LabelAssigned": "Etiket bağlandı",
-      "ProjectStatusChanged": "Durum değişti"
+      "ProjectStatusChanged": "Durum değişti",
+      "TransferOut": "Transfer (çıkış)",
+      "TransferIn": "Transfer (giriş)"
     },
     "quoteLineType": {
       "Equipment": "Ekipman",
       "Crew": "Personel",
       "Transport": "Nakliye",
       "Service": "Hizmet"
+    },
+    "relationKind": {
+      "Content": "İçerik",
+      "Accessory": "Aksesuar",
+      "Alternative": "Alternatif"
+    },
+    "repairStatus": {
+      "Open": "Açık",
+      "InProgress": "Tamirde",
+      "Completed": "Tamamlandı",
+      "Cancelled": "İptal"
     }
   },
   "errors": {
@@ -517,6 +575,45 @@
     "Impersonation": {
       "NotAllowed": "Bu kullanıcı olarak giriş yapamazsınız.",
       "NotActive": "Başka bir kullanıcı olarak oturum açmış değilsiniz."
+    },
+    "Relation": {
+      "Self": "Bir ekipman kendisine bağlanamaz.",
+      "Duplicate": "Bu ekipman zaten bu listede."
+    },
+    "Supplier": {
+      "NameAlreadyExists": "\"{{name}}\" adında bir tedarikçi zaten var.",
+      "InUse": "Bu tedarikçi ekipman, cihaz veya tamir kayıtlarında kullanıldığı için silinemez.",
+      "Duplicate": "Bu tedarikçi bu ekipmana zaten eklenmiş."
+    },
+    "Repair": {
+      "InvalidStatusTransition": "Tamir durumu {{from}} durumundan {{to}} durumuna geçemez.",
+      "UnitRequired": "Seri numaralı ekipmanlarda tamir için cihaz seçilmelidir."
+    },
+    "Inspection": {
+      "NotConfigured": "Bu ekipman için periyodik muayene tanımlanmamış."
+    },
+    "Section": {
+      "TooDeep": "Bölümler en fazla {{max}} seviye iç içe olabilir.",
+      "NotFound": "Bölüm bulunamadı."
+    },
+    "Crew": {
+      "AlreadyAssigned": "Bu kişi projeye zaten atanmış.",
+      "UserNotInCompany": "Seçilen kullanıcı bu lokasyonda çalışmıyor."
+    },
+    "Transfer": {
+      "SameCompany": "Cihazlar zaten bu lokasyonda.",
+      "NoWarehouse": "{{company}} lokasyonunda depo tanımlı değil.",
+      "LabelConflict": "{{code}} etiketi hedef lokasyonda başka bir cihaza bağlı."
+    },
+    "Attachment": {
+      "TooLarge": "Dosya en fazla {{max}} MB olabilir.",
+      "NotImage": "Yalnızca resim dosyası yüklenebilir."
+    },
+    "LabelTemplate": {
+      "InvalidSize": "Etiket ölçüleri geçersiz."
+    },
+    "Import": {
+      "InvalidRow": "Satır geçersiz: {{field}} alanını kontrol edin."
     }
   },
   "roles": {
@@ -538,7 +635,8 @@
     "builtin": {
       "admin": "Yönetici",
       "warehouse": "Depo",
-      "sales": "Satış"
+      "sales": "Satış",
+      "member": "Üye"
     }
   },
   "users": {
@@ -568,7 +666,9 @@
     "passwordReset": "Şifre değiştirildi",
     "impersonate": "Bu kullanıcı olarak gir",
     "impersonateConfirm": "{{name}} olarak giriş yapılsın mı?",
-    "impersonateHint": "Uygulamayı bu kullanıcının yetkileriyle görürsünüz. Üstteki banttan istediğiniz an kendi hesabınıza dönebilirsiniz."
+    "impersonateHint": "Uygulamayı bu kullanıcının yetkileriyle görürsünüz. Üstteki banttan istediğiniz an kendi hesabınıza dönebilirsiniz.",
+    "phone": "Telefon",
+    "jobTitle": "Ünvan"
   },
   "permissionGroups": {
     "Equipment": "Ekipman",
@@ -577,7 +677,9 @@
     "Quotes": "Teklifler",
     "Customers": "Müşteriler",
     "Settings": "Ayarlar",
-    "Identity": "Kullanıcı yönetimi"
+    "Identity": "Kullanıcı yönetimi",
+    "Maintenance": "Bakım",
+    "Suppliers": "Tedarikçiler"
   },
   "permissions": {
     "Equipment": "Ekipmanı görüntüleme",
@@ -596,6 +698,314 @@
     "Settings_StockLocations": "Stok lokasyonlarını yönetme",
     "Identity_Roles": "Rol ve yetki yönetimi",
     "Identity_Users": "Kullanıcı yönetimi",
-    "Identity_Users_Impersonate": "Başka kullanıcı olarak giriş"
+    "Identity_Users_Impersonate": "Başka kullanıcı olarak giriş",
+    "Equipment_Transfer": "Cihazları başka lokasyona transfer etme",
+    "Maintenance": "Tamir ve muayeneleri görüntüleme",
+    "Maintenance_Manage": "Tamir ve muayene kaydetme",
+    "Suppliers": "Tedarikçileri görüntüleme",
+    "Suppliers_Manage": "Tedarikçi ekleme/düzenleme",
+    "AssignedProjects": "Atandığı projeleri görme (fiyatsız)",
+    "Prices": "Fiyatları ve tutarları görme",
+    "Settings_LabelTemplates": "Etiket şablonlarını yönetme"
+  },
+  "excel": {
+    "export": "Excel",
+    "import": "İçe aktar",
+    "importHelp": "Şablonu indirip doldurun ve yükleyin. Aynı koda sahip kayıt varsa güncellenir, yoksa yeni kayıt oluşturulur.",
+    "columns": "Sütunlar",
+    "downloadTemplate": "Şablonu indir",
+    "chooseFile": "Excel dosyası seç",
+    "noRows": "Dosyada içe aktarılacak satır bulunamadı.",
+    "result": "{{created}} yeni, {{updated}} güncellendi, {{failed}} hatalı satır.",
+    "row": "Satır",
+    "error": "Hata"
+  },
+  "collab": {
+    "notes": "Notlar",
+    "tasks": "Görevler",
+    "files": "Dosyalar",
+    "notePlaceholder": "Not yazın…",
+    "noNotes": "Henüz not yok",
+    "editNote": "Notu düzenle",
+    "deleteNoteConfirm": "Not silinsin mi?",
+    "addTask": "Görev ekle",
+    "editTask": "Görevi düzenle",
+    "noTasks": "Görev yok",
+    "deleteTaskConfirm": "Görev silinsin mi?",
+    "taskTitle": "Görev",
+    "taskDescription": "Açıklama",
+    "assignedTo": "Atanan kişi",
+    "dueDate": "Son tarih",
+    "uploadFile": "Dosya ekle",
+    "noFiles": "Dosya yok",
+    "download": "İndir",
+    "deleteFileConfirm": "Dosya silinsin mi?"
+  },
+  "richText": {
+    "bold": "Kalın",
+    "italic": "İtalik",
+    "underline": "Altı çizili",
+    "bulletList": "Madde işaretli liste",
+    "numberedList": "Numaralı liste",
+    "link": "Bağlantı",
+    "linkPrompt": "Bağlantı adresi"
+  },
+  "equipmentDetail": {
+    "tabs": {
+      "properties": "Özellikler",
+      "units": "Seri numaraları",
+      "content": "İçerik",
+      "accessories": "Aksesuarlar",
+      "alternatives": "Alternatifler",
+      "suppliers": "Tedarikçiler",
+      "inspection": "Periyodik muayene",
+      "repairs": "Tamirler",
+      "stock": "Stok",
+      "history": "Hareket kaydı"
+    },
+    "relationHint": {
+      "Content": "Varsayılan içerik: bu ekipman projeye eklendiğinde birlikte gelen parçalar (örn. kasanın içindekiler). İrsaliyede ekipmanın altında listelenir.",
+      "Accessory": "Aksesuarlar: projeye eklerken isteğe bağlı olarak birlikte eklenebilen ekipmanlar (kablo, klemp vb.).",
+      "Alternative": "Alternatifler: stok yetmediğinde projede önerilen benzer ekipmanlar."
+    },
+    "addImage": "Resim ekle",
+    "changeImage": "Resmi değiştir",
+    "removeImageConfirm": "Resim kaldırılsın mı?",
+    "noFolder": "Klasörsüz",
+    "createLabel": "Etiket oluştur",
+    "scanLabel": "Okut",
+    "removeLabelConfirm": "\"{{code}}\" etiketi kaldırılsın mı?",
+    "quantity": "Adet",
+    "removeConfirm": "Kaldırılsın mı?",
+    "partOf": "Bu ekipmanın içinde bulunduğu ekipmanlar",
+    "addSupplier": "Tedarikçi ekle",
+    "editSupplier": "Tedarikçiyi düzenle",
+    "supplier": "Tedarikçi",
+    "supplierCode": "Tedarikçi ürün kodu",
+    "purchasePrice": "Alış fiyatı",
+    "preferred": "Tercih edilen",
+    "inspectionSettings": "Muayene ayarı",
+    "intervalMonths": "Muayene aralığı (ay)",
+    "intervalHint": "Boş bırakılırsa periyodik muayene takip edilmez.",
+    "inspectionDescription": "Muayenede yapılacaklar",
+    "dueDates": "Cihazların muayene tarihleri",
+    "recordInspection": "Muayene kaydet",
+    "lastInspection": "Son muayene",
+    "nextInspection": "Sonraki muayene",
+    "inspectionHistory": "Muayene geçmişi",
+    "date": "Tarih",
+    "result": "Sonuç",
+    "passed": "Geçti",
+    "failed": "Kaldı",
+    "failedHint": "Kapatılırsa (kaldı) cihaz tamire alınır.",
+    "inspector": "Muayene eden",
+    "openRepair": "Tamir aç",
+    "repairTitle": "Arıza",
+    "repairDescription": "Açıklama",
+    "repairSupplier": "Tamirci / servis",
+    "reportedAt": "Bildirim",
+    "cost": "Maliyet",
+    "noLocation": "Lokasyonsuz",
+    "total": "Toplam",
+    "bulkStockHint": "Adet ile takip edilen ekipmanda stok, Özellikler sekmesindeki stok adedidir."
+  },
+  "suppliers": {
+    "title": "Tedarikçiler",
+    "create": "Yeni tedarikçi",
+    "edit": "Tedarikçiyi düzenle",
+    "deleteConfirm": "Tedarikçi silinsin mi?",
+    "searchPlaceholder": "Ad, yetkili, e-posta veya vergi no ara",
+    "name": "Firma adı",
+    "contactPerson": "Yetkili kişi",
+    "email": "E-posta",
+    "phone": "Telefon",
+    "taxNumber": "Vergi no",
+    "taxOffice": "Vergi dairesi",
+    "address": "Adres",
+    "city": "Şehir",
+    "country": "Ülke",
+    "website": "Web sitesi"
+  },
+  "crew": {
+    "title": "Ekip rehberi",
+    "searchPlaceholder": "Ad, ünvan, telefon veya e-posta ara",
+    "fullName": "Ad soyad",
+    "jobTitle": "Ünvan",
+    "phone": "Telefon",
+    "email": "E-posta",
+    "roles": "Roller"
+  },
+  "repairs": {
+    "title": "Tamirler",
+    "create": "Yeni tamir",
+    "edit": "Tamiri düzenle",
+    "number": "No",
+    "equipmentCode": "Ekipman kodu",
+    "equipment": "Ekipman",
+    "unit": "Cihaz",
+    "quantity": "Adet",
+    "titleField": "Arıza / iş",
+    "description": "Açıklama",
+    "status": "Durum",
+    "reportedAt": "Bildirim tarihi",
+    "completedAt": "Tamamlanma",
+    "supplier": "Tamirci / tedarikçi",
+    "cost": "Maliyet",
+    "searchPlaceholder": "Ekipman, cihaz veya arıza ara",
+    "onlyOpen": "Sadece açık olanlar",
+    "changeStatus": "Durum"
+  },
+  "sections": {
+    "section": "Bölüm",
+    "none": "Bölümsüz",
+    "add": "Bölüm ekle",
+    "addSub": "Alt bölüm ekle",
+    "rename": "Bölümü düzenle",
+    "name": "Bölüm adı",
+    "nameHint": "Ör. ANA SAHNE, KORİDOR, SES SİSTEMİ",
+    "parent": "Üst bölüm",
+    "topLevel": "Ana bölüm (üst bölüm yok)",
+    "deleteConfirm": "Bölüm silinsin mi? İçindeki ekipmanlar bölümsüz kalır.",
+    "moveTo": "Bölüme taşı",
+    "moveUp": "Yukarı taşı",
+    "moveDown": "Aşağı taşı",
+    "includeAccessories": "Aksesuarları da ekle",
+    "alternatives": "Alternatif ekipmanlar",
+    "noAlternatives": "Tanımlı alternatif yok",
+    "availableCount": "{{count}} müsait",
+    "addAlternative": "{{count}} adet ekle",
+    "dailyTotal": "Günlük toplam"
+  },
+  "crewTab": {
+    "title": "Ekip",
+    "pickPerson": "Kişi seçin",
+    "function": "Görevi",
+    "add": "Ekibe ekle",
+    "empty": "Projeye henüz ekip atanmadı",
+    "name": "Ad soyad",
+    "jobTitle": "Ünvan",
+    "phone": "Telefon",
+    "email": "E-posta",
+    "removeConfirm": "Kişi ekipten çıkarılsın mı?",
+    "crewViewHint": "Bu projede ekip üyesisiniz. Malzeme listesini görüntüleyip fiyatsız irsaliyeyi yazdırabilirsiniz."
+  },
+  "projectExtra": {
+    "accountManager": "Proje sorumlusu",
+    "paymentTerms": "Ödeme şekli",
+    "paymentTermsPlaceholder": "Ör. İş sonrası faturalandırılacaktır.",
+    "notesTasksFiles": "Notlar · Görevler · Dosyalar",
+    "projectNumber": "Proje no",
+    "currency": "Para birimi"
+  },
+  "packingSlip": {
+    "open": "İrsaliye / malzeme listesi (PDF)",
+    "title": "DEPO FİŞİ",
+    "createdAt": "Oluşturma tarihi",
+    "timetable": "Zaman çizelgesi",
+    "out": "Çıkış",
+    "in": "Dönüş",
+    "companySignature": "Firma imzası",
+    "customerSignature": "Müşteri imzası"
+  },
+  "quoteSections": {
+    "sectionHint": "Aynı bölüm adını taşıyan kalemler teklifte birlikte gruplanır.",
+    "lineNotes": "Kalem notu"
+  },
+  "quotePrint": {
+    "contactPerson": "Yetkili kişi",
+    "preparedBy": "Hazırlayan",
+    "workDays": "İş günleri",
+    "equipment": "Ekipmanlar"
+  },
+  "unitGrid": {
+    "printLabels": "Etiket oluştur / yazdır ({{count}})",
+    "archive": "Arşivle",
+    "archiveConfirm": "Seçili {{count}} cihaz arşivlensin mi?",
+    "archived": "Arşivde",
+    "showArchived": "Arşivdekileri göster",
+    "saveAndAddAnother": "Kaydet ve yeni ekle",
+    "importTitle": "Seri numaralarını içe aktar",
+    "labelCodeColumn": "Etiket kodu"
+  },
+  "transfer": {
+    "button": "Başka lokasyona transfer",
+    "title": "{{count}} cihazı transfer et",
+    "hint": "Cihazlar etiketleri ve geçmişiyle birlikte {{from}} lokasyonundan seçtiğiniz lokasyonun ana deposuna taşınır.",
+    "submit": "Transfer et",
+    "done": "{{count}} cihaz {{company}} / {{location}} deposuna transfer edildi."
+  },
+  "unitDetail": {
+    "tabDetails": "Detay",
+    "tabRepairs": "Tamirler",
+    "tabHistory": "Geçmiş",
+    "createLabel": "Etiket oluştur",
+    "scanLabel": "Okut",
+    "scanTitle": "{{ref}} için mevcut etiketi okutun",
+    "labelAlreadyHere": "\"{{code}}\" etiketi zaten bu cihaza bağlı.",
+    "labelInUse": "\"{{code}}\" etiketi başka bir kayda bağlı: {{target}}",
+    "removeLabelConfirm": "Etiket bu cihazdan kaldırılsın mı?",
+    "restore": "Arşivden çıkar",
+    "archiveConfirm": "Cihaz arşivlensin mi? Projelere çıkarılamaz.",
+    "uploadImage": "Resim",
+    "purchaseDate": "Satın alma tarihi",
+    "warrantyDate": "Garanti bitişi",
+    "replacementDate": "Yenileme tarihi",
+    "supplier": "Tedarikçi",
+    "nextInspection": "Sonraki muayene",
+    "inspection": "Periyodik muayene",
+    "inspectionInfo": "Her {{months}} ayda bir · son: {{last}} · sonraki: {{next}}",
+    "noInspection": "Bu ekipman için periyodik muayene tanımlı değil.",
+    "remark": "Açıklama",
+    "repairs": "Tamir kayıtları",
+    "newRepair": "Tamire gönder",
+    "repairTitle": "Arıza / iş",
+    "repairDescription": "Açıklama",
+    "repairHint": "Kayıt açıldığında cihaz \"Tamirde\" durumuna geçer, tamir tamamlanınca depoya döner.",
+    "reportedAt": "Bildirim",
+    "completedAt": "Tamamlanma",
+    "cost": "Maliyet",
+    "inspections": "Muayeneler",
+    "recordInspection": "Muayene kaydet",
+    "inspectionDate": "Muayene tarihi",
+    "result": "Sonuç",
+    "passed": "Geçti",
+    "failed": "Kaldı",
+    "failedHint": "Muayeneden kalan cihaz otomatik olarak tamire alınır.",
+    "inspector": "Muayene eden",
+    "note": "Not"
+  },
+  "labelPrint": {
+    "title": "Etiket yazdır",
+    "template": "Etiket şablonu",
+    "count": "{{count}} etiket",
+    "newCreated": "Etiketi olmayan {{count}} kayıt için yeni etiket oluşturuldu (Rentman ile aynı QR formatı).",
+    "noTemplate": "Etiket şablonu yok. Ayarlar › Etiket şablonları'ndan ekleyin.",
+    "nothing": "Yazdırılacak kayıt seçilmedi.",
+    "printerHint": "Her etiket ayrı bir sayfa olarak, şablon ölçüsünde yazdırılır. Yazıcı ayarlarında kağıt boyutunu etiket ölçüsüne, ölçeği %100'e ayarlayın."
+  },
+  "labelTemplates": {
+    "title": "Etiket şablonları",
+    "create": "Yeni şablon",
+    "edit": "Şablonu düzenle",
+    "hint": "QR etiketlerinin ölçüsünü ve üzerinde yazacak bilgileri belirler. Antet kullanılmaz.",
+    "name": "Şablon adı",
+    "size": "Ölçü",
+    "widthMm": "Genişlik",
+    "heightMm": "Yükseklik",
+    "qrSize": "QR boyutu",
+    "fontSize": "Yazı boyutu",
+    "fields": "Etikette görünecek bilgiler",
+    "showName": "Ekipman adı",
+    "showBrand": "Marka",
+    "showModel": "Model",
+    "showCode": "Ekipman kodu",
+    "showInternalRef": "İç referans",
+    "showSerialNumber": "Seri no",
+    "showCompanyName": "Firma adı",
+    "isDefault": "Varsayılan şablon",
+    "default": "Varsayılan",
+    "deleteConfirm": "Şablon silinsin mi?",
+    "preview": "Önizleme (gerçek ölçü)",
+    "previewHint": "Önizleme ekranda yaklaşık gerçek boyutta gösterilir."
   }
 }

@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using StageTrack.Collaboration;
 using StageTrack.Customers;
+using StageTrack.Maintenance;
+using StageTrack.Suppliers;
 using StageTrack.Data;
 using StageTrack.Identity;
 using StageTrack.Inventory;
@@ -30,6 +33,12 @@ public static class StageTrackDomainModule
         services.AddScoped<WarehouseManager>();
         services.AddScoped<RentalFactorManager>();
         services.AddScoped<QuoteManager>();
+        services.AddScoped<SupplierManager>();
+        services.AddScoped<RepairManager>();
+        services.AddScoped<InspectionManager>();
+        services.AddScoped<LabelTemplateManager>();
+        services.AddScoped<AttachmentManager>();
+        services.AddScoped<TransferManager>();
 
         services.AddScoped<DemoDataSeeder>();
         return services;

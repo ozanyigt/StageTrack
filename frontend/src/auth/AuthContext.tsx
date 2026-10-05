@@ -11,9 +11,14 @@ interface AuthState {
   loading: boolean;
   /** True while an admin is signed in as another user. */
   impersonating: boolean;
+  /** Signs in; with access to several locations the user then picks one (see choosingLocation). */
   login: (userName: string, password: string) => Promise<void>;
   logout: () => void;
-  switchCompany: (companyId: string) => void;
+  /** True while the location picker is shown (after sign-in, or "change location" from the user menu). */
+  choosingLocation: boolean;
+  chooseLocation: (companyId: string) => void;
+  changeLocation: () => void;
+  cancelLocationChoice: () => void;
   can: (permission: string) => boolean;
   /** Reloads the user's permissions, e.g. after a role of the current user was edited. */
   refresh: () => Promise<void>;
@@ -28,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(session.getCompanyId());
   const [loading, setLoading] = useState(!!session.getToken());
+  const [choosingLocation, setChoosingLocation] = useState(false);
 
   const applyUser = useCallback((u: CurrentUser) => {
     setUser(u);
@@ -50,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     session.setToken(null);
     setUser(null);
+    setChoosingLocation(false);
     queryClient.clear();
   }, [queryClient]);
 
@@ -72,7 +79,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const login = useCallback(
-    async (userName: string, password: string) => applyLogin(await accountApi.login(userName, password)),
+    async (userName: string, password: string) => {
+      const result = await accountApi.login(userName, password);
+      applyLogin(result);
+      setChoosingLocation(result.user.companies.length > 1);
+    },
     [applyLogin],
   );
 
@@ -82,14 +93,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const endImpersonation = useCallback(async () => applyLogin(await accountApi.endImpersonation()), [applyLogin]);
 
-  const switchCompany = useCallback(
+  const chooseLocation = useCallback(
     (id: string) => {
       session.setCompanyId(id);
       setCompanyId(id);
+      setChoosingLocation(false);
       queryClient.clear();
     },
     [queryClient],
   );
+
+  const changeLocation = useCallback(() => setChoosingLocation(true), []);
+  const cancelLocationChoice = useCallback(() => setChoosingLocation(false), []);
 
   const value = useMemo<AuthState>(() => {
     const permissions = new Set(user?.permissions ?? []);
@@ -100,13 +115,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       impersonating: !!user?.impersonatorName,
       login,
       logout,
-      switchCompany,
+      choosingLocation,
+      chooseLocation,
+      changeLocation,
+      cancelLocationChoice,
       can: (permission: string) => permissions.has(permission),
       refresh,
       impersonate,
       endImpersonation,
     };
-  }, [user, companyId, loading, login, logout, switchCompany, refresh, impersonate, endImpersonation]);
+  }, [user, companyId, loading, login, logout, choosingLocation, chooseLocation, changeLocation, cancelLocationChoice, refresh, impersonate, endImpersonation]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -126,7 +144,16 @@ export async function changeLanguage(code: string, signedIn: boolean) {
 export const Permissions = {
   Equipment: 'StageTrack.Equipment',
   EquipmentManage: 'StageTrack.Equipment.Manage',
+  EquipmentTransfer: 'StageTrack.Equipment.Transfer',
   LabelsAssign: 'StageTrack.Labels.Assign',
+  Maintenance: 'StageTrack.Maintenance',
+  MaintenanceManage: 'StageTrack.Maintenance.Manage',
+  Suppliers: 'StageTrack.Suppliers',
+  SuppliersManage: 'StageTrack.Suppliers.Manage',
+  /** Crew members: only their own confirmed projects, without prices. */
+  AssignedProjects: 'StageTrack.AssignedProjects',
+  Prices: 'StageTrack.Prices',
+  LabelTemplates: 'StageTrack.Settings.LabelTemplates',
   Customers: 'StageTrack.Customers',
   CustomersManage: 'StageTrack.Customers.Manage',
   Projects: 'StageTrack.Projects',

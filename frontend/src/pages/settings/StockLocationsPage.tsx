@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { stockLocationApi } from '../../api/endpoints';
 import { STOCK_LOCATION_TYPES, type StockLocation } from '../../api/types';
+import { ExportButton } from '../../components/ExcelButtons';
 import { useErrorToast } from '../../utils/errors';
 
 type LocationForm = Omit<StockLocation, 'id'>;
@@ -39,7 +40,20 @@ export function StockLocationsPage() {
     <>
       <div className="page-header">
         <Typography.Title level={3}>{t('stockLocations.title')}</Typography.Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => open('new')}>{t('stockLocations.create')}</Button>
+        <Space wrap>
+          <ExportButton<StockLocation>
+            fileName={t('stockLocations.title')}
+            load={async () => data ?? []}
+            columns={[
+              { header: t('stockLocations.name'), value: (l) => l.name },
+              { header: t('stockLocations.type'), value: (l) => t(`enums.stockLocationType.${l.type}`) },
+              { header: t('stockLocations.address'), value: (l) => l.address },
+              { header: t('stockLocations.city'), value: (l) => l.city },
+              { header: t('stockLocations.active'), value: (l) => (l.isActive ? t('common.yes') : t('common.no')) },
+            ]}
+          />
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => open('new')}>{t('stockLocations.create')}</Button>
+        </Space>
       </div>
       <Card size="small">
         <Table

@@ -25,7 +25,12 @@
     "userName": "اسم المستخدم",
     "password": "كلمة المرور",
     "submit": "تسجيل الدخول",
-    "demoUsers": "تجريبي: admin · depo · satis"
+    "demoUsers": "تجريبي: admin · depo · satis · teknisyen1 (عضو)",
+    "chooseLocation": "مرحبًا {{name}}، في أي موقع ستعمل؟",
+    "country": {
+      "TR": "تركيا",
+      "AE": "الإمارات العربية المتحدة"
+    }
   },
   "layout": {
     "company": "الشركة",
@@ -33,7 +38,8 @@
     "logout": "تسجيل الخروج",
     "toggleTheme": "الوضع الفاتح/الداكن",
     "impersonating": "أنت تعرض التطبيق الآن باسم {{user}} (حسابك: {{admin}}). تُسجَّل الإجراءات باسم هذا المستخدم.",
-    "backToMyAccount": "العودة إلى حسابي"
+    "backToMyAccount": "العودة إلى حسابي",
+    "changeLocation": "تغيير الموقع"
   },
   "nav": {
     "dashboard": "لوحة المعلومات",
@@ -52,7 +58,12 @@
     "rentalFactors": "معاملات الأيام",
     "stockLocations": "مواقع المخزون",
     "users": "المستخدمون",
-    "roles": "الأدوار والصلاحيات"
+    "roles": "الأدوار والصلاحيات",
+    "myProjects": "مشاريعي",
+    "repairs": "الإصلاحات",
+    "suppliers": "الموردون",
+    "crew": "دليل الفريق",
+    "labelTemplates": "قوالب الملصقات"
   },
   "dashboard": {
     "welcome": "مرحبًا، {{name}}",
@@ -63,7 +74,11 @@
     "missing": "ناقص {{count}}",
     "shortageLines": "{{count}} بند · يبدأ {{date}}",
     "devices": "حالة الأجهزة",
-    "recentMovements": "آخر حركات المستودع"
+    "recentMovements": "آخر حركات المستودع",
+    "myProjects": "مشاريعي",
+    "noMyProjects": "لا توجد مشاريع مؤكدة معيّنة لك",
+    "openRepairs": "إصلاحات مفتوحة",
+    "overdueInspections": "فحوصات متأخرة"
   },
   "calendar": {
     "title": "التقويم",
@@ -129,7 +144,10 @@
     "project": "المشروع",
     "user": "المستخدم",
     "label": "الملصق",
-    "system": "النظام"
+    "system": "النظام",
+    "equipmentCode": "رمز المعدة",
+    "quantity": "الكمية",
+    "note": "ملاحظة"
   },
   "projects": {
     "title": "المشاريع",
@@ -206,7 +224,23 @@
     "rentalPriceHint": "يُضرب في معامل الأيام في عرض السعر.",
     "dailyPrice": "السعر اليومي",
     "weightKg": "الوزن (كغ)",
-    "volumeM3": "الحجم (م³)"
+    "volumeM3": "الحجم (م³)",
+    "countryOfOrigin": "بلد المنشأ",
+    "currentA": "التيار (أمبير)",
+    "dimensions": "الأبعاد (الطول × العرض × الارتفاع)",
+    "exportFile": "قائمة المعدات",
+    "heightCm": "الارتفاع (سم)",
+    "importFolder": "مسار المجلد (مثل VIDEO/Display)",
+    "importTemplate": "قالب استيراد المعدات",
+    "importTitle": "استيراد المعدات",
+    "lengthCm": "الطول (سم)",
+    "packedPer": "عدد القطع في العبوة",
+    "packedPerHint": "عدد القطع في الصندوق/العبوة الواحدة.",
+    "physical": "الخصائص الفيزيائية",
+    "powerW": "القدرة (واط)",
+    "renameFolder": "تعديل المجلد",
+    "volumeAuto": "محسوب من الأبعاد: {{value}} م³",
+    "widthCm": "العرض (سم)"
   },
   "units": {
     "title": "الأجهزة (الأرقام التسلسلية)",
@@ -319,7 +353,9 @@
     "phone": "الهاتف",
     "address": "العنوان",
     "city": "المدينة",
-    "country": "الدولة"
+    "country": "الدولة",
+    "importTitle": "استيراد العملاء",
+    "importTemplate": "customer-template"
   },
   "rentalFactors": {
     "title": "معاملات الأيام",
@@ -366,7 +402,16 @@
     "RentalFactorProfile": "ملف المعاملات",
     "StockLocation": "موقع المخزون",
     "Company": "الشركة",
-    "AppUser": "المستخدم"
+    "AppUser": "المستخدم",
+    "Supplier": "المورد",
+    "Repair": "الإصلاح",
+    "UnitInspection": "الفحص",
+    "LabelTemplate": "قالب الملصق",
+    "Attachment": "الملف",
+    "Note": "الملاحظة",
+    "TaskItem": "المهمة",
+    "ProjectSection": "القسم",
+    "ProjectCrewMember": "عضو الفريق"
   },
   "enums": {
     "projectStatus": {
@@ -410,13 +455,26 @@
       "CheckOut": "إخراج",
       "CheckIn": "إرجاع",
       "LabelAssigned": "ربط ملصق",
-      "ProjectStatusChanged": "تغيير الحالة"
+      "ProjectStatusChanged": "تغيير الحالة",
+      "TransferOut": "نقل (صادر)",
+      "TransferIn": "نقل (وارد)"
     },
     "quoteLineType": {
       "Equipment": "معدات",
       "Crew": "طاقم",
       "Transport": "نقل",
       "Service": "خدمة"
+    },
+    "relationKind": {
+      "Content": "محتوى",
+      "Accessory": "ملحق",
+      "Alternative": "بديل"
+    },
+    "repairStatus": {
+      "Open": "مفتوح",
+      "InProgress": "قيد الإصلاح",
+      "Completed": "مكتمل",
+      "Cancelled": "ملغى"
     }
   },
   "errors": {
@@ -517,6 +575,45 @@
     "Impersonation": {
       "NotAllowed": "لا يمكنك تسجيل الدخول كهذا المستخدم.",
       "NotActive": "أنت لم تسجل الدخول كمستخدم آخر."
+    },
+    "Relation": {
+      "Self": "لا يمكن ربط المعدة بنفسها.",
+      "Duplicate": "هذه المعدة موجودة بالفعل في القائمة."
+    },
+    "Supplier": {
+      "NameAlreadyExists": "يوجد مورد باسم \"{{name}}\" بالفعل.",
+      "InUse": "لا يمكن حذف هذا المورد لأنه مستخدم في معدات أو أجهزة أو إصلاحات.",
+      "Duplicate": "هذا المورد مرتبط بالفعل بهذه المعدة."
+    },
+    "Repair": {
+      "InvalidStatusTransition": "لا يمكن تغيير حالة الإصلاح من {{from}} إلى {{to}}.",
+      "UnitRequired": "يجب اختيار جهاز لإصلاح المعدات ذات الأرقام التسلسلية."
+    },
+    "Inspection": {
+      "NotConfigured": "لم يتم تحديد فحص دوري لهذه المعدة."
+    },
+    "Section": {
+      "TooDeep": "يمكن أن تتداخل الأقسام بحد أقصى {{max}} مستويات.",
+      "NotFound": "القسم غير موجود."
+    },
+    "Crew": {
+      "AlreadyAssigned": "هذا الشخص معيّن بالفعل في المشروع.",
+      "UserNotInCompany": "المستخدم المحدد لا يعمل في هذا الموقع."
+    },
+    "Transfer": {
+      "SameCompany": "الأجهزة موجودة بالفعل في هذا الموقع.",
+      "NoWarehouse": "لا يوجد مستودع معرّف في {{company}}.",
+      "LabelConflict": "الملصق {{code}} مرتبط بجهاز آخر في الموقع الهدف."
+    },
+    "Attachment": {
+      "TooLarge": "الحد الأقصى لحجم الملف {{max}} ميغابايت.",
+      "NotImage": "يمكن رفع ملفات الصور فقط."
+    },
+    "LabelTemplate": {
+      "InvalidSize": "أبعاد الملصق غير صالحة."
+    },
+    "Import": {
+      "InvalidRow": "صف غير صالح: تحقق من العمود {{field}}."
     }
   },
   "roles": {
@@ -538,7 +635,8 @@
     "builtin": {
       "admin": "مسؤول",
       "warehouse": "المستودع",
-      "sales": "المبيعات"
+      "sales": "المبيعات",
+      "member": "عضو"
     }
   },
   "users": {
@@ -568,7 +666,9 @@
     "passwordReset": "تم تغيير كلمة المرور",
     "impersonate": "الدخول كهذا المستخدم",
     "impersonateConfirm": "تسجيل الدخول باسم {{name}}؟",
-    "impersonateHint": "سترى التطبيق بصلاحيات هذا المستخدم. استخدم الشريط في الأعلى للعودة إلى حسابك في أي وقت."
+    "impersonateHint": "سترى التطبيق بصلاحيات هذا المستخدم. استخدم الشريط في الأعلى للعودة إلى حسابك في أي وقت.",
+    "phone": "الهاتف",
+    "jobTitle": "المسمى الوظيفي"
   },
   "permissionGroups": {
     "Equipment": "المعدات",
@@ -577,7 +677,9 @@
     "Quotes": "عروض الأسعار",
     "Customers": "العملاء",
     "Settings": "الإعدادات",
-    "Identity": "إدارة المستخدمين"
+    "Identity": "إدارة المستخدمين",
+    "Maintenance": "الصيانة",
+    "Suppliers": "الموردون"
   },
   "permissions": {
     "Equipment": "عرض المعدات",
@@ -596,6 +698,314 @@
     "Settings_StockLocations": "إدارة مواقع المخزون",
     "Identity_Roles": "إدارة الأدوار والصلاحيات",
     "Identity_Users": "إدارة المستخدمين",
-    "Identity_Users_Impersonate": "الدخول كمستخدم آخر"
+    "Identity_Users_Impersonate": "الدخول كمستخدم آخر",
+    "Equipment_Transfer": "نقل الأجهزة إلى موقع آخر",
+    "Maintenance": "عرض الإصلاحات والفحوصات",
+    "Maintenance_Manage": "تسجيل الإصلاحات والفحوصات",
+    "Suppliers": "عرض الموردين",
+    "Suppliers_Manage": "إضافة/تعديل الموردين",
+    "AssignedProjects": "رؤية المشاريع المعيّنة (بدون أسعار)",
+    "Prices": "رؤية الأسعار والمبالغ",
+    "Settings_LabelTemplates": "إدارة قوالب الملصقات"
+  },
+  "excel": {
+    "export": "Excel",
+    "import": "استيراد",
+    "importHelp": "نزّل القالب واملأه ثم ارفعه. الصفوف ذات الرمز الموجود تُحدّث السجل، والبقية تُنشأ كسجلات جديدة.",
+    "columns": "الأعمدة",
+    "downloadTemplate": "تنزيل القالب",
+    "chooseFile": "اختر ملف Excel",
+    "noRows": "لم يتم العثور على صفوف للاستيراد في الملف.",
+    "result": "{{created}} جديد، {{updated}} محدّث، {{failed}} صف به خطأ.",
+    "row": "الصف",
+    "error": "الخطأ"
+  },
+  "collab": {
+    "notes": "الملاحظات",
+    "tasks": "المهام",
+    "files": "الملفات",
+    "notePlaceholder": "اكتب ملاحظة…",
+    "noNotes": "لا توجد ملاحظات بعد",
+    "editNote": "تعديل الملاحظة",
+    "deleteNoteConfirm": "حذف هذه الملاحظة؟",
+    "addTask": "إضافة مهمة",
+    "editTask": "تعديل المهمة",
+    "noTasks": "لا توجد مهام",
+    "deleteTaskConfirm": "حذف هذه المهمة؟",
+    "taskTitle": "المهمة",
+    "taskDescription": "الوصف",
+    "assignedTo": "المكلّف",
+    "dueDate": "تاريخ الاستحقاق",
+    "uploadFile": "إضافة ملف",
+    "noFiles": "لا توجد ملفات",
+    "download": "تنزيل",
+    "deleteFileConfirm": "حذف هذا الملف؟"
+  },
+  "richText": {
+    "bold": "عريض",
+    "italic": "مائل",
+    "underline": "تسطير",
+    "bulletList": "قائمة نقطية",
+    "numberedList": "قائمة مرقمة",
+    "link": "رابط",
+    "linkPrompt": "عنوان الرابط"
+  },
+  "equipmentDetail": {
+    "tabs": {
+      "properties": "الخصائص",
+      "units": "الأرقام التسلسلية",
+      "content": "المحتوى",
+      "accessories": "الملحقات",
+      "alternatives": "البدائل",
+      "suppliers": "الموردون",
+      "inspection": "الفحص الدوري",
+      "repairs": "الإصلاحات",
+      "stock": "المخزون",
+      "history": "سجل الحركات"
+    },
+    "relationHint": {
+      "Content": "المحتوى الافتراضي: القطع التي تأتي مع هذه المعدة عند إضافتها إلى مشروع (مثل محتويات الصندوق). تُدرج تحت المعدة في إشعار التسليم.",
+      "Accessory": "الملحقات: معدات يمكن إضافتها اختياريًا مع هذه المعدة (كابلات، مشابك، إلخ).",
+      "Alternative": "البدائل: معدات مشابهة تُقترح في المشروع عند نقص المخزون."
+    },
+    "addImage": "إضافة صورة",
+    "changeImage": "تغيير الصورة",
+    "removeImageConfirm": "إزالة الصورة؟",
+    "noFolder": "بدون مجلد",
+    "createLabel": "إنشاء ملصق",
+    "scanLabel": "مسح",
+    "removeLabelConfirm": "إزالة الملصق \"{{code}}\"؟",
+    "quantity": "الكمية",
+    "removeConfirm": "إزالة؟",
+    "partOf": "المعدات التي تحتوي على هذه المعدة",
+    "addSupplier": "إضافة مورد",
+    "editSupplier": "تعديل المورد",
+    "supplier": "المورد",
+    "supplierCode": "رمز منتج المورد",
+    "purchasePrice": "سعر الشراء",
+    "preferred": "مفضّل",
+    "inspectionSettings": "إعداد الفحص",
+    "intervalMonths": "فترة الفحص (أشهر)",
+    "intervalHint": "اتركه فارغًا لعدم تتبع الفحص الدوري.",
+    "inspectionDescription": "ما يجب فحصه",
+    "dueDates": "مواعيد فحص الأجهزة",
+    "recordInspection": "تسجيل فحص",
+    "lastInspection": "آخر فحص",
+    "nextInspection": "الفحص القادم",
+    "inspectionHistory": "سجل الفحوصات",
+    "date": "التاريخ",
+    "result": "النتيجة",
+    "passed": "ناجح",
+    "failed": "راسب",
+    "failedHint": "عند الإيقاف (راسب) يُحال الجهاز إلى الإصلاح.",
+    "inspector": "الفاحص",
+    "openRepair": "فتح إصلاح",
+    "repairTitle": "العطل",
+    "repairDescription": "الوصف",
+    "repairSupplier": "جهة الإصلاح / الخدمة",
+    "reportedAt": "تاريخ البلاغ",
+    "cost": "التكلفة",
+    "noLocation": "بدون موقع",
+    "total": "الإجمالي",
+    "bulkStockHint": "في المعدات المتتبعة بالكمية، المخزون هو كمية المخزون في تبويب الخصائص."
+  },
+  "suppliers": {
+    "title": "الموردون",
+    "create": "مورد جديد",
+    "edit": "تعديل المورد",
+    "deleteConfirm": "حذف هذا المورد؟",
+    "searchPlaceholder": "ابحث بالاسم أو جهة الاتصال أو البريد أو الرقم الضريبي",
+    "name": "اسم الشركة",
+    "contactPerson": "جهة الاتصال",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "taxNumber": "الرقم الضريبي",
+    "taxOffice": "مكتب الضرائب",
+    "address": "العنوان",
+    "city": "المدينة",
+    "country": "الدولة",
+    "website": "الموقع الإلكتروني"
+  },
+  "crew": {
+    "title": "دليل الفريق",
+    "searchPlaceholder": "ابحث بالاسم أو المسمى أو الهاتف أو البريد",
+    "fullName": "الاسم",
+    "jobTitle": "المسمى الوظيفي",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "roles": "الأدوار"
+  },
+  "repairs": {
+    "title": "الإصلاحات",
+    "create": "إصلاح جديد",
+    "edit": "تعديل الإصلاح",
+    "number": "الرقم",
+    "equipmentCode": "رمز المعدة",
+    "equipment": "المعدة",
+    "unit": "الجهاز",
+    "quantity": "الكمية",
+    "titleField": "العطل / العمل",
+    "description": "الوصف",
+    "status": "الحالة",
+    "reportedAt": "تاريخ الإبلاغ",
+    "completedAt": "تاريخ الإنجاز",
+    "supplier": "جهة الإصلاح / المورد",
+    "cost": "التكلفة",
+    "searchPlaceholder": "ابحث عن معدة أو جهاز أو عطل",
+    "onlyOpen": "المفتوحة فقط",
+    "changeStatus": "الحالة"
+  },
+  "sections": {
+    "section": "القسم",
+    "none": "بدون قسم",
+    "add": "إضافة قسم",
+    "addSub": "إضافة قسم فرعي",
+    "rename": "تعديل القسم",
+    "name": "اسم القسم",
+    "nameHint": "مثال: المسرح الرئيسي، الممر، نظام الصوت",
+    "parent": "القسم الرئيسي",
+    "topLevel": "قسم رئيسي (بدون قسم أعلى)",
+    "deleteConfirm": "حذف هذا القسم؟ ستبقى معداته بدون قسم.",
+    "moveTo": "نقل إلى قسم",
+    "moveUp": "نقل لأعلى",
+    "moveDown": "نقل لأسفل",
+    "includeAccessories": "إضافة الملحقات أيضًا",
+    "alternatives": "معدات بديلة",
+    "noAlternatives": "لا توجد بدائل معرّفة",
+    "availableCount": "{{count}} متاح",
+    "addAlternative": "إضافة {{count}}",
+    "dailyTotal": "الإجمالي اليومي"
+  },
+  "crewTab": {
+    "title": "الفريق",
+    "pickPerson": "اختر شخصًا",
+    "function": "المهمة",
+    "add": "إضافة إلى الفريق",
+    "empty": "لم يتم تعيين فريق بعد",
+    "name": "الاسم",
+    "jobTitle": "المسمى الوظيفي",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "removeConfirm": "إزالة هذا الشخص من الفريق؟",
+    "crewViewHint": "أنت ضمن فريق هذا المشروع. يمكنك عرض قائمة المواد وطباعة إذن التسليم بدون أسعار."
+  },
+  "projectExtra": {
+    "accountManager": "مسؤول المشروع",
+    "paymentTerms": "شروط الدفع",
+    "paymentTermsPlaceholder": "مثال: تُصدر الفاتورة بعد الفعالية.",
+    "notesTasksFiles": "الملاحظات · المهام · الملفات",
+    "projectNumber": "رقم المشروع",
+    "currency": "العملة"
+  },
+  "packingSlip": {
+    "open": "إذن التسليم / قائمة المواد (PDF)",
+    "title": "إذن صرف مستودع",
+    "createdAt": "تاريخ الإنشاء",
+    "timetable": "الجدول الزمني",
+    "out": "خروج",
+    "in": "عودة",
+    "companySignature": "توقيع الشركة",
+    "customerSignature": "توقيع العميل"
+  },
+  "quoteSections": {
+    "sectionHint": "تُجمع البنود التي تحمل اسم القسم نفسه معًا في عرض السعر.",
+    "lineNotes": "ملاحظة البند"
+  },
+  "quotePrint": {
+    "contactPerson": "الشخص المسؤول",
+    "preparedBy": "أعدّه",
+    "workDays": "أيام العمل",
+    "equipment": "المعدات"
+  },
+  "unitGrid": {
+    "printLabels": "إنشاء / طباعة الملصقات ({{count}})",
+    "archive": "أرشفة",
+    "archiveConfirm": "أرشفة {{count}} من الأجهزة المحددة؟",
+    "archived": "مؤرشف",
+    "showArchived": "عرض المؤرشف",
+    "saveAndAddAnother": "حفظ وإضافة آخر",
+    "importTitle": "استيراد الأرقام التسلسلية",
+    "labelCodeColumn": "رمز الملصق"
+  },
+  "transfer": {
+    "button": "نقل إلى موقع آخر",
+    "title": "نقل {{count}} من الأجهزة",
+    "hint": "تُنقل الأجهزة من {{from}} إلى المستودع الرئيسي للموقع المحدد مع ملصقاتها وسجلها.",
+    "submit": "نقل",
+    "done": "تم نقل {{count}} من الأجهزة إلى {{company}} / {{location}}."
+  },
+  "unitDetail": {
+    "tabDetails": "التفاصيل",
+    "tabRepairs": "الإصلاحات",
+    "tabHistory": "السجل",
+    "createLabel": "إنشاء ملصق",
+    "scanLabel": "مسح",
+    "scanTitle": "امسح الملصق الحالي للجهاز {{ref}}",
+    "labelAlreadyHere": "الملصق \"{{code}}\" مرتبط بهذا الجهاز بالفعل.",
+    "labelInUse": "الملصق \"{{code}}\" مرتبط بسجل آخر: {{target}}",
+    "removeLabelConfirm": "إزالة هذا الملصق من الجهاز؟",
+    "restore": "استعادة من الأرشيف",
+    "archiveConfirm": "أرشفة هذا الجهاز؟ لن يمكن إخراجه إلى المشاريع.",
+    "uploadImage": "صورة",
+    "purchaseDate": "تاريخ الشراء",
+    "warrantyDate": "انتهاء الضمان",
+    "replacementDate": "تاريخ الاستبدال",
+    "supplier": "المورد",
+    "nextInspection": "الفحص التالي",
+    "inspection": "الفحص الدوري",
+    "inspectionInfo": "كل {{months}} أشهر · الأخير: {{last}} · التالي: {{next}}",
+    "noInspection": "لم يتم تحديد فحص دوري لهذه المعدة.",
+    "remark": "ملاحظة",
+    "repairs": "سجلات الإصلاح",
+    "newRepair": "إرسال للإصلاح",
+    "repairTitle": "العطل / العمل",
+    "repairDescription": "الوصف",
+    "repairHint": "يصبح الجهاز \"قيد الإصلاح\" عند فتح الإصلاح ويعود إلى المستودع عند اكتماله.",
+    "reportedAt": "تاريخ الإبلاغ",
+    "completedAt": "تاريخ الاكتمال",
+    "cost": "التكلفة",
+    "inspections": "الفحوصات",
+    "recordInspection": "تسجيل فحص",
+    "inspectionDate": "تاريخ الفحص",
+    "result": "النتيجة",
+    "passed": "ناجح",
+    "failed": "راسب",
+    "failedHint": "يُرسل الجهاز الذي يرسب في الفحص إلى الإصلاح تلقائيًا.",
+    "inspector": "الفاحص",
+    "note": "ملاحظة"
+  },
+  "labelPrint": {
+    "title": "طباعة الملصقات",
+    "template": "قالب الملصق",
+    "count": "{{count}} ملصق",
+    "newCreated": "تم إنشاء ملصقات جديدة لـ {{count}} من السجلات التي لا تملك ملصقًا (بنفس تنسيق QR الخاص بـ Rentman).",
+    "noTemplate": "لا يوجد قالب ملصق بعد. أضفه من الإعدادات › قوالب الملصقات.",
+    "nothing": "لم يتم تحديد شيء للطباعة.",
+    "printerHint": "يُطبع كل ملصق كصفحة مستقلة بحجم القالب. في إعدادات الطابعة اضبط حجم الورق على حجم الملصق والمقياس على 100٪."
+  },
+  "labelTemplates": {
+    "title": "قوالب الملصقات",
+    "create": "قالب جديد",
+    "edit": "تعديل القالب",
+    "hint": "يحدد حجم ملصقات QR والمعلومات المطبوعة عليها. لا يُستخدم ترويسة.",
+    "name": "اسم القالب",
+    "size": "الحجم",
+    "widthMm": "العرض",
+    "heightMm": "الارتفاع",
+    "qrSize": "حجم QR",
+    "fontSize": "حجم الخط",
+    "fields": "المعلومات على الملصق",
+    "showName": "اسم المعدة",
+    "showBrand": "العلامة التجارية",
+    "showModel": "الطراز",
+    "showCode": "رمز المعدة",
+    "showInternalRef": "المرجع الداخلي",
+    "showSerialNumber": "الرقم التسلسلي",
+    "showCompanyName": "اسم الشركة",
+    "isDefault": "القالب الافتراضي",
+    "default": "افتراضي",
+    "deleteConfirm": "حذف هذا القالب؟",
+    "preview": "معاينة (الحجم الفعلي)",
+    "previewHint": "تُعرض المعاينة على الشاشة بالحجم الفعلي تقريبًا."
   }
 }

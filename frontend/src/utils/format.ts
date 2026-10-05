@@ -24,3 +24,8 @@ export function useFormat() {
 /** Sends local date-times to the API without a timezone shift (event times are wall-clock times). */
 export const toApiDateTime = (value: dayjs.Dayjs | null | undefined) => (value ? value.format('YYYY-MM-DDTHH:mm:ss') : null);
 export const toApiDate = (value: dayjs.Dayjs | null | undefined) => (value ? value.format('YYYY-MM-DD') : null);
+
+export const formatDate = (value?: string | null) => (value ? dayjs(value).format('DD.MM.YYYY') : '—');
+/** Server audit times are UTC; shown in the browser's local time. */
+export const formatDateTime = (value?: string | null) =>
+  value ? dayjs(/[zZ]|[+-]\d\d:\d\d$/.test(value) ? value : value + 'Z').format('DD.MM.YYYY HH:mm') : '—';

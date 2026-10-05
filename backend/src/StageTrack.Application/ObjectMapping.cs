@@ -2,9 +2,11 @@ using StageTrack.Account;
 using StageTrack.Companies;
 using StageTrack.Customers;
 using StageTrack.Inventory;
+using StageTrack.Maintenance;
 using StageTrack.Pricing;
 using StageTrack.Projects;
 using StageTrack.Quotes;
+using StageTrack.Suppliers;
 using StageTrack.Warehouse;
 
 namespace StageTrack;
@@ -23,7 +25,8 @@ internal static class ObjectMapping
         Id = f.Id, Name = f.Name, ParentId = f.ParentId, SortOrder = f.SortOrder
     };
 
-    public static T FillEquipment<T>(this T dto, Equipment e, int stock) where T : EquipmentDto
+    /// <param name="showPrice">False hides the rental price (users without the price permission).</param>
+    public static T FillEquipment<T>(this T dto, Equipment e, int stock, bool showPrice = true) where T : EquipmentDto
     {
         dto.Id = e.Id;
         dto.Code = e.Code;
@@ -34,7 +37,7 @@ internal static class ObjectMapping
         dto.Type = e.Type;
         dto.IsSerialized = e.IsSerialized;
         dto.Stock = stock;
-        dto.RentalPrice = e.RentalPrice;
+        dto.RentalPrice = showPrice ? e.RentalPrice : null;
         dto.WeightKg = e.WeightKg;
         dto.VolumeM3 = e.VolumeM3;
         dto.Notes = e.Notes;
@@ -42,43 +45,90 @@ internal static class ObjectMapping
         return dto;
     }
 
-    public static EquipmentDto ToDto(this Equipment e, int stock) => new EquipmentDto().FillEquipment(e, stock);
+    public static EquipmentDto ToDto(this Equipment e, int stock, bool showPrice = true) => new EquipmentDto().FillEquipment(e, stock, showPrice);
 
-    public static EquipmentLookupDto ToLookupDto(this Equipment e) => new()
+    public static EquipmentLookupDto ToLookupDto(this Equipment e, bool showPrice) => new()
     {
-        Id = e.Id, Code = e.Code, Name = e.Name, IsSerialized = e.IsSerialized, RentalPrice = e.RentalPrice
+        Id = e.Id, Code = e.Code, Name = e.Name, IsSerialized = e.IsSerialized, RentalPrice = showPrice ? e.RentalPrice : null
     };
 
-    public static EquipmentUnitDto ToDto(this EquipmentUnitListItem x) => new()
+    public static T FillUnit<T>(this T dto, EquipmentUnit u, int? inspectionIntervalMonths = null) where T : EquipmentUnitDto
     {
-        Id = x.Unit.Id,
-        EquipmentId = x.Unit.EquipmentId,
+        dto.Id = u.Id;
+        dto.EquipmentId = u.EquipmentId;
+        dto.InternalRef = u.InternalRef;
+        dto.SerialNumber = u.SerialNumber;
+        dto.StockLocationId = u.StockLocationId;
+        dto.Status = u.Status;
+        dto.CurrentProjectId = u.CurrentProjectId;
+        dto.Notes = u.Notes;
+        dto.IsArchived = u.IsArchived;
+        dto.PurchaseDate = u.PurchaseDate;
+        dto.WarrantyDate = u.WarrantyDate;
+        dto.ReplacementDate = u.ReplacementDate;
+        dto.SupplierId = u.SupplierId;
+        dto.LastInspectionDate = u.LastInspectionDate;
+        dto.NextInspectionDate = u.GetNextInspectionDate(inspectionIntervalMonths);
+        dto.ImageAttachmentId = u.ImageAttachmentId;
+        return dto;
+    }
+
+    public static T FillUnit<T>(this T dto, EquipmentUnitListItem x) where T : EquipmentUnitDto
+    {
+        dto.FillUnit(x.Unit, x.InspectionIntervalMonths);
+        dto.EquipmentCode = x.EquipmentCode;
+        dto.EquipmentName = x.EquipmentName;
+        dto.StockLocationName = x.StockLocationName;
+        dto.CurrentProjectNumber = x.CurrentProjectNumber;
+        dto.CurrentProjectName = x.CurrentProjectName;
+        dto.LabelCount = x.LabelCount;
+        dto.SupplierName = x.SupplierName;
+        return dto;
+    }
+
+    public static EquipmentUnitDto ToDto(this EquipmentUnitListItem x) => new EquipmentUnitDto().FillUnit(x);
+
+    public static EquipmentUnitDto ToDto(this EquipmentUnit u, Equipment e)
+    {
+        var dto = new EquipmentUnitDto().FillUnit(u, e.InspectionIntervalMonths);
+        dto.EquipmentCode = e.Code;
+        dto.EquipmentName = e.Name;
+        return dto;
+    }
+
+    public static LabelTemplateDto ToDto(this LabelTemplate t) => new()
+    {
+        Id = t.Id, Name = t.Name, WidthMm = t.WidthMm, HeightMm = t.HeightMm, QrSizeMm = t.QrSizeMm, FontSizePt = t.FontSizePt,
+        ShowName = t.ShowName, ShowBrand = t.ShowBrand, ShowModel = t.ShowModel, ShowCode = t.ShowCode,
+        ShowInternalRef = t.ShowInternalRef, ShowSerialNumber = t.ShowSerialNumber, ShowCompanyName = t.ShowCompanyName,
+        IsDefault = t.IsDefault
+    };
+
+    public static SupplierDto ToDto(this Supplier s) => new()
+    {
+        Id = s.Id, Name = s.Name, ContactPerson = s.ContactPerson, Email = s.Email, Phone = s.Phone, TaxNumber = s.TaxNumber,
+        TaxOffice = s.TaxOffice, Address = s.Address, City = s.City, Country = s.Country, Website = s.Website, Notes = s.Notes
+    };
+
+    public static RepairDto ToDto(this RepairListItem x) => new()
+    {
+        Id = x.Repair.Id,
+        Number = x.Repair.Number,
+        EquipmentId = x.Repair.EquipmentId,
         EquipmentCode = x.EquipmentCode,
         EquipmentName = x.EquipmentName,
-        InternalRef = x.Unit.InternalRef,
-        SerialNumber = x.Unit.SerialNumber,
-        StockLocationId = x.Unit.StockLocationId,
-        StockLocationName = x.StockLocationName,
-        Status = x.Unit.Status,
-        CurrentProjectId = x.Unit.CurrentProjectId,
-        CurrentProjectNumber = x.CurrentProjectNumber,
-        CurrentProjectName = x.CurrentProjectName,
-        Notes = x.Unit.Notes,
-        LabelCount = x.LabelCount
-    };
-
-    public static EquipmentUnitDto ToDto(this EquipmentUnit u, Equipment e) => new()
-    {
-        Id = u.Id,
-        EquipmentId = u.EquipmentId,
-        EquipmentCode = e.Code,
-        EquipmentName = e.Name,
-        InternalRef = u.InternalRef,
-        SerialNumber = u.SerialNumber,
-        StockLocationId = u.StockLocationId,
-        Status = u.Status,
-        CurrentProjectId = u.CurrentProjectId,
-        Notes = u.Notes
+        UnitId = x.Repair.UnitId,
+        UnitInternalRef = x.UnitInternalRef,
+        Quantity = x.Repair.Quantity,
+        Title = x.Repair.Title,
+        Description = x.Repair.Description,
+        Status = x.Repair.Status,
+        ReportedAt = x.Repair.ReportedAt,
+        CompletedAt = x.Repair.CompletedAt,
+        SupplierId = x.Repair.SupplierId,
+        SupplierName = x.SupplierName,
+        Cost = x.Repair.Cost,
+        AllowedStatuses = RepairManager.GetAllowedTargets(x.Repair.Status).ToList()
     };
 
     public static LabelDto ToDto(this EquipmentLabel l) => new()
@@ -139,7 +189,8 @@ internal static class ObjectMapping
         ProjectName = x.ProjectName,
         UserFullName = x.UserFullName,
         LabelCode = x.Movement.LabelCode,
-        Quantity = x.Movement.Quantity
+        Quantity = x.Movement.Quantity,
+        Note = x.Movement.Note
     };
 
     public static ScanResultDto ToDto(this ScanOutcome o) => new()

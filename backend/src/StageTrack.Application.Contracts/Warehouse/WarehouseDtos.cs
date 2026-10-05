@@ -92,6 +92,7 @@ public class MovementDto
     public string? UserFullName { get; set; }
     public string? LabelCode { get; set; }
     public int Quantity { get; set; }
+    public string? Note { get; set; }
 }
 
 public class GetMovementListInput : PagedRequestDto

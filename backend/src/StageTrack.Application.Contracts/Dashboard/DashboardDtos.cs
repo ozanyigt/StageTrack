@@ -11,6 +11,12 @@ public class DashboardDto
     public List<ProjectListItemDto> Upcoming { get; set; } = [];
     public List<ShortageSummaryDto> Shortages { get; set; } = [];
     public List<MovementDto> RecentMovements { get; set; } = [];
+
+    /// <summary>Crew members: confirmed projects they are assigned to.</summary>
+    public List<ProjectListItemDto> MyProjects { get; set; } = [];
+
+    public int OpenRepairs { get; set; }
+    public int OverdueInspections { get; set; }
 }
 
 public class ShortageSummaryDto

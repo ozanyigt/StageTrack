@@ -8,7 +8,9 @@ import { userApi } from '../../api/endpoints';
 import type { User } from '../../api/types';
 import { Permissions, roleLabel, useAuth } from '../../auth/AuthContext';
 import { LANGUAGES } from '../../i18n';
+import { ExportButton } from '../../components/ExcelButtons';
 import { useErrorToast } from '../../utils/errors';
+import { fetchAllPages } from '../../utils/excel';
 import { useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
 
@@ -18,6 +20,8 @@ interface UserForm {
   userName: string;
   fullName: string;
   email?: string;
+  phone?: string;
+  jobTitle?: string;
   password?: string;
   language: string;
   roleIds: string[];
@@ -57,8 +61,15 @@ export function UsersPage() {
   const save = useMutation({
     mutationFn: (v: UserForm) =>
       editing && editing !== 'new'
-        ? userApi.update(editing.id, { fullName: v.fullName, email: v.email || null, roleIds: v.roleIds, companyIds: v.companyIds })
-        : userApi.create({ ...v, email: v.email || null, password: v.password! }),
+        ? userApi.update(editing.id, {
+            fullName: v.fullName,
+            email: v.email || null,
+            phone: v.phone || null,
+            jobTitle: v.jobTitle || null,
+            roleIds: v.roleIds,
+            companyIds: v.companyIds,
+          })
+        : userApi.create({ ...v, email: v.email || null, phone: v.phone || null, jobTitle: v.jobTitle || null, password: v.password! }),
     onSuccess: () => {
       message.success(t('common.saved'));
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -101,7 +112,16 @@ export function UsersPage() {
     form.setFieldsValue(
       u === 'new'
         ? { language: 'tr', roleIds: [], companyIds: company ? [company.id] : [] }
-        : { userName: u.userName, fullName: u.fullName, email: u.email ?? undefined, language: u.language, roleIds: u.roleIds, companyIds: u.companyIds },
+        : {
+            userName: u.userName,
+            fullName: u.fullName,
+            email: u.email ?? undefined,
+            phone: u.phone ?? undefined,
+            jobTitle: u.jobTitle ?? undefined,
+            language: u.language,
+            roleIds: u.roleIds,
+            companyIds: u.companyIds,
+          },
     );
     setEditing(u);
   };
@@ -110,7 +130,23 @@ export function UsersPage() {
     <>
       <div className="page-header">
         <Typography.Title level={3}>{t('users.title')}</Typography.Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => open('new')}>{t('users.create')}</Button>
+        <Space wrap>
+          <ExportButton<User>
+            fileName={t('users.title')}
+            load={() => fetchAllPages((skipCount, maxResultCount) => userApi.list({ text: search, skipCount, maxResultCount }))}
+            columns={[
+              { header: t('users.fullName'), value: (u) => u.fullName },
+              { header: t('users.userName'), value: (u) => u.userName },
+              { header: t('users.jobTitle'), value: (u) => u.jobTitle },
+              { header: t('users.email'), value: (u) => u.email },
+              { header: t('users.phone'), value: (u) => u.phone },
+              { header: t('users.roles'), value: (u) => u.roleIds.map(roleName).join(', ') },
+              { header: t('users.status'), value: (u) => (u.isActive ? t('users.active') : t('users.inactive')) },
+              { header: t('users.created'), value: (u) => f.date(u.creationTime) },
+            ]}
+          />
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => open('new')}>{t('users.create')}</Button>
+        </Space>
       </div>
       <Card size="small">
         <Input.Search allowClear placeholder={t('users.searchPlaceholder')} value={text}
@@ -123,9 +159,20 @@ export function UsersPage() {
           scroll={{ x: 900 }}
           pagination={{ current: page, pageSize: PAGE_SIZE, total: list.data?.totalCount, onChange: setPage, showSizeChanger: false }}
           columns={[
-            { title: t('users.fullName'), dataIndex: 'fullName', ellipsis: true },
+            {
+              title: t('users.fullName'),
+              dataIndex: 'fullName',
+              ellipsis: true,
+              render: (v: string, u) => (
+                <>
+                  {v}
+                  {u.jobTitle && <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12 }}>{u.jobTitle}</Typography.Text>}
+                </>
+              ),
+            },
             { title: t('users.userName'), dataIndex: 'userName', width: 140 },
             { title: t('users.email'), dataIndex: 'email', width: 200, ellipsis: true, responsive: ['lg'] },
+            { title: t('users.phone'), dataIndex: 'phone', width: 150, responsive: ['xl'] },
             { title: t('users.roles'), dataIndex: 'roleIds', render: (ids: string[]) => ids.map((id) => <Tag key={id}>{roleName(id)}</Tag>) },
             {
               title: t('users.status'), dataIndex: 'isActive', width: 100,
@@ -174,8 +221,14 @@ export function UsersPage() {
           <Form.Item name="fullName" label={t('users.fullName')} rules={[{ required: true, message: t('validation.required') }]}>
             <Input />
           </Form.Item>
+          <Form.Item name="jobTitle" label={t('users.jobTitle')}>
+            <Input maxLength={128} />
+          </Form.Item>
           <Form.Item name="email" label={t('users.email')} rules={[{ type: 'email', message: t('validation.email') }]}>
             <Input />
+          </Form.Item>
+          <Form.Item name="phone" label={t('users.phone')}>
+            <Input maxLength={32} />
           </Form.Item>
           {editing === 'new' && (
             <Form.Item name="password" label={t('users.password')} rules={passwordRules(t)} extra={t('users.passwordRule')}>

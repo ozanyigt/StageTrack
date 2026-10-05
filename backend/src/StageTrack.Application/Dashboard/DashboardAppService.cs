@@ -1,5 +1,7 @@
 using StageTrack.Authorization;
 using StageTrack.Inventory;
+using StageTrack.Maintenance;
+using StageTrack.Session;
 using StageTrack.Permissions;
 using StageTrack.Projects;
 using StageTrack.Warehouse;
@@ -10,8 +12,10 @@ public class DashboardAppService(
     IProjectRepository projectRepository,
     IEquipmentUnitRepository unitRepository,
     IWarehouseMovementRepository movementRepository,
+    IRepairRepository repairRepository,
     AvailabilityManager availabilityManager,
-    IPermissionChecker permissionChecker) : IDashboardAppService
+    IPermissionChecker permissionChecker,
+    ICurrentUser currentUser) : IDashboardAppService
 {
     private const int UpcomingDays = 7;
     private const int ShortageLookAheadDays = 14;
@@ -24,6 +28,22 @@ public class DashboardAppService(
         if (await permissionChecker.IsGrantedAsync(StageTrackPermissions.Projects.Default))
         {
             await FillProjectsAsync(dashboard);
+        }
+        else if (await permissionChecker.IsGrantedAsync(StageTrackPermissions.Projects.Assigned))
+        {
+            var mine = await projectRepository.GetPagedListAsync(new ProjectFilter
+            {
+                Statuses = ProjectStatusRules.VisibleToCrew,
+                CrewUserId = currentUser.Id,
+                From = DateTime.Today
+            }, null, 0, 20);
+            dashboard.MyProjects = mine.Select(x => x.ToDto()).ToList();
+        }
+
+        if (await permissionChecker.IsGrantedAsync(StageTrackPermissions.Maintenance.Default))
+        {
+            dashboard.OpenRepairs = (int)await repairRepository.GetCountAsync(new RepairFilter { OnlyOpen = true });
+            dashboard.OverdueInspections = await unitRepository.CountOverdueInspectionsAsync(DateTime.Today);
         }
 
         if (await permissionChecker.IsGrantedAsync(StageTrackPermissions.Equipment.Default))
@@ -71,7 +91,7 @@ public class DashboardAppService(
                     ProjectNumber = project.Number,
                     ProjectName = project.Name,
                     PlanStart = project.PlanStart,
-                    MissingQuantity = missing.Sum(m => m.Missing),
+                    MissingQuantity = missing.Values.Sum(),
                     LineCount = missing.Count
                 });
             }
