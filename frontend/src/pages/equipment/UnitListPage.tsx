@@ -3,7 +3,8 @@ import { Button, Card, Checkbox, Flex, Input, Select, Space, Table, Tag, Typogra
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { useLabelGenerator } from '../../components/LabelGenerator';
+import { Link } from 'react-router-dom';
 import { unitApi } from '../../api/endpoints';
 import { UNIT_STATUSES, type UnitImportRow, type UnitStatus } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
@@ -22,7 +23,7 @@ const PAGE_SIZE = 50;
 /** All devices across equipment, like Rentman's "Serial numbers" screen; also finds a device by its label code. */
 export function UnitListPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const labels = useLabelGenerator();
   const qc = useQueryClient();
   const { can } = useAuth();
   const canTransfer = useCanTransfer();
@@ -107,7 +108,7 @@ export function UnitListPage() {
             {t('unitGrid.showArchived')}
           </Checkbox>
           <Space style={{ marginInlineStart: 'auto' }} wrap>
-            <Button icon={<PrinterOutlined />} disabled={selected.length === 0} onClick={() => navigate(`/labels/print?units=${selected.join(',')}`)}>
+            <Button icon={<PrinterOutlined />} disabled={selected.length === 0} onClick={() => labels.open({ unitIds: selected })}>
               {t('unitGrid.printLabels', { count: selected.length })}
             </Button>
             {canTransfer && (

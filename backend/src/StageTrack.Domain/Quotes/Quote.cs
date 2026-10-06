@@ -116,7 +116,7 @@ public class Quote : CompanyAggregateRoot
 
     /// <summary>Replaces the equipment lines (lines of other types stay as they are).</summary>
     internal void ReplaceEquipmentLines(IEnumerable<(Guid EquipmentId, string Description, decimal Quantity, decimal UnitPrice, bool ApplyFactor,
-        decimal DiscountPercent, string? Section, string? Notes)> lines)
+        decimal DiscountPercent, string? Section, string? Notes, bool IsContent)> lines)
     {
         EnsureEditable();
         foreach (var line in Lines.Where(l => l.Type == QuoteLineType.Equipment).ToList())
@@ -132,6 +132,7 @@ public class Quote : CompanyAggregateRoot
             var line = new QuoteLine(Guid.CreateVersion7(), Id, order++);
             line.Set(QuoteLineType.Equipment, item.EquipmentId, item.Description, item.Quantity, item.UnitPrice, item.ApplyFactor, item.DiscountPercent);
             line.SetPlacement(item.Section, item.Notes);
+            line.SetContent(item.IsContent);
             Lines.Add(line);
         }
 
@@ -161,6 +162,7 @@ public class Quote : CompanyAggregateRoot
             var newLine = new QuoteLine(Guid.CreateVersion7(), id, line.SortOrder);
             newLine.Set(line.Type, line.EquipmentId, line.Description, line.Quantity, line.UnitPrice, line.ApplyFactor, line.DiscountPercent);
             newLine.SetPlacement(line.Section, line.Notes);
+            newLine.SetContent(line.IsContent);
             copy.Lines.Add(newLine);
         }
 
@@ -261,6 +263,11 @@ public class QuoteLine : Entity
     }
 
     internal void SetSortOrder(int sortOrder) => SortOrder = sortOrder;
+
+    /// <summary>Content of the case line above it: listed for information, not priced.</summary>
+    public bool IsContent { get; private set; }
+
+    internal void SetContent(bool isContent) => IsContent = isContent;
 
     internal void SetPlacement(string? section, string? notes)
     {

@@ -20,7 +20,7 @@ const COLUMNS: { key: keyof Omit<WarehouseBoard, 'date'>; color: string }[] = [
   { key: 'delayed', color: '#ff4d4f' },
 ];
 
-/** Rentman-style warehouse board: what to prepare, what is out, what should come back today, what is late. */
+/** Warehouse board: what to prepare, what is out, what should come back today, what is late. Cards open the scan screen. */
 export function WarehouseBoardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ export function WarehouseBoardPage() {
 
   const card = (p: ProjectListItem) => (
     <Card key={p.id} size="small" hoverable style={{ marginBottom: 8, borderInlineStart: `4px solid ${p.color}` }}
-      onClick={() => navigate(`/projects/${p.id}`)}>
+      onClick={() => navigate(`/warehouse/scan/${p.id}`)}>
       <Flex justify="space-between" gap={8}>
         <div style={{ minWidth: 0 }}>
           <Typography.Text strong ellipsis style={{ display: 'block' }}>{p.name}</Typography.Text>

@@ -82,6 +82,11 @@ public static class StageTrackErrorCodes
     public const string QuoteHasNoLines = "Quote.HasNoLines";
     public const string QuoteNotLatestRevision = "Quote.NotLatestRevision";
     public const string TenantCodeAlreadyExists = "Tenant.CodeAlreadyExists";
+    public const string EquipmentNotQuotable = "Equipment.NotQuotable";
+    public const string EquipmentUsedInHistory = "Equipment.UsedInHistory";
+    public const string ProjectContentLineLocked = "Project.ContentLineLocked";
+    public const string QuoteAlreadyExistsForJob = "Quote.AlreadyExistsForJob";
+    public const string FirmLogoInvalid = "Firm.LogoInvalid";
     public const string TenantSuspended = "Tenant.Suspended";
     public const string TenantSubscriptionExpired = "Tenant.SubscriptionExpired";
     public const string TenantSubscriptionNotStarted = "Tenant.SubscriptionNotStarted";

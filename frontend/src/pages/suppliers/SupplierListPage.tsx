@@ -10,6 +10,7 @@ import { ExportButton } from '../../components/ExcelButtons';
 import { useErrorToast } from '../../utils/errors';
 import { fetchAllPages } from '../../utils/excel';
 import { useDebounced } from '../../utils/useDebounced';
+import { useGuardedForm } from '../../components/useGuardedModal';
 
 const PAGE_SIZE = 25;
 
@@ -24,6 +25,7 @@ export function SupplierListPage() {
   const [text, setText] = useState('');
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<Supplier | 'new' | null>(null);
+  const guard = useGuardedForm(!!editing, async () => save.mutateAsync(await form.validateFields()));
   const search = useDebounced(text, 300);
   const manage = can(Permissions.SuppliersManage);
 
@@ -139,7 +141,7 @@ export function SupplierListPage() {
       <Drawer
         open={!!editing}
         width={520}
-        onClose={() => setEditing(null)}
+        onClose={guard.guardClose(() => setEditing(null))}
         title={editing === 'new' ? t('suppliers.create') : t('suppliers.edit')}
         destroyOnHidden
         extra={
@@ -158,7 +160,7 @@ export function SupplierListPage() {
           </Space>
         }
       >
-        <Form form={form} layout="vertical" onFinish={(v) => save.mutate(v)}>
+        <Form form={form} onValuesChange={guard.onValuesChange} layout="vertical" onFinish={(v) => save.mutate(v)}>
           <Form.Item name="name" label={t('suppliers.name')} rules={[{ required: true, whitespace: true, message: t('validation.required') }]}>
             <Input maxLength={256} />
           </Form.Item>

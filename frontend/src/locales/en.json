@@ -13,7 +13,8 @@
     "save": "Save",
     "saved": "Saved",
     "viewAll": "View all",
-    "yes": "Yes"
+    "yes": "Yes",
+    "selectDate": "Select date"
   },
   "validation": {
     "required": "This field is required",
@@ -65,7 +66,9 @@
     "suppliers": "Suppliers",
     "crew": "Crew directory",
     "labelTemplates": "Label templates",
-    "tenants": "Firms"
+    "tenants": "Firms",
+    "auditLog": "Audit log",
+    "firm": "Firm and logo"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -114,7 +117,7 @@
     "inputPlaceholder": "Scan a label or type the code and press Enter",
     "camera": "Camera",
     "cameraTitle": "Scan with camera",
-    "cameraHint": "Hold the QR label inside the frame. Existing Rentman labels work too.",
+    "cameraHint": "Bring the QR label into the frame. Existing labels on the devices are read as well.",
     "cameraError": "Could not open the camera. Check the browser camera permission and the HTTPS connection.",
     "progress": "Packing progress",
     "packingList": "Packing list",
@@ -257,7 +260,7 @@
     "labels": "Labels",
     "changeStatus": "Status",
     "labelCode": "Label code (optional)",
-    "labelCodeHint": "You can scan the existing Rentman QR code on the device.",
+    "labelCodeHint": "You can scan the existing QR label on the device.",
     "scanToFill": "Scan the label"
   },
   "labels": {
@@ -265,7 +268,7 @@
     "assign": "Link",
     "assigned": "Label \"{{code}}\" linked",
     "unknownLabel": "Label \"{{code}}\" is not known yet",
-    "assignHint": "This is most likely a label left from Rentman. Link it to the right device without removing it; it will be recognized on the next scan.",
+    "assignHint": "This label is not registered yet. Link it to its device without removing it; it is recognized directly next time.",
     "equipment": "Equipment",
     "unit": "Device",
     "type": "Label type",
@@ -275,7 +278,7 @@
     "equipmentLabels": "Equipment labels",
     "add": "Label",
     "addTitle": "Add a label for {{target}}",
-    "addHint": "Scan the label on the device. Existing Rentman labels can be used as they are.",
+    "addHint": "Scan the barcode/QR label you used in your previous system; it is linked to this record and keeps working as it is.",
     "showQr": "Show QR",
     "none": "No labels on this record"
   },
@@ -444,7 +447,7 @@
       "Sale": "Sale item"
     },
     "labelType": {
-      "RentmanQr": "Rentman QR",
+      "RentmanQr": "QR label",
       "Qr": "QR",
       "Barcode": "Barcode",
       "Rfid": "RFID"
@@ -497,7 +500,9 @@
       "CodeAlreadyExists": "Equipment code \"{{code}}\" is already in use.",
       "HasUnits": "This equipment has serial numbers; it cannot be switched to quantity tracking.",
       "NotSerialized": "This equipment is tracked by quantity; serial numbers cannot be added.",
-      "PlannedOnProjects": "This equipment is planned on active projects and cannot be archived."
+      "PlannedOnProjects": "This equipment is planned on active projects and cannot be archived.",
+      "NotQuotable": "Equipment {{code}} cannot be added to projects or quotes (not shown in quotes).",
+      "UsedInHistory": "{{code}} has been used on projects or quotes and cannot be deleted, so the history stays intact. You can archive it."
     },
     "Folder": {
       "HasChildren": "Delete or move the sub folders first.",
@@ -517,7 +522,7 @@
       "NotFound": "Label \"{{code}}\" is not linked to any equipment yet.",
       "TargetRequired": "Select an equipment or a serial number for the label.",
       "OtherCompany": "This label belongs to {{company}}. Switch to that company and scan again.",
-      "UnknownWorkspace": "This label belongs to another Rentman workspace (#{{workspace}})."
+      "UnknownWorkspace": "This label belongs to another workspace (#{{workspace}})."
     },
     "Customer": {
       "TaxNumberAlreadyExists": "A customer with tax number \"{{taxNumber}}\" already exists.",
@@ -529,7 +534,8 @@
       "QuantityMustBePositive": "Quantity must be greater than zero.",
       "NotEditable": "Projects with status \"{{status}}\" cannot be edited.",
       "HasEquipmentOut": "{{count}} items are still out on this project. Check them in first.",
-      "CannotDelete": "Only draft or cancelled projects can be deleted."
+      "CannotDelete": "Only draft or cancelled projects can be deleted.",
+      "ContentLineLocked": "Case content lines follow their case; change quantity, move or remove the case line instead."
     },
     "Warehouse": {
       "ProjectNotScannable": "Equipment cannot be scanned for a project with status \"{{status}}\".",
@@ -558,7 +564,8 @@
       "CannotDelete": "Only draft quotes can be deleted.",
       "LineDescriptionRequired": "Enter a description for the line.",
       "NotLatestRevision": "Only the latest revision can be reopened.",
-      "JobAlreadyDecided": "A quote of this job has already been accepted."
+      "JobAlreadyDecided": "A quote of this job has already been accepted.",
+      "AlreadyExistsForJob": "This job already has a quote; open a new revision of it to make changes."
     },
     "Role": {
       "NameAlreadyExists": "A role named \"{{name}}\" already exists.",
@@ -631,6 +638,9 @@
     },
     "Company": {
       "CodeAlreadyExists": "This firm already has a location with code {{code}}."
+    },
+    "Firm": {
+      "LogoInvalid": "The logo must be an image file of at most 2 MB."
     }
   },
   "roles": {
@@ -723,7 +733,9 @@
     "Suppliers_Manage": "Add/edit suppliers",
     "AssignedProjects": "See assigned projects (without prices)",
     "Prices": "See prices and totals",
-    "Settings_LabelTemplates": "Manage label templates"
+    "Settings_LabelTemplates": "Manage label templates",
+    "Equipment_Delete": "Delete equipment (written to the audit log)",
+    "Settings_AuditLog": "View the audit log"
   },
   "excel": {
     "export": "Excel",
@@ -778,7 +790,8 @@
       "inspection": "Periodic inspection",
       "repairs": "Repairs",
       "stock": "Stock",
-      "history": "History"
+      "history": "History",
+      "manufacturerSerials": "Manufacturer serial numbers"
     },
     "relationHint": {
       "Content": "Default content: items that come along when this equipment is added to a project (e.g. the contents of a case). Listed under the item on the packing slip.",
@@ -824,7 +837,9 @@
     "cost": "Cost",
     "noLocation": "No location",
     "total": "Total",
-    "bulkStockHint": "For quantity-tracked equipment the stock is the stock quantity on the Properties tab."
+    "bulkStockHint": "For quantity-tracked equipment the stock is the stock quantity on the Properties tab.",
+    "notSerialized": "This equipment is tracked by quantity.",
+    "notSerializedHint": "To track each device (manufacturer serial number, internal reference, label), turn on \"Track by serial number\" on the Properties tab."
   },
   "suppliers": {
     "title": "Suppliers",
@@ -942,7 +957,9 @@
     "showArchived": "Show archived",
     "saveAndAddAnother": "Save and add another",
     "importTitle": "Import serial numbers",
-    "labelCodeColumn": "Label code"
+    "labelCodeColumn": "Label code",
+    "noLocation": "No location",
+    "internalRefHint": "The next number is suggested; change it if you like (e.g. TR-001)."
   },
   "transfer": {
     "button": "Transfer to another location",
@@ -995,7 +1012,7 @@
     "title": "Print labels",
     "template": "Label template",
     "count": "{{count}} labels",
-    "newCreated": "New labels were created for {{count}} items without one (same QR format as Rentman).",
+    "newCreated": "New QR labels were created for {{count}} items without a label.",
     "noTemplate": "No label template yet. Add one under Settings › Label templates.",
     "nothing": "Nothing selected to print.",
     "printerHint": "Each label prints as its own page at the template size. In the printer dialog set the paper size to the label size and scale to 100%."
@@ -1131,8 +1148,8 @@
     "currency": "Currency",
     "vatRate": "VAT %",
     "country": "Country code",
-    "rentmanWorkspace": "Rentman workspace (cmpID)",
-    "rentmanWorkspaceHint": "The cmpID in existing Rentman QR labels. Leave empty if unknown.",
+    "rentmanWorkspace": "Label workspace no. (cmpID)",
+    "rentmanWorkspaceHint": "The cmpID value in the existing QR labels on the devices. Leave empty if unknown.",
     "warehouseName": "First warehouse name",
     "addLocation": "Add location",
     "editLocation": "Edit location",
@@ -1154,5 +1171,158 @@
     "backToList": "Firms",
     "statusColumn": "Status"
   },
-  "subscriptionWarning": "Your subscription ends on {{date}} ({{count}} days left). Please contact us to renew."
+  "subscriptionWarning": "Your subscription ends on {{date}} ({{count}} days left). Please contact us to renew.",
+  "archivePage": {
+    "title": "Archive",
+    "equipment": "Archived equipment",
+    "units": "Archived devices",
+    "restored": "Restored from the archive.",
+    "equipmentFile": "Archived equipment",
+    "unitsFile": "Archived devices"
+  },
+  "equipmentList": {
+    "columns": "Columns",
+    "resetColumns": "Reset to default",
+    "more": "More",
+    "exportAll": "Export all to Excel",
+    "exportSelected": "Export to Excel",
+    "createLabels": "Create labels",
+    "clearSelection": "Clear selection",
+    "selected": "{{count}} selected",
+    "archiveSelectedConfirm": "Archive the {{count}} selected items? They can no longer be added to new projects.",
+    "archived": "{{count}} items archived.",
+    "dimensionsCm": "Dimensions L × W × H (cm)",
+    "showInQuotes": "Show in quotes",
+    "purchaseDate": "Purchase date",
+    "warrantyEndDate": "Warranty end",
+    "purchaseSupplier": "Purchased from",
+    "containedIn": "Part of case",
+    "containedInNote": "Part of {{code}} {{name}}"
+  },
+  "folderManager": {
+    "title": "Manage folders",
+    "addRoot": "Add root folder",
+    "addSub": "Add sub-folder",
+    "deleteConfirm": "Delete the folder \"{{name}}\"?",
+    "empty": "No folders yet",
+    "hint": "To add a folder under another one, hover the row and click +. Changes are saved immediately."
+  },
+  "labelGen": {
+    "title": "Create labels",
+    "selected": "Selected serial numbers",
+    "selectAll": "Select all",
+    "noDevices": "This equipment has no active devices.",
+    "equipmentLabel": "Equipment label",
+    "copies": "pcs",
+    "note": "Note",
+    "noteHint": "Optional; printed in small text at the bottom of each label.",
+    "generate": "Generate",
+    "docTitle": "{{code}} · Labels ({{count}})",
+    "docTitleMany": "Labels ({{count}})",
+    "closeAll": "Close all"
+  },
+  "equipmentQuote": {
+    "showInQuotes": "Show in quotes",
+    "showInQuotesHint": "If No, this equipment (e.g. office equipment) cannot be added to projects or quotes.",
+    "notInQuotes": "Not shown in quotes",
+    "purchase": "Purchase",
+    "purchaseDate": "Purchase date",
+    "warrantyEndDate": "Warranty end",
+    "purchaseSupplier": "Purchased from",
+    "containedIn": "This equipment is part of the content of:"
+  },
+  "equipmentDelete": {
+    "confirmTitle": "Delete {{code}}?",
+    "selectedConfirmTitle": "Delete {{count}} equipment items?",
+    "confirm": "The equipment, its devices and labels are deleted permanently and the deletion is written to the audit log. Equipment used on projects or quotes cannot be deleted; archive it instead.",
+    "deleted": "{{count}} equipment items deleted."
+  },
+  "auditLog": {
+    "title": "Audit log",
+    "subtitle": "Who did critical operations such as deletions, and when",
+    "search": "Search description or user",
+    "time": "Time",
+    "action": "Action",
+    "description": "Description",
+    "user": "User",
+    "impersonator": "Actual account",
+    "viaImpersonation": "while {{name}} was signed in as this user",
+    "actions": {
+      "EquipmentDeleted": "Equipment deleted"
+    }
+  },
+  "unsaved": {
+    "title": "Unsaved changes",
+    "message": "Your changes have not been saved. Save them?",
+    "save": "Save",
+    "discard": "Leave without saving"
+  },
+  "firmSettings": {
+    "title": "Firm and logo",
+    "firm": "Firm",
+    "location": "Location",
+    "logo": "Logo",
+    "logoHint": "Used on printed quotes and packing slips. PNG, JPG, SVG or WEBP; at most 2 MB.",
+    "noLogo": "No logo",
+    "upload": "Upload logo",
+    "remove": "Remove logo"
+  },
+  "equipmentTracking": {
+    "label": "Tracking",
+    "required": "Choose whether it is tracked by quantity or by serial number.",
+    "quantity": "By quantity",
+    "quantityHint": "Cables, tape and the like: no serial numbers, only a stock count.",
+    "serial": "By serial number",
+    "serialHint": "Each device is its own record (manufacturer serial no., label); internal references are numbered 1, 2, 3… automatically."
+  },
+  "casePrice": {
+    "contentTotal": "Content total: {{amount}}",
+    "manual": "Entered manually",
+    "useContentTotal": "Use the content total",
+    "autoNote": "The price is calculated from the content; if you change it, your price is kept."
+  },
+  "customerQuick": {
+    "title": "New customer",
+    "add": "Add new customer"
+  },
+  "paymentTerms": {
+    "afterJob": "To be invoiced after the job.",
+    "cash": "Payment in advance.",
+    "halfAdvance": "50% in advance, 50% after the job.",
+    "net30": "Net 30 days."
+  },
+  "picker": {
+    "title": "Equipment",
+    "allEquipment": "All equipment",
+    "hint": "Drag an item onto a section on the right, or add it to \"{{section}}\" with +.",
+    "stock": "Stock: {{count}}"
+  },
+  "projectSections": {
+    "warehouseExtras": "Added products (warehouse)",
+    "warehouseExtrasTag": "Added by warehouse",
+    "warehouseExtrasHint": "Items scanned out that were not on the quote, or more than planned. Not on the quote; tracked on return.",
+    "caseContent": "case content ×{{count}}",
+    "inCase": "In case price",
+    "target": "+ adds here",
+    "dropHint": "Drag items from the left onto a section. Click a section to make + add to it.",
+    "emptyDrop": "Drag items here",
+    "openQuote": "Open quote"
+  },
+  "quoteContent": {
+    "inCase": "case content"
+  },
+  "scanSheet": {
+    "toScan": "To scan",
+    "scanned": "Scanned",
+    "noSection": "No section",
+    "extras": "Added products",
+    "remaining": "{{count}} left",
+    "allDone": "Everything has been scanned",
+    "nothingScanned": "Nothing scanned yet",
+    "confirmTitle": "Add this item?",
+    "confirmNotPlanned": "is not on the quote.",
+    "confirmOverPlanned": "is being scanned above the planned quantity.",
+    "confirmYes": "Yes, add it",
+    "addedToExtras": "Added to \"Added products\""
+  }
 }

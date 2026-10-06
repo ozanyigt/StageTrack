@@ -11,6 +11,7 @@ import { EquipmentSelect } from '../../components/Selects';
 import { useErrorToast } from '../../utils/errors';
 import { useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
+import { useGuardedForm } from '../../components/useGuardedModal';
 
 function useDetailUpdater(id: string) {
   const queryClient = useQueryClient();
@@ -139,6 +140,7 @@ export function EquipmentSuppliersTab({ equipment }: { equipment: EquipmentDetai
   const showPrice = can(Permissions.Prices);
   const [editing, setEditing] = useState<EquipmentSupplierLink | 'new' | null>(null);
   const [form] = Form.useForm<SupplierForm>();
+  const guard = useGuardedForm(!!editing, async () => save.mutateAsync(await form.validateFields()));
   const [text, setText] = useState('');
   const search = useDebounced(text, 250);
   const suppliers = useQuery({ queryKey: ['supplier-lookup', search], queryFn: () => supplierApi.lookup(search), enabled: !!editing });
@@ -228,14 +230,14 @@ export function EquipmentSuppliersTab({ equipment }: { equipment: EquipmentDetai
       <Modal
         open={!!editing}
         title={editing === 'new' ? t('equipmentDetail.addSupplier') : t('equipmentDetail.editSupplier')}
-        onCancel={() => setEditing(null)}
+        onCancel={guard.guardClose(() => setEditing(null))}
         onOk={() => form.submit()}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
         confirmLoading={save.isPending}
         destroyOnHidden
       >
-        <Form form={form} layout="vertical" onFinish={(v) => save.mutate(v)}>
+        <Form form={form} onValuesChange={guard.onValuesChange} layout="vertical" onFinish={(v) => save.mutate(v)}>
           <Form.Item name="supplierId" label={t('equipmentDetail.supplier')} rules={[{ required: true, message: t('validation.required') }]}>
             <Select showSearch filterOption={false} onSearch={setText} loading={suppliers.isFetching} options={options} />
           </Form.Item>

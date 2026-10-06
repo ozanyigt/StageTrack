@@ -1,4 +1,6 @@
 import { PrinterOutlined } from '@ant-design/icons';
+import { useAuth } from '../../auth/AuthContext';
+import { FirmLogo } from '../../components/FirmLogo';
 import { Button, ConfigProvider, Result, Skeleton, theme } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { Fragment, useEffect } from 'react';
@@ -43,19 +45,23 @@ export function usePrintBackground() {
   }, []);
 }
 
+/** Document header: firm logo, firm name and, under it, the location the document comes from. */
 export function DocHeader({ company, subtitle }: { company: string; subtitle?: string }) {
+  const { user } = useAuth();
+  const firm = user?.tenantName || company;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <img src="/favicon.svg" width={40} height={40} alt="" />
+      <FirmLogo size={42} />
       <div>
-        <div style={{ fontSize: 16, fontWeight: 700 }}>{company}</div>
-        {subtitle && <div style={{ color: '#666' }}>{subtitle}</div>}
+        <div style={{ fontSize: 17, fontWeight: 700 }}>{firm}</div>
+        {firm !== company && <div style={{ color: '#444', fontSize: 11 }}>{company}</div>}
+        {subtitle && <div style={{ color: '#777', fontSize: 10 }}>{subtitle}</div>}
       </div>
     </div>
   );
 }
 
-/** Price-free packing slip / material list (Rentman "Depo fişi" with sections). Crew members can print it too. */
+/** Price-free packing slip / material list ("Depo fişi" with sections). Crew members can print it too. */
 export function PackingSlipPrintPage() {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation();
@@ -163,7 +169,7 @@ export function PackingSlipPrintPage() {
                 {section.name && (
                   <tr className={`section-row${section.depth > 1 ? ' sub' : ''}`}>
                     <td colSpan={5} style={{ paddingInlineStart: 6 + (section.depth - 1) * 16 }}>
-                      {section.name}
+                      {section.isWarehouseExtras ? t('projectSections.warehouseExtras') : section.name}
                       {section.lines.length > 0 && <span style={{ fontWeight: 400, color: '#555' }}> · {total(section.lines)}</span>}
                     </td>
                   </tr>

@@ -1,13 +1,17 @@
-import { ColorPicker, DatePicker, Form, Input, Modal, Select } from 'antd';
+import { AutoComplete, ColorPicker, DatePicker, Form, Input, Modal, Select } from 'antd';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import dayjs, { type Dayjs } from 'dayjs';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { crewApi, projectApi, quoteApi } from '../../api/endpoints';
 import type { Project, ProjectInput, Quote } from '../../api/types';
 import { CustomerSelect, StockLocationSelect } from '../../components/Selects';
 import { useErrorToast } from '../../utils/errors';
 import { toApiDateTime } from '../../utils/format';
+import { useUnsavedChanges } from '../../components/UnsavedChanges';
+
+/** Ready-made payment terms; the first one is the default for new jobs. */
+export const PAYMENT_TERM_KEYS = ['afterJob', 'cash', 'halfAdvance', 'net30'] as const;
 
 interface FormValues {
   name: string;
@@ -38,6 +42,7 @@ export function ProjectFormModal({ open, project, onClose, onSaved, onJobCreated
   const [form] = Form.useForm<FormValues>();
   const showError = useErrorToast();
   const directory = useQuery({ queryKey: ['crew-directory'], queryFn: crewApi.directory, enabled: open });
+  const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -58,9 +63,15 @@ export function ProjectFormModal({ open, project, onClose, onSaved, onJobCreated
       });
     } else {
       const start = dayjs().add(1, 'day').hour(8).minute(0);
-      form.setFieldsValue({ plan: [start, start.add(2, 'day').hour(23)], color: '#22c55e', projectType: 'PRODÜKSİYON' });
+      form.setFieldsValue({
+        plan: [start, start.add(2, 'day').hour(23)],
+        color: '#22c55e',
+        projectType: 'PRODÜKSİYON',
+        paymentTerms: t(`paymentTerms.${PAYMENT_TERM_KEYS[0]}`),
+      });
     }
-  }, [open, project, form]);
+    setDirty(false);
+  }, [open, project, form, t]);
 
   const save = useMutation({
     mutationFn: (v: FormValues): Promise<Project | Quote> => {
@@ -83,17 +94,26 @@ export function ProjectFormModal({ open, project, onClose, onSaved, onJobCreated
       return project ? projectApi.update(project.id, input) : projectApi.create(input);
     },
     onSuccess: (result) => {
+      setDirty(false);
       if (jobMode) onJobCreated?.(result as Quote);
       else onSaved?.(result as Project);
     },
     onError: showError,
   });
 
+  const { confirmLeave } = useUnsavedChanges(open && dirty, () => form.validateFields().then((v) => save.mutateAsync(v)));
+  const close = async () => {
+    if (await confirmLeave()) {
+      setDirty(false);
+      onClose();
+    }
+  };
+
   return (
     <Modal
       open={open}
       title={project ? t('projects.editTitle') : jobMode ? t('salesJobs.createTitle') : t('projects.createTitle')}
-      onCancel={onClose}
+      onCancel={close}
       onOk={() => form.submit()}
       okText={t('common.save')}
       cancelText={t('common.cancel')}
@@ -101,7 +121,7 @@ export function ProjectFormModal({ open, project, onClose, onSaved, onJobCreated
       width={640}
       destroyOnHidden
     >
-      <Form form={form} layout="vertical" onFinish={(v) => save.mutate(v)}>
+      <Form form={form} layout="vertical" onFinish={(v) => save.mutate(v)} onValuesChange={() => setDirty(true)}>
         <Form.Item name="name" label={t('projects.name')} rules={[{ required: true, message: t('validation.required') }]}>
           <Input autoFocus />
         </Form.Item>
@@ -135,7 +155,12 @@ export function ProjectFormModal({ open, project, onClose, onSaved, onJobCreated
           />
         </Form.Item>
         <Form.Item name="paymentTerms" label={t('projectExtra.paymentTerms')}>
-          <Input maxLength={256} placeholder={t('projectExtra.paymentTermsPlaceholder')} />
+          <AutoComplete
+            maxLength={256}
+            placeholder={t('projectExtra.paymentTermsPlaceholder')}
+            options={PAYMENT_TERM_KEYS.map((k) => ({ value: t(`paymentTerms.${k}`) }))}
+            filterOption={false}
+          />
         </Form.Item>
         <Form.Item name="notes" label={t('common.notes')}>
           <Input.TextArea rows={3} />

@@ -13,6 +13,9 @@ public static class StageTrackPermissions
         public const string Default = Prefix + ".Equipment";
         public const string Manage = Default + ".Manage";
         public const string Transfer = Default + ".Transfer";
+
+        /// <summary>Delete equipment for good (with its devices and labels); every deletion is written to the audit log.</summary>
+        public const string Delete = Default + ".Delete";
     }
 
     public static class Labels
@@ -71,6 +74,8 @@ public static class StageTrackPermissions
         public const string RentalFactors = Prefix + ".Settings.RentalFactors";
         public const string StockLocations = Prefix + ".Settings.StockLocations";
         public const string LabelTemplates = Prefix + ".Settings.LabelTemplates";
+        public const string AuditLog = Prefix + ".Settings.AuditLog";
+        public const string Firm = Prefix + ".Settings.Firm";
     }
 
     /// <summary>
@@ -104,6 +109,7 @@ public static class StageTrackPermissions
             new(Equipment.Default),
             new(Equipment.Manage, Equipment.Default),
             new(Equipment.Transfer, Equipment.Manage),
+            new(Equipment.Delete, Equipment.Manage),
             new(Labels.Assign, Equipment.Default)
         ]),
         new("Maintenance",
@@ -143,7 +149,9 @@ public static class StageTrackPermissions
         [
             new(Settings.RentalFactors),
             new(Settings.StockLocations),
-            new(Settings.LabelTemplates)
+            new(Settings.LabelTemplates),
+            new(Settings.AuditLog),
+            new(Settings.Firm)
         ]),
         new("Identity",
         [

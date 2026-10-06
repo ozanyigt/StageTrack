@@ -42,7 +42,8 @@ public class EquipmentController(IEquipmentAppService appService) : ControllerBa
     public Task<EquipmentDetailDto> GetAsync(Guid id) => appService.GetAsync(id);
 
     [HttpGet("lookup")]
-    public Task<List<EquipmentLookupDto>> GetLookupAsync([FromQuery] string? text) => appService.GetLookupAsync(text);
+    public Task<List<EquipmentLookupDto>> GetLookupAsync([FromQuery] string? text, [FromQuery] bool forQuote = false) =>
+        appService.GetLookupAsync(text, forQuote);
 
     [HttpPost("availability")]
     public Task<List<EquipmentAvailabilityDto>> GetAvailabilityAsync(GetAvailabilityInput input) => appService.GetAvailabilityAsync(input);
@@ -101,6 +102,14 @@ public class EquipmentController(IEquipmentAppService appService) : ControllerBa
     [HttpPost("{id:guid}/restore")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
     public Task RestoreAsync(Guid id) => appService.RestoreAsync(id);
+
+    [HttpDelete("{id:guid}")]
+    [Authorize(StageTrackPermissions.Equipment.Delete)]
+    public Task DeleteAsync(Guid id) => appService.DeleteAsync(id);
+
+    [HttpPost("{id:guid}/price-from-content")]
+    [Authorize(StageTrackPermissions.Equipment.Manage)]
+    public Task<EquipmentDetailDto> UsePriceFromContentAsync(Guid id) => appService.UsePriceFromContentAsync(id);
 }
 
 [ApiController]
@@ -145,6 +154,9 @@ public class EquipmentUnitsController(IEquipmentUnitAppService appService) : Con
     [HttpDelete("{id:guid}/image")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
     public Task<EquipmentUnitDetailDto> RemoveImageAsync(Guid id) => appService.RemoveImageAsync(id);
+
+    [HttpGet("next-internal-ref")]
+    public Task<string> SuggestInternalRefAsync([FromQuery] Guid equipmentId) => appService.SuggestInternalRefAsync(equipmentId);
 
     [HttpPost("transfer")]
     [Authorize(StageTrackPermissions.Equipment.Transfer)]

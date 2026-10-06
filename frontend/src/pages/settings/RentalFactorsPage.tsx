@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { rentalFactorApi } from '../../api/endpoints';
 import type { RentalFactorProfile, RentalFactorProfileInput } from '../../api/types';
 import { useErrorToast } from '../../utils/errors';
+import { useGuardedForm } from '../../components/useGuardedModal';
 import { useFormat } from '../../utils/format';
 
 /**
@@ -20,6 +21,10 @@ export function RentalFactorsPage() {
   const queryClient = useQueryClient();
   const [form] = Form.useForm<RentalFactorProfileInput>();
   const [selected, setSelected] = useState<RentalFactorProfile | 'new' | null>(null);
+  const guard = useGuardedForm(!!selected, async () => {
+    const v = await form.validateFields();
+    return save.mutateAsync({ ...v, steps: [...v.steps].sort((a, b) => a.days - b.days) });
+  });
 
   const profiles = useQuery({ queryKey: ['rental-factors'], queryFn: rentalFactorApi.list });
   const selectedId = selected && selected !== 'new' ? selected.id : null;
@@ -43,6 +48,7 @@ export function RentalFactorsPage() {
     mutationFn: (v: RentalFactorProfileInput) =>
       selected && selected !== 'new' ? rentalFactorApi.update(selected.id, v) : rentalFactorApi.create(v),
     onSuccess: (p) => {
+      guard.markSaved();
       message.success(t('common.saved'));
       queryClient.invalidateQueries({ queryKey: ['rental-factors'] });
       setSelected(p);
@@ -60,7 +66,7 @@ export function RentalFactorsPage() {
     <>
       <div className="page-header">
         <Typography.Title level={3}>{t('rentalFactors.title')}</Typography.Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setSelected('new')}>{t('rentalFactors.create')}</Button>
+        <Button type="primary" icon={<PlusOutlined />} onClick={guard.guardClose(() => setSelected('new'))}>{t('rentalFactors.create')}</Button>
       </div>
       <Alert type="info" showIcon style={{ marginBottom: 12 }} message={t('rentalFactors.explain')} description={t('rentalFactors.explainDetail')} />
       <Row gutter={[12, 12]}>
@@ -71,7 +77,7 @@ export function RentalFactorsPage() {
               dataSource={profiles.data}
               renderItem={(p) => (
                 <List.Item
-                  onClick={() => setSelected(p)}
+                  onClick={guard.guardClose(() => setSelected(p))}
                   style={{ cursor: 'pointer', fontWeight: selectedId === p.id ? 600 : undefined }}
                   extra={p.isDefault && <Tag icon={<StarFilled />} color="orange">{t('rentalFactors.default')}</Tag>}
                 >
@@ -91,7 +97,7 @@ export function RentalFactorsPage() {
             )}
           >
             {!selected ? <Empty /> : (
-              <Form form={form} layout="vertical" onFinish={(v) => save.mutate({ ...v, steps: [...v.steps].sort((a, b) => a.days - b.days) })}>
+              <Form form={form} layout="vertical" onValuesChange={guard.onValuesChange} onFinish={(v) => save.mutate({ ...v, steps: [...v.steps].sort((a, b) => a.days - b.days) })}>
                 <Form.Item name="name" label={t('rentalFactors.name')} rules={[{ required: true, message: t('validation.required') }]}>
                   <Input />
                 </Form.Item>

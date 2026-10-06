@@ -184,10 +184,11 @@ public class Project : CompanyAggregateRoot
             GetSection(sectionId.Value);
         }
 
-        var line = Equipment.FirstOrDefault(e => e.EquipmentId == equipmentId && e.SectionId == sectionId);
+        var line = Equipment.FirstOrDefault(e => e.EquipmentId == equipmentId && e.SectionId == sectionId && e.ParentLineId == null && !e.IsExtra);
         if (line is not null)
         {
             line.SetQuantity(line.Quantity + quantity);
+            UpdateContentQuantities(line);
             return line;
         }
 
@@ -197,13 +198,68 @@ public class Project : CompanyAggregateRoot
         return line;
     }
 
+    /// <summary>
+    /// Default content of a case/set: child lines under the case line (quantity = case quantity × content quantity).
+    /// They are reserved and scanned like any line, but follow their case (quantity, section, removal).
+    /// </summary>
+    internal void SetContent(ProjectEquipment parent, IReadOnlyList<(Guid EquipmentId, int Quantity)> content)
+    {
+        var order = 1;
+        foreach (var (equipmentId, quantity) in content)
+        {
+            var child = Equipment.FirstOrDefault(e => e.ParentLineId == parent.Id && e.EquipmentId == equipmentId);
+            if (child is null)
+            {
+                child = new ProjectEquipment(Guid.CreateVersion7(), Id, equipmentId, parent.Quantity * quantity, order);
+                child.MakeContentOf(parent, quantity);
+                Equipment.Add(child);
+            }
+
+            child.SetSortOrder(order++);
+        }
+
+        UpdateContentQuantities(parent);
+    }
+
+    /// <summary>Equipment scanned out by the warehouse although it was not planned (or more than planned).</summary>
+    internal ProjectEquipment AddWarehouseExtra(Guid equipmentId)
+    {
+        var section = Sections.FirstOrDefault(s => s.IsWarehouseExtras);
+        if (section is null)
+        {
+            section = new ProjectSection(Guid.CreateVersion7(), Id, null, ProjectSection.WarehouseExtrasName,
+                Sections.Count(s => s.ParentId == null) + 1);
+            section.MarkAsWarehouseExtras();
+            Sections.Add(section);
+        }
+
+        var line = Equipment.FirstOrDefault(e => e.SectionId == section.Id && e.EquipmentId == equipmentId && e.IsExtra);
+        if (line is null)
+        {
+            line = new ProjectEquipment(Guid.CreateVersion7(), Id, equipmentId, 1, NextLineOrder(section.Id));
+            line.SetSection(section.Id, line.SortOrder);
+            line.MarkAsExtra();
+            Equipment.Add(line);
+            return line;
+        }
+
+        line.SetQuantity(line.Quantity + 1);
+        return line;
+    }
+
     public void UpdateEquipment(Guid lineId, int quantity, string? notes)
     {
         EnsureEditable();
         EnsurePositive(quantity);
         var line = GetLine(lineId);
+        if (line.ParentLineId.HasValue && quantity != line.Quantity)
+        {
+            throw new BusinessException(StageTrackErrorCodes.ProjectContentLineLocked);
+        }
+
         line.SetQuantity(quantity);
         line.SetNotes(notes);
+        UpdateContentQuantities(line);
     }
 
     public void MoveEquipmentToSection(Guid lineId, Guid? sectionId)
@@ -214,25 +270,35 @@ public class Project : CompanyAggregateRoot
             GetSection(sectionId.Value);
         }
 
-        var line = GetLine(lineId);
+        var line = GetTopLevelLine(lineId);
         if (line.SectionId != sectionId)
         {
             line.SetSection(sectionId, NextLineOrder(sectionId));
+            foreach (var child in ContentOf(line))
+            {
+                child.SetSection(sectionId, child.SortOrder);
+            }
         }
     }
 
     public void MoveEquipment(Guid lineId, int direction)
     {
         EnsureEditable();
-        var line = GetLine(lineId);
-        var siblings = Equipment.Where(e => e.SectionId == line.SectionId).OrderBy(e => e.SortOrder).ToList();
+        var line = GetTopLevelLine(lineId);
+        var siblings = Equipment.Where(e => e.SectionId == line.SectionId && e.ParentLineId == null).OrderBy(e => e.SortOrder).ToList();
         Swap(siblings, siblings.IndexOf(line), direction, (l, order) => l.SetSortOrder(order));
     }
 
     public void RemoveEquipment(Guid lineId)
     {
         EnsureEditable();
-        Equipment.Remove(GetLine(lineId));
+        var line = GetTopLevelLine(lineId);
+        foreach (var child in ContentOf(line).ToList())
+        {
+            Equipment.Remove(child);
+        }
+
+        Equipment.Remove(line);
     }
 
     public int GetPlannedQuantity(Guid equipmentId) =>
@@ -261,7 +327,7 @@ public class Project : CompanyAggregateRoot
     internal void SetStatus(ProjectStatus status) => Status = status;
 
     private int NextLineOrder(Guid? sectionId) =>
-        Equipment.Where(e => e.SectionId == sectionId).Select(e => e.SortOrder).DefaultIfEmpty(0).Max() + 1;
+        Equipment.Where(e => e.SectionId == sectionId && e.ParentLineId == null).Select(e => e.SortOrder).DefaultIfEmpty(0).Max() + 1;
 
     private int GetDepth(ProjectSection section)
     {
@@ -303,6 +369,23 @@ public class Project : CompanyAggregateRoot
     private ProjectEquipment GetLine(Guid lineId) =>
         Equipment.FirstOrDefault(e => e.Id == lineId) ?? throw new EntityNotFoundException(typeof(ProjectEquipment), lineId);
 
+    /// <summary>Content lines follow their case: they cannot be moved or removed on their own.</summary>
+    private ProjectEquipment GetTopLevelLine(Guid lineId)
+    {
+        var line = GetLine(lineId);
+        return line.ParentLineId.HasValue ? throw new BusinessException(StageTrackErrorCodes.ProjectContentLineLocked) : line;
+    }
+
+    private IEnumerable<ProjectEquipment> ContentOf(ProjectEquipment parent) => Equipment.Where(e => e.ParentLineId == parent.Id);
+
+    private void UpdateContentQuantities(ProjectEquipment parent)
+    {
+        foreach (var child in ContentOf(parent))
+        {
+            child.SetQuantity(parent.Quantity * child.ContentQuantity);
+        }
+    }
+
     private ProjectCrewMember GetCrew(Guid crewId) =>
         Crew.FirstOrDefault(c => c.Id == crewId) ?? throw new EntityNotFoundException(typeof(ProjectCrewMember), crewId);
 
@@ -335,6 +418,15 @@ public class ProjectEquipment : Entity
 
     public int SortOrder { get; private set; }
 
+    /// <summary>Set on the content lines of a case/set: the case line they belong to.</summary>
+    public Guid? ParentLineId { get; private set; }
+
+    /// <summary>Content lines: pieces per one case.</summary>
+    public int ContentQuantity { get; private set; }
+
+    /// <summary>Added by the warehouse while scanning out (not planned by sales); never put on the quote.</summary>
+    public bool IsExtra { get; private set; }
+
     private ProjectEquipment()
     {
     }
@@ -358,6 +450,15 @@ public class ProjectEquipment : Entity
     }
 
     internal void SetSortOrder(int sortOrder) => SortOrder = sortOrder;
+
+    internal void MakeContentOf(ProjectEquipment parent, int contentQuantity)
+    {
+        ParentLineId = parent.Id;
+        ContentQuantity = Math.Max(1, contentQuantity);
+        SectionId = parent.SectionId;
+    }
+
+    internal void MarkAsExtra() => IsExtra = true;
 }
 
 /// <summary>User-named group of equipment lines ("Ana sahne", "Koridor", "Ses › Hoparlör").</summary>
@@ -367,6 +468,11 @@ public class ProjectSection : Entity
     public Guid? ParentId { get; private set; }
     public string Name { get; private set; } = null!;
     public int SortOrder { get; private set; }
+
+    /// <summary>The "added products" section the warehouse creates for items scanned out without a plan.</summary>
+    public bool IsWarehouseExtras { get; private set; }
+
+    public const string WarehouseExtrasName = "Eklenen ürünler";
 
     private ProjectSection()
     {
@@ -383,6 +489,8 @@ public class ProjectSection : Entity
     internal void Rename(string name) => Name = name;
 
     internal void SetSortOrder(int sortOrder) => SortOrder = sortOrder;
+
+    internal void MarkAsWarehouseExtras() => IsWarehouseExtras = true;
 
     internal void SetParent(Guid? parentId, int sortOrder)
     {

@@ -15,6 +15,12 @@ public class ScanOutcome
     /// <summary>True when the device was already scanned out for this project; nothing was changed.</summary>
     public bool AlreadyScanned { get; init; }
 
+    /// <summary>
+    /// Not planned (or more than planned): nothing was changed; the warehouse must confirm, then the item is added to
+    /// the project's "added products" section.
+    /// </summary>
+    public bool RequiresConfirmation { get; init; }
+
     public List<ScanWarning> Warnings { get; init; } = [];
 }
 
@@ -29,7 +35,7 @@ public class WarehouseManager(
     IProjectRepository projectRepository)
 {
     public async Task<(ScanOutcome Outcome, WarehouseMovement? Movement)> ScanAsync(
-        Project project, string? rawCode, ScanDirection direction, Guid? userId)
+        Project project, string? rawCode, ScanDirection direction, Guid? userId, bool allowUnplanned = false)
     {
         if (!ProjectStatusRules.Scannable.Contains(project.Status))
         {
@@ -63,8 +69,26 @@ public class WarehouseManager(
             if (unit is not null)
             {
                 await EnsureCanCheckOutAsync(unit);
-                unit.CheckOut(project.Id);
             }
+
+            if (outBefore + 1 > planned)
+            {
+                if (!allowUnplanned)
+                {
+                    var pending = BuildOutcome(direction, equipment, unit, target.Label.Code, planned, outBefore, alreadyScanned: false);
+                    return (new ScanOutcome
+                    {
+                        Direction = pending.Direction, Equipment = equipment, Unit = unit, LabelCode = pending.LabelCode,
+                        PlannedQuantity = planned, OutQuantity = outBefore, Warnings = [planned == 0 ? ScanWarning.NotPlanned : ScanWarning.OverPlanned],
+                        RequiresConfirmation = true
+                    }, null);
+                }
+
+                project.AddWarehouseExtra(equipment.Id);
+                planned = project.GetPlannedQuantity(equipment.Id);
+            }
+
+            unit?.CheckOut(project.Id);
         }
         else if (unit is not null)
         {

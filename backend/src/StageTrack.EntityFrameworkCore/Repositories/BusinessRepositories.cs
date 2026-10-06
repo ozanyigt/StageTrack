@@ -92,6 +92,10 @@ public class ProjectRepository(StageTrackDbContext dbContext) : EfRepository<Pro
     public Task<long> GetCountAsync(ProjectFilter filter, CancellationToken cancellationToken = default) =>
         ApplyFilter(DbSet, filter).LongCountAsync(cancellationToken);
 
+    public async Task<bool> IsEquipmentUsedInHistoryAsync(Guid equipmentId, CancellationToken cancellationToken = default) =>
+        await DbContext.Projects.IgnoreQueryFilters().AnyAsync(p => p.Equipment.Any(e => e.EquipmentId == equipmentId), cancellationToken) ||
+        await DbContext.Quotes.IgnoreQueryFilters().AnyAsync(q => q.Lines.Any(l => l.EquipmentId == equipmentId), cancellationToken);
+
     public Task<bool> IsEquipmentPlannedOnActiveProjectsAsync(Guid equipmentId, CancellationToken cancellationToken = default)
     {
         var reserving = ProjectStatusRules.Reserving.ToList();

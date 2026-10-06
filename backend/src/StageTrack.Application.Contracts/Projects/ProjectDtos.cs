@@ -49,6 +49,9 @@ public class ProjectSectionDto
     public int SortOrder { get; set; }
     public int Depth { get; set; }
     public string Path { get; set; } = null!;
+
+    /// <summary>The "added products" section created by the warehouse scan.</summary>
+    public bool IsWarehouseExtras { get; set; }
 }
 
 public class ProjectEquipmentDto
@@ -76,6 +79,15 @@ public class ProjectEquipmentDto
     public int OutQuantity { get; set; }
     public int ReturnedQuantity { get; set; }
     public List<AlternativeDto> Alternatives { get; set; } = [];
+
+    /// <summary>Content line of a case/set: the case line it belongs to (shown indented under it).</summary>
+    public Guid? ParentLineId { get; set; }
+
+    /// <summary>Content lines: pieces per one case.</summary>
+    public int ContentQuantity { get; set; }
+
+    /// <summary>Added by the warehouse while scanning; not on the quote.</summary>
+    public bool IsExtra { get; set; }
 }
 
 public class AlternativeDto
@@ -227,6 +239,7 @@ public class PackingSlipSectionDto
 {
     /// <summary>Null for lines without a section.</summary>
     public string? Name { get; set; }
+    public bool IsWarehouseExtras { get; set; }
 
     public int Depth { get; set; }
     public List<PackingSlipLineDto> Lines { get; set; } = [];

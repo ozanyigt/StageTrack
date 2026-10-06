@@ -23,6 +23,10 @@ public interface IEquipmentRepository : IRepository<Equipment>
 
     Task<List<Equipment>> SearchAsync(string? text, int take, CancellationToken cancellationToken = default);
 
+    /// <summary>For each given equipment: the equipment whose default content (case) includes it.</summary>
+    Task<Dictionary<Guid, List<(Guid Id, string Code, string Name)>>> GetContainersOfAsync(IReadOnlyCollection<Guid> equipmentIds,
+        CancellationToken cancellationToken = default);
+
     Task<bool> AnyInFolderAsync(Guid folderId, CancellationToken cancellationToken = default);
 
     Task<Equipment?> FindByCodeAsync(string code, CancellationToken cancellationToken = default);
@@ -72,7 +76,11 @@ public class EquipmentUnitListItem
 
 public interface IEquipmentUnitRepository : IRepository<EquipmentUnit>
 {
-    Task<bool> InternalRefExistsAsync(string internalRef, Guid? excludeId = null, CancellationToken cancellationToken = default);
+    /// <summary>Internal references are unique per equipment (TR-001 of a monitor and TR-001 of a converter may both exist).</summary>
+    Task<bool> InternalRefExistsAsync(Guid equipmentId, string internalRef, Guid? excludeId = null, CancellationToken cancellationToken = default);
+
+    /// <summary>Internal references of the equipment's devices (incl. archived), order not guaranteed.</summary>
+    Task<List<string>> GetInternalRefsAsync(Guid equipmentId, CancellationToken cancellationToken = default);
 
     Task<List<EquipmentUnitListItem>> GetPagedListAsync(EquipmentUnitFilter filter, int skip, int take, CancellationToken cancellationToken = default);
 
@@ -97,7 +105,7 @@ public interface IEquipmentUnitRepository : IRepository<EquipmentUnit>
 
     Task<List<EquipmentUnit>> GetListByEquipmentAsync(Guid equipmentId, bool includeArchived, CancellationToken cancellationToken = default);
 
-    Task<EquipmentUnit?> FindByInternalRefAsync(string internalRef, CancellationToken cancellationToken = default);
+    Task<EquipmentUnit?> FindByInternalRefAsync(Guid equipmentId, string internalRef, CancellationToken cancellationToken = default);
 }
 
 /// <summary>Read model for a resolved label.</summary>

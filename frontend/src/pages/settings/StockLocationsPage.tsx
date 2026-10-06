@@ -7,6 +7,7 @@ import { stockLocationApi } from '../../api/endpoints';
 import { STOCK_LOCATION_TYPES, type StockLocation } from '../../api/types';
 import { ExportButton } from '../../components/ExcelButtons';
 import { useErrorToast } from '../../utils/errors';
+import { useGuardedForm } from '../../components/useGuardedModal';
 
 type LocationForm = Omit<StockLocation, 'id'>;
 
@@ -17,6 +18,7 @@ export function StockLocationsPage() {
   const queryClient = useQueryClient();
   const [form] = Form.useForm<LocationForm>();
   const [editing, setEditing] = useState<StockLocation | 'new' | null>(null);
+  const guard = useGuardedForm(!!editing, async () => save.mutateAsync(await form.validateFields()));
   const { data, isLoading } = useQuery({ queryKey: ['stock-locations'], queryFn: stockLocationApi.list });
 
   const save = useMutation({
@@ -82,14 +84,14 @@ export function StockLocationsPage() {
       <Modal
         open={!!editing}
         title={editing === 'new' ? t('stockLocations.create') : t('stockLocations.edit')}
-        onCancel={() => setEditing(null)}
+        onCancel={guard.guardClose(() => setEditing(null))}
         onOk={() => form.submit()}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
         confirmLoading={save.isPending}
         destroyOnHidden
       >
-        <Form form={form} layout="vertical" onFinish={(v) => save.mutate(v)}>
+        <Form form={form} onValuesChange={guard.onValuesChange} layout="vertical" onFinish={(v) => save.mutate(v)}>
           <Form.Item name="name" label={t('stockLocations.name')} rules={[{ required: true, message: t('validation.required') }]}>
             <Input />
           </Form.Item>

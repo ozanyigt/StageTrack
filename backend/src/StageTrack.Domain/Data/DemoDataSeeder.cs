@@ -135,7 +135,7 @@ public class DemoDataSeeder(
             StageTrackPermissions.Equipment.Default, StageTrackPermissions.Labels.Assign,
             StageTrackPermissions.Maintenance.Default, StageTrackPermissions.Maintenance.Manage,
             StageTrackPermissions.Suppliers.Default,
-            StageTrackPermissions.Projects.Default, StageTrackPermissions.Projects.ChangeStatus,
+            // No project details for the warehouse: board and scan screen only.
             StageTrackPermissions.Warehouse.Default, StageTrackPermissions.Warehouse.Scan);
 
         var sales = Role("sales",
@@ -153,7 +153,7 @@ public class DemoDataSeeder(
             await roleRepository.InsertAsync(role);
         }
 
-        await AddUserAsync("admin", "Demo Yönetici", "Admin123!", "admin@demo.local", "+90 532 000 00 01", "Genel Müdür", admin, tr, ae);
+        await AddUserAsync("staras.admin", "Demo Yönetici", "Admin123!", "admin@demo.local", "+90 532 000 00 01", "Genel Müdür", admin, tr, ae);
         await AddUserAsync("depo", "Depo Sorumlusu", "Depo123!", "depo@demo.local", "+90 532 000 00 02", "Depo Sorumlusu", warehouse, tr);
         // The sales person works in Turkey and Dubai with one account; the location is picked at sign-in.
         await AddUserAsync("satis", "Satış Temsilcisi", "Satis123!", "satis@demo.local", "+90 532 000 00 03", "Satış Temsilcisi", sales, tr, ae);

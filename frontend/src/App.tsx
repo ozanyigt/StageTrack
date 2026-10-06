@@ -3,7 +3,8 @@ import trTR from 'antd/locale/tr_TR';
 import enUS from 'antd/locale/en_US';
 import arEG from 'antd/locale/ar_EG';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Route, RouterProvider, Routes } from 'react-router-dom';
+import { UnsavedChangesProvider } from './components/UnsavedChanges';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider, Permissions, useAuth } from './auth/AuthContext';
 import { ThemeProvider, useThemeMode } from './components/ThemeMode';
@@ -16,8 +17,11 @@ import { EquipmentDetailPage } from './pages/equipment/EquipmentDetailPage';
 import { UnitListPage } from './pages/equipment/UnitListPage';
 import { EquipmentLayout } from './pages/equipment/EquipmentLayout';
 import { UnitDetailPage } from './pages/equipment/UnitDetailPage';
-import { LabelPrintPage } from './pages/equipment/LabelPrintPage';
+import { EquipmentArchivePage } from './pages/equipment/EquipmentArchivePage';
+import { LabelGeneratorProvider } from './components/LabelGenerator';
 import { LabelTemplatesPage } from './pages/settings/LabelTemplatesPage';
+import { AuditLogPage } from './pages/settings/AuditLogPage';
+import { FirmSettingsPage } from './pages/settings/FirmSettingsPage';
 import { RepairListPage } from './pages/maintenance/RepairListPage';
 import { SupplierListPage } from './pages/suppliers/SupplierListPage';
 import { CrewDirectoryPage } from './pages/crew/CrewDirectoryPage';
@@ -109,7 +113,6 @@ function AppRoutes() {
     <Routes>
       <Route path="/quotes/:id/print" element={<Guard permission={Permissions.Quotes}><QuotePrintPage /></Guard>} />
       <Route path="/projects/:id/packing-slip" element={<Guard permission={ProjectAccess}><PackingSlipPrintPage /></Guard>} />
-      <Route path="/labels/print" element={<Guard permission={Permissions.Equipment}><LabelPrintPage /></Guard>} />
       <Route element={<AppLayout />}>
         <Route index element={<DashboardPage />} />
         <Route path="calendar" element={<Guard permission={Permissions.Projects}><CalendarPage /></Guard>} />
@@ -121,6 +124,7 @@ function AppRoutes() {
         <Route path="warehouse/movements" element={<Guard permission={Permissions.Warehouse}><MovementsPage /></Guard>} />
         <Route path="equipment" element={<Guard permission={Permissions.Equipment}><EquipmentLayout /></Guard>}>
           <Route index element={<EquipmentListPage />} />
+          <Route path="archive" element={<EquipmentArchivePage />} />
           <Route path="units" element={<UnitListPage />} />
           <Route path="units/:id" element={<UnitDetailPage />} />
           <Route path=":id" element={<EquipmentDetailPage />} />
@@ -137,22 +141,35 @@ function AppRoutes() {
         <Route path="settings/roles" element={<Guard permission={Permissions.IdentityRoles}><RolesPage /></Guard>} />
         <Route path="settings/stock-locations" element={<Guard permission={Permissions.StockLocations}><StockLocationsPage /></Guard>} />
         <Route path="settings/label-templates" element={<Guard permission={Permissions.LabelTemplates}><LabelTemplatesPage /></Guard>} />
+        <Route path="settings/audit-log" element={<Guard permission={Permissions.AuditLog}><AuditLogPage /></Guard>} />
+        <Route path="settings/firm" element={<Guard permission={Permissions.Firm}><FirmSettingsPage /></Guard>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
   );
 }
 
+function Root() {
+  return (
+    <AuthProvider>
+      <UnsavedChangesProvider>
+        <LabelGeneratorProvider>
+          <AppRoutes />
+        </LabelGeneratorProvider>
+      </UnsavedChangesProvider>
+    </AuthProvider>
+  );
+}
+
+// A data router: route changes can be blocked while a form has unsaved changes.
+const router = createBrowserRouter([{ path: '*', element: <Root /> }]);
+
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <Themed>
-          <BrowserRouter>
-            <AuthProvider>
-              <AppRoutes />
-            </AuthProvider>
-          </BrowserRouter>
+          <RouterProvider router={router} />
         </Themed>
       </ThemeProvider>
     </QueryClientProvider>

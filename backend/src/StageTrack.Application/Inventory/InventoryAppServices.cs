@@ -79,17 +79,36 @@ public class EquipmentAppService(
 
         var total = await equipmentRepository.GetCountAsync(filter);
         var items = await equipmentRepository.GetPagedListAsync(filter, input.Sorting, input.SkipCount, input.MaxResultCount);
-        var stock = await equipmentRepository.GetStockQuantitiesAsync(items.Select(e => e.Id).ToList());
+        var ids = items.Select(e => e.Id).ToList();
+        var stock = await equipmentRepository.GetStockQuantitiesAsync(ids);
+        var containers = await equipmentRepository.GetContainersOfAsync(ids);
+        var folders = (await folderRepository.GetListAsync()).ToDictionary(f => f.Id, f => f.Name);
+        var suppliers = (await supplierRepository.GetListByIdsAsync(items.Where(e => e.PurchaseSupplierId.HasValue).Select(e => e.PurchaseSupplierId!.Value)))
+            .ToDictionary(s => s.Id, s => s.Name);
         var showPrice = await prices.CanSeeAsync();
-        return new PagedResultDto<EquipmentDto>(total, items.Select(e => e.ToDto(stock.GetValueOrDefault(e.Id), showPrice)).ToList());
+        return new PagedResultDto<EquipmentDto>(total, items.Select(e =>
+        {
+            var dto = e.ToDto(stock.GetValueOrDefault(e.Id), showPrice);
+            dto.FolderName = e.FolderId.HasValue ? folders.GetValueOrDefault(e.FolderId.Value) : null;
+            dto.PurchaseSupplierName = e.PurchaseSupplierId.HasValue ? suppliers.GetValueOrDefault(e.PurchaseSupplierId.Value) : null;
+            dto.ContainedIn = containers.GetValueOrDefault(e.Id)?.Select(c => new EquipmentRefDto { Id = c.Id, Code = c.Code, Name = c.Name }).ToList() ?? [];
+            return dto;
+        }).ToList());
     }
 
     public async Task<EquipmentDetailDto> GetAsync(Guid id) => await BuildDetailAsync(await equipmentRepository.GetAsync(id));
 
-    public async Task<List<EquipmentLookupDto>> GetLookupAsync(string? text)
+    public async Task<List<EquipmentLookupDto>> GetLookupAsync(string? text, bool forQuote = false)
     {
         var showPrice = await prices.CanSeeAsync();
-        return (await equipmentRepository.SearchAsync(text, 30)).Select(e => e.ToLookupDto(showPrice)).ToList();
+        var items = await equipmentRepository.SearchAsync(text, forQuote ? 60 : 30);
+        if (forQuote)
+        {
+            var stock = await equipmentRepository.GetStockQuantitiesAsync(items.Select(e => e.Id).ToList());
+            items = items.Where(e => e.ShowInQuotes && stock.GetValueOrDefault(e.Id) > 0).Take(30).ToList();
+        }
+
+        return items.Select(e => e.ToLookupDto(showPrice)).ToList();
     }
 
     public async Task<EquipmentDto> CreateAsync(CreateUpdateEquipmentDto input)
@@ -114,6 +133,8 @@ public class EquipmentAppService(
 
     public async Task RestoreAsync(Guid id) => (await equipmentRepository.GetAsync(id)).Restore();
 
+    public async Task DeleteAsync(Guid id) => await equipmentManager.DeleteAsync(await equipmentRepository.GetAsync(id));
+
     public async Task<List<EquipmentAvailabilityDto>> GetAvailabilityAsync(GetAvailabilityInput input)
     {
         var availability = await availabilityManager.GetAsync(input.EquipmentIds, input.Start, input.End, input.ExcludeProjectId);
@@ -123,10 +144,21 @@ public class EquipmentAppService(
         }).ToList();
     }
 
+    public async Task<EquipmentDetailDto> UsePriceFromContentAsync(Guid id)
+    {
+        var equipment = await equipmentRepository.GetAsync(id);
+        equipment.SetPriceManual(false);
+        await equipmentManager.ApplyContentPriceAsync(equipment);
+        await unitOfWork.SaveChangesAsync();
+        return await BuildDetailAsync(equipment);
+    }
+
     public async Task<EquipmentDetailDto> AddRelationAsync(Guid id, AddEquipmentRelationInput input)
     {
         var equipment = await equipmentRepository.GetAsync(id);
         await equipmentManager.AddRelationAsync(equipment, input.Kind, input.RelatedEquipmentId, input.Quantity);
+        await unitOfWork.SaveChangesAsync();
+        await equipmentManager.ApplyContentPriceAsync(equipment);
         await unitOfWork.SaveChangesAsync();
         return await BuildDetailAsync(equipment);
     }
@@ -135,6 +167,7 @@ public class EquipmentAppService(
     {
         var equipment = await equipmentRepository.GetAsync(id);
         equipment.UpdateRelation(relationId, input.Quantity);
+        await equipmentManager.ApplyContentPriceAsync(equipment);
         await unitOfWork.SaveChangesAsync();
         return await BuildDetailAsync(equipment);
     }
@@ -143,6 +176,7 @@ public class EquipmentAppService(
     {
         var equipment = await equipmentRepository.GetAsync(id);
         equipment.RemoveRelation(relationId);
+        await equipmentManager.ApplyContentPriceAsync(equipment);
         await unitOfWork.SaveChangesAsync();
         return await BuildDetailAsync(equipment);
     }
@@ -267,9 +301,13 @@ public class EquipmentAppService(
             input.CurrentA, input.PackedPer);
         equipment.SetInspection(input.InspectionIntervalMonths, input.InspectionDescription);
         equipment.SetStockQuantity(input.StockQuantity);
-        if (input.RentalPrice.HasValue && await prices.CanSeeAsync())
+        equipment.SetShowInQuotes(input.ShowInQuotes);
+        equipment.SetPurchase(input.PurchaseDate, input.WarrantyEndDate, input.PurchaseSupplierId);
+        if (input.RentalPrice.HasValue && await prices.CanSeeAsync() && input.RentalPrice.Value != equipment.RentalPrice)
         {
+            // Typed by hand: from now on the price no longer follows the content total.
             equipment.SetRentalPrice(input.RentalPrice.Value);
+            equipment.SetPriceManual(true);
         }
     }
 
@@ -286,6 +324,15 @@ public class EquipmentAppService(
 
         var dto = new EquipmentDetailDto().FillEquipment(equipment, stock.GetValueOrDefault(id), showPrice);
         dto.StockQuantity = equipment.StockQuantity;
+        dto.IsPriceManual = equipment.IsPriceManual;
+        dto.ContentPriceTotal = showPrice && equipment.Relations.Any(r => r.Kind == EquipmentRelationKind.Content)
+            ? await equipmentManager.GetContentPriceTotalAsync(equipment)
+            : null;
+        dto.ContainedIn = (await equipmentRepository.GetContainersOfAsync([id])).GetValueOrDefault(id)?
+            .Select(c => new EquipmentRefDto { Id = c.Id, Code = c.Code, Name = c.Name }).ToList() ?? [];
+        dto.PurchaseSupplierName = equipment.PurchaseSupplierId.HasValue
+            ? (await supplierRepository.FindAsync(equipment.PurchaseSupplierId.Value))?.Name
+            : null;
         dto.CountryOfOrigin = equipment.CountryOfOrigin;
         dto.LengthCm = equipment.LengthCm;
         dto.WidthCm = equipment.WidthCm;
@@ -382,6 +429,8 @@ public class EquipmentUnitAppService(
     }
 
     public async Task<EquipmentUnitDetailDto> GetAsync(Guid id) => await BuildDetailAsync(id);
+
+    public Task<string> SuggestInternalRefAsync(Guid equipmentId) => unitManager.SuggestInternalRefAsync(equipmentId);
 
     public async Task<EquipmentUnitDto> CreateAsync(CreateEquipmentUnitDto input)
     {
@@ -480,7 +529,7 @@ public class EquipmentUnitAppService(
                 : locations.FirstOrDefault(l => string.Equals(l.Name, row.StockLocation.Trim(), StringComparison.CurrentCultureIgnoreCase))?.Id
                   ?? throw new BusinessException(StageTrackErrorCodes.ImportInvalidRow).WithData("field", "stockLocation");
 
-            var unit = await unitRepository.FindByInternalRefAsync(internalRef);
+            var unit = await unitRepository.FindByInternalRefAsync(equipment.Id, internalRef);
             var created = unit is null;
             if (unit is null)
             {

@@ -2,11 +2,14 @@ import { CheckOutlined, CloseOutlined, EditOutlined, InboxOutlined, PlusOutlined
 import { Button, Checkbox, DatePicker, Flex, Form, Input, Modal, Popconfirm, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs, { type Dayjs } from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useUnsavedChanges } from '../../components/UnsavedChanges';
+import { useGuardedForm } from '../../components/useGuardedModal';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { useLabelGenerator } from '../../components/LabelGenerator';
+import { Link } from 'react-router-dom';
 import { unitApi } from '../../api/endpoints';
-import type { EquipmentUnit } from '../../api/types';
+import { UNIT_STATUSES, type EquipmentUnit } from '../../api/types';
 import { ExportButton } from '../../components/ExcelButtons';
 import { ScanInput } from '../../components/ScanInput';
 import { StockLocationSelect } from '../../components/Selects';
@@ -39,12 +42,12 @@ export const isInspectionOverdue = (u: { nextInspectionDate?: string | null; isA
   !!u.nextInspectionDate && !u.isArchived && dayjs(u.nextInspectionDate).isBefore(dayjs(), 'day');
 
 /**
- * Serial numbers of one equipment item as an editable grid (Rentman "Serial numbers" tab):
+ * Serial numbers of one equipment item as an editable grid:
  * one row at a time is edited in place; selected rows can get labels, move to another location or be archived.
  */
 export function UnitGrid({ equipmentId, canManage }: { equipmentId: string; canManage?: boolean }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const labels = useLabelGenerator();
   const qc = useQueryClient();
   const showError = useErrorToast();
   const canTransfer = useCanTransfer();
@@ -68,13 +71,35 @@ export function UnitGrid({ equipmentId, canManage }: { equipmentId: string; canM
     qc.invalidateQueries({ queryKey: ['equipment', equipmentId] });
   };
 
-  const startEdit = (u: EquipmentUnit) => {
-    setEditingId(u.id);
-    setDraft(toDraft(u));
-  };
+  // Summary by location and status (active devices).
+  const summary = useMemo(() => {
+    const byLocation = new Map<string, Record<string, number>>();
+    rows.filter((u) => !u.isArchived).forEach((u) => {
+      const name = u.stockLocationName ?? t('unitGrid.noLocation');
+      const counts = byLocation.get(name) ?? {};
+      counts[u.status] = (counts[u.status] ?? 0) + 1;
+      byLocation.set(name, counts);
+    });
+    return [...byLocation.entries()];
+  }, [rows, t]);
+
+  const editingRow = rows.find((u) => u.id === editingId);
+  const sameDate = (a?: Dayjs | null, b?: Dayjs | null) => (a ? a.format('YYYY-MM-DD') : '') === (b ? b.format('YYYY-MM-DD') : '');
+  const rowDirty = (() => {
+    if (!editingRow || !draft) return false;
+    const o = toDraft(editingRow);
+    return (
+      o.internalRef !== draft.internalRef ||
+      (o.serialNumber ?? '') !== (draft.serialNumber ?? '') ||
+      (o.stockLocationId ?? null) !== (draft.stockLocationId ?? null) ||
+      !sameDate(o.purchaseDate, draft.purchaseDate) ||
+      !sameDate(o.warrantyDate, draft.warrantyDate) ||
+      (o.supplierId ?? null) !== (draft.supplierId ?? null)
+    );
+  })();
 
   const saveRow = async (u: EquipmentUnit) => {
-    if (!draft || !draft.internalRef.trim()) return;
+    if (!draft || !draft.internalRef.trim()) throw new Error('invalid');
     setSaving(true);
     try {
       await unitApi.update(u.id, {
@@ -92,9 +117,26 @@ export function UnitGrid({ equipmentId, canManage }: { equipmentId: string; canM
       refresh();
     } catch (e) {
       showError(e);
+      throw e;
     } finally {
       setSaving(false);
     }
+  };
+
+  // A row with unsaved edits blocks leaving the page and asks before another row is opened.
+  const { confirmLeave } = useUnsavedChanges(rowDirty, editingRow ? () => saveRow(editingRow) : undefined);
+
+  const stopEdit = async () => {
+    if (await confirmLeave()) {
+      setEditingId(null);
+      setDraft(null);
+    }
+  };
+
+  const startEdit = async (u: EquipmentUnit) => {
+    if (editingId && !(await confirmLeave())) return;
+    setEditingId(u.id);
+    setDraft(toDraft(u));
   };
 
   const archiveSelected = async () => {
@@ -119,7 +161,7 @@ export function UnitGrid({ equipmentId, canManage }: { equipmentId: string; canM
             {t('units.create')}
           </Button>
         )}
-        <Button icon={<PrinterOutlined />} disabled={selected.length === 0} onClick={() => navigate(`/labels/print?units=${selected.join(',')}`)}>
+        <Button icon={<PrinterOutlined />} disabled={selected.length === 0} onClick={() => labels.open({ unitIds: selected })}>
           {t('unitGrid.printLabels', { count: selected.length })}
         </Button>
         {canTransfer && (
@@ -141,6 +183,20 @@ export function UnitGrid({ equipmentId, canManage }: { equipmentId: string; canM
           <ExportButton fileName={`serial-numbers-${rows[0]?.equipmentCode ?? equipmentId}`} columns={unitExportColumns(t)} load={async () => rows} />
         </span>
       </Flex>
+      {summary.length > 0 && (
+        <Flex gap={8} wrap style={{ marginBottom: 12 }}>
+          {summary.map(([location, counts]) => (
+            <Tag key={location} style={{ padding: '2px 8px' }}>
+              <Typography.Text strong style={{ fontSize: 12 }}>{location}</Typography.Text>
+              {UNIT_STATUSES.filter((st) => counts[st]).map((st) => (
+                <span key={st} style={{ marginInlineStart: 8 }}>
+                  {t(`enums.unitStatus.${st}`)}: <b>{counts[st]}</b>
+                </span>
+              ))}
+            </Tag>
+          ))}
+        </Flex>
+      )}
       <Table
         size="small"
         rowKey="id"
@@ -238,10 +294,10 @@ export function UnitGrid({ equipmentId, canManage }: { equipmentId: string; canM
                     editing(u) ? (
                       <Space size={2}>
                         <Tooltip title={t('common.save')}>
-                          <Button size="small" type="text" icon={<CheckOutlined />} loading={saving} onClick={() => saveRow(u)} aria-label={t('common.save')} />
+                          <Button size="small" type="text" icon={<CheckOutlined />} loading={saving} onClick={() => saveRow(u).catch(() => undefined)} aria-label={t('common.save')} />
                         </Tooltip>
                         <Tooltip title={t('common.cancel')}>
-                          <Button size="small" type="text" icon={<CloseOutlined />} onClick={() => setEditingId(null)} aria-label={t('common.cancel')} />
+                          <Button size="small" type="text" icon={<CloseOutlined />} onClick={stopEdit} aria-label={t('common.cancel')} />
                         </Tooltip>
                       </Space>
                     ) : (
@@ -266,12 +322,23 @@ export function UnitGrid({ equipmentId, canManage }: { equipmentId: string; canM
   );
 }
 
-/** Registers a new device; its existing Rentman label can be scanned right away. */
+/** Registers a new device; its existing label can be scanned right away. */
 function CreateUnitModal({ equipmentId, open, onClose, onCreated }: { equipmentId: string; open: boolean; onClose: () => void; onCreated: () => void }) {
   const { t } = useTranslation();
   const showError = useErrorToast();
   const [form] = Form.useForm();
   const [busy, setBusy] = useState(false);
+
+  // Next internal reference (1, 2, 3… or TR-004 after TR-003); editable, empty is numbered by the server.
+  const suggest = () =>
+    unitApi
+      .nextInternalRef(equipmentId)
+      .then((ref) => form.setFieldValue('internalRef', ref))
+      .catch(() => undefined);
+  useEffect(() => {
+    if (open) suggest();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, equipmentId]);
 
   const save = async (addAnother: boolean) => {
     const v = await form.validateFields();
@@ -279,7 +346,7 @@ function CreateUnitModal({ equipmentId, open, onClose, onCreated }: { equipmentI
     try {
       await unitApi.create({
         equipmentId,
-        internalRef: v.internalRef.trim(),
+        internalRef: v.internalRef?.trim() || null,
         serialNumber: v.serialNumber?.trim() || null,
         stockLocationId: v.stockLocationId ?? null,
         purchaseDate: toApiDate(v.purchaseDate),
@@ -287,39 +354,46 @@ function CreateUnitModal({ equipmentId, open, onClose, onCreated }: { equipmentI
         labelCode: v.labelCode?.trim() || null,
       });
       onCreated();
-      if (addAnother) form.setFieldsValue({ internalRef: '', serialNumber: '', labelCode: '' });
-      else {
+      guard.markSaved();
+      if (addAnother) {
+        form.setFieldsValue({ internalRef: '', serialNumber: '', labelCode: '' });
+        suggest();
+      } else {
         form.resetFields();
         onClose();
       }
     } catch (e) {
       showError(e);
+      throw e;
     } finally {
       setBusy(false);
     }
   };
 
+  const guard = useGuardedForm(open, () => save(false));
+  const close = guard.guardClose(onClose);
+
   return (
     <Modal
       open={open}
       title={t('units.create')}
-      onCancel={onClose}
+      onCancel={close}
       destroyOnHidden
       footer={
         <Space>
-          <Button onClick={onClose}>{t('common.cancel')}</Button>
-          <Button loading={busy} onClick={() => save(true)}>
+          <Button onClick={close}>{t('common.cancel')}</Button>
+          <Button loading={busy} onClick={() => save(true).catch(() => undefined)}>
             {t('unitGrid.saveAndAddAnother')}
           </Button>
-          <Button type="primary" loading={busy} onClick={() => save(false)}>
+          <Button type="primary" loading={busy} onClick={() => save(false).catch(() => undefined)}>
             {t('common.save')}
           </Button>
         </Space>
       }
     >
-      <Form form={form} layout="vertical" preserve={false}>
+      <Form form={form} layout="vertical" preserve={false} onValuesChange={guard.onValuesChange}>
         <Flex gap={12}>
-          <Form.Item name="internalRef" label={t('units.internalRef')} style={{ flex: 1 }} rules={[{ required: true, whitespace: true, message: t('validation.required') }]}>
+          <Form.Item name="internalRef" label={t('units.internalRef')} style={{ flex: 1 }} extra={t('unitGrid.internalRefHint')}>
             <Input maxLength={64} autoFocus />
           </Form.Item>
           <Form.Item name="serialNumber" label={t('units.serialNumber')} style={{ flex: 1 }}>

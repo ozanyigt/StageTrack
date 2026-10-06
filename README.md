@@ -18,6 +18,9 @@ cd backend/src/StageTrack.HttpApi.Host && dotnet run      # http://localhost:508
 cd frontend && npm install && npm run dev                 # http://localhost:5180
 ```
 
+> **Eski sürümden geçenler:** Projeyi güncelledikten sonra ilk çalıştırmadan önce `reset-demo-db.cmd` çalıştırın.
+> Veritabanı yapısı değiştiği için eski yerel veritabanı yeni sürümle açılmaz; sıfırlama eski test verilerini siler.
+
 İlk açılışta veritabanı oluşturulur; içinde **yalnızca platform yöneticisi** vardır (test verisi yok).
 Veritabanını sıfırlamak için `reset-demo-db.cmd`.
 
@@ -27,7 +30,7 @@ Veritabanını sıfırlamak için `reset-demo-db.cmd`.
 
 Platform yöneticisi hesabı `backend/src/StageTrack.HttpApi.Host/appsettings.Development.json` içindeki `HostAdmin`
 bölümünden gelir; sunum/üretim öncesi şifreyi değiştirin. Eski Staras demo verisi gerekirse aynı dosyada
-`"Seed": { "DemoData": true }` yapıp veritabanını sıfırlayın (STARAS firması + test kullanıcıları gelir).
+`"Seed": { "DemoData": true }` yapıp veritabanını sıfırlayın (STARAS firması + test kullanıcıları gelir; demo firmanın yöneticisi `staras.admin` / `Admin123!`).
 
 ## Platform yönetimi (abonelik)
 

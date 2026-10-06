@@ -244,7 +244,8 @@ public class QuoteAppService(
             DiscountPercent = l.DiscountPercent,
             Total = l.Total,
             Section = l.Section,
-            Notes = l.Notes
+            Notes = l.Notes,
+            IsContent = l.IsContent
         }).ToList();
         return dto;
     }

@@ -67,7 +67,7 @@
   "Impersonation.NotAllowed": "You cannot sign in as this user.",
   "Impersonation.NotActive": "You are not signed in as another user.",
   "Label.OtherCompany": "This label belongs to {company}. Switch to that company and scan again.",
-  "Label.UnknownWorkspace": "This label belongs to another Rentman workspace (#{workspace}).",
+  "Label.UnknownWorkspace": "This label belongs to another workspace (#{workspace}).",
   "Relation.Self": "An item cannot be linked to itself.",
   "Relation.Duplicate": "This item is already in the list.",
   "Supplier.NameAlreadyExists": "A supplier named \"{name}\" already exists.",
@@ -97,5 +97,10 @@
   "Tenant.LocationLimitReached": "The location limit of the subscription ({max}) has been reached.",
   "Tenant.InvalidPeriod": "The end date cannot be before the start date.",
   "Tenant.InvalidLimit": "Limits must be at least 1.",
-  "Company.CodeAlreadyExists": "This firm already has a location with code {code}."
+  "Company.CodeAlreadyExists": "This firm already has a location with code {code}.",
+  "Equipment.NotQuotable": "Equipment {code} cannot be added to projects or quotes (not shown in quotes).",
+  "Equipment.UsedInHistory": "{code} has been used on projects or quotes and cannot be deleted, so the history stays intact. You can archive it.",
+  "Project.ContentLineLocked": "Case content lines follow their case; change quantity, move or remove the case line instead.",
+  "Quote.AlreadyExistsForJob": "This job already has a quote; open a new revision of it to make changes.",
+  "Firm.LogoInvalid": "The logo must be an image file of at most 2 MB."
 }

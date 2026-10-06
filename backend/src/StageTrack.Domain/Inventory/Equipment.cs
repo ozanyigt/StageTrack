@@ -38,6 +38,15 @@ public class Equipment : CompanyAggregateRoot
     public bool IsArchived { get; private set; }
     public Guid? ImageAttachmentId { get; private set; }
 
+    /// <summary>False for office/internal equipment: it can never be planned on a project or put on a quote.</summary>
+    public bool ShowInQuotes { get; private set; } = true;
+
+    /// <summary>Purchase data of quantity-tracked equipment (serialized devices keep it per device).</summary>
+    public DateTime? PurchaseDate { get; private set; }
+
+    public DateTime? WarrantyEndDate { get; private set; }
+    public Guid? PurchaseSupplierId { get; private set; }
+
     /// <summary>Periodic inspection interval (e.g. 12 months for rigging); null when the item needs none.</summary>
     public int? InspectionIntervalMonths { get; private set; }
 
@@ -94,6 +103,20 @@ public class Equipment : CompanyAggregateRoot
     }
 
     public void SetImage(Guid? attachmentId) => ImageAttachmentId = attachmentId;
+
+    public void SetShowInQuotes(bool showInQuotes) => ShowInQuotes = showInQuotes;
+
+    /// <summary>True once the rental price was typed by hand: it no longer follows the content total.</summary>
+    public bool IsPriceManual { get; private set; }
+
+    public void SetPriceManual(bool isManual) => IsPriceManual = isManual;
+
+    public void SetPurchase(DateTime? purchaseDate, DateTime? warrantyEndDate, Guid? supplierId)
+    {
+        PurchaseDate = purchaseDate?.Date;
+        WarrantyEndDate = warrantyEndDate?.Date;
+        PurchaseSupplierId = supplierId;
+    }
 
     public void SetRentalPrice(decimal price) => RentalPrice = Math.Max(0, Math.Round(price, 2));
 

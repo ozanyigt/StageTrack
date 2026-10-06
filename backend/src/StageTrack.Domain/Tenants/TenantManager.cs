@@ -169,7 +169,7 @@ public class TenantProvisioningManager(
             StageTrackPermissions.Equipment.Default, StageTrackPermissions.Labels.Assign,
             StageTrackPermissions.Maintenance.Default, StageTrackPermissions.Maintenance.Manage,
             StageTrackPermissions.Suppliers.Default,
-            StageTrackPermissions.Projects.Default, StageTrackPermissions.Projects.ChangeStatus,
+            // No project details: the warehouse works from the board and the scan screen only.
             StageTrackPermissions.Warehouse.Default, StageTrackPermissions.Warehouse.Scan
         ]),
         ("sales",

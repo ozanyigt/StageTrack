@@ -41,16 +41,42 @@ public class EquipmentDto
     public decimal? VolumeM3 { get; set; }
     public string? Notes { get; set; }
     public bool IsArchived { get; set; }
-}
 
-public class EquipmentDetailDto : EquipmentDto
-{
-    public int StockQuantity { get; set; }
+    public string? FolderName { get; set; }
     public string? CountryOfOrigin { get; set; }
     public decimal? LengthCm { get; set; }
     public decimal? WidthCm { get; set; }
     public decimal? HeightCm { get; set; }
     public decimal? PowerW { get; set; }
+
+    /// <summary>False: office/internal equipment that cannot be planned on projects or quotes.</summary>
+    public bool ShowInQuotes { get; set; }
+
+    public DateTime? PurchaseDate { get; set; }
+    public DateTime? WarrantyEndDate { get; set; }
+    public Guid? PurchaseSupplierId { get; set; }
+    public string? PurchaseSupplierName { get; set; }
+
+    /// <summary>Cases/sets whose default content includes this equipment ("part of").</summary>
+    public List<EquipmentRefDto> ContainedIn { get; set; } = [];
+}
+
+public class EquipmentRefDto
+{
+    public Guid Id { get; set; }
+    public string Code { get; set; } = null!;
+    public string Name { get; set; } = null!;
+}
+
+public class EquipmentDetailDto : EquipmentDto
+{
+    public int StockQuantity { get; set; }
+
+    /// <summary>True when the price was typed by hand; otherwise a case's price follows its content total.</summary>
+    public bool IsPriceManual { get; set; }
+
+    /// <summary>Total rental price of the default content; null when the user may not see prices or there is no content.</summary>
+    public decimal? ContentPriceTotal { get; set; }
     public decimal? CurrentA { get; set; }
     public int PackedPer { get; set; }
     public Guid? ImageAttachmentId { get; set; }
@@ -151,6 +177,11 @@ public class CreateUpdateEquipmentDto
 
     [StringLength(EquipmentConsts.MaxNotesLength)]
     public string? Notes { get; set; }
+
+    public bool ShowInQuotes { get; set; } = true;
+    public DateTime? PurchaseDate { get; set; }
+    public DateTime? WarrantyEndDate { get; set; }
+    public Guid? PurchaseSupplierId { get; set; }
 }
 
 public class AddEquipmentRelationInput
@@ -260,8 +291,9 @@ public class CreateEquipmentUnitDto
     [Required]
     public Guid EquipmentId { get; set; }
 
-    [Required, StringLength(EquipmentUnitConsts.MaxInternalRefLength)]
-    public string InternalRef { get; set; } = null!;
+    /// <summary>Empty: the next number (1, 2, 3… or TR-004 after TR-003) is used.</summary>
+    [StringLength(EquipmentUnitConsts.MaxInternalRefLength)]
+    public string? InternalRef { get; set; }
 
     [StringLength(EquipmentUnitConsts.MaxSerialNumberLength)]
     public string? SerialNumber { get; set; }

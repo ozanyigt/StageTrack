@@ -7,6 +7,8 @@ import { roleApi } from '../../api/endpoints';
 import type { PermissionGroup, Role } from '../../api/types';
 import { permissionLabelKey, roleLabel, useAuth } from '../../auth/AuthContext';
 import { useErrorToast } from '../../utils/errors';
+import { useGuardedForm } from '../../components/useGuardedModal';
+import { useUnsavedChanges } from '../../components/UnsavedChanges';
 
 interface PermissionNode {
   key: string;
@@ -46,6 +48,7 @@ export function RolesPage() {
   const [checked, setChecked] = useState<string[]>([]);
   const [nameModal, setNameModal] = useState<{ role?: Role } | null>(null);
   const [nameForm] = Form.useForm<{ name: string }>();
+  const nameGuard = useGuardedForm(!!nameModal, async () => saveName.mutateAsync((await nameForm.validateFields()).name));
 
   const definitions = useQuery({ queryKey: ['permission-definitions'], queryFn: roleApi.definitions });
   const roles = useQuery({ queryKey: ['roles'], queryFn: roleApi.list });
@@ -80,6 +83,14 @@ export function RolesPage() {
     onSuccess: (role) => { message.success(t('common.saved')); afterChange(role); },
     onError: showError,
   });
+
+  // Permission ticks not saved yet: asked before another role is opened or the page is left.
+  const permissionsDirty =
+    !!selected && !selected.isStatic && [...checked].sort().join('|') !== [...selected.permissions].sort().join('|');
+  const { confirmLeave: confirmPermissionsLeave } = useUnsavedChanges(permissionsDirty, () => savePermissions.mutateAsync());
+  const selectRole = async (id: string) => {
+    if (id === selectedId || (await confirmPermissionsLeave())) setSelectedId(id);
+  };
 
   const saveName = useMutation({
     mutationFn: (name: string) => (nameModal?.role ? roleApi.rename(nameModal.role.id, name) : roleApi.create(name)),
@@ -128,7 +139,7 @@ export function RolesPage() {
               dataSource={roles.data}
               renderItem={(r) => (
                 <List.Item
-                  onClick={() => setSelectedId(r.id)}
+                  onClick={() => selectRole(r.id)}
                   style={{ cursor: 'pointer', fontWeight: r.id === selectedId ? 600 : undefined }}
                   extra={<Space size={4}>
                     {r.isStatic && <Tag icon={<LockOutlined />} color="orange">{t('roles.static')}</Tag>}
@@ -188,14 +199,14 @@ export function RolesPage() {
       <Modal
         open={!!nameModal}
         title={nameModal?.role ? t('roles.rename') : t('roles.create')}
-        onCancel={() => setNameModal(null)}
+        onCancel={nameGuard.guardClose(() => setNameModal(null))}
         onOk={() => nameForm.submit()}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
         confirmLoading={saveName.isPending}
         destroyOnHidden
       >
-        <Form form={nameForm} layout="vertical" onFinish={(v) => saveName.mutate(v.name)}>
+        <Form form={nameForm} onValuesChange={nameGuard.onValuesChange} layout="vertical" onFinish={(v) => saveName.mutate(v.name)}>
           <Form.Item name="name" label={t('roles.name')} rules={[{ required: true, min: 2, max: 64, message: t('validation.required') }]}>
             <Input autoFocus />
           </Form.Item>
