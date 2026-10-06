@@ -105,6 +105,7 @@ public class AccountAppService(
             IsHost = user.IsHost,
             TenantName = tenant?.Name,
             SubscriptionEndDate = tenant?.EndDate,
+            HasFirmLogo = tenant?.LogoContent is not null,
             Id = user.Id,
             UserName = user.UserName,
             FullName = user.FullName,

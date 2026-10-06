@@ -13,6 +13,7 @@ import { useErrorToast } from '../../utils/errors';
 import { fetchAllPages } from '../../utils/excel';
 import { useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
+import { useGuardedForm } from '../../components/useGuardedModal';
 
 const PAGE_SIZE = 25;
 
@@ -47,7 +48,9 @@ export function UsersPage() {
   const [text, setText] = useState('');
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<User | 'new' | null>(null);
+  const guard = useGuardedForm(!!editing, async () => save.mutateAsync(await form.validateFields()));
   const [passwordUser, setPasswordUser] = useState<User | null>(null);
+  const passwordGuard = useGuardedForm(!!passwordUser, async () => resetPassword.mutateAsync(await passwordForm.validateFields()));
   const search = useDebounced(text, 300);
 
   const list = useQuery({
@@ -208,12 +211,12 @@ export function UsersPage() {
       <Drawer
         open={!!editing}
         width={480}
-        onClose={() => setEditing(null)}
+        onClose={guard.guardClose(() => setEditing(null))}
         title={editing === 'new' ? t('users.create') : t('users.edit')}
         destroyOnHidden
         extra={<Button type="primary" loading={save.isPending} onClick={() => form.submit()}>{t('common.save')}</Button>}
       >
-        <Form form={form} layout="vertical" onFinish={(v) => save.mutate(v)}>
+        <Form form={form} onValuesChange={guard.onValuesChange} layout="vertical" onFinish={(v) => save.mutate(v)}>
           <Form.Item name="userName" label={t('users.userName')}
             rules={[{ required: true, message: t('validation.required') }, { pattern: /^[A-Za-z0-9._@-]{3,64}$/, message: t('users.userNameRule') }]}>
             <Input disabled={editing !== 'new'} autoComplete="off" />
@@ -251,14 +254,14 @@ export function UsersPage() {
       <Modal
         open={!!passwordUser}
         title={t('users.resetPasswordFor', { name: passwordUser?.fullName })}
-        onCancel={() => setPasswordUser(null)}
+        onCancel={passwordGuard.guardClose(() => setPasswordUser(null))}
         onOk={() => passwordForm.submit()}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
         confirmLoading={resetPassword.isPending}
         destroyOnHidden
       >
-        <Form form={passwordForm} layout="vertical" onFinish={(v) => resetPassword.mutate(v)}>
+        <Form form={passwordForm} onValuesChange={passwordGuard.onValuesChange} layout="vertical" onFinish={(v) => resetPassword.mutate(v)}>
           <Form.Item name="newPassword" label={t('users.newPassword')} rules={passwordRules(t)} extra={t('users.passwordRule')}>
             <Input.Password autoComplete="new-password" autoFocus />
           </Form.Item>

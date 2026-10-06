@@ -12,6 +12,7 @@ import { useErrorToast } from '../../utils/errors';
 import { formatDate, toApiDate, useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
 import { toEquipmentInput } from './EquipmentPropertiesTab';
+import { useGuardedForm } from '../../components/useGuardedModal';
 
 export const repairStatusColor: Record<RepairStatus, string> = {
   Open: 'orange',
@@ -31,7 +32,9 @@ export function EquipmentInspectionTab({ equipment }: { equipment: EquipmentDeta
   const record = can(Permissions.MaintenanceManage);
   const [settings] = Form.useForm<{ inspectionIntervalMonths?: number | null; inspectionDescription?: string | null }>();
   const [recordOpen, setRecordOpen] = useState(false);
+  const settingsGuard = useGuardedForm(manage, async () => saveSettings.mutateAsync(await settings.validateFields()));
   const [recordForm] = Form.useForm<{ unitId: string; date: dayjs.Dayjs; passed: boolean; notes?: string }>();
+  const recordGuard = useGuardedForm(recordOpen, async () => recordInspection.mutateAsync(await recordForm.validateFields()));
 
   useEffect(() => {
     settings.setFieldsValue({ inspectionIntervalMonths: equipment.inspectionIntervalMonths, inspectionDescription: equipment.inspectionDescription });
@@ -52,6 +55,7 @@ export function EquipmentInspectionTab({ equipment }: { equipment: EquipmentDeta
     mutationFn: (v: { inspectionIntervalMonths?: number | null; inspectionDescription?: string | null }) =>
       equipmentApi.update(equipment.id, { ...toEquipmentInput(equipment, can(Permissions.Prices)), ...v }),
     onSuccess: (saved) => {
+      settingsGuard.markSaved();
       queryClient.setQueryData(['equipment', equipment.id], saved);
       queryClient.invalidateQueries({ queryKey: ['units', equipment.id] });
       message.success(t('common.saved'));
@@ -77,7 +81,7 @@ export function EquipmentInspectionTab({ equipment }: { equipment: EquipmentDeta
   return (
     <Space direction="vertical" style={{ width: '100%' }} size="middle">
       <Card size="small" title={t('equipmentDetail.inspectionSettings')}>
-        <Form form={settings} layout="vertical" disabled={!manage} onFinish={(v) => saveSettings.mutate(v)}>
+        <Form form={settings} layout="vertical" disabled={!manage} onValuesChange={settingsGuard.onValuesChange} onFinish={(v) => saveSettings.mutate(v)}>
           <Flex gap={12} wrap align="end">
             <Form.Item name="inspectionIntervalMonths" label={t('equipmentDetail.intervalMonths')} extra={t('equipmentDetail.intervalHint')} style={{ width: 220 }}>
               <InputNumber min={1} max={120} style={{ width: '100%' }} />
@@ -171,14 +175,14 @@ export function EquipmentInspectionTab({ equipment }: { equipment: EquipmentDeta
       <Modal
         open={recordOpen}
         title={t('equipmentDetail.recordInspection')}
-        onCancel={() => setRecordOpen(false)}
+        onCancel={recordGuard.guardClose(() => setRecordOpen(false))}
         onOk={() => recordForm.submit()}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
         confirmLoading={recordInspection.isPending}
         destroyOnHidden
       >
-        <Form form={recordForm} layout="vertical" onFinish={(v) => recordInspection.mutate(v)}>
+        <Form form={recordForm} onValuesChange={recordGuard.onValuesChange} layout="vertical" onFinish={(v) => recordInspection.mutate(v)}>
           <Form.Item name="unitId" label={t('labels.unit')} rules={[{ required: true, message: t('validation.required') }]}>
             <Select
               showSearch
@@ -212,6 +216,7 @@ export function EquipmentRepairsTab({ equipment, unitId }: { equipment: Equipmen
   const showPrice = can(Permissions.Prices);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm<RepairInput>();
+  const repairGuard = useGuardedForm(open, async () => create.mutateAsync(await form.validateFields()));
   const [supplierText, setSupplierText] = useState('');
   const supplierSearch = useDebounced(supplierText, 250);
 
@@ -309,14 +314,14 @@ export function EquipmentRepairsTab({ equipment, unitId }: { equipment: Equipmen
       <Modal
         open={open}
         title={t('equipmentDetail.openRepair')}
-        onCancel={() => setOpen(false)}
+        onCancel={repairGuard.guardClose(() => setOpen(false))}
         onOk={() => form.submit()}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
         confirmLoading={create.isPending}
         destroyOnHidden
       >
-        <Form form={form} layout="vertical" onFinish={(v) => create.mutate(v)}>
+        <Form form={form} onValuesChange={repairGuard.onValuesChange} layout="vertical" onFinish={(v) => create.mutate(v)}>
           {equipment.isSerialized && !unitId && (
             <Form.Item name="unitId" label={t('labels.unit')} rules={[{ required: true, message: t('validation.required') }]}>
               <Select

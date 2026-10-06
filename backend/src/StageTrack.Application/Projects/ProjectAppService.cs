@@ -57,6 +57,7 @@ public class ProjectAppService(
     IUserRepository userRepository,
     ICompanyRepository companyRepository,
     ProjectManager projectManager,
+    Quotes.QuoteManager quoteManager,
     AvailabilityManager availabilityManager,
     ProjectAccess access,
     PriceVisibility prices,
@@ -111,19 +112,20 @@ public class ProjectAppService(
                 Name = item.Name,
                 Quantity = line.Quantity,
                 Notes = line.Notes,
-                Content = item.Relations.Where(r => r.Kind == EquipmentRelationKind.Content && content.ContainsKey(r.RelatedEquipmentId))
-                    .OrderBy(r => r.SortOrder)
-                    .Select(r => new PackingSlipLineDto
+                Content = project.Equipment.Where(c => c.ParentLineId == line.Id && equipment.ContainsKey(c.EquipmentId))
+                    .OrderBy(c => c.SortOrder)
+                    .Select(c => new PackingSlipLineDto
                     {
-                        Code = content[r.RelatedEquipmentId].Code,
-                        Name = content[r.RelatedEquipmentId].Name,
-                        Quantity = r.Quantity * line.Quantity
+                        Code = equipment[c.EquipmentId].Code,
+                        Name = equipment[c.EquipmentId].Name,
+                        Quantity = c.Quantity,
+                        Notes = c.Notes
                     }).ToList()
             };
         }
 
         var sections = new List<PackingSlipSectionDto>();
-        var loose = project.Equipment.Where(e => e.SectionId is null).OrderBy(e => e.SortOrder).ToList();
+        var loose = project.Equipment.Where(e => e.SectionId is null && e.ParentLineId == null).OrderBy(e => e.SortOrder).ToList();
         if (loose.Count > 0)
         {
             sections.Add(new PackingSlipSectionDto { Name = null, Depth = 1, Lines = loose.Select(ToLine).ToList() });
@@ -135,7 +137,8 @@ public class ProjectAppService(
             {
                 Name = section.Name,
                 Depth = depth,
-                Lines = project.Equipment.Where(e => e.SectionId == section.Id).OrderBy(e => e.SortOrder).Select(ToLine).ToList()
+                IsWarehouseExtras = section.IsWarehouseExtras,
+                Lines = project.Equipment.Where(e => e.SectionId == section.Id && e.ParentLineId == null).OrderBy(e => e.SortOrder).Select(ToLine).ToList()
             });
         }
 
@@ -190,7 +193,10 @@ public class ProjectAppService(
         if (input.IncludeAccessories)
         {
             var equipment = await equipmentRepository.GetAsync(input.EquipmentId);
-            foreach (var accessory in equipment.Relations.Where(r => r.Kind == EquipmentRelationKind.Accessory))
+            var accessories = equipment.Relations.Where(r => r.Kind == EquipmentRelationKind.Accessory).ToList();
+            var quotable = (await equipmentRepository.GetListByIdsAsync(accessories.Select(a => a.RelatedEquipmentId)))
+                .Where(e => e.ShowInQuotes && !e.IsArchived).Select(e => e.Id).ToHashSet();
+            foreach (var accessory in accessories.Where(a => quotable.Contains(a.RelatedEquipmentId)))
             {
                 await projectManager.AddEquipmentAsync(p, accessory.RelatedEquipmentId, accessory.Quantity * input.Quantity, input.SectionId);
             }
@@ -238,6 +244,10 @@ public class ProjectAppService(
     {
         var project = await projectRepository.GetAsync(id);
         await change(project);
+        await unitOfWork.SaveChangesAsync();
+
+        // A draft quote follows the planned equipment (prices already set on it are kept).
+        await quoteManager.SyncDraftAsync(project);
         await unitOfWork.SaveChangesAsync();
         return await BuildDtoAsync(project);
     }
@@ -305,7 +315,8 @@ public class ProjectAppService(
         dto.PaymentTerms = project.PaymentTerms;
         dto.Sections = outline.Select(o => new ProjectSectionDto
         {
-            Id = o.Section.Id, ParentId = o.Section.ParentId, Name = o.Section.Name, SortOrder = o.Section.SortOrder, Depth = o.Depth, Path = o.Path
+            Id = o.Section.Id, ParentId = o.Section.ParentId, Name = o.Section.Name, SortOrder = o.Section.SortOrder, Depth = o.Depth, Path = o.Path,
+            IsWarehouseExtras = o.Section.IsWarehouseExtras
         }).ToList();
         dto.Crew = await BuildCrewAsync(project);
         dto.Equipment = project.Equipment
@@ -335,7 +346,10 @@ public class ProjectAppService(
                     Shortage = shortage,
                     OutQuantity = balance?.Out ?? 0,
                     ReturnedQuantity = balance?.CheckedIn ?? 0,
-                    Alternatives = shortage == 0
+                    ParentLineId = line.ParentLineId,
+                    ContentQuantity = line.ContentQuantity,
+                    IsExtra = line.IsExtra,
+                    Alternatives = shortage == 0 || line.ParentLineId.HasValue
                         ? []
                         : item.Relations.Where(r => r.Kind == EquipmentRelationKind.Alternative && alternatives.ContainsKey(r.RelatedEquipmentId))
                             .Select(r => new AlternativeDto

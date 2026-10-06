@@ -1,9 +1,10 @@
 import {
   ArrowDownOutlined, ArrowLeftOutlined, ArrowUpOutlined, DeleteOutlined, DownOutlined, EditOutlined, FileAddOutlined, FilePdfOutlined,
-  FolderAddOutlined, PlusOutlined, ScanOutlined, SwapOutlined, UserAddOutlined, WarningOutlined,
+  FolderAddOutlined, FolderOpenOutlined, PlusOutlined, ScanOutlined, SwapOutlined, UserAddOutlined, WarningOutlined,
+  EnterOutlined, InfoCircleOutlined,
 } from '@ant-design/icons';
 import {
-  Alert, App, Button, Card, Checkbox, Descriptions, Dropdown, Empty, Flex, Form, Input, InputNumber, Modal, Popconfirm, Popover, Progress,
+  Alert, App, Button, Card, Descriptions, Dropdown, Empty, Flex, Form, Input, InputNumber, Modal, Popconfirm, Popover, Progress,
   Select, Skeleton, Space, Table, Tabs, Tag, Tooltip, Typography, theme,
 } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -11,11 +12,12 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { crewApi, projectApi, quoteApi, warehouseApi } from '../../api/endpoints';
-import type { Project, ProjectEquipment, ProjectSection, ProjectStatus } from '../../api/types';
+import type { Equipment, Project, ProjectEquipment, ProjectSection, ProjectStatus } from '../../api/types';
 import { SALES_PROJECT_STATUSES } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { CollaborationPanel } from '../../components/CollaborationPanel';
-import { EquipmentSelect } from '../../components/Selects';
+import { useLabelGenerator } from '../../components/LabelGenerator';
+import { EQUIPMENT_DRAG_TYPE, EquipmentPickerPanel } from './EquipmentPickerPanel';
 import { ProjectStatusTag, QuoteStatusTag } from '../../components/StatusTags';
 import { useErrorToast } from '../../utils/errors';
 import { useFormat } from '../../utils/format';
@@ -39,10 +41,11 @@ export function ProjectDetailPage() {
   const { token } = theme.useToken();
   const showError = useErrorToast();
   const queryClient = useQueryClient();
+  const { openPage } = useLabelGenerator();
   const [editOpen, setEditOpen] = useState(false);
-  const [newEquipment, setNewEquipment] = useState<string>();
-  const [newQuantity, setNewQuantity] = useState<number>(1);
-  const [newSection, setNewSection] = useState<string>(NO_SECTION);
+  // Section that "+" in the equipment picker adds to (click a section header to choose it).
+  const [targetSection, setTargetSection] = useState<string>(NO_SECTION);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
   const [withAccessories, setWithAccessories] = useState(true);
   const [sectionDialog, setSectionDialog] = useState<SectionDialog | null>(null);
   const [sectionForm] = Form.useForm<{ name: string; parentId?: string | null }>();
@@ -72,8 +75,9 @@ export function ProjectDetailPage() {
 
   const changeStatus = useMutation({ mutationFn: (s: ProjectStatus) => projectApi.changeStatus(id!, s), onSuccess: setProject, onError: showError });
   const addEquipment = useMutation({
-    mutationFn: () => projectApi.addEquipment(id!, newEquipment!, newQuantity, newSection === NO_SECTION ? null : newSection, withAccessories),
-    onSuccess: (p) => { setProject(p); setNewEquipment(undefined); setNewQuantity(1); },
+    mutationFn: ({ equipmentId, sectionId }: { equipmentId: string; sectionId: string }) =>
+      projectApi.addEquipment(id!, equipmentId, 1, sectionId === NO_SECTION ? null : sectionId, withAccessories),
+    onSuccess: setProject,
     onError: showError,
   });
   const remove = useMutation({
@@ -92,10 +96,15 @@ export function ProjectDetailPage() {
   });
 
   const p = project.data;
+  const latestQuote = quotes.data?.items[0];
   const groups = useMemo(() => {
     if (!p) return [];
+    // Each case line is followed by its content lines (shown indented, read-only).
     const bySection = (sectionId: string | null) =>
-      p.equipment.filter((e) => (e.sectionId ?? null) === sectionId).sort((a, b) => a.sortOrder - b.sortOrder);
+      p.equipment
+        .filter((e) => (e.sectionId ?? null) === sectionId && !e.parentLineId)
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .flatMap((top) => [top, ...p.equipment.filter((c) => c.parentLineId === top.id).sort((a, b) => a.sortOrder - b.sortOrder)]);
     const result: { section: ProjectSection | null; lines: ProjectEquipment[] }[] = [];
     const loose = bySection(null);
     if (loose.length > 0 || p.sections.length === 0) result.push({ section: null, lines: loose });
@@ -110,10 +119,36 @@ export function ProjectDetailPage() {
   const currency = company?.defaultCurrency ?? 'TRY';
   const totalOut = p.equipment.reduce((s, e) => s + e.outQuantity, 0);
   const totalPlanned = p.equipment.reduce((s, e) => s + e.quantity, 0);
-  const dailyTotal = p.equipment.reduce((s, e) => s + (e.rentalPrice ?? 0) * e.quantity, 0);
+  // Content is priced in its case; warehouse extras are not offered.
+  const dailyTotal = p.equipment.filter((e) => !e.parentLineId && !e.isExtra).reduce((s, e) => s + (e.rentalPrice ?? 0) * e.quantity, 0);
+  const sectionTitle = (s: ProjectSection) => (s.isWarehouseExtras ? t('projectSections.warehouseExtras') : s.name);
+  const targetLabel =
+    targetSection === NO_SECTION ? t('sections.none') : sectionTitle(p.sections.find((s) => s.id === targetSection) ?? p.sections[0]);
+  const addFromPicker = (equipment: Equipment, sectionId: string) => addEquipment.mutate({ equipmentId: equipment.id, sectionId });
+  const dropProps = (key: string) =>
+    manage
+      ? {
+          onDragOver: (ev: React.DragEvent) => {
+            if (!ev.dataTransfer.types.includes(EQUIPMENT_DRAG_TYPE)) return;
+            ev.preventDefault();
+            ev.dataTransfer.dropEffect = 'copy';
+            if (dropTarget !== key) setDropTarget(key);
+          },
+          onDragLeave: (ev: React.DragEvent) => {
+            if (!(ev.currentTarget as HTMLElement).contains(ev.relatedTarget as Node)) setDropTarget(null);
+          },
+          onDrop: (ev: React.DragEvent) => {
+            const equipmentId = ev.dataTransfer.getData(EQUIPMENT_DRAG_TYPE);
+            setDropTarget(null);
+            if (!equipmentId) return;
+            ev.preventDefault();
+            addEquipment.mutate({ equipmentId, sectionId: key });
+          },
+        }
+      : {};
   const sectionOptions = [
     { value: NO_SECTION, label: t('sections.none') },
-    ...p.sections.map((s) => ({ value: s.id, label: s.path })),
+    ...p.sections.filter((s) => !s.isWarehouseExtras).map((s) => ({ value: s.id, label: s.path })),
   ];
 
   const openSectionDialog = (dialog: SectionDialog) => {
@@ -164,16 +199,32 @@ export function ProjectDetailPage() {
     </div>
   );
 
-  const lineColumns = (lines: ProjectEquipment[]) => [
+  const editableLine = (e: ProjectEquipment) => manage && !e.parentLineId && !e.isExtra;
+  const lineColumns = (lines: ProjectEquipment[]) => {
+    const topLines = lines.filter((l) => !l.parentLineId);
+    return [
     {
-      title: t('equipment.code'), dataIndex: 'equipmentCode', width: 110,
-      render: (v: string, e: ProjectEquipment) => (crewView ? v : <Link to={`/equipment/${e.equipmentId}`}>{v}</Link>),
+      title: t('equipment.code'), dataIndex: 'equipmentCode', width: 130,
+      render: (v: string, e: ProjectEquipment) => (
+        <span style={e.parentLineId ? { paddingInlineStart: 18, color: token.colorTextSecondary } : undefined}>
+          {e.parentLineId && <EnterOutlined style={{ transform: 'scaleX(-1)', marginInlineEnd: 6, fontSize: 11 }} />}
+          {crewView ? v : <Link to={`/equipment/${e.equipmentId}`}>{v}</Link>}
+        </span>
+      ),
     },
-    { title: t('equipment.name'), dataIndex: 'equipmentName', ellipsis: true },
+    {
+      title: t('equipment.name'), dataIndex: 'equipmentName', ellipsis: true,
+      render: (v: string, e: ProjectEquipment) =>
+        e.parentLineId ? (
+          <Typography.Text type="secondary">
+            {v} <Tag bordered={false} style={{ fontSize: 11 }}>{t('projectSections.caseContent', { count: e.contentQuantity })}</Tag>
+          </Typography.Text>
+        ) : v,
+    },
     {
       title: t('projects.quantity'), dataIndex: 'quantity', width: 100,
       render: (q: number, e: ProjectEquipment) =>
-        manage ? (
+        editableLine(e) ? (
           <InputNumber size="small" min={1} defaultValue={q} key={`${e.id}-${q}`} style={{ width: 80 }} aria-label={t('projects.quantity')}
             onBlur={(ev) => { const v = Number(ev.target.value); if (v > 0 && v !== q) run(projectApi.updateEquipment(id!, e.id, v, e.notes)); }}
             onPressEnter={(ev) => (ev.target as HTMLInputElement).blur()} />
@@ -182,7 +233,7 @@ export function ProjectDetailPage() {
     {
       title: t('common.notes'), dataIndex: 'notes', width: 180,
       render: (n: string | null, e: ProjectEquipment) =>
-        manage ? (
+        manage && !e.isExtra ? (
           <Input size="small" defaultValue={n ?? ''} key={`${e.id}-n-${n}`} maxLength={500} placeholder="—" aria-label={t('common.notes')}
             onBlur={(ev) => { const v = ev.target.value.trim(); if (v !== (n ?? '')) run(projectApi.updateEquipment(id!, e.id, e.quantity, v || null)); }}
             onPressEnter={(ev) => (ev.target as HTMLInputElement).blur()} />
@@ -197,7 +248,7 @@ export function ProjectDetailPage() {
             render: (_: unknown, e: ProjectEquipment) => (
               <Space size={4}>
                 <span>{e.available} / {e.stock}</span>
-                {e.shortage > 0 ? (
+                {e.parentLineId || e.isExtra ? null : e.shortage > 0 ? (
                   <Popover title={t('sections.alternatives')} content={alternativesPopover(e)} trigger="click">
                     <Tag color="red" style={{ cursor: 'pointer' }} icon={e.alternatives.length > 0 ? <SwapOutlined /> : undefined}>
                       {t('projects.shortage', { count: e.shortage })}
@@ -216,14 +267,16 @@ export function ProjectDetailPage() {
     ...(showPrices
       ? [{
           title: t('equipment.dailyPrice'), dataIndex: 'rentalPrice', width: 120, align: 'end' as const, responsive: ['xl' as const],
-          render: (v: number | null) => (v === null || v === undefined ? '—' : f.money(v, currency)),
+          render: (v: number | null, e: ProjectEquipment) =>
+            e.parentLineId ? <Typography.Text type="secondary">{t('projectSections.inCase')}</Typography.Text> : v === null || v === undefined ? '—' : f.money(v, currency),
         }]
       : []),
     ...(manage
       ? [{
           title: '', width: 210,
           render: (_: unknown, e: ProjectEquipment) => {
-            const index = lines.findIndex((l) => l.id === e.id);
+            if (!editableLine(e)) return null;
+            const index = topLines.findIndex((l) => l.id === e.id);
             return (
               <Space size={2}>
                 <Select
@@ -237,7 +290,7 @@ export function ProjectDetailPage() {
                 />
                 <Button size="small" type="text" icon={<ArrowUpOutlined />} disabled={index <= 0} aria-label={t('sections.moveUp')}
                   onClick={() => run(projectApi.moveEquipment(id!, e.id, { sectionId: e.sectionId ?? null, direction: -1 }))} />
-                <Button size="small" type="text" icon={<ArrowDownOutlined />} disabled={index >= lines.length - 1} aria-label={t('sections.moveDown')}
+                <Button size="small" type="text" icon={<ArrowDownOutlined />} disabled={index >= topLines.length - 1} aria-label={t('sections.moveDown')}
                   onClick={() => run(projectApi.moveEquipment(id!, e.id, { sectionId: e.sectionId ?? null, direction: 1 }))} />
                 <Button size="small" type="text" danger icon={<DeleteOutlined />} aria-label={t('common.delete')}
                   onClick={() => run(projectApi.removeEquipment(id!, e.id))} />
@@ -246,13 +299,17 @@ export function ProjectDetailPage() {
           },
         }]
       : []),
-  ];
+    ];
+  };
 
   const sectionHeader = (section: ProjectSection | null, count: number) => {
     const siblings = section ? p.sections.filter((s) => (s.parentId ?? null) === (section.parentId ?? null)) : [];
     const index = section ? siblings.findIndex((s) => s.id === section.id) : -1;
+    const key = section?.id ?? NO_SECTION;
+    const isTarget = manage && targetSection === key && !section?.isWarehouseExtras;
     return (
       <Flex
+        onClick={() => manage && !section?.isWarehouseExtras && setTargetSection(key)}
         align="center"
         justify="space-between"
         gap={8}
@@ -263,12 +320,23 @@ export function ProjectDetailPage() {
           padding: '6px 10px',
           borderRadius: 6,
           background: section ? (section.depth > 1 ? token.colorFillQuaternary : token.colorFillSecondary) : token.colorFillQuaternary,
+          cursor: manage && !section?.isWarehouseExtras ? 'pointer' : undefined,
+          outline: isTarget ? `2px solid ${token.colorPrimary}` : undefined,
         }}
       >
-        <Typography.Text strong={!!section} type={section ? undefined : 'secondary'}>
-          {section ? section.name : t('sections.none')} <Typography.Text type="secondary">({count})</Typography.Text>
-        </Typography.Text>
-        {manage && section && (
+        <Space size={6}>
+          <FolderOpenOutlined style={{ color: isTarget ? token.colorPrimary : token.colorTextTertiary }} />
+          <Typography.Text strong={!!section} type={section ? undefined : 'secondary'}>
+            {section ? sectionTitle(section) : t('sections.none')} <Typography.Text type="secondary">({count})</Typography.Text>
+          </Typography.Text>
+          {section?.isWarehouseExtras && (
+            <Tooltip title={t('projectSections.warehouseExtrasHint')}>
+              <Tag color="orange" icon={<InfoCircleOutlined />}>{t('projectSections.warehouseExtrasTag')}</Tag>
+            </Tooltip>
+          )}
+          {isTarget && <Tag color="processing" bordered={false}>{t('projectSections.target')}</Tag>}
+        </Space>
+        {manage && section && !section.isWarehouseExtras && (
           <Space size={2}>
             {section.depth < 2 && (
               <Tooltip title={t('sections.addSub')}>
@@ -276,7 +344,7 @@ export function ProjectDetailPage() {
                   onClick={() => openSectionDialog({ mode: 'add', parentId: section.id })} />
               </Tooltip>
             )}
-            <Button size="small" type="text" icon={<EditOutlined />} aria-label={t('sections.rename')}
+            <Button size="small" type="text" icon={<EditOutlined />} aria-label={t('sections.rename')} onMouseDown={(ev) => ev.stopPropagation()}
               onClick={() => openSectionDialog({ mode: 'rename', section })} />
             <Button size="small" type="text" icon={<ArrowUpOutlined />} disabled={index <= 0} aria-label={t('sections.moveUp')}
               onClick={() => run(projectApi.moveSection(id!, section.id, -1))} />
@@ -291,33 +359,46 @@ export function ProjectDetailPage() {
     );
   };
 
-  const equipmentTab = (
+  const sectionsView = (
     <>
       {manage && (
-        <Flex gap={8} wrap align="center" style={{ marginBottom: 12 }}>
-          <EquipmentSelect value={newEquipment} onChange={setNewEquipment} style={{ minWidth: 280, flex: 1, maxWidth: 460 }} />
-          <InputNumber min={1} value={newQuantity} onChange={(v) => setNewQuantity(v ?? 1)} style={{ width: 90 }} aria-label={t('projects.quantity')} />
-          <Select value={newSection} onChange={setNewSection} options={sectionOptions} style={{ minWidth: 180 }} aria-label={t('sections.section')} />
-          <Checkbox checked={withAccessories} onChange={(e) => setWithAccessories(e.target.checked)}>{t('sections.includeAccessories')}</Checkbox>
-          <Button type="primary" icon={<PlusOutlined />} disabled={!newEquipment} loading={addEquipment.isPending} onClick={() => addEquipment.mutate()}>
-            {t('common.add')}
-          </Button>
+        <Flex gap={8} wrap align="center" justify="space-between" style={{ marginBottom: 8 }}>
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('projectSections.dropHint')}</Typography.Text>
           <Button icon={<FolderAddOutlined />} onClick={() => openSectionDialog({ mode: 'add', parentId: null })}>{t('sections.add')}</Button>
         </Flex>
       )}
-      {p.equipment.length === 0 && p.sections.length === 0 ? (
+      {p.equipment.length === 0 && p.sections.length === 0 && !manage ? (
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
       ) : (
-        groups.map(({ section, lines }) => (
-          <div key={section?.id ?? NO_SECTION}>
-            {(p.sections.length > 0 || section) && sectionHeader(section, lines.length)}
-            {lines.length > 0 && (
-              <div style={{ marginInlineStart: section && section.depth > 1 ? 24 : 0 }}>
-                <Table size="small" rowKey="id" pagination={false} dataSource={lines} scroll={{ x: crewView ? 600 : 1000 }} columns={lineColumns(lines)} />
-              </div>
-            )}
-          </div>
-        ))
+        groups.map(({ section, lines }) => {
+          const key = section?.id ?? NO_SECTION;
+          const droppable = manage && !section?.isWarehouseExtras;
+          return (
+            <div
+              key={key}
+              {...(droppable ? dropProps(key) : {})}
+              style={{
+                borderRadius: 8,
+                paddingBottom: 4,
+                background: dropTarget === key ? token.colorPrimaryBg : undefined,
+                transition: 'background .15s',
+              }}
+            >
+              {(p.sections.length > 0 || section) && sectionHeader(section, lines.filter((l) => !l.parentLineId).length)}
+              {lines.length > 0 ? (
+                <div style={{ marginInlineStart: section && section.depth > 1 ? 24 : 0 }}>
+                  <Table size="small" rowKey="id" pagination={false} dataSource={lines} scroll={{ x: crewView ? 600 : 900 }} columns={lineColumns(lines)} />
+                </div>
+              ) : (
+                droppable && (
+                  <Typography.Text type="secondary" style={{ display: 'block', padding: '10px 12px', fontSize: 12 }}>
+                    {t('projectSections.emptyDrop')}
+                  </Typography.Text>
+                )
+              )}
+            </div>
+          );
+        })
       )}
       {showPrices && (
         <Flex justify="flex-end" style={{ marginTop: 12 }}>
@@ -326,6 +407,33 @@ export function ProjectDetailPage() {
       )}
     </>
   );
+
+  const equipmentTab = manage ? (
+    <Flex gap={12} align="start">
+      <div style={{ width: 340, flexShrink: 0 }} className="hide-mobile">
+        <EquipmentPickerPanel
+          targetLabel={targetLabel}
+          includeAccessories={withAccessories}
+          onIncludeAccessoriesChange={setWithAccessories}
+          onAdd={(e) => addFromPicker(e, targetSection)}
+        />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>{sectionsView}</div>
+    </Flex>
+  ) : (
+    sectionsView
+  );
+
+  const openQuoteButton = (size?: 'small') =>
+    latestQuote ? (
+      <Button size={size} icon={<FileAddOutlined />} onClick={() => navigate(`/quotes/${latestQuote.id}`)}>
+        {t('projectSections.openQuote')}
+      </Button>
+    ) : (
+      <Button size={size} icon={<FileAddOutlined />} loading={createQuote.isPending} onClick={() => createQuote.mutate()}>
+        {t('projects.createQuote')}
+      </Button>
+    );
 
   return (
     <>
@@ -337,7 +445,7 @@ export function ProjectDetailPage() {
           <ProjectStatusTag status={p.status} />
         </Space>
         <Space wrap>
-          <Button icon={<FilePdfOutlined />} onClick={() => window.open(`/projects/${p.id}/packing-slip`, '_blank', 'noopener')}>
+          <Button icon={<FilePdfOutlined />} onClick={() => openPage(`${p.number} · ${t('packingSlip.title')}`, `/projects/${p.id}/packing-slip`)}>
             {t('packingSlip.open')}
           </Button>
           {!crewView && can(Permissions.ProjectsChangeStatus) && p.allowedStatuses.length > 0 && (
@@ -354,9 +462,7 @@ export function ProjectDetailPage() {
           {!crewView && can(Permissions.WarehouseScan) && (
             <Button icon={<ScanOutlined />} onClick={() => navigate(`/warehouse/scan/${p.id}`)}>{t('projects.openScan')}</Button>
           )}
-          {!crewView && can(Permissions.QuotesManage) && can(Permissions.Prices) && (
-            <Button icon={<FileAddOutlined />} loading={createQuote.isPending} onClick={() => createQuote.mutate()}>{t('projects.createQuote')}</Button>
-          )}
+          {!crewView && can(Permissions.QuotesManage) && can(Permissions.Prices) && !quotes.isLoading && openQuoteButton()}
           {manage && <Button icon={<EditOutlined />} onClick={() => setEditOpen(true)}>{t('common.edit')}</Button>}
           {!crewView && can(Permissions.ProjectsManage) && (p.status === 'Draft' || p.status === 'Cancelled') && (
             <Button danger icon={<DeleteOutlined />} aria-label={t('common.delete')}
@@ -410,6 +516,8 @@ export function ProjectDetailPage() {
                   key: 'quotes',
                   label: `${t('projects.quotesTab')} (${quotes.data?.totalCount ?? 0})`,
                   children: (
+                    <>
+                    {can(Permissions.QuotesManage) && <div style={{ marginBottom: 8 }}>{openQuoteButton('small')}</div>}
                     <Table
                       size="small"
                       rowKey="id"
@@ -423,6 +531,7 @@ export function ProjectDetailPage() {
                         { title: t('quotes.grandTotal'), align: 'end' as const, render: (_, q) => f.money(q.grandTotal, q.currency) },
                       ]}
                     />
+                    </>
                   ),
                 }]
               : []),

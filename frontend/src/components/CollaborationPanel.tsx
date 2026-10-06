@@ -9,6 +9,8 @@ import type { OwnerType, TaskItem } from '../api/types';
 import { useErrorToast } from '../utils/errors';
 import { downloadBlob } from '../utils/excel';
 import { formatDate, formatDateTime } from '../utils/format';
+import { useGuardedForm } from './useGuardedModal';
+import { useUnsavedChanges } from './UnsavedChanges';
 
 const formatSize = (bytes: number) =>
   bytes < 1024 ? `${bytes} B` : bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(0)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
@@ -41,6 +43,11 @@ function NotesTab({ ownerType, ownerId, readOnly }: { ownerType: OwnerType; owne
   const { data = [], isLoading } = useQuery({ queryKey: key, queryFn: () => collaborationApi.notes(ownerType, ownerId) });
   const [text, setText] = useState('');
   const [editing, setEditing] = useState<{ id: string; text: string } | null>(null);
+  const [originalText, setOriginalText] = useState('');
+  const { confirmLeave: confirmNoteLeave } = useUnsavedChanges(!!editing && editing.text !== originalText);
+  const closeNoteEditor = async () => {
+    if (await confirmNoteLeave()) setEditing(null);
+  };
   const refresh = () => qc.invalidateQueries({ queryKey: key });
 
   const add = useMutation({
@@ -71,7 +78,7 @@ function NotesTab({ ownerType, ownerId, readOnly }: { ownerType: OwnerType; owne
             actions={
               n.canEdit && !readOnly
                 ? [
-                    <Button key="e" type="text" size="small" icon={<EditOutlined />} onClick={() => setEditing({ id: n.id, text: n.text })} aria-label={t('common.edit')} />,
+                    <Button key="e" type="text" size="small" icon={<EditOutlined />} onClick={() => { setOriginalText(n.text); setEditing({ id: n.id, text: n.text }); }} aria-label={t('common.edit')} />,
                     <Popconfirm key="d" title={t('collab.deleteNoteConfirm')} onConfirm={() => collaborationApi.removeNote(n.id).then(refresh).catch(showError)}>
                       <Button type="text" size="small" danger icon={<DeleteOutlined />} aria-label={t('common.delete')} />
                     </Popconfirm>,
@@ -93,7 +100,7 @@ function NotesTab({ ownerType, ownerId, readOnly }: { ownerType: OwnerType; owne
       <Modal
         open={!!editing}
         title={t('collab.editNote')}
-        onCancel={() => setEditing(null)}
+        onCancel={closeNoteEditor}
         onOk={() =>
           editing &&
           collaborationApi
@@ -123,6 +130,7 @@ function TasksTab({ ownerType, ownerId, readOnly }: { ownerType: OwnerType; owne
   const users = useQuery({ queryKey: ['crew-directory'], queryFn: crewApi.directory, enabled: !readOnly });
   const [editing, setEditing] = useState<TaskItem | 'new' | null>(null);
   const [form] = Form.useForm();
+  const taskGuard = useGuardedForm(!!editing, async () => { await save(); });
   const refresh = () => qc.invalidateQueries({ queryKey: key });
 
   const openEditor = (task: TaskItem | 'new') => {
@@ -144,6 +152,7 @@ function TasksTab({ ownerType, ownerId, readOnly }: { ownerType: OwnerType; owne
       refresh();
     } catch (e) {
       showError(e);
+      throw e;
     }
   };
 
@@ -201,13 +210,13 @@ function TasksTab({ ownerType, ownerId, readOnly }: { ownerType: OwnerType; owne
       <Modal
         open={!!editing}
         title={editing === 'new' ? t('collab.addTask') : t('collab.editTask')}
-        onCancel={() => setEditing(null)}
-        onOk={save}
+        onCancel={taskGuard.guardClose(() => setEditing(null))}
+        onOk={() => save().catch(() => undefined)}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
         destroyOnHidden
       >
-        <Form form={form} layout="vertical">
+        <Form form={form} onValuesChange={taskGuard.onValuesChange} layout="vertical">
           <Form.Item name="title" label={t('collab.taskTitle')} rules={[{ required: true, whitespace: true, message: t('validation.required') }]}>
             <Input maxLength={256} />
           </Form.Item>

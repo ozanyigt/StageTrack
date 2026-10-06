@@ -67,7 +67,7 @@
   "Impersonation.NotAllowed": "Bu kullanıcı olarak giriş yapamazsınız.",
   "Impersonation.NotActive": "Başka bir kullanıcı olarak oturum açmış değilsiniz.",
   "Label.OtherCompany": "Bu etiket {company} şirketine ait. Doğru şirketi seçip tekrar okutun.",
-  "Label.UnknownWorkspace": "Bu etiket başka bir Rentman çalışma alanına (#{workspace}) ait.",
+  "Label.UnknownWorkspace": "Bu etiket başka bir çalışma alanına (#{workspace}) ait.",
   "Relation.Self": "Bir ekipman kendisine bağlanamaz.",
   "Relation.Duplicate": "Bu ekipman zaten bu listede.",
   "Supplier.NameAlreadyExists": "\"{name}\" adında bir tedarikçi zaten var.",
@@ -97,5 +97,10 @@
   "Tenant.LocationLimitReached": "Abonelik paketindeki lokasyon limitine ({max}) ulaşıldı.",
   "Tenant.InvalidPeriod": "Bitiş tarihi başlangıçtan önce olamaz.",
   "Tenant.InvalidLimit": "Limit en az 1 olmalıdır.",
-  "Company.CodeAlreadyExists": "Bu firmada {code} kodlu bir lokasyon zaten var."
+  "Company.CodeAlreadyExists": "Bu firmada {code} kodlu bir lokasyon zaten var.",
+  "Equipment.NotQuotable": "{code} kodlu ekipman teklife/projeye eklenemez (teklifte gösterilmiyor).",
+  "Equipment.UsedInHistory": "{code} projelerde veya tekliflerde kullanılmış; geçmiş kayıtlar bozulmasın diye silinemez. Arşivleyebilirsiniz.",
+  "Project.ContentLineLocked": "Case içeriğindeki satırlar case'e bağlıdır; adet, taşıma ve silme case satırından yapılır.",
+  "Quote.AlreadyExistsForJob": "Bu işin zaten bir teklifi var; değişiklik için mevcut teklifin yeni revizyonunu açın.",
+  "Firm.LogoInvalid": "Logo en fazla 2 MB büyüklüğünde bir resim dosyası olmalıdır."
 }

@@ -73,6 +73,9 @@ public class QuoteListItemDto
     public string ProjectName { get; set; } = null!;
     public string? CustomerName { get; set; }
     public string? RejectionReason { get; set; }
+
+    /// <summary>Statuses the quote can be set to from the list (status drop-down).</summary>
+    public List<QuoteStatus> AllowedStatuses { get; set; } = [];
 }
 
 public class QuoteLineDto
@@ -90,6 +93,9 @@ public class QuoteLineDto
     public decimal Total { get; set; }
     public string? Section { get; set; }
     public string? Notes { get; set; }
+
+    /// <summary>Content of the case line above it: listed, not priced.</summary>
+    public bool IsContent { get; set; }
 }
 
 public class QuoteDto : QuoteListItemDto
@@ -106,7 +112,6 @@ public class QuoteDto : QuoteListItemDto
     public decimal NetTotal { get; set; }
     public decimal VatAmount { get; set; }
     public bool IsEditable { get; set; }
-    public List<QuoteStatus> AllowedStatuses { get; set; } = [];
     public List<QuoteLineDto> Lines { get; set; } = [];
 
     public string? Venue { get; set; }

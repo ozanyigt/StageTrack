@@ -52,9 +52,32 @@ public class EquipmentRepository(StageTrackDbContext dbContext) : EfRepository<E
             .Select(g => new { EquipmentId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.EquipmentId, x => x.Count, cancellationToken);
 
+        // Quantity-tracked equipment: pieces on an open repair cannot be rented out.
+        var inRepair = await DbContext.Repairs
+            .Where(r => ids.Contains(r.EquipmentId) && r.UnitId == null &&
+                        (r.Status == Maintenance.RepairStatus.Open || r.Status == Maintenance.RepairStatus.InProgress))
+            .GroupBy(r => r.EquipmentId)
+            .Select(g => new { EquipmentId = g.Key, Quantity = g.Sum(r => r.Quantity) })
+            .ToDictionaryAsync(x => x.EquipmentId, x => x.Quantity, cancellationToken);
+
         return equipment.ToDictionary(
             e => e.Id,
-            e => e.IsSerialized ? unitCounts.GetValueOrDefault(e.Id) : e.StockQuantity);
+            e => e.IsSerialized ? unitCounts.GetValueOrDefault(e.Id) : Math.Max(0, e.StockQuantity - inRepair.GetValueOrDefault(e.Id)));
+    }
+
+    public async Task<Dictionary<Guid, List<(Guid Id, string Code, string Name)>>> GetContainersOfAsync(IReadOnlyCollection<Guid> equipmentIds,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = equipmentIds.Distinct().ToList();
+        var rows = await (from relation in DbContext.Set<EquipmentRelation>()
+                          where relation.Kind == EquipmentRelationKind.Content && ids.Contains(relation.RelatedEquipmentId)
+                          join container in DbSet on relation.EquipmentId equals container.Id
+                          where !container.IsArchived
+                          orderby container.Code
+                          select new { relation.RelatedEquipmentId, container.Id, container.Code, container.Name })
+            .ToListAsync(cancellationToken);
+        return rows.GroupBy(r => r.RelatedEquipmentId)
+            .ToDictionary(g => g.Key, g => g.Select(r => (r.Id, r.Code, r.Name)).ToList());
     }
 
     public Task<List<Equipment>> SearchAsync(string? text, int take, CancellationToken cancellationToken = default) =>
@@ -124,8 +147,11 @@ public class EquipmentFolderRepository(StageTrackDbContext dbContext) : EfReposi
 
 public class EquipmentUnitRepository(StageTrackDbContext dbContext) : EfRepository<EquipmentUnit>(dbContext), IEquipmentUnitRepository
 {
-    public Task<bool> InternalRefExistsAsync(string internalRef, Guid? excludeId = null, CancellationToken cancellationToken = default) =>
-        DbSet.AnyAsync(u => u.InternalRef == internalRef && (excludeId == null || u.Id != excludeId), cancellationToken);
+    public Task<bool> InternalRefExistsAsync(Guid equipmentId, string internalRef, Guid? excludeId = null, CancellationToken cancellationToken = default) =>
+        DbSet.AnyAsync(u => u.EquipmentId == equipmentId && u.InternalRef == internalRef && (excludeId == null || u.Id != excludeId), cancellationToken);
+
+    public Task<List<string>> GetInternalRefsAsync(Guid equipmentId, CancellationToken cancellationToken = default) =>
+        DbSet.Where(u => u.EquipmentId == equipmentId).OrderBy(u => u.Id).Select(u => u.InternalRef).ToListAsync(cancellationToken);
 
     public Task<List<EquipmentUnitListItem>> GetPagedListAsync(EquipmentUnitFilter filter, int skip, int take, CancellationToken cancellationToken = default) =>
         ToListItems(ApplyFilter(DbSet, filter))
@@ -202,8 +228,8 @@ public class EquipmentUnitRepository(StageTrackDbContext dbContext) : EfReposito
     public Task<List<EquipmentUnit>> GetListByEquipmentAsync(Guid equipmentId, bool includeArchived, CancellationToken cancellationToken = default) =>
         DbSet.Where(u => u.EquipmentId == equipmentId && (includeArchived || !u.IsArchived)).OrderBy(u => u.InternalRef).ToListAsync(cancellationToken);
 
-    public Task<EquipmentUnit?> FindByInternalRefAsync(string internalRef, CancellationToken cancellationToken = default) =>
-        DbSet.FirstOrDefaultAsync(u => u.InternalRef == internalRef, cancellationToken);
+    public Task<EquipmentUnit?> FindByInternalRefAsync(Guid equipmentId, string internalRef, CancellationToken cancellationToken = default) =>
+        DbSet.FirstOrDefaultAsync(u => u.EquipmentId == equipmentId && u.InternalRef == internalRef, cancellationToken);
 
     private IQueryable<EquipmentUnit> ApplyFilter(IQueryable<EquipmentUnit> query, EquipmentUnitFilter filter)
     {

@@ -49,6 +49,9 @@ public class CurrentUserDto
 
     /// <summary>Last day of the firm's subscription, for the renewal warning; null when open-ended.</summary>
     public DateTime? SubscriptionEndDate { get; set; }
+
+    /// <summary>The firm uploaded a logo (GET /api/firm/logo).</summary>
+    public bool HasFirmLogo { get; set; }
 }
 
 public class SetLanguageInput

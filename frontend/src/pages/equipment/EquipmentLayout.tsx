@@ -1,14 +1,15 @@
-import { BarcodeOutlined, DeleteOutlined, EditOutlined, FolderAddOutlined, FolderOutlined } from '@ant-design/icons';
-import { App, Button, Card, Flex, Form, Input, Modal, Tree, TreeSelect, Typography, theme } from 'antd';
+import { DeleteOutlined, EditOutlined, FolderOutlined, InboxOutlined, PlusOutlined, FolderAddOutlined } from '@ant-design/icons';
+import { Button, Card, Drawer, Empty, Flex, Input, Popconfirm, Tree, Typography, theme } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useMatch, useNavigate, useSearchParams } from 'react-router-dom';
 import { equipmentApi, folderApi } from '../../api/endpoints';
 import type { EquipmentFolder } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
+import { useUnsavedChanges } from '../../components/UnsavedChanges';
 import { useErrorToast } from '../../utils/errors';
-import { buildFolderTree } from './folderTree';
+import { buildFolderTree, type FolderNode } from './folderTree';
 
 interface TreeNode {
   key: string;
@@ -34,7 +35,7 @@ function ancestorsOf(folders: EquipmentFolder[], id: string | null | undefined):
 
 /**
  * Equipment module shell: the folder tree stays on the left while the list, equipment detail,
- * device list and device detail change on the right (like Rentman's equipment screen).
+ * archive and device detail change on the right.
  */
 export function EquipmentLayout() {
   const { t } = useTranslation();
@@ -42,49 +43,25 @@ export function EquipmentLayout() {
   const location = useLocation();
   const [params] = useSearchParams();
   const { can } = useAuth();
-  const { modal } = App.useApp();
   const { token } = theme.useToken();
-  const showError = useErrorToast();
-  const queryClient = useQueryClient();
   const manage = can(Permissions.EquipmentManage);
+  const [managerOpen, setManagerOpen] = useState(false);
 
   const detailMatch = useMatch('/equipment/:id');
-  const detailId = detailMatch && detailMatch.params.id !== 'units' ? detailMatch.params.id : undefined;
+  const detailId = detailMatch && !['units', 'archive'].includes(detailMatch.params.id!) ? detailMatch.params.id : undefined;
   const detail = useQuery({ queryKey: ['equipment', detailId], queryFn: () => equipmentApi.get(detailId!), enabled: !!detailId });
 
   const folders = useQuery({ queryKey: ['folders'], queryFn: folderApi.list });
   const list = folders.data ?? [];
-  const selectedFolder = detailId ? detail.data?.folderId ?? null : params.get('folder');
   const onList = location.pathname === '/equipment';
-  const onUnits = location.pathname.startsWith('/equipment/units');
+  const onArchive = location.pathname.startsWith('/equipment/archive');
+  const selectedFolder = detailId ? detail.data?.folderId ?? null : params.get('folder');
 
   const [expanded, setExpanded] = useState<string[] | null>(null);
   const autoExpanded = ancestorsOf(list, selectedFolder);
   const expandedKeys = expanded ? Array.from(new Set([...expanded, ...autoExpanded])) : autoExpanded;
 
-  const [folderModal, setFolderModal] = useState<{ id?: string } | null>(null);
-  const [folderForm] = Form.useForm<{ name: string; parentId?: string | null }>();
-
-  const saveFolder = useMutation({
-    mutationFn: (v: { name: string; parentId?: string | null }) =>
-      folderModal?.id ? folderApi.update(folderModal.id, v) : folderApi.create(v),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['folders'] });
-      setFolderModal(null);
-    },
-    onError: showError,
-  });
-
-  const deleteFolder = useMutation({
-    mutationFn: (id: string) => folderApi.remove(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['folders'] });
-      navigate('/equipment');
-    },
-    onError: showError,
-  });
-
-  const decorate = (nodes: ReturnType<typeof buildFolderTree>): TreeNode[] =>
+  const decorate = (nodes: FolderNode[]): TreeNode[] =>
     nodes.map((n) => ({
       key: n.key,
       title: (
@@ -98,14 +75,6 @@ export function EquipmentLayout() {
       children: decorate(n.children),
     }));
 
-  const openFolderModal = (id?: string) => {
-    const folder = list.find((f) => f.id === id);
-    folderForm.resetFields();
-    folderForm.setFieldsValue(folder ? { name: folder.name, parentId: folder.parentId ?? null } : { parentId: selectedFolder ?? null });
-    setFolderModal({ id });
-  };
-
-  const selectedOnList = onList ? params.get('folder') : null;
   const totalEquipment = list.reduce((s, f) => s + f.equipmentCount, 0);
 
   return (
@@ -116,26 +85,8 @@ export function EquipmentLayout() {
         title={t('equipment.folders')}
         extra={
           manage && (
-            <Flex gap={2}>
-              <Button size="small" type="text" icon={<FolderAddOutlined />} aria-label={t('equipment.addFolder')} onClick={() => openFolderModal()} />
-              <Button
-                size="small"
-                type="text"
-                icon={<EditOutlined />}
-                disabled={!selectedOnList}
-                aria-label={t('equipment.renameFolder')}
-                onClick={() => openFolderModal(selectedOnList!)}
-              />
-              <Button
-                size="small"
-                type="text"
-                danger
-                icon={<DeleteOutlined />}
-                disabled={!selectedOnList}
-                aria-label={t('common.delete')}
-                onClick={() => modal.confirm({ title: t('equipment.deleteFolderConfirm'), onOk: () => deleteFolder.mutateAsync(selectedOnList!) })}
-              />
-            </Flex>
+            <Button size="small" type="text" icon={<FolderAddOutlined />} aria-label={t('folderManager.title')} title={t('folderManager.title')}
+              onClick={() => setManagerOpen(true)} />
           )
         }
       >
@@ -145,10 +96,7 @@ export function EquipmentLayout() {
             size="small"
             icon={<FolderOutlined />}
             onClick={() => navigate('/equipment')}
-            style={{
-              justifyContent: 'flex-start',
-              background: onList && !params.get('folder') ? token.controlItemBgActive : undefined,
-            }}
+            style={{ justifyContent: 'flex-start', background: onList && !params.get('folder') ? token.controlItemBgActive : undefined }}
           >
             <Flex justify="space-between" style={{ flex: 1 }}>
               <span>{t('equipment.allFolders')}</span>
@@ -160,18 +108,18 @@ export function EquipmentLayout() {
           <Button
             type="text"
             size="small"
-            icon={<BarcodeOutlined />}
-            onClick={() => navigate('/equipment/units')}
-            style={{ justifyContent: 'flex-start', background: onUnits ? token.controlItemBgActive : undefined }}
+            icon={<InboxOutlined />}
+            onClick={() => navigate('/equipment/archive')}
+            style={{ justifyContent: 'flex-start', background: onArchive ? token.controlItemBgActive : undefined }}
           >
-            {t('nav.units')}
+            {t('archivePage.title')}
           </Button>
         </Flex>
         <Tree
           blockNode
           showLine={{ showLeafIcon: false }}
           treeData={decorate(buildFolderTree(list))}
-          selectedKeys={selectedFolder && !onUnits ? [selectedFolder] : []}
+          selectedKeys={selectedFolder && !onArchive ? [selectedFolder] : []}
           expandedKeys={expandedKeys}
           onExpand={(keys) => setExpanded(keys as string[])}
           onSelect={(keys) => {
@@ -185,29 +133,166 @@ export function EquipmentLayout() {
         <Outlet />
       </div>
 
-      <Modal
-        open={!!folderModal}
-        title={folderModal?.id ? t('equipment.renameFolder') : t('equipment.addFolder')}
-        onCancel={() => setFolderModal(null)}
-        onOk={() => folderForm.submit()}
-        okText={t('common.save')}
-        cancelText={t('common.cancel')}
-        confirmLoading={saveFolder.isPending}
-        destroyOnHidden
-      >
-        <Form form={folderForm} layout="vertical" onFinish={(v) => saveFolder.mutate(v)}>
-          <Form.Item name="name" label={t('equipment.folderName')} rules={[{ required: true, whitespace: true, message: t('validation.required') }]}>
-            <Input autoFocus maxLength={128} />
-          </Form.Item>
-          <Form.Item name="parentId" label={t('equipment.parentFolder')}>
-            <TreeSelect
-              allowClear
-              treeDefaultExpandAll
-              treeData={buildFolderTree(list.filter((f) => f.id !== folderModal?.id))}
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
+      <FolderManagerDrawer open={managerOpen} folders={list} onClose={() => setManagerOpen(false)} />
     </div>
+  );
+}
+
+type Editing = { mode: 'add'; parentId: string | null } | { mode: 'rename'; id: string };
+
+/** Whole folder tree: add a root folder, add a sub-folder under any folder, rename or delete — each change saves at once. */
+function FolderManagerDrawer({ open, folders, onClose }: { open: boolean; folders: EquipmentFolder[]; onClose: () => void }) {
+  const { t } = useTranslation();
+  const { token } = theme.useToken();
+  const queryClient = useQueryClient();
+  const showError = useErrorToast();
+  const navigate = useNavigate();
+  const [editing, setEditing] = useState<Editing | null>(null);
+  const [name, setName] = useState('');
+  const [expanded, setExpanded] = useState<string[]>([]);
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ['folders'] });
+
+  // Like Rentman's folder manager, the whole tree is open when the panel opens.
+  useEffect(() => {
+    if (open) setExpanded(folders.map((f) => f.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const value = name.trim();
+      if (!value || !editing) return;
+      if (editing.mode === 'add') await folderApi.create({ name: value, parentId: editing.parentId });
+      else await folderApi.update(editing.id, { name: value, parentId: folders.find((f) => f.id === editing.id)?.parentId ?? null });
+    },
+    onSuccess: () => {
+      if (editing?.mode === 'add' && editing.parentId) setExpanded((e) => Array.from(new Set([...e, editing.parentId!])));
+      setEditing(null);
+      setName('');
+      refresh();
+    },
+    onError: showError,
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: string) => folderApi.remove(id),
+    onSuccess: () => {
+      refresh();
+      navigate('/equipment');
+    },
+    onError: showError,
+  });
+
+  // A typed but unsaved folder name: Escape asks before throwing it away (leaving the field saves it).
+  const [originalName, setOriginalName] = useState('');
+  const ignoreBlur = useRef(false);
+  const nameDirty = !!editing && name.trim() !== '' && name.trim() !== originalName;
+  const { confirmLeave } = useUnsavedChanges(nameDirty, () => save.mutateAsync());
+  const cancelEditing = async () => {
+    ignoreBlur.current = true;
+    try {
+      if (await confirmLeave()) setEditing(null);
+    } finally {
+      ignoreBlur.current = false;
+    }
+  };
+
+  const startAdd = (parentId: string | null) => {
+    setEditing({ mode: 'add', parentId });
+    setName('');
+    setOriginalName('');
+    if (parentId) setExpanded((e) => Array.from(new Set([...e, parentId])));
+  };
+
+  const editor = (
+    <Input
+      size="small"
+      autoFocus
+      value={name}
+      maxLength={128}
+      placeholder={t('equipment.folderName')}
+      onChange={(e) => setName(e.target.value)}
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        e.stopPropagation();
+        if (e.key === 'Enter') save.mutate();
+        if (e.key === 'Escape') cancelEditing();
+      }}
+      onBlur={() => {
+        if (ignoreBlur.current) return;
+        if (name.trim()) save.mutate();
+        else setEditing(null);
+      }}
+      disabled={save.isPending}
+      style={{ maxWidth: 280 }}
+    />
+  );
+
+  const addRow = (parentId: string | null): TreeNode => ({ key: `__new_${parentId ?? 'root'}`, title: editor, children: [] });
+
+  const build = (nodes: FolderNode[], parentId: string | null): TreeNode[] => {
+    const rows: TreeNode[] = nodes.map((n) => ({
+      key: n.key,
+      title:
+        editing?.mode === 'rename' && editing.id === n.key ? (
+          editor
+        ) : (
+          <Flex justify="space-between" align="center" gap={8} className="folder-row">
+            <Typography.Text ellipsis>{n.title}</Typography.Text>
+            <Flex gap={2} className="folder-row-actions" onClick={(e) => e.stopPropagation()}>
+              <Button size="small" type="text" icon={<PlusOutlined />} aria-label={t('folderManager.addSub')} title={t('folderManager.addSub')}
+                onClick={() => startAdd(n.key)} />
+              <Button size="small" type="text" icon={<EditOutlined />} aria-label={t('equipment.renameFolder')} title={t('equipment.renameFolder')}
+                onClick={() => { setEditing({ mode: 'rename', id: n.key }); setName(n.title); setOriginalName(n.title); }} />
+              <Popconfirm title={t('folderManager.deleteConfirm', { name: n.title })} onConfirm={() => remove.mutate(n.key)}
+                okText={t('common.delete')} cancelText={t('common.cancel')} okButtonProps={{ danger: true }}>
+                <Button size="small" type="text" danger icon={<DeleteOutlined />} aria-label={t('common.delete')} title={t('common.delete')} />
+              </Popconfirm>
+            </Flex>
+          </Flex>
+        ),
+      children: build(n.children, n.key),
+    }));
+    if (editing?.mode === 'add' && editing.parentId === parentId) rows.push(addRow(parentId));
+    return rows;
+  };
+
+  const tree = build(buildFolderTree(folders), null);
+
+  return (
+    <Drawer
+      open={open}
+      onClose={() => { setEditing(null); onClose(); }}
+      width={520}
+      title={t('folderManager.title')}
+      destroyOnHidden
+      extra={
+        <Button type="link" icon={<PlusOutlined />} onClick={() => startAdd(null)}>
+          {t('folderManager.addRoot')}
+        </Button>
+      }
+    >
+      <style>{`
+        .folder-row .folder-row-actions { opacity: 0; transition: opacity .15s; }
+        .folder-row:hover .folder-row-actions, .folder-row:focus-within .folder-row-actions { opacity: 1; }
+        @media (hover: none) { .folder-row .folder-row-actions { opacity: 1; } }
+      `}</style>
+      <Typography.Paragraph type="secondary" style={{ fontSize: 12 }}>
+        {t('folderManager.hint')}
+      </Typography.Paragraph>
+      {tree.length === 0 ? (
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('folderManager.empty')} />
+      ) : (
+        <Tree
+          blockNode
+          selectable={false}
+          showLine={{ showLeafIcon: false }}
+          treeData={tree}
+          expandedKeys={expanded}
+          onExpand={(keys) => setExpanded(keys as string[])}
+          style={{ background: token.colorBgContainer }}
+        />
+      )}
+    </Drawer>
   );
 }

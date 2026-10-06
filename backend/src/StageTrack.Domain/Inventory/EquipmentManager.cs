@@ -7,7 +7,9 @@ public class EquipmentManager(
     IEquipmentRepository equipmentRepository,
     IEquipmentUnitRepository unitRepository,
     IProjectRepository projectRepository,
-    ISupplierRepository supplierRepository)
+    ISupplierRepository supplierRepository,
+    IEquipmentLabelRepository labelRepository,
+    Auditing.AuditLogManager auditLogManager)
 {
     public async Task<Equipment> CreateAsync(string code, string name, EquipmentType type, bool isSerialized)
     {
@@ -70,6 +72,62 @@ public class EquipmentManager(
     {
         var supplier = await supplierRepository.GetAsync(supplierId, includeDetails: false);
         return equipment.AddSupplier(supplier.Id, supplierCode, purchasePrice, isPreferred);
+    }
+
+    /// <summary>
+    /// Deletes equipment that was entered by mistake, together with its devices and labels (their codes become free
+    /// again) and writes the deletion to the audit log. Equipment that has been on a project or quote is part of the
+    /// history and can only be archived.
+    /// </summary>
+    public async Task DeleteAsync(Equipment equipment)
+    {
+        if (await projectRepository.IsEquipmentUsedInHistoryAsync(equipment.Id))
+        {
+            throw new BusinessException(StageTrackErrorCodes.EquipmentUsedInHistory).WithData("code", equipment.Code);
+        }
+
+        var units = await unitRepository.GetListByEquipmentAsync(equipment.Id, includeArchived: true);
+        foreach (var label in await labelRepository.GetListByEquipmentAsync(equipment.Id))
+        {
+            await labelRepository.DeleteAsync(label);
+        }
+
+        foreach (var unit in units)
+        {
+            await unitRepository.DeleteAsync(unit);
+        }
+
+        await equipmentRepository.DeleteAsync(equipment);
+
+        var description = $"{equipment.Code} {equipment.Name}";
+        if (units.Count > 0)
+        {
+            description += $" ({string.Join(", ", units.Select(u => u.InternalRef))})";
+        }
+
+        await auditLogManager.LogAsync(Auditing.AuditLogConsts.EquipmentDeleted, nameof(Equipment), equipment.Id, description);
+    }
+
+    /// <summary>Total rental price of the default content (price × quantity).</summary>
+    public async Task<decimal> GetContentPriceTotalAsync(Equipment equipment)
+    {
+        var content = equipment.Relations.Where(r => r.Kind == EquipmentRelationKind.Content).ToList();
+        if (content.Count == 0)
+        {
+            return 0;
+        }
+
+        var prices = (await equipmentRepository.GetListByIdsAsync(content.Select(r => r.RelatedEquipmentId))).ToDictionary(e => e.Id, e => e.RentalPrice);
+        return content.Sum(r => prices.GetValueOrDefault(r.RelatedEquipmentId) * r.Quantity);
+    }
+
+    /// <summary>A case's price is the total of its content, until someone types a different price.</summary>
+    public async Task ApplyContentPriceAsync(Equipment equipment)
+    {
+        if (!equipment.IsPriceManual && equipment.Relations.Any(r => r.Kind == EquipmentRelationKind.Content))
+        {
+            equipment.SetRentalPrice(await GetContentPriceTotalAsync(equipment));
+        }
     }
 
     private async Task EnsureCodeIsUniqueAsync(string code, Guid? excludeId)

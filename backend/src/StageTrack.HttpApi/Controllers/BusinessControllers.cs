@@ -138,6 +138,14 @@ public class WarehouseController(IWarehouseAppService appService) : ControllerBa
     [Authorize(StageTrackPermissions.Warehouse.Scan)]
     public Task<ScanResultDto> ScanAsync(ScanInput input) => appService.ScanAsync(input);
 
+    [HttpGet("scan-sheet/{projectId:guid}")]
+    public Task<ScanSheetDto> GetScanSheetAsync(Guid projectId) => appService.GetScanSheetAsync(projectId);
+
+    [HttpPost("projects/{projectId:guid}/status")]
+    [Authorize(StageTrackPermissions.Warehouse.Scan)]
+    public Task<ScanSheetDto> SetProjectStatusAsync(Guid projectId, SetWarehouseProjectStatusInput input) =>
+        appService.SetProjectStatusAsync(projectId, input);
+
     [HttpGet("packing-list/{projectId:guid}")]
     public Task<PackingListDto> GetPackingListAsync(Guid projectId) => appService.GetPackingListAsync(projectId);
 

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { labelTemplateApi } from '../../api/endpoints';
 import type { LabelTemplate, LabelTemplateInput, PrintLabelItem } from '../../api/types';
 import { useAuth } from '../../auth/AuthContext';
+import { useGuardedForm } from '../../components/useGuardedModal';
 import { useErrorToast } from '../../utils/errors';
 import { LabelPreview } from '../equipment/LabelPreview';
 
@@ -51,6 +52,7 @@ export function LabelTemplatesPage() {
   const [form] = Form.useForm<LabelTemplateInput>();
   const live = Form.useWatch([], form) as LabelTemplateInput | undefined;
   const [saving, setSaving] = useState(false);
+  const guard = useGuardedForm(!!editing, () => save());
 
   const refresh = () => qc.invalidateQueries({ queryKey: ['label-templates'] });
 
@@ -70,6 +72,7 @@ export function LabelTemplatesPage() {
       refresh();
     } catch (e) {
       showError(e);
+      throw e;
     } finally {
       setSaving(false);
     }
@@ -137,8 +140,8 @@ export function LabelTemplatesPage() {
       <Modal
         open={!!editing}
         title={editing === 'new' ? t('labelTemplates.create') : t('labelTemplates.edit')}
-        onCancel={() => setEditing(null)}
-        onOk={save}
+        onCancel={guard.guardClose(() => setEditing(null))}
+        onOk={() => save().catch(() => undefined)}
         okButtonProps={{ loading: saving }}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
@@ -147,7 +150,7 @@ export function LabelTemplatesPage() {
       >
         <Row gutter={24}>
           <Col xs={24} md={12}>
-            <Form form={form} layout="vertical" initialValues={DEFAULTS}>
+            <Form form={form} layout="vertical" initialValues={DEFAULTS} onValuesChange={guard.onValuesChange}>
               <Form.Item name="name" label={t('labelTemplates.name')} rules={[{ required: true, whitespace: true, message: t('validation.required') }]}>
                 <Input maxLength={128} />
               </Form.Item>

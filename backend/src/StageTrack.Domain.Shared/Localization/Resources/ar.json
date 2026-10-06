@@ -67,7 +67,7 @@
   "Impersonation.NotAllowed": "لا يمكنك تسجيل الدخول كهذا المستخدم.",
   "Impersonation.NotActive": "أنت لم تسجل الدخول كمستخدم آخر.",
   "Label.OtherCompany": "هذا الملصق يخص شركة {company}. اختر الشركة الصحيحة وامسح مرة أخرى.",
-  "Label.UnknownWorkspace": "هذا الملصق يخص مساحة عمل Rentman أخرى (#{workspace}).",
+  "Label.UnknownWorkspace": "هذا الملصق يخص مساحة عمل أخرى (#{workspace}).",
   "Relation.Self": "لا يمكن ربط المعدة بنفسها.",
   "Relation.Duplicate": "هذه المعدة موجودة بالفعل في القائمة.",
   "Supplier.NameAlreadyExists": "يوجد مورد باسم \"{name}\" بالفعل.",
@@ -97,5 +97,10 @@
   "Tenant.LocationLimitReached": "تم الوصول إلى حد المواقع في الاشتراك ({max}).",
   "Tenant.InvalidPeriod": "لا يمكن أن يكون تاريخ النهاية قبل تاريخ البداية.",
   "Tenant.InvalidLimit": "يجب أن يكون الحد 1 على الأقل.",
-  "Company.CodeAlreadyExists": "لدى هذه الشركة موقع بالرمز {code} بالفعل."
+  "Company.CodeAlreadyExists": "لدى هذه الشركة موقع بالرمز {code} بالفعل.",
+  "Equipment.NotQuotable": "لا يمكن إضافة المعدة {code} إلى المشاريع أو عروض الأسعار (غير معروضة في العروض).",
+  "Equipment.UsedInHistory": "استُخدمت {code} في مشاريع أو عروض أسعار ولا يمكن حذفها حفاظًا على السجل. يمكنك أرشفتها.",
+  "Project.ContentLineLocked": "بنود محتوى الحقيبة تتبع الحقيبة؛ غيّر الكمية أو انقل أو احذف بند الحقيبة بدلًا من ذلك.",
+  "Quote.AlreadyExistsForJob": "لهذا العمل عرض سعر بالفعل؛ افتح مراجعة جديدة منه لإجراء التغييرات.",
+  "Firm.LogoInvalid": "يجب أن يكون الشعار ملف صورة بحجم أقصى 2 ميغابايت."
 }

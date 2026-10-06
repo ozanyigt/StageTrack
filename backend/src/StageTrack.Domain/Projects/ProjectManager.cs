@@ -30,7 +30,30 @@ public class ProjectManager(
             throw new EntityNotFoundException(typeof(Equipment), equipmentId);
         }
 
-        return project.AddEquipment(equipment.Id, quantity, sectionId);
+        EnsureQuotable(equipment);
+        var line = project.AddEquipment(equipment.Id, quantity, sectionId);
+
+        // A case/set brings its default content along as child lines.
+        var withRelations = await equipmentRepository.GetAsync(equipmentId);
+        var contentRelations = withRelations.Relations.Where(r => r.Kind == Inventory.EquipmentRelationKind.Content).OrderBy(r => r.SortOrder).ToList();
+        if (contentRelations.Count > 0)
+        {
+            var active = (await equipmentRepository.GetListByIdsAsync(contentRelations.Select(r => r.RelatedEquipmentId)))
+                .Where(e => !e.IsArchived).Select(e => e.Id).ToHashSet();
+            project.SetContent(line, contentRelations.Where(r => active.Contains(r.RelatedEquipmentId))
+                .Select(r => (r.RelatedEquipmentId, r.Quantity)).ToList());
+        }
+
+        return line;
+    }
+
+    /// <summary>Office/internal equipment ("show in quotes" = no) is never rented out.</summary>
+    public static void EnsureQuotable(Equipment equipment)
+    {
+        if (!equipment.ShowInQuotes)
+        {
+            throw new BusinessException(StageTrackErrorCodes.EquipmentNotQuotable).WithData("code", equipment.Code);
+        }
     }
 
     /// <summary>Only users who work in this location can be put on its projects.</summary>

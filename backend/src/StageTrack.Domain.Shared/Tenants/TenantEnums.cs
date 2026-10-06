@@ -30,4 +30,6 @@ public static class TenantConsts
 
     /// <summary>Days before the end date from which the firm sees a renewal warning.</summary>
     public const int ExpiryWarningDays = 14;
+
+    public const int MaxLogoSize = 2 * 1024 * 1024;
 }

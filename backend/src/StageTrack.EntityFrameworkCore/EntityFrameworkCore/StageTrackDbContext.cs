@@ -25,6 +25,7 @@ public class StageTrackDbContext(
 {
     public DbSet<Company> Companies => Set<Company>();
     public DbSet<Tenants.Tenant> Tenants => Set<Tenants.Tenant>();
+    public DbSet<Auditing.AuditLog> AuditLogs => Set<Auditing.AuditLog>();
     public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<AppRole> Roles => Set<AppRole>();
     public DbSet<StockLocation> StockLocations => Set<StockLocation>();

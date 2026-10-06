@@ -10,6 +10,7 @@ import { ExportButton, ImportButton } from '../../components/ExcelButtons';
 import { useErrorToast } from '../../utils/errors';
 import { fetchAllPages, type ImportField } from '../../utils/excel';
 import { useDebounced } from '../../utils/useDebounced';
+import { useGuardedForm } from '../../components/useGuardedModal';
 
 const PAGE_SIZE = 25;
 type CustomerForm = Omit<Customer, 'id'>;
@@ -24,6 +25,7 @@ export function CustomerListPage() {
   const [text, setText] = useState('');
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<Customer | 'new' | null>(null);
+  const guard = useGuardedForm(!!editing, async () => save.mutateAsync(await form.validateFields()));
   const search = useDebounced(text, 300);
   const manage = can(Permissions.CustomersManage);
 
@@ -113,7 +115,7 @@ export function CustomerListPage() {
       <Drawer
         open={!!editing}
         width={520}
-        onClose={() => setEditing(null)}
+        onClose={guard.guardClose(() => setEditing(null))}
         title={editing === 'new' ? t('customers.create') : t('customers.edit')}
         destroyOnHidden
         extra={
@@ -126,7 +128,7 @@ export function CustomerListPage() {
           </Space>
         }
       >
-        <Form form={form} layout="vertical" onFinish={(v) => save.mutate(v)}>
+        <Form form={form} onValuesChange={guard.onValuesChange} layout="vertical" onFinish={(v) => save.mutate(v)}>
           <Form.Item name="name" label={t('customers.name')} rules={[{ required: true, message: t('validation.required') }]}>
             <Input />
           </Form.Item>

@@ -13,7 +13,8 @@
     "save": "Kaydet",
     "saved": "Kaydedildi",
     "viewAll": "Tümünü gör",
-    "yes": "Evet"
+    "yes": "Evet",
+    "selectDate": "Tarih seçin"
   },
   "validation": {
     "required": "Bu alan zorunludur",
@@ -65,7 +66,9 @@
     "suppliers": "Tedarikçiler",
     "crew": "Ekip rehberi",
     "labelTemplates": "Etiket şablonları",
-    "tenants": "Firmalar"
+    "tenants": "Firmalar",
+    "auditLog": "İşlem kaydı",
+    "firm": "Firma ve logo"
   },
   "dashboard": {
     "welcome": "Hoş geldiniz, {{name}}",
@@ -114,7 +117,7 @@
     "inputPlaceholder": "Etiketi okutun veya kodu yazıp Enter'a basın",
     "camera": "Kamera",
     "cameraTitle": "Kamerayla okut",
-    "cameraHint": "QR etiketi çerçevenin içine getirin. Mevcut Rentman etiketleri de okunur.",
+    "cameraHint": "QR etiketi çerçevenin içine getirin. Cihazların üzerindeki mevcut etiketler de okunur.",
     "cameraError": "Kamera açılamadı. Tarayıcının kamera iznini ve HTTPS bağlantısını kontrol edin.",
     "progress": "Paketleme ilerlemesi",
     "packingList": "Paketleme listesi",
@@ -257,7 +260,7 @@
     "labels": "Etiket",
     "changeStatus": "Durum",
     "labelCode": "Etiket kodu (isteğe bağlı)",
-    "labelCodeHint": "Cihazın üzerindeki mevcut Rentman QR kodunu okutabilirsiniz.",
+    "labelCodeHint": "Cihazın üzerindeki mevcut QR etiketini okutabilirsiniz.",
     "scanToFill": "Etiketi okutun"
   },
   "labels": {
@@ -265,7 +268,7 @@
     "assign": "Bağla",
     "assigned": "\"{{code}}\" etiketi bağlandı",
     "unknownLabel": "\"{{code}}\" etiketi henüz tanımlı değil",
-    "assignHint": "Bu büyük olasılıkla Rentman'den kalan bir etiket. Etiketi sökmeden ilgili cihaza bağlayın; bir daha okutulduğunda doğrudan tanınır.",
+    "assignHint": "Bu etiket henüz sistemde kayıtlı değil. Etiketi sökmeden ilgili cihaza bağlayın; bir daha okutulduğunda doğrudan tanınır.",
     "equipment": "Ekipman",
     "unit": "Cihaz",
     "type": "Etiket tipi",
@@ -275,7 +278,7 @@
     "equipmentLabels": "Ekipman etiketleri",
     "add": "Etiket",
     "addTitle": "{{target}} için etiket ekle",
-    "addHint": "Cihazın üzerindeki etiketi okutun. Mevcut Rentman etiketleri olduğu gibi kullanılabilir.",
+    "addHint": "Eski sisteminizde kullandığınız barkodu/QR etiketi okutun; etiket bu kayda bağlanır ve olduğu gibi kullanılmaya devam eder.",
     "showQr": "QR göster",
     "none": "Bu kayıtta etiket yok"
   },
@@ -444,7 +447,7 @@
       "Sale": "Satış ürünü"
     },
     "labelType": {
-      "RentmanQr": "Rentman QR",
+      "RentmanQr": "QR etiketi",
       "Qr": "QR",
       "Barcode": "Barkod",
       "Rfid": "RFID"
@@ -497,7 +500,9 @@
       "CodeAlreadyExists": "\"{{code}}\" ekipman kodu zaten kullanılıyor.",
       "HasUnits": "Bu ekipmanın seri numaraları var; adet takibine çevrilemez.",
       "NotSerialized": "Bu ekipman adet ile takip ediliyor; seri numarası eklenemez.",
-      "PlannedOnProjects": "Bu ekipman aktif projelerde planlı olduğu için arşivlenemez."
+      "PlannedOnProjects": "Bu ekipman aktif projelerde planlı olduğu için arşivlenemez.",
+      "NotQuotable": "{{code}} kodlu ekipman teklife/projeye eklenemez (teklifte gösterilmiyor).",
+      "UsedInHistory": "{{code}} projelerde veya tekliflerde kullanılmış; geçmiş kayıtlar bozulmasın diye silinemez. Arşivleyebilirsiniz."
     },
     "Folder": {
       "HasChildren": "Önce alt klasörleri silin veya taşıyın.",
@@ -517,7 +522,7 @@
       "NotFound": "\"{{code}}\" etiketi henüz hiçbir ekipmana bağlı değil.",
       "TargetRequired": "Etiket için bir ekipman veya seri numarası seçin.",
       "OtherCompany": "Bu etiket {{company}} şirketine ait. Doğru şirketi seçip tekrar okutun.",
-      "UnknownWorkspace": "Bu etiket başka bir Rentman çalışma alanına (#{{workspace}}) ait."
+      "UnknownWorkspace": "Bu etiket başka bir çalışma alanına (#{{workspace}}) ait."
     },
     "Customer": {
       "TaxNumberAlreadyExists": "\"{{taxNumber}}\" vergi numaralı bir müşteri zaten var.",
@@ -529,7 +534,8 @@
       "QuantityMustBePositive": "Adet sıfırdan büyük olmalıdır.",
       "NotEditable": "\"{{status}}\" durumundaki projeler düzenlenemez.",
       "HasEquipmentOut": "Bu projede hâlâ dışarıda {{count}} ekipman var. Önce dönüş okutması yapın.",
-      "CannotDelete": "Yalnızca taslak veya iptal edilmiş projeler silinebilir."
+      "CannotDelete": "Yalnızca taslak veya iptal edilmiş projeler silinebilir.",
+      "ContentLineLocked": "Case içeriğindeki satırlar case'e bağlıdır; adet, taşıma ve silme case satırından yapılır."
     },
     "Warehouse": {
       "ProjectNotScannable": "\"{{status}}\" durumundaki bir proje için ekipman okutulamaz.",
@@ -558,7 +564,8 @@
       "CannotDelete": "Yalnızca taslak teklifler silinebilir.",
       "LineDescriptionRequired": "Satır için bir açıklama girin.",
       "NotLatestRevision": "Yalnızca en son revizyon yeniden açılabilir.",
-      "JobAlreadyDecided": "Bu işin bir teklifi zaten kabul edilmiş."
+      "JobAlreadyDecided": "Bu işin bir teklifi zaten kabul edilmiş.",
+      "AlreadyExistsForJob": "Bu işin zaten bir teklifi var; değişiklik için mevcut teklifin yeni revizyonunu açın."
     },
     "Role": {
       "NameAlreadyExists": "\"{{name}}\" adında bir rol zaten var.",
@@ -631,6 +638,9 @@
     },
     "Company": {
       "CodeAlreadyExists": "Bu firmada {{code}} kodlu bir lokasyon zaten var."
+    },
+    "Firm": {
+      "LogoInvalid": "Logo en fazla 2 MB büyüklüğünde bir resim dosyası olmalıdır."
     }
   },
   "roles": {
@@ -723,7 +733,9 @@
     "Suppliers_Manage": "Tedarikçi ekleme/düzenleme",
     "AssignedProjects": "Atandığı projeleri görme (fiyatsız)",
     "Prices": "Fiyatları ve tutarları görme",
-    "Settings_LabelTemplates": "Etiket şablonlarını yönetme"
+    "Settings_LabelTemplates": "Etiket şablonlarını yönetme",
+    "Equipment_Delete": "Ekipman silme (işlem kaydına yazılır)",
+    "Settings_AuditLog": "İşlem kaydını görüntüleme"
   },
   "excel": {
     "export": "Excel",
@@ -778,7 +790,8 @@
       "inspection": "Periyodik muayene",
       "repairs": "Tamirler",
       "stock": "Stok",
-      "history": "Hareket kaydı"
+      "history": "Hareket kaydı",
+      "manufacturerSerials": "Üretici seri numaraları"
     },
     "relationHint": {
       "Content": "Varsayılan içerik: bu ekipman projeye eklendiğinde birlikte gelen parçalar (örn. kasanın içindekiler). İrsaliyede ekipmanın altında listelenir.",
@@ -824,7 +837,9 @@
     "cost": "Maliyet",
     "noLocation": "Lokasyonsuz",
     "total": "Toplam",
-    "bulkStockHint": "Adet ile takip edilen ekipmanda stok, Özellikler sekmesindeki stok adedidir."
+    "bulkStockHint": "Adet ile takip edilen ekipmanda stok, Özellikler sekmesindeki stok adedidir.",
+    "notSerialized": "Bu ekipman adet ile takip ediliyor.",
+    "notSerializedHint": "Cihazları tek tek (üretici seri numarası, iç referans, etiket) takip etmek için Özellikler sekmesinde \"Seri numarası ile takip\" seçeneğini açın."
   },
   "suppliers": {
     "title": "Tedarikçiler",
@@ -942,7 +957,9 @@
     "showArchived": "Arşivdekileri göster",
     "saveAndAddAnother": "Kaydet ve yeni ekle",
     "importTitle": "Seri numaralarını içe aktar",
-    "labelCodeColumn": "Etiket kodu"
+    "labelCodeColumn": "Etiket kodu",
+    "noLocation": "Lokasyonsuz",
+    "internalRefHint": "Sıradaki numara önerildi; isterseniz değiştirin (örn. TR-001)."
   },
   "transfer": {
     "button": "Başka lokasyona transfer",
@@ -995,7 +1012,7 @@
     "title": "Etiket yazdır",
     "template": "Etiket şablonu",
     "count": "{{count}} etiket",
-    "newCreated": "Etiketi olmayan {{count}} kayıt için yeni etiket oluşturuldu (Rentman ile aynı QR formatı).",
+    "newCreated": "Etiketi olmayan {{count}} kayıt için yeni QR etiket oluşturuldu.",
     "noTemplate": "Etiket şablonu yok. Ayarlar › Etiket şablonları'ndan ekleyin.",
     "nothing": "Yazdırılacak kayıt seçilmedi.",
     "printerHint": "Her etiket ayrı bir sayfa olarak, şablon ölçüsünde yazdırılır. Yazıcı ayarlarında kağıt boyutunu etiket ölçüsüne, ölçeği %100'e ayarlayın."
@@ -1131,8 +1148,8 @@
     "currency": "Para birimi",
     "vatRate": "KDV %",
     "country": "Ülke kodu",
-    "rentmanWorkspace": "Rentman çalışma alanı (cmpID)",
-    "rentmanWorkspaceHint": "Mevcut Rentman QR etiketlerindeki cmpID. Bilinmiyorsa boş bırakın.",
+    "rentmanWorkspace": "Etiket çalışma alanı no (cmpID)",
+    "rentmanWorkspaceHint": "Cihazların üzerindeki mevcut QR etiketlerinde yazan cmpID değeri. Bilinmiyorsa boş bırakın.",
     "warehouseName": "İlk depo adı",
     "addLocation": "Lokasyon ekle",
     "editLocation": "Lokasyonu düzenle",
@@ -1154,5 +1171,158 @@
     "backToList": "Firmalar",
     "statusColumn": "Durum"
   },
-  "subscriptionWarning": "Aboneliğiniz {{date}} tarihinde sona eriyor ({{count}} gün kaldı). Yenilemek için bizimle iletişime geçin."
+  "subscriptionWarning": "Aboneliğiniz {{date}} tarihinde sona eriyor ({{count}} gün kaldı). Yenilemek için bizimle iletişime geçin.",
+  "archivePage": {
+    "title": "Arşiv",
+    "equipment": "Arşivlenen ekipman",
+    "units": "Arşivlenen cihazlar",
+    "restored": "Arşivden çıkarıldı.",
+    "equipmentFile": "Arşivlenen ekipman",
+    "unitsFile": "Arşivlenen cihazlar"
+  },
+  "equipmentList": {
+    "columns": "Kolonlar",
+    "resetColumns": "Varsayılana dön",
+    "more": "Diğer",
+    "exportAll": "Tümünü Excel'e aktar",
+    "exportSelected": "Excel'e aktar",
+    "createLabels": "Etiket oluştur",
+    "clearSelection": "Seçimi temizle",
+    "selected": "{{count}} seçili",
+    "archiveSelectedConfirm": "Seçili {{count}} ekipman arşivlensin mi? Yeni projelere eklenemezler.",
+    "archived": "{{count}} ekipman arşivlendi.",
+    "dimensionsCm": "Ölçüler U × G × Y (cm)",
+    "showInQuotes": "Teklifte göster",
+    "purchaseDate": "Alım tarihi",
+    "warrantyEndDate": "Garanti bitişi",
+    "purchaseSupplier": "Alındığı firma",
+    "containedIn": "Dahil olduğu case",
+    "containedInNote": "{{code}} {{name}} içeriğine dahildir"
+  },
+  "folderManager": {
+    "title": "Klasörleri yönet",
+    "addRoot": "Ana klasör ekle",
+    "addSub": "Alt klasör ekle",
+    "deleteConfirm": "\"{{name}}\" klasörü silinsin mi?",
+    "empty": "Henüz klasör yok",
+    "hint": "Bir klasörün altına eklemek için satırın üzerine gelip + simgesine basın. Değişiklikler hemen kaydedilir."
+  },
+  "labelGen": {
+    "title": "Etiket oluştur",
+    "selected": "Seçili seri numaraları",
+    "selectAll": "Tümünü seç",
+    "noDevices": "Bu ekipmanın aktif cihazı yok.",
+    "equipmentLabel": "Ekipman etiketi",
+    "copies": "adet",
+    "note": "Not",
+    "noteHint": "İsteğe bağlı; her etiketin altına küçük yazıyla basılır.",
+    "generate": "Oluştur",
+    "docTitle": "{{code}} · Etiketler ({{count}})",
+    "docTitleMany": "Etiketler ({{count}})",
+    "closeAll": "Tümünü kapat"
+  },
+  "equipmentQuote": {
+    "showInQuotes": "Teklifte göster",
+    "showInQuotesHint": "Hayır seçilirse bu ekipman (ör. ofis ekipmanı) projelere ve tekliflere eklenemez.",
+    "notInQuotes": "Teklifte gösterilmiyor",
+    "purchase": "Satın alma",
+    "purchaseDate": "Alım tarihi",
+    "warrantyEndDate": "Garanti bitişi",
+    "purchaseSupplier": "Alındığı firma",
+    "containedIn": "Bu ekipman şu case/setin içeriğine dahildir:"
+  },
+  "equipmentDelete": {
+    "confirmTitle": "{{code}} silinsin mi?",
+    "selectedConfirmTitle": "{{count}} ekipman silinsin mi?",
+    "confirm": "Ekipman, cihazları ve etiketleri kalıcı olarak silinir ve işlem kaydına yazılır. Projelerde veya tekliflerde kullanılmış ekipman silinemez; onları arşivleyin.",
+    "deleted": "{{count}} ekipman silindi."
+  },
+  "auditLog": {
+    "title": "İşlem kaydı",
+    "subtitle": "Silme gibi kritik işlemleri kimin, ne zaman yaptığı",
+    "search": "Açıklama veya kullanıcı ara",
+    "time": "Zaman",
+    "action": "İşlem",
+    "description": "Açıklama",
+    "user": "Kullanıcı",
+    "impersonator": "Asıl hesap",
+    "viaImpersonation": "{{name}} bu kullanıcı olarak girmişken",
+    "actions": {
+      "EquipmentDeleted": "Ekipman silindi"
+    }
+  },
+  "unsaved": {
+    "title": "Değişiklikleri kaydetmediniz",
+    "message": "Yaptığınız değişiklikler kaydedilmedi. Kaydedilsin mi?",
+    "save": "Kaydet",
+    "discard": "Kaydetmeden çık"
+  },
+  "firmSettings": {
+    "title": "Firma ve logo",
+    "firm": "Firma",
+    "location": "Lokasyon",
+    "logo": "Logo",
+    "logoHint": "Teklif ve irsaliye çıktılarında kullanılır. PNG, JPG, SVG veya WEBP; en fazla 2 MB.",
+    "noLogo": "Logo yok",
+    "upload": "Logo yükle",
+    "remove": "Logoyu kaldır"
+  },
+  "equipmentTracking": {
+    "label": "Takip şekli",
+    "required": "Adet ile mi, seri numarası ile mi takip edileceğini seçin.",
+    "quantity": "Adet ile",
+    "quantityHint": "Kablo, bant gibi ürünler: seri numarası tutulmaz, sadece stok adedi.",
+    "serial": "Seri numarası ile",
+    "serialHint": "Her cihaz ayrı kayıt (üretici seri no, etiket); iç referans 1, 2, 3… diye otomatik verilir."
+  },
+  "casePrice": {
+    "contentTotal": "İçerik toplamı: {{amount}}",
+    "manual": "Elle girildi",
+    "useContentTotal": "İçerik toplamına eşitle",
+    "autoNote": "Fiyat içerikteki ürünlerden otomatik hesaplanıyor; değiştirirseniz elle girilen fiyat korunur."
+  },
+  "customerQuick": {
+    "title": "Yeni müşteri",
+    "add": "Yeni müşteri ekle"
+  },
+  "paymentTerms": {
+    "afterJob": "İş sonrası faturalandırılacaktır.",
+    "cash": "Peşin ödeme.",
+    "halfAdvance": "%50 avans, %50 iş sonrası.",
+    "net30": "30 gün vadeli."
+  },
+  "picker": {
+    "title": "Ekipmanlar",
+    "allEquipment": "Tüm ekipman",
+    "hint": "Ürünü sürükleyip sağdaki bölüme bırakın ya da + ile \"{{section}}\" bölümüne ekleyin.",
+    "stock": "Stok: {{count}}"
+  },
+  "projectSections": {
+    "warehouseExtras": "Eklenen ürünler (depo)",
+    "warehouseExtrasTag": "Depo ekledi",
+    "warehouseExtrasHint": "Depo okutma sırasında teklifte olmayan veya fazla çıkan ürünler. Teklife yansımaz; dönüşte takip edilir.",
+    "caseContent": "case içeriği ×{{count}}",
+    "inCase": "Case fiyatında",
+    "target": "+ buraya ekler",
+    "dropHint": "Soldan ürünleri bir bölümün üzerine sürükleyin. Bir bölüme tıklayınca + butonu o bölüme ekler.",
+    "emptyDrop": "Ürünleri buraya sürükleyin",
+    "openQuote": "Teklifi aç"
+  },
+  "quoteContent": {
+    "inCase": "case içeriği"
+  },
+  "scanSheet": {
+    "toScan": "Okutulacaklar",
+    "scanned": "Okutulanlar",
+    "noSection": "Bölümsüz",
+    "extras": "Eklenen ürünler",
+    "remaining": "{{count}} kaldı",
+    "allDone": "Hepsi okutuldu",
+    "nothingScanned": "Henüz okutulmadı",
+    "confirmTitle": "Bu ürün eklensin mi?",
+    "confirmNotPlanned": "teklifte yok.",
+    "confirmOverPlanned": "planlanan adetten fazla okutuluyor.",
+    "confirmYes": "Evet, ekle",
+    "addedToExtras": "\"Eklenen ürünler\" bölümüne eklendi"
+  }
 }

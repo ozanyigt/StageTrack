@@ -27,6 +27,12 @@ public class QuoteManager(
     /// </summary>
     public async Task<Quote> CreateFromProjectAsync(Project project, Company company, Guid? profileId, DateTime issueDate)
     {
+        // A job has one quote number; changes are made as revisions of it.
+        if ((await quoteRepository.GetListByProjectAsync(project.Id)).Count > 0)
+        {
+            throw new BusinessException(StageTrackErrorCodes.QuoteAlreadyExistsForJob);
+        }
+
         var number = await GenerateNumberAsync(issueDate.Year);
         var quote = new Quote(Guid.CreateVersion7(), project.Id, number, 1, issueDate, company.DefaultCurrency, company.DefaultVatRate);
         await ApplyRentalPeriodAsync(quote, project.RentalDays, profileId);
@@ -47,13 +53,26 @@ public class QuoteManager(
         }
 
         var previous = quote.Lines
-            .Where(l => l.Type == QuoteLineType.Equipment && l.EquipmentId.HasValue)
+            .Where(l => l.Type == QuoteLineType.Equipment && l.EquipmentId.HasValue && !l.IsContent)
             .GroupBy(l => (l.EquipmentId!.Value, l.Section))
             .ToDictionary(g => g.Key, g => g.First());
         quote.ReplaceEquipmentLines(await BuildEquipmentLinesAsync(project, previous));
     }
 
-    private async Task<List<(Guid, string, decimal, decimal, bool, decimal, string?, string?)>> BuildEquipmentLinesAsync(
+    /// <summary>While the job's quote is a draft it follows the planned equipment automatically.</summary>
+    public async Task SyncDraftAsync(Project project)
+    {
+        var draft = (await quoteRepository.GetListByProjectAsync(project.Id))
+            .Where(q => q.Status == QuoteStatus.Draft)
+            .OrderByDescending(q => q.Revision)
+            .FirstOrDefault();
+        if (draft is not null)
+        {
+            await SyncFromProjectAsync(await quoteRepository.GetAsync(draft.Id), project);
+        }
+    }
+
+    private async Task<List<(Guid, string, decimal, decimal, bool, decimal, string?, string?, bool)>> BuildEquipmentLinesAsync(
         Project project, Dictionary<(Guid, string?), QuoteLine> previous)
     {
         var equipmentIds = project.Equipment.Select(e => e.EquipmentId).ToList();
@@ -63,10 +82,12 @@ public class QuoteManager(
         var placements = new List<(Guid? SectionId, string? Path)> { (null, null) };
         placements.AddRange(project.GetSectionOutline().Select(o => ((Guid?)o.Section.Id, (string?)o.Path)));
 
-        var result = new List<(Guid, string, decimal, decimal, bool, decimal, string?, string?)>();
+        var result = new List<(Guid, string, decimal, decimal, bool, decimal, string?, string?, bool)>();
         foreach (var (sectionId, path) in placements)
         {
-            foreach (var line in project.Equipment.Where(e => e.SectionId == sectionId).OrderBy(e => e.SortOrder))
+            // Items the warehouse added while scanning are not part of the offer.
+            var lines = project.Equipment.Where(e => e.SectionId == sectionId && e.ParentLineId == null && !e.IsExtra).OrderBy(e => e.SortOrder);
+            foreach (var line in lines)
             {
                 if (!equipment.TryGetValue(line.EquipmentId, out var item))
                 {
@@ -75,7 +96,16 @@ public class QuoteManager(
 
                 previous.TryGetValue((item.Id, path), out var old);
                 result.Add((item.Id, old?.Description ?? item.Name, line.Quantity, old?.UnitPrice ?? item.RentalPrice,
-                    old?.ApplyFactor ?? true, old?.DiscountPercent ?? 0, path, line.Notes ?? old?.Notes));
+                    old?.ApplyFactor ?? true, old?.DiscountPercent ?? 0, path, line.Notes ?? old?.Notes, false));
+
+                // Case content: listed under the case, priced in the case.
+                foreach (var child in project.Equipment.Where(e => e.ParentLineId == line.Id).OrderBy(e => e.SortOrder))
+                {
+                    if (equipment.TryGetValue(child.EquipmentId, out var content))
+                    {
+                        result.Add((content.Id, content.Name, child.Quantity, 0m, false, 0m, path, child.Notes, true));
+                    }
+                }
             }
         }
 
@@ -103,6 +133,7 @@ public class QuoteManager(
     public async Task<QuoteLine> AddEquipmentLineAsync(Quote quote, Guid equipmentId, decimal quantity, string? section)
     {
         var equipment = await equipmentRepository.GetAsync(equipmentId, includeDetails: false);
+        ProjectManager.EnsureQuotable(equipment);
         return quote.AddLine(QuoteLineType.Equipment, equipment.Id, equipment.Name, quantity, equipment.RentalPrice,
             applyFactor: true, discountPercent: 0, section: section);
     }

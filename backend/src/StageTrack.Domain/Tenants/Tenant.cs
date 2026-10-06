@@ -34,6 +34,11 @@ public class Tenant : AggregateRoot, IAuditedObject
     /// <summary>Null = unlimited.</summary>
     public int? MaxLocations { get; private set; }
 
+    /// <summary>Firm logo printed on quotes and packing slips.</summary>
+    public byte[]? LogoContent { get; private set; }
+
+    public string? LogoContentType { get; private set; }
+
     public DateTime CreationTime { get; set; }
     public Guid? CreatorId { get; set; }
     public DateTime? LastModificationTime { get; set; }
@@ -80,6 +85,17 @@ public class Tenant : AggregateRoot, IAuditedObject
     }
 
     public void SetActive(bool isActive) => IsActive = isActive;
+
+    public void SetLogo(byte[]? content, string? contentType)
+    {
+        if (content is not null && (content.Length > TenantConsts.MaxLogoSize || contentType is null || !contentType.StartsWith("image/")))
+        {
+            throw new BusinessException(StageTrackErrorCodes.FirmLogoInvalid);
+        }
+
+        LogoContent = content;
+        LogoContentType = content is null ? null : contentType;
+    }
 
     public TenantStatus GetStatus(DateTime today)
     {

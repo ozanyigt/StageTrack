@@ -59,7 +59,8 @@ export const equipmentApi = {
     params: T.PagedRequest & { text?: string; folderId?: T.Guid; includeSubfolders?: boolean; type?: T.EquipmentType; isArchived?: boolean },
   ) => get<T.PagedResult<T.Equipment>>('/equipment', params),
   get: (id: T.Guid) => get<T.EquipmentDetail>(`/equipment/${id}`),
-  lookup: (text?: string) => get<T.EquipmentLookup[]>('/equipment/lookup', { text }),
+  /** forQuote: projects and quotes — leaves out office equipment and equipment with nothing rentable (e.g. in repair). */
+  lookup: (text?: string, forQuote = false) => get<T.EquipmentLookup[]>('/equipment/lookup', { text, forQuote: forQuote || undefined }),
   availability: (equipmentIds: T.Guid[], start: string, end: string, excludeProjectId?: T.Guid) =>
     post<{ equipmentId: T.Guid; stock: number; plannedElsewhere: number; available: number }[]>('/equipment/availability', {
       equipmentIds,
@@ -71,6 +72,10 @@ export const equipmentApi = {
   update: (id: T.Guid, input: T.EquipmentInput) => put<T.EquipmentDetail>(`/equipment/${id}`, input),
   archive: (id: T.Guid) => post(`/equipment/${id}/archive`),
   restore: (id: T.Guid) => post(`/equipment/${id}/restore`),
+  /** Deletes equipment entered by mistake (never on a project/quote) with its devices and labels; logged. */
+  remove: (id: T.Guid) => del(`/equipment/${id}`),
+  /** Case price back to its content total (and following it again). */
+  usePriceFromContent: (id: T.Guid) => post<T.EquipmentDetail>(`/equipment/${id}/price-from-content`),
   addRelation: (id: T.Guid, kind: T.RelationKind, relatedEquipmentId: T.Guid, quantity: number) =>
     post<T.EquipmentDetail>(`/equipment/${id}/relations`, { kind, relatedEquipmentId, quantity }),
   updateRelation: (id: T.Guid, relationId: T.Guid, quantity: number) =>
@@ -94,6 +99,8 @@ export const unitApi = {
     params: T.PagedRequest & { text?: string; equipmentId?: T.Guid; status?: T.UnitStatus; stockLocationId?: T.Guid; includeArchived?: boolean },
   ) => get<T.PagedResult<T.EquipmentUnit>>('/equipment-units', params),
   get: (id: T.Guid) => get<T.EquipmentUnitDetail>(`/equipment-units/${id}`),
+  /** Proposed internal reference of the next device (1, 2, 3… or TR-004 after TR-003). */
+  nextInternalRef: (equipmentId: T.Guid) => get<string>('/equipment-units/next-internal-ref', { equipmentId }),
   labels: (id: T.Guid) => get<T.Label[]>(`/equipment-units/${id}/labels`),
   create: (input: {
     equipmentId: T.Guid;
@@ -222,8 +229,12 @@ export const collaborationApi = {
 };
 
 export const warehouseApi = {
-  scan: (projectId: T.Guid, code: string, direction: T.ScanDirection) =>
-    post<T.ScanResult>('/warehouse/scan', { projectId, code, direction }),
+  scan: (projectId: T.Guid, code: string, direction: T.ScanDirection, allowUnplanned = false) =>
+    post<T.ScanResult>('/warehouse/scan', { projectId, code, direction, allowUnplanned }),
+  scanSheet: (projectId: T.Guid) => get<T.ScanSheet>(`/warehouse/scan-sheet/${projectId}`),
+  /** Warehouse: Prepped / OnLocation / Returned without project access. */
+  setProjectStatus: (projectId: T.Guid, status: T.ProjectStatus) =>
+    post<T.ScanSheet>(`/warehouse/projects/${projectId}/status`, { status }),
   packingList: (projectId: T.Guid) => get<T.PackingList>(`/warehouse/packing-list/${projectId}`),
   board: (params: { date?: string; stockLocationId?: T.Guid }) => get<T.WarehouseBoard>('/warehouse/board', params),
   movements: (params: T.PagedRequest & { text?: string; projectId?: T.Guid; equipmentId?: T.Guid; unitId?: T.Guid; action?: T.MovementAction }) =>
@@ -274,4 +285,20 @@ export const hostApi = {
   resetPassword: (id: T.Guid, userId: T.Guid, newPassword: string) =>
     post(`/host/tenants/${id}/users/${userId}/reset-password`, { newPassword }),
   impersonate: (userId: T.Guid) => post<T.LoginResult>(`/host/tenants/users/${userId}/impersonate`),
+};
+
+export const auditLogApi = {
+  list: (params: T.PagedRequest & { text?: string }) => get<T.PagedResult<T.AuditLog>>('/audit-logs', params),
+};
+
+/** The signed-in user's firm: logo printed on quotes and packing slips. */
+export const firmApi = {
+  /** Null when the firm has no logo. */
+  logo: () => http.get<Blob>('/firm/logo', { responseType: 'blob' }).then((r) => (r.status === 204 || r.data.size === 0 ? null : r.data)),
+  setLogo: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return http.put('/firm/logo', form).then((r) => r.data);
+  },
+  removeLogo: () => del('/firm/logo'),
 };

@@ -9,6 +9,7 @@ import { ExportButton } from '../../components/ExcelButtons';
 import { fetchAllPages } from '../../utils/excel';
 import { useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
+import { Permissions, useAuth } from '../../auth/AuthContext';
 
 const PAGE_SIZE = 50;
 
@@ -16,6 +17,7 @@ const PAGE_SIZE = 50;
 export function MovementsPage() {
   const { t } = useTranslation();
   const f = useFormat();
+  const { can } = useAuth();
   const [text, setText] = useState('');
   const [action, setAction] = useState<MovementAction>();
   const [page, setPage] = useState(1);
@@ -74,7 +76,14 @@ export function MovementsPage() {
               title: t('movements.project'),
               width: 240,
               ellipsis: true,
-              render: (_, m) => (m.projectId ? <Link to={`/projects/${m.projectId}`}>{m.projectNumber} · {m.projectName}</Link> : '—'),
+              render: (_, m) =>
+                !m.projectId ? (
+                  '—'
+                ) : can(Permissions.Projects) ? (
+                  <Link to={`/projects/${m.projectId}`}>{m.projectNumber} · {m.projectName}</Link>
+                ) : (
+                  `${m.projectNumber} · ${m.projectName}`
+                ),
             },
             { title: t('movements.unit'), dataIndex: 'unitInternalRef', width: 140 },
             { title: t('movements.serialNumber'), dataIndex: 'unitSerialNumber', width: 130, responsive: ['xl'] },

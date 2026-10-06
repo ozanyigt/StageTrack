@@ -40,6 +40,7 @@ public static class StageTrackDomainModule
         services.AddScoped<AttachmentManager>();
         services.AddScoped<TransferManager>();
         services.AddScoped<Tenants.TenantManager>();
+        services.AddScoped<Auditing.AuditLogManager>();
         services.AddScoped<Tenants.TenantProvisioningManager>();
         services.AddScoped<Data.HostDataSeeder>();
 

@@ -36,8 +36,10 @@ import {
 } from 'antd';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useGuardedForm } from '../../components/useGuardedModal';
 import { useTranslation } from 'react-i18next';
+import { useLabelGenerator } from '../../components/LabelGenerator';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { inspectionApi, labelApi, repairApi, unitApi, warehouseApi } from '../../api/endpoints';
 import { LABEL_TYPES, type EquipmentUnitDetail, type LabelType, type Repair, type RepairStatus } from '../../api/types';
@@ -60,11 +62,14 @@ export function RepairStatusTag({ status }: { status: RepairStatus }) {
   return <Tag color={repairStatusColor[status]}>{t(`enums.repairStatus.${status}`)}</Tag>;
 }
 
-/** Rentman-like serial number page: details, labels, repairs/inspections and history of one device. */
+/** Serial number page: details, labels, repairs/inspections and history of one device. */
 export function UnitDetailPage() {
   const { id = '' } = useParams();
+  const [tab, setTab] = useState('details');
+  const detailsGuard = useRef<(() => Promise<boolean>) | null>(null);
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const labels = useLabelGenerator();
   const qc = useQueryClient();
   const { can } = useAuth();
   const showError = useErrorToast();
@@ -97,7 +102,7 @@ export function UnitDetailPage() {
           {unit.isArchived && <Tag>{t('unitGrid.archived')}</Tag>}
         </Space>
         <Space wrap>
-          <Button icon={<PrinterOutlined />} onClick={() => navigate(`/labels/print?units=${id}`)}>
+          <Button icon={<PrinterOutlined />} onClick={() => labels.open({ unitIds: [id!] })}>
             {t('unitDetail.createLabel')}
           </Button>
           {canManage &&
@@ -165,8 +170,24 @@ export function UnitDetailPage() {
         <Col xs={24} xl={16}>
           <Card size="small">
             <Tabs
+              activeKey={tab}
+              onChange={async (key) => {
+                if (tab === 'details' && detailsGuard.current && !(await detailsGuard.current())) return;
+                setTab(key);
+              }}
               items={[
-                { key: 'details', label: t('unitDetail.tabDetails'), children: <DetailsTab unit={unit} canManage={canManage && !unit.isArchived} onSaved={refresh} /> },
+                {
+                  key: 'details',
+                  label: t('unitDetail.tabDetails'),
+                  children: (
+                    <DetailsTab
+                      unit={unit}
+                      canManage={canManage && !unit.isArchived}
+                      onSaved={refresh}
+                      onLeaveGuard={(fn) => (detailsGuard.current = fn)}
+                    />
+                  ),
+                },
                 { key: 'repairs', label: t('unitDetail.tabRepairs'), children: <RepairsTab unit={unit} onChanged={refresh} /> },
                 { key: 'history', label: t('unitDetail.tabHistory'), children: <HistoryTab unitId={id} /> },
               ]}
@@ -183,14 +204,24 @@ export function UnitDetailPage() {
   );
 }
 
-function DetailsTab({ unit, canManage, onSaved }: { unit: EquipmentUnitDetail; canManage: boolean; onSaved: () => void }) {
+function DetailsTab({
+  unit,
+  canManage,
+  onSaved,
+  onLeaveGuard,
+}: {
+  unit: EquipmentUnitDetail;
+  canManage: boolean;
+  onSaved: () => void;
+  onLeaveGuard?: (confirmLeave: () => Promise<boolean>) => void;
+}) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const showError = useErrorToast();
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
+  const loadValues = () =>
     form.setFieldsValue({
       internalRef: unit.internalRef,
       serialNumber: unit.serialNumber,
@@ -201,6 +232,10 @@ function DetailsTab({ unit, canManage, onSaved }: { unit: EquipmentUnitDetail; c
       supplierId: unit.supplierId,
       notes: unit.notes ?? '',
     });
+
+  useEffect(() => {
+    loadValues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unit, form]);
 
   const save = async () => {
@@ -217,19 +252,34 @@ function DetailsTab({ unit, canManage, onSaved }: { unit: EquipmentUnitDetail; c
         supplierId: v.supplierId ?? null,
         notes: v.notes || null,
       });
+      guard.markSaved();
       message.success(t('common.saved'));
       onSaved();
     } catch (e) {
       showError(e);
+      throw e;
     } finally {
       setSaving(false);
     }
   };
 
+  const guard = useGuardedForm(canManage, save);
+  useEffect(() => {
+    onLeaveGuard?.(async () => {
+      if (!guard.dirty) return true;
+      let left = false;
+      await guard.guardClose(() => {
+        left = true;
+        loadValues();
+      })();
+      return left;
+    });
+  });
+
   return (
     <Row gutter={[24, 16]}>
       <Col xs={24} lg={14}>
-        <Form form={form} layout="vertical" disabled={!canManage}>
+        <Form form={form} layout="vertical" disabled={!canManage} onValuesChange={guard.onValuesChange}>
           <Row gutter={12}>
             <Col xs={24} sm={12}>
               <Form.Item name="internalRef" label={t('units.internalRef')} rules={[{ required: true, whitespace: true, message: t('validation.required') }]}>
@@ -282,7 +332,7 @@ function DetailsTab({ unit, canManage, onSaved }: { unit: EquipmentUnitDetail; c
             {canManage ? <RichTextEditor /> : <RichTextView html={unit.notes} />}
           </Form.Item>
           {canManage && (
-            <Button type="primary" loading={saving} onClick={save}>
+            <Button type="primary" loading={saving} onClick={() => save().catch(() => undefined)}>
               {t('common.save')}
             </Button>
           )}
@@ -295,10 +345,10 @@ function DetailsTab({ unit, canManage, onSaved }: { unit: EquipmentUnitDetail; c
   );
 }
 
-/** Labels of the device: create/print a new one, or scan an existing (e.g. Rentman) label to link it. */
+/** Labels of the device: create/print a new one, or scan an existing label (e.g. from the previous system) to link it. */
 function LabelsBox({ unit, onChanged }: { unit: EquipmentUnitDetail; onChanged: () => void }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const labels = useLabelGenerator();
   const { message } = App.useApp();
   const { can } = useAuth();
   const showError = useErrorToast();
@@ -338,7 +388,7 @@ function LabelsBox({ unit, onChanged }: { unit: EquipmentUnitDetail; onChanged: 
       title={t('units.labels')}
       extra={
         <Space size={4}>
-          <Button size="small" icon={<PrinterOutlined />} onClick={() => navigate(`/labels/print?units=${unit.id}`)}>
+          <Button size="small" icon={<PrinterOutlined />} onClick={() => labels.open({ unitIds: [unit.id] })}>
             {t('unitDetail.createLabel')}
           </Button>
           {canAssign && (
@@ -401,6 +451,8 @@ function RepairsTab({ unit, onChanged }: { unit: EquipmentUnitDetail; onChanged:
   const [inspectionOpen, setInspectionOpen] = useState(false);
   const [repairForm] = Form.useForm();
   const [inspectionForm] = Form.useForm();
+  const repairGuard = useGuardedForm(repairOpen, () => createRepair());
+  const inspectionGuard = useGuardedForm(inspectionOpen, () => recordInspection());
 
   const repairs = useQuery({ queryKey: ['repairs', 'unit', unit.id], queryFn: () => repairApi.list({ unitId: unit.id, maxResultCount: 200 }), enabled: canView });
   const inspections = useQuery({ queryKey: ['inspections', 'unit', unit.id], queryFn: () => inspectionApi.list({ unitId: unit.id }), enabled: canView });
@@ -427,11 +479,13 @@ function RepairsTab({ unit, onChanged }: { unit: EquipmentUnitDetail; onChanged:
         supplierId: v.supplierId ?? null,
         cost: v.cost ?? null,
       });
+      repairGuard.markSaved();
       setRepairOpen(false);
       repairForm.resetFields();
       refresh();
     } catch (e) {
       showError(e);
+      throw e;
     }
   };
 
@@ -439,11 +493,13 @@ function RepairsTab({ unit, onChanged }: { unit: EquipmentUnitDetail; onChanged:
     const v = await inspectionForm.validateFields();
     try {
       await inspectionApi.record({ unitId: unit.id, date: toApiDate(v.date)!, passed: v.passed, notes: v.notes || null });
+      inspectionGuard.markSaved();
       setInspectionOpen(false);
       inspectionForm.resetFields();
       refresh();
     } catch (e) {
       showError(e);
+      throw e;
     }
   };
 
@@ -550,8 +606,16 @@ function RepairsTab({ unit, onChanged }: { unit: EquipmentUnitDetail; onChanged:
         />
       </div>
 
-      <Modal open={repairOpen} title={t('unitDetail.newRepair')} onCancel={() => setRepairOpen(false)} onOk={createRepair} okText={t('common.save')} cancelText={t('common.cancel')} destroyOnHidden>
-        <Form form={repairForm} layout="vertical" preserve={false}>
+      <Modal
+        open={repairOpen}
+        title={t('unitDetail.newRepair')}
+        onCancel={repairGuard.guardClose(() => setRepairOpen(false))}
+        onOk={() => createRepair().catch(() => undefined)}
+        okText={t('common.save')}
+        cancelText={t('common.cancel')}
+        destroyOnHidden
+      >
+        <Form form={repairForm} layout="vertical" preserve={false} onValuesChange={repairGuard.onValuesChange}>
           <Form.Item name="title" label={t('unitDetail.repairTitle')} rules={[{ required: true, whitespace: true, message: t('validation.required') }]}>
             <Input maxLength={256} />
           </Form.Item>
@@ -573,13 +637,13 @@ function RepairsTab({ unit, onChanged }: { unit: EquipmentUnitDetail; onChanged:
       <Modal
         open={inspectionOpen}
         title={t('unitDetail.recordInspection')}
-        onCancel={() => setInspectionOpen(false)}
-        onOk={recordInspection}
+        onCancel={inspectionGuard.guardClose(() => setInspectionOpen(false))}
+        onOk={() => recordInspection().catch(() => undefined)}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
         destroyOnHidden
       >
-        <Form form={inspectionForm} layout="vertical" preserve={false} initialValues={{ date: dayjs(), passed: true }}>
+        <Form form={inspectionForm} layout="vertical" preserve={false} initialValues={{ date: dayjs(), passed: true }} onValuesChange={inspectionGuard.onValuesChange}>
           <Form.Item name="date" label={t('unitDetail.inspectionDate')} rules={[{ required: true, message: t('validation.required') }]}>
             <DatePicker format="DD.MM.YYYY" />
           </Form.Item>

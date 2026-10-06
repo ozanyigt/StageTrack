@@ -26,6 +26,7 @@ public static class StageTrackEntityFrameworkCoreModule
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<Tenants.ITenantRepository, TenantRepository>();
+        services.AddScoped<Auditing.IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IStockLocationRepository, StockLocationRepository>();

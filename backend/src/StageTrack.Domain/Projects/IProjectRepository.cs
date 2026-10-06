@@ -37,6 +37,9 @@ public interface IProjectRepository : IRepository<Project>
 
     Task<long> GetCountAsync(ProjectFilter filter, CancellationToken cancellationToken = default);
 
+    /// <summary>Planned on any project (any status) or on any quote line: such equipment is part of the history.</summary>
+    Task<bool> IsEquipmentUsedInHistoryAsync(Guid equipmentId, CancellationToken cancellationToken = default);
+
     Task<bool> IsEquipmentPlannedOnActiveProjectsAsync(Guid equipmentId, CancellationToken cancellationToken = default);
 
     Task<bool> AnyForCustomerAsync(Guid customerId, CancellationToken cancellationToken = default);

@@ -1,6 +1,6 @@
 import {
   AppstoreOutlined,
-  BarcodeOutlined,
+  InboxOutlined,
   CalendarOutlined,
   DashboardOutlined,
   FileTextOutlined,
@@ -79,7 +79,7 @@ export function AppLayout() {
       permission: Permissions.Equipment,
       children: [
         { key: '/equipment', icon: <TagsOutlined />, label: t('nav.equipmentList') },
-        { key: '/equipment/units', icon: <BarcodeOutlined />, label: t('nav.units') },
+        { key: '/equipment/archive', icon: <InboxOutlined />, label: t('archivePage.title') },
         ...(can(Permissions.Maintenance) ? [{ key: '/maintenance/repairs', icon: <BuildOutlined />, label: t('nav.repairs') }] : []),
       ],
     },
@@ -96,6 +96,8 @@ export function AppLayout() {
         { key: '/settings/rental-factors', label: t('nav.rentalFactors'), permission: Permissions.RentalFactors },
         { key: '/settings/stock-locations', label: t('nav.stockLocations'), permission: Permissions.StockLocations },
         { key: '/settings/label-templates', icon: <QrcodeOutlined />, label: t('nav.labelTemplates'), permission: Permissions.LabelTemplates },
+        { key: '/settings/audit-log', icon: <HistoryOutlined />, label: t('nav.auditLog'), permission: Permissions.AuditLog },
+        { key: '/settings/firm', icon: <ShopOutlined />, label: t('nav.firm'), permission: Permissions.Firm },
       ].filter((i) => can(i.permission)),
     },
   ];
@@ -107,7 +109,7 @@ export function AppLayout() {
 
   const path = location.pathname;
   const selected =
-    ['/warehouse/scan', '/warehouse/movements', '/equipment/units', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/calendar']
+    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
       .find((p) => path.startsWith(p)) ??
     ['/warehouse', '/projects', '/quotes', '/equipment', '/customers', '/suppliers', '/crew'].find((p) => path.startsWith(p) && !user?.isHost) ??
     '/';

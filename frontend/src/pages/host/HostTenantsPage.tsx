@@ -13,6 +13,7 @@ import { useDebounced } from '../../utils/useDebounced';
 import {
   AdminFields, formToTenant, LocationFields, normalizeLocation, TenantFields, TenantStatusTag, type TenantFormValues,
 } from './TenantForms';
+import { useGuardedForm } from '../../components/useGuardedModal';
 
 const PAGE_SIZE = 25;
 
@@ -30,6 +31,7 @@ export function HostTenantsPage() {
   const [page, setPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
   const [form] = Form.useForm<CreateValues>();
+  const guard = useGuardedForm(createOpen, async () => create.mutateAsync(await form.validateFields()));
   const search = useDebounced(text, 300);
 
   const summary = useQuery({ queryKey: ['host-summary'], queryFn: hostApi.summary });
@@ -43,6 +45,7 @@ export function HostTenantsPage() {
     mutationFn: (v: CreateValues) =>
       hostApi.create({ ...formToTenant(v), location: normalizeLocation(v.location), admin: { ...v.admin, userName: v.admin.userName.trim() } }),
     onSuccess: (created) => {
+      guard.markSaved();
       message.success(t('host.created'));
       setCreateOpen(false);
       queryClient.invalidateQueries({ queryKey: ['host-tenants'] });
@@ -130,14 +133,14 @@ export function HostTenantsPage() {
         open={createOpen}
         title={t('host.newTenant')}
         width={760}
-        onCancel={() => setCreateOpen(false)}
+        onCancel={guard.guardClose(() => setCreateOpen(false))}
         onOk={() => form.submit()}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
         confirmLoading={create.isPending}
         destroyOnHidden
       >
-        <Form form={form} layout="vertical" onFinish={(v) => create.mutate(v)} requiredMark="optional">
+        <Form form={form} onValuesChange={guard.onValuesChange} layout="vertical" onFinish={(v) => create.mutate(v)} requiredMark="optional">
           <TenantFields />
           <Divider orientation="left" plain>{t('host.firstLocation')}</Divider>
           <Typography.Paragraph type="secondary" style={{ fontSize: 12 }}>{t('host.firstLocationHint')}</Typography.Paragraph>

@@ -13,6 +13,7 @@ import { fetchAllPages } from '../../utils/excel';
 import { useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
 import { ProjectFormModal } from '../projects/ProjectFormModal';
+import { QuoteStatusControl } from './QuoteStatusControl';
 
 const PAGE_SIZE = 25;
 
@@ -156,17 +157,19 @@ export function QuoteListPage() {
             },
             {
               title: t('quotes.status'),
-              width: 150,
-              render: (_, j) =>
-                j.latestQuote ? (
-                  j.latestQuote.rejectionReason ? (
-                    <Tooltip title={j.latestQuote.rejectionReason}>
-                      <span><QuoteStatusTag status={j.latestQuote.status} /></span>
-                    </Tooltip>
-                  ) : (
-                    <QuoteStatusTag status={j.latestQuote.status} />
-                  )
-                ) : null,
+              width: 170,
+              render: (_, j) => {
+                const q = j.latestQuote;
+                if (!q) return null;
+                const control = can(Permissions.QuotesManage) ? (
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <QuoteStatusControl quoteId={q.id} status={q.status} allowedStatuses={q.allowedStatuses} size="small" />
+                  </span>
+                ) : (
+                  <QuoteStatusTag status={q.status} />
+                );
+                return q.rejectionReason ? <Tooltip title={q.rejectionReason}><span>{control}</span></Tooltip> : control;
+              },
             },
             ...(view === 'Active'
               ? []

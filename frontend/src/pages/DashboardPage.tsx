@@ -178,7 +178,18 @@ export function DashboardPage() {
             { title: t('movements.action'), dataIndex: 'action', width: 130, render: (a) => t(`enums.movementAction.${a}`) },
             { title: t('movements.equipment'), render: (_, m) => `${m.equipmentCode} · ${m.equipmentName}`, ellipsis: true },
             { title: t('movements.unit'), dataIndex: 'unitInternalRef', width: 140 },
-            { title: t('movements.project'), render: (_, m) => (m.projectNumber ? `${m.projectNumber} · ${m.projectName}` : '—'), ellipsis: true },
+            {
+              title: t('movements.project'),
+              ellipsis: true,
+              render: (_, m) => {
+                if (!m.projectId) return '—';
+                const label = `${m.projectNumber} · ${m.projectName}`;
+                // The warehouse never opens project details; it goes to the job's scan screen.
+                if (can(Permissions.Projects)) return <Link to={`/projects/${m.projectId}`}>{label}</Link>;
+                if (can(Permissions.WarehouseScan)) return <Link to={`/warehouse/scan/${m.projectId}`}>{label}</Link>;
+                return label;
+              },
+            },
           ]}
         />
       </Card>

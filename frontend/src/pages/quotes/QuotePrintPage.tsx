@@ -121,20 +121,30 @@ export function QuotePrintPage() {
                     <td className="num">{money(g.lines.reduce((s, l) => s + l.total, 0))}</td>
                   </tr>
                 )}
-                {g.lines.map((l) => (
-                  <tr key={l.id}>
-                    <td style={{ whiteSpace: 'nowrap' }}>{l.equipmentCode ?? t(`enums.quoteLineType.${l.type}`)}</td>
-                    <td className="num">{f.number(l.quantity)}</td>
-                    <td>
-                      {l.description}
-                      {l.notes && <div style={{ color: '#666', fontSize: 10, whiteSpace: 'pre-wrap' }}>{l.notes}</div>}
-                    </td>
-                    <td className="num">{money(l.unitPrice)}</td>
-                    <td className="num">{l.applyFactor ? `×${f.number(q.factor)}` : '—'}</td>
-                    <td className="num">{l.discountPercent ? `%${f.number(l.discountPercent)}` : '—'}</td>
-                    <td className="num">{money(l.total)}</td>
-                  </tr>
-                ))}
+                {g.lines.map((l) =>
+                  l.isContent ? (
+                    // Case content: listed under the case, priced in the case.
+                    <tr key={l.id} className="content-row">
+                      <td style={{ whiteSpace: 'nowrap', paddingInlineStart: 16 }}>↳ {l.equipmentCode}</td>
+                      <td className="num">{f.number(l.quantity)}</td>
+                      <td style={{ paddingInlineStart: 16 }}>{l.description}</td>
+                      <td colSpan={4} />
+                    </tr>
+                  ) : (
+                    <tr key={l.id}>
+                      <td style={{ whiteSpace: 'nowrap' }}>{l.equipmentCode ?? t(`enums.quoteLineType.${l.type}`)}</td>
+                      <td className="num">{f.number(l.quantity)}</td>
+                      <td>
+                        {l.description}
+                        {l.notes && <div style={{ color: '#666', fontSize: 10, whiteSpace: 'pre-wrap' }}>{l.notes}</div>}
+                      </td>
+                      <td className="num">{money(l.unitPrice)}</td>
+                      <td className="num">{l.applyFactor ? `×${f.number(q.factor)}` : '—'}</td>
+                      <td className="num">{l.discountPercent ? `%${f.number(l.discountPercent)}` : '—'}</td>
+                      <td className="num">{money(l.total)}</td>
+                    </tr>
+                  ),
+                )}
               </Fragment>
             ))}
           </tbody>

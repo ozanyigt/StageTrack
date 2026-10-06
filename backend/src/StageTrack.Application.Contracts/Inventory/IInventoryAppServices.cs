@@ -20,7 +20,8 @@ public interface IEquipmentAppService
 
     Task<EquipmentDetailDto> GetAsync(Guid id);
 
-    Task<List<EquipmentLookupDto>> GetLookupAsync(string? text);
+    /// <param name="forQuote">Projects and quotes: leaves out office equipment and equipment with nothing rentable (e.g. all in repair).</param>
+    Task<List<EquipmentLookupDto>> GetLookupAsync(string? text, bool forQuote = false);
 
     Task<EquipmentDto> CreateAsync(CreateUpdateEquipmentDto input);
 
@@ -29,6 +30,12 @@ public interface IEquipmentAppService
     Task ArchiveAsync(Guid id);
 
     Task RestoreAsync(Guid id);
+
+    /// <summary>Case price back to the total of its content (and following it again).</summary>
+    Task<EquipmentDetailDto> UsePriceFromContentAsync(Guid id);
+
+    /// <summary>Deletes equipment entered by mistake (never used on a project/quote); logged in the audit log.</summary>
+    Task DeleteAsync(Guid id);
 
     Task<List<EquipmentAvailabilityDto>> GetAvailabilityAsync(GetAvailabilityInput input);
 
@@ -74,6 +81,9 @@ public interface IEquipmentUnitAppService
     Task<EquipmentUnitDetailDto> RemoveImageAsync(Guid id);
 
     Task<TransferResultDto> TransferAsync(TransferUnitsInput input);
+
+    /// <summary>Internal reference proposed for the next device of the equipment.</summary>
+    Task<string> SuggestInternalRefAsync(Guid equipmentId);
 
     Task<ImportResultDto> ImportAsync(List<UnitImportRow> rows);
 }

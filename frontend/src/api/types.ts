@@ -45,6 +45,8 @@ export interface CurrentUser {
   tenantName?: string | null;
   /** Last day of the firm's subscription (renewal warning). */
   subscriptionEndDate?: string | null;
+  /** The firm uploaded a logo (GET /firm/logo). */
+  hasFirmLogo: boolean;
 }
 
 export interface LoginResult {
@@ -93,6 +95,27 @@ export interface Equipment {
   volumeM3?: number | null;
   notes?: string | null;
   isArchived: boolean;
+  folderName?: string | null;
+  countryOfOrigin?: string | null;
+  lengthCm?: number | null;
+  widthCm?: number | null;
+  heightCm?: number | null;
+  powerW?: number | null;
+  /** False: office/internal equipment that cannot be planned on projects or quotes. */
+  showInQuotes: boolean;
+  /** Quantity-tracked equipment: purchase data (devices keep it per device). */
+  purchaseDate?: string | null;
+  warrantyEndDate?: string | null;
+  purchaseSupplierId?: Guid | null;
+  purchaseSupplierName?: string | null;
+  /** Cases/sets whose default content includes this equipment. */
+  containedIn: EquipmentRef[];
+}
+
+export interface EquipmentRef {
+  id: Guid;
+  code: string;
+  name: string;
 }
 
 export interface EquipmentRelation {
@@ -123,6 +146,10 @@ export interface StockRow {
 
 export interface EquipmentDetail extends Equipment {
   stockQuantity: number;
+  /** Price typed by hand; otherwise a case's price follows its content total. */
+  isPriceManual: boolean;
+  /** Total price of the default content (null without content or price permission). */
+  contentPriceTotal?: number | null;
   countryOfOrigin?: string | null;
   lengthCm?: number | null;
   widthCm?: number | null;
@@ -165,6 +192,10 @@ export interface EquipmentInput {
   inspectionIntervalMonths?: number | null;
   inspectionDescription?: string | null;
   notes?: string | null;
+  showInQuotes: boolean;
+  purchaseDate?: string | null;
+  warrantyEndDate?: string | null;
+  purchaseSupplierId?: Guid | null;
 }
 
 export interface EquipmentLookup {
@@ -334,6 +365,8 @@ export interface ProjectSection {
   depth: number;
   /** "SES / Hoparlör" */
   path: string;
+  /** The "added products" section the warehouse created while scanning. */
+  isWarehouseExtras: boolean;
 }
 
 export interface Alternative {
@@ -371,6 +404,11 @@ export interface ProjectEquipment {
   outQuantity: number;
   returnedQuantity: number;
   alternatives: Alternative[];
+  /** Content line of a case: the case line it belongs to (shown indented, follows the case). */
+  parentLineId?: Guid | null;
+  contentQuantity: number;
+  /** Added by the warehouse while scanning; not on the quote. */
+  isExtra: boolean;
 }
 
 export interface Project extends ProjectListItem {
@@ -399,6 +437,7 @@ export interface PackingSlipLine {
 
 export interface PackingSlipSection {
   name?: string | null;
+  isWarehouseExtras: boolean;
   depth: number;
   lines: PackingSlipLine[];
 }
@@ -465,6 +504,55 @@ export interface ScanResult {
   outQuantity: number;
   alreadyScanned: boolean;
   warnings: ScanWarning[];
+  /** Nothing recorded: ask "not on the quote / more than planned — add it?", then scan again with allowUnplanned. */
+  requiresConfirmation: boolean;
+}
+
+export interface ScanSheetSection {
+  id: Guid;
+  parentId?: Guid | null;
+  name: string;
+  depth: number;
+  isWarehouseExtras: boolean;
+}
+
+export interface ScanSheetUnit {
+  unitId: Guid;
+  internalRef: string;
+  serialNumber?: string | null;
+}
+
+export interface ScanSheetLine {
+  lineId: Guid;
+  parentLineId?: Guid | null;
+  sectionId?: Guid | null;
+  equipmentId: Guid;
+  code: string;
+  name: string;
+  isSerialized: boolean;
+  isExtra: boolean;
+  planned: number;
+  out: number;
+  returned: number;
+  /** Devices currently out for this line, e.g. TR-003. */
+  unitsOut: ScanSheetUnit[];
+  unitsReturned: ScanSheetUnit[];
+}
+
+/** Scan screen data: the planned list in the quote's sections with what is out / back. */
+export interface ScanSheet {
+  projectId: Guid;
+  number: number;
+  name: string;
+  status: ProjectStatus;
+  customerName?: string | null;
+  venue?: string | null;
+  planStart: string;
+  planEnd: string;
+  /** Statuses the warehouse may set: Prepped, OnLocation, Returned. */
+  allowedStatuses: ProjectStatus[];
+  sections: ScanSheetSection[];
+  lines: ScanSheetLine[];
 }
 
 export interface PackingLine {
@@ -568,6 +656,8 @@ export interface QuoteListItem {
   customerName?: string | null;
   /** Why the customer declined (rejected quotes). */
   rejectionReason?: string | null;
+  /** Statuses it can be set to (status drop-down). */
+  allowedStatuses: QuoteStatus[];
 }
 
 export interface QuoteLine {
@@ -584,6 +674,8 @@ export interface QuoteLine {
   total: number;
   section?: string | null;
   notes?: string | null;
+  /** Content of the case line above it: listed, not priced. */
+  isContent: boolean;
 }
 
 export interface Quote extends QuoteListItem {
@@ -599,7 +691,6 @@ export interface Quote extends QuoteListItem {
   netTotal: number;
   vatAmount: number;
   isEditable: boolean;
-  allowedStatuses: QuoteStatus[];
   lines: QuoteLine[];
   venue?: string | null;
   useStart?: string | null;
@@ -966,4 +1057,17 @@ export interface TenantAdminInput {
   email?: string | null;
   password: string;
   language: string;
+}
+
+// Audit log (sensitive operations such as deleting equipment)
+export interface AuditLog {
+  id: Guid;
+  creationTime: string;
+  action: string;
+  entityType: string;
+  entityId?: Guid | null;
+  description: string;
+  userName?: string | null;
+  userFullName?: string | null;
+  impersonatorName?: string | null;
 }

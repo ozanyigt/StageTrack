@@ -79,7 +79,7 @@ public class TransferManager(
 
             foreach (var unit in units)
             {
-                if (await unitRepository.InternalRefExistsAsync(unit.InternalRef))
+                if (await unitRepository.InternalRefExistsAsync(targetEquipment[unit.EquipmentId], unit.InternalRef))
                 {
                     throw new BusinessException(StageTrackErrorCodes.UnitInternalRefAlreadyExists).WithData("reference", unit.InternalRef);
                 }

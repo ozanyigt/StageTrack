@@ -42,6 +42,15 @@ internal static class ObjectMapping
         dto.VolumeM3 = e.VolumeM3;
         dto.Notes = e.Notes;
         dto.IsArchived = e.IsArchived;
+        dto.CountryOfOrigin = e.CountryOfOrigin;
+        dto.LengthCm = e.LengthCm;
+        dto.WidthCm = e.WidthCm;
+        dto.HeightCm = e.HeightCm;
+        dto.PowerW = e.PowerW;
+        dto.ShowInQuotes = e.ShowInQuotes;
+        dto.PurchaseDate = e.PurchaseDate;
+        dto.WarrantyEndDate = e.WarrantyEndDate;
+        dto.PurchaseSupplierId = e.PurchaseSupplierId;
         return dto;
     }
 
@@ -206,7 +215,8 @@ internal static class ObjectMapping
         PlannedQuantity = o.PlannedQuantity,
         OutQuantity = o.OutQuantity,
         AlreadyScanned = o.AlreadyScanned,
-        Warnings = o.Warnings
+        Warnings = o.Warnings,
+        RequiresConfirmation = o.RequiresConfirmation
     };
 
     public static RentalFactorProfileDto ToDto(this RentalFactorProfile p) => new()
@@ -234,6 +244,7 @@ internal static class ObjectMapping
         dto.ProjectName = projectName;
         dto.CustomerName = customerName;
         dto.RejectionReason = q.RejectionReason;
+        dto.AllowedStatuses = QuoteManager.GetAllowedTargets(q.Status).ToList();
         return dto;
     }
 

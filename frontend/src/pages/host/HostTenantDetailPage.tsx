@@ -10,6 +10,7 @@ import { roleLabel, useAuth } from '../../auth/AuthContext';
 import { useErrorToast } from '../../utils/errors';
 import { useFormat } from '../../utils/format';
 import { formToTenant, LocationFields, normalizeLocation, TenantFields, TenantStatusTag, tenantToForm, type TenantFormValues } from './TenantForms';
+import { useGuardedForm } from '../../components/useGuardedModal';
 
 /** One customer firm: subscription, locations and users; the platform admin can sign in as any of its users. */
 export function HostTenantDetailPage() {
@@ -25,8 +26,11 @@ export function HostTenantDetailPage() {
   const [location, setLocation] = useState<TenantLocation | 'new' | null>(null);
   const [passwordUser, setPasswordUser] = useState<TenantUser | null>(null);
   const [tenantForm] = Form.useForm<TenantFormValues>();
+  const tenantGuard = useGuardedForm(editOpen, async () => update.mutateAsync(await tenantForm.validateFields()));
   const [locationForm] = Form.useForm<TenantLocationInput>();
+  const locationGuard = useGuardedForm(!!location, async () => saveLocation.mutateAsync(await locationForm.validateFields()));
   const [passwordForm] = Form.useForm<{ newPassword: string }>();
+  const passwordGuard = useGuardedForm(!!passwordUser, async () => resetPassword.mutateAsync(await passwordForm.validateFields()));
 
   const tenant = useQuery({ queryKey: ['host-tenant', id], queryFn: () => hostApi.get(id!) });
 
@@ -204,24 +208,24 @@ export function HostTenantDetailPage() {
         />
       </Card>
 
-      <Modal open={editOpen} title={t('host.editTenant')} width={760} onCancel={() => setEditOpen(false)} onOk={() => tenantForm.submit()}
+      <Modal open={editOpen} title={t('host.editTenant')} width={760} onCancel={tenantGuard.guardClose(() => setEditOpen(false))} onOk={() => tenantForm.submit()}
         okText={t('common.save')} cancelText={t('common.cancel')} confirmLoading={update.isPending} destroyOnHidden forceRender>
-        <Form form={tenantForm} layout="vertical" onFinish={(v) => update.mutate(v)} requiredMark="optional">
+        <Form form={tenantForm} onValuesChange={tenantGuard.onValuesChange} layout="vertical" onFinish={(v) => update.mutate(v)} requiredMark="optional">
           <TenantFields />
         </Form>
       </Modal>
 
       <Modal open={!!location} title={location === 'new' ? t('host.addLocation') : t('host.editLocation')} width={640}
-        onCancel={() => setLocation(null)} onOk={() => locationForm.submit()} okText={t('common.save')} cancelText={t('common.cancel')}
+        onCancel={locationGuard.guardClose(() => setLocation(null))} onOk={() => locationForm.submit()} okText={t('common.save')} cancelText={t('common.cancel')}
         confirmLoading={saveLocation.isPending} forceRender>
-        <Form form={locationForm} layout="vertical" onFinish={(v) => saveLocation.mutate(v)} requiredMark="optional">
+        <Form form={locationForm} onValuesChange={locationGuard.onValuesChange} layout="vertical" onFinish={(v) => saveLocation.mutate(v)} requiredMark="optional">
           <LocationFields isNew={location === 'new'} />
         </Form>
       </Modal>
 
-      <Modal open={!!passwordUser} title={`${t('host.resetPassword')} · ${passwordUser?.fullName ?? ''}`} onCancel={() => setPasswordUser(null)}
+      <Modal open={!!passwordUser} title={`${t('host.resetPassword')} · ${passwordUser?.fullName ?? ''}`} onCancel={passwordGuard.guardClose(() => setPasswordUser(null))}
         onOk={() => passwordForm.submit()} okText={t('common.save')} cancelText={t('common.cancel')} confirmLoading={resetPassword.isPending} forceRender>
-        <Form form={passwordForm} layout="vertical" onFinish={(v) => resetPassword.mutate(v)}>
+        <Form form={passwordForm} onValuesChange={passwordGuard.onValuesChange} layout="vertical" onFinish={(v) => resetPassword.mutate(v)}>
           <Form.Item name="newPassword" label={t('host.newPassword')}
             rules={[{ required: true, message: t('validation.required') }, { pattern: /^(?=.*[A-Za-zÇĞİÖŞÜçğıöşü])(?=.*\d).{8,}$/, message: t('users.passwordRule') }]}>
             <Input.Password autoComplete="new-password" />

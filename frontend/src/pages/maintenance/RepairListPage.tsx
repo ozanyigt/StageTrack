@@ -13,6 +13,7 @@ import { useErrorToast } from '../../utils/errors';
 import { fetchAllPages } from '../../utils/excel';
 import { useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
+import { useGuardedForm } from '../../components/useGuardedModal';
 
 const PAGE_SIZE = 25;
 
@@ -52,6 +53,7 @@ export function RepairListPage() {
   const [onlyOpen, setOnlyOpen] = useState(true);
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<Repair | 'new' | null>(null);
+  const guard = useGuardedForm(!!editing, async () => save.mutateAsync(await form.validateFields()));
   const [picked, setPicked] = useState<EquipmentLookup>();
   const [supplierText, setSupplierText] = useState('');
   const search = useDebounced(text, 300);
@@ -258,7 +260,7 @@ export function RepairListPage() {
       <Modal
         open={!!editing}
         title={editing === 'new' ? t('repairs.create') : t('repairs.edit')}
-        onCancel={() => setEditing(null)}
+        onCancel={guard.guardClose(() => setEditing(null))}
         onOk={() => form.submit()}
         okText={t('common.save')}
         cancelText={t('common.cancel')}
@@ -266,7 +268,7 @@ export function RepairListPage() {
         destroyOnHidden
         width={560}
       >
-        <Form form={form} layout="vertical" onFinish={(v) => save.mutate(v)}>
+        <Form form={form} onValuesChange={guard.onValuesChange} layout="vertical" onFinish={(v) => save.mutate(v)}>
           {editing === 'new' ? (
             <>
               <Form.Item name="equipmentId" label={t('repairs.equipment')} rules={[{ required: true, message: t('validation.required') }]}>

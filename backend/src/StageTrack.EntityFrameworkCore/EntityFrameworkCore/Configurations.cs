@@ -38,6 +38,18 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
     }
 }
 
+public class AuditLogConfiguration : IEntityTypeConfiguration<Auditing.AuditLog>
+{
+    public void Configure(EntityTypeBuilder<Auditing.AuditLog> b)
+    {
+        b.Property(x => x.Action).HasMaxLength(Auditing.AuditLogConsts.MaxActionLength).IsRequired();
+        b.Property(x => x.EntityType).HasMaxLength(Auditing.AuditLogConsts.MaxEntityTypeLength).IsRequired();
+        b.Property(x => x.Description).HasMaxLength(Auditing.AuditLogConsts.MaxDescriptionLength).IsRequired();
+        b.Property(x => x.UserName).HasMaxLength(64);
+        b.HasIndex(x => new { x.CompanyId, x.CreationTime });
+    }
+}
+
 public class TenantConfiguration : IEntityTypeConfiguration<Tenants.Tenant>
 {
     public void Configure(EntityTypeBuilder<Tenants.Tenant> b)
@@ -49,6 +61,7 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenants.Tenant>
         b.Property(x => x.Phone).HasMaxLength(Tenants.TenantConsts.MaxPhoneLength);
         b.Property(x => x.Notes).HasMaxLength(Tenants.TenantConsts.MaxNotesLength);
         b.Property(x => x.PlanName).HasMaxLength(Tenants.TenantConsts.MaxPlanLength).IsRequired();
+        b.Property(x => x.LogoContentType).HasMaxLength(128);
         b.HasIndex(x => x.Code).IsUnique();
     }
 }
@@ -148,6 +161,8 @@ public class EquipmentConfiguration : IEntityTypeConfiguration<Equipment>
         b.Property(x => x.Model).HasMaxLength(EquipmentConsts.MaxModelLength);
         b.Property(x => x.Notes).HasMaxLength(EquipmentConsts.MaxNotesLength);
         b.Property(x => x.RentalPrice).HasColumnType(ColumnTypes.Money);
+        b.Property(x => x.ShowInQuotes).HasDefaultValue(true);
+        b.HasOne<Suppliers.Supplier>().WithMany().HasForeignKey(x => x.PurchaseSupplierId).OnDelete(DeleteBehavior.Restrict);
         b.Property(x => x.WeightKg).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.VolumeM3).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.LengthCm).HasColumnType(ColumnTypes.Measure);
@@ -281,7 +296,8 @@ public class EquipmentUnitConfiguration : IEntityTypeConfiguration<EquipmentUnit
         b.Property(x => x.SerialNumber).HasMaxLength(EquipmentUnitConsts.MaxSerialNumberLength);
         b.Property(x => x.InternalRef).HasMaxLength(EquipmentUnitConsts.MaxInternalRefLength).IsRequired();
         b.Property(x => x.Notes).HasMaxLength(EquipmentDetailConsts.MaxRemarkLength);
-        b.HasIndex(x => new { x.CompanyId, x.InternalRef }).IsUnique().HasFilter("[IsDeleted] = 0");
+        b.HasIndex(x => new { x.CompanyId, x.EquipmentId, x.InternalRef }).IsUnique().HasFilter("[IsDeleted] = 0");
+        b.HasIndex(x => new { x.CompanyId, x.InternalRef });
         b.HasOne<Supplier>().WithMany().HasForeignKey(x => x.SupplierId).OnDelete(DeleteBehavior.Restrict);
         b.HasIndex(x => new { x.EquipmentId, x.Status });
         b.HasIndex(x => x.CurrentProjectId);

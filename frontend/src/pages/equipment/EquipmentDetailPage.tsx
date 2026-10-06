@@ -1,7 +1,7 @@
 import { ArrowLeftOutlined, CameraOutlined, DeleteOutlined, InboxOutlined, PrinterOutlined, ScanOutlined, UndoOutlined } from '@ant-design/icons';
-import { App, Button, Card, Flex, Modal, Popconfirm, Skeleton, Space, Table, Tabs, Tag, Typography, Upload } from 'antd';
+import { Alert, App, Button, Card, Flex, Modal, Popconfirm, Skeleton, Space, Table, Tabs, Tag, Typography, Upload } from 'antd';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { equipmentApi, labelApi, warehouseApi } from '../../api/endpoints';
@@ -10,7 +10,7 @@ import { Permissions, useAuth } from '../../auth/AuthContext';
 import { AuthImage } from '../../components/AuthImage';
 import { CollaborationPanel } from '../../components/CollaborationPanel';
 import { ScanInput } from '../../components/ScanInput';
-import { UnitStatusTag } from '../../components/StatusTags';
+import { useLabelGenerator } from '../../components/LabelGenerator';
 import { useErrorToast } from '../../utils/errors';
 import { useFormat } from '../../utils/format';
 import { EquipmentInspectionTab, EquipmentRepairsTab } from './EquipmentMaintenanceTabs';
@@ -28,6 +28,7 @@ export function EquipmentDetailPage() {
   const queryClient = useQueryClient();
   const manage = can(Permissions.EquipmentManage);
   const [tab, setTab] = useState('properties');
+  const propertiesGuard = useRef<(() => Promise<boolean>) | null>(null);
 
   const equipment = useQuery({ queryKey: ['equipment', id], queryFn: () => equipmentApi.get(id!) });
   const apply = (saved: EquipmentDetail) => queryClient.setQueryData(['equipment', id], saved);
@@ -35,6 +36,16 @@ export function EquipmentDetailPage() {
   const archive = useMutation({
     mutationFn: () => (equipment.data!.isArchived ? equipmentApi.restore(id!) : equipmentApi.archive(id!)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['equipment'] }),
+    onError: showError,
+  });
+
+  const remove = useMutation({
+    mutationFn: () => equipmentApi.remove(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['equipment'] });
+      queryClient.invalidateQueries({ queryKey: ['folders'] });
+      navigate(equipment.data?.folderId ? `/equipment?folder=${equipment.data.folderId}` : '/equipment');
+    },
     onError: showError,
   });
 
@@ -46,9 +57,14 @@ export function EquipmentDetailPage() {
   const backTo = e.folderId ? `/equipment?folder=${e.folderId}` : '/equipment';
 
   const tabs = [
-    { key: 'properties', label: t('equipmentDetail.tabs.properties'), children: <EquipmentPropertiesTab equipment={e} /> },
+    {
+      key: 'properties',
+      label: t('equipmentDetail.tabs.properties'),
+      children: <EquipmentPropertiesTab equipment={e} onLeaveGuard={(fn) => (propertiesGuard.current = fn)} />,
+    },
+    // Serial numbers only for serial-tracked equipment; quantity-tracked items keep just a stock count.
     ...(e.isSerialized
-      ? [{ key: 'units', label: `${t('equipmentDetail.tabs.units')} (${e.stock})`, children: <UnitGrid equipmentId={e.id} canManage={manage} /> }]
+      ? [{ key: 'units', label: `${t('equipmentDetail.tabs.manufacturerSerials')} (${e.stock})`, children: <UnitGrid equipmentId={e.id} canManage={manage} /> }]
       : []),
     {
       key: 'content',
@@ -68,7 +84,6 @@ export function EquipmentDetailPage() {
     { key: 'suppliers', label: `${t('equipmentDetail.tabs.suppliers')} (${e.suppliers.length})`, children: <EquipmentSuppliersTab equipment={e} /> },
     { key: 'inspection', label: t('equipmentDetail.tabs.inspection'), children: <EquipmentInspectionTab equipment={e} /> },
     ...(can(Permissions.Maintenance) ? [{ key: 'repairs', label: t('equipmentDetail.tabs.repairs'), children: <EquipmentRepairsTab equipment={e} /> }] : []),
-    { key: 'stock', label: t('equipmentDetail.tabs.stock'), children: <StockTab equipment={e} /> },
     { key: 'history', label: t('equipmentDetail.tabs.history'), children: <HistoryTab equipmentId={e.id} /> },
   ];
 
@@ -82,15 +97,36 @@ export function EquipmentDetailPage() {
           </Typography.Title>
           {e.isArchived && <Tag>{t('equipment.archived')}</Tag>}
         </Space>
-        {manage && (
-          <Button
-            icon={e.isArchived ? <UndoOutlined /> : <InboxOutlined />}
-            loading={archive.isPending}
-            onClick={() => (e.isArchived ? archive.mutate() : modal.confirm({ title: t('equipment.archiveConfirm'), onOk: () => archive.mutateAsync() }))}
-          >
-            {e.isArchived ? t('equipment.restore') : t('equipment.archive')}
-          </Button>
-        )}
+        <Space>
+          {manage && (
+            <Button
+              icon={e.isArchived ? <UndoOutlined /> : <InboxOutlined />}
+              loading={archive.isPending}
+              onClick={() => (e.isArchived ? archive.mutate() : modal.confirm({ title: t('equipment.archiveConfirm'), onOk: () => archive.mutateAsync() }))}
+            >
+              {e.isArchived ? t('equipment.restore') : t('equipment.archive')}
+            </Button>
+          )}
+          {can(Permissions.EquipmentDelete) && (
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              loading={remove.isPending}
+              onClick={() =>
+                modal.confirm({
+                  title: t('equipmentDelete.confirmTitle', { code: e.code }),
+                  content: t('equipmentDelete.confirm'),
+                  okText: t('common.delete'),
+                  cancelText: t('common.cancel'),
+                  okButtonProps: { danger: true },
+                  onOk: () => remove.mutateAsync(),
+                })
+              }
+            >
+              {t('common.delete')}
+            </Button>
+          )}
+        </Space>
       </div>
 
       <Card size="small" style={{ marginBottom: 12 }}>
@@ -130,6 +166,7 @@ export function EquipmentDetailPage() {
               <Tag color="geekblue">
                 {t('equipment.stock')}: {e.stock}
               </Tag>
+              {!e.showInQuotes && <Tag color="orange">{t('equipmentQuote.notInQuotes')}</Tag>}
               {e.isSerialized &&
                 UNIT_STATUSES.filter((s) => e.unitStatusCounts[s]).map((s) => (
                   <Tag key={s}>
@@ -137,13 +174,40 @@ export function EquipmentDetailPage() {
                   </Tag>
                 ))}
             </Space>
+            {e.containedIn.length > 0 && (
+              <Alert
+                type="info"
+                showIcon
+                style={{ padding: '4px 10px' }}
+                message={
+                  <span>
+                    {t('equipmentQuote.containedIn')}{' '}
+                    {e.containedIn.map((c, i) => (
+                      <span key={c.id}>
+                        {i > 0 && ', '}
+                        <Link to={`/equipment/${c.id}`}>
+                          {c.code} {c.name}
+                        </Link>
+                      </span>
+                    ))}
+                  </span>
+                }
+              />
+            )}
             {!e.isSerialized && <EquipmentLabels equipment={e} />}
           </Flex>
         </Flex>
       </Card>
 
       <Card size="small">
-        <Tabs activeKey={tab} onChange={setTab} items={tabs} />
+        <Tabs
+          activeKey={tabs.some((x) => x.key === tab) ? tab : 'properties'}
+          onChange={async (key) => {
+            if (tab === 'properties' && propertiesGuard.current && !(await propertiesGuard.current())) return;
+            setTab(key);
+          }}
+          items={tabs}
+        />
       </Card>
 
       <Card size="small" style={{ marginTop: 12 }}>
@@ -156,7 +220,7 @@ export function EquipmentDetailPage() {
 /** Labels of quantity-tracked equipment: list, print a new one, or scan an existing label to link it. */
 function EquipmentLabels({ equipment }: { equipment: EquipmentDetail }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const labels = useLabelGenerator();
   const { can } = useAuth();
   const { message } = App.useApp();
   const showError = useErrorToast();
@@ -195,7 +259,7 @@ function EquipmentLabels({ equipment }: { equipment: EquipmentDetail }) {
             {l.code} · {t(`enums.labelType.${l.type}`)}
           </Tag>
         ))}
-        <Button size="small" icon={<PrinterOutlined />} onClick={() => navigate(`/labels/print?equipment=${equipment.id}`)}>
+        <Button size="small" icon={<PrinterOutlined />} onClick={() => labels.open({ equipmentIds: [equipment.id] })}>
           {t('equipmentDetail.createLabel')}
         </Button>
         {assignAllowed && (
@@ -215,64 +279,6 @@ function EquipmentLabels({ equipment }: { equipment: EquipmentDetail }) {
   );
 }
 
-function StockTab({ equipment }: { equipment: EquipmentDetail }) {
-  const { t } = useTranslation();
-  const byLocation = new Map<string, { name: string; counts: Partial<Record<string, number>>; total: number }>();
-  for (const row of equipment.stockRows) {
-    const key = row.stockLocationId ?? '-';
-    const entry = byLocation.get(key) ?? { name: row.stockLocationName ?? t('equipmentDetail.noLocation'), counts: {}, total: 0 };
-    entry.counts[row.status] = (entry.counts[row.status] ?? 0) + row.count;
-    entry.total += row.count;
-    byLocation.set(key, entry);
-  }
-  const rows = [...byLocation.entries()].map(([key, v]) => ({ key, ...v }));
-
-  if (!equipment.isSerialized) {
-    return (
-      <Space direction="vertical">
-        <Typography.Text>
-          {t('equipment.stockQuantity')}: <strong>{equipment.stockQuantity}</strong>
-        </Typography.Text>
-        <Typography.Text type="secondary">{t('equipmentDetail.bulkStockHint')}</Typography.Text>
-      </Space>
-    );
-  }
-
-  return (
-    <Table
-      size="small"
-      rowKey="key"
-      dataSource={rows}
-      pagination={false}
-      columns={[
-        { title: t('units.location'), dataIndex: 'name' },
-        ...UNIT_STATUSES.map((s) => ({
-          title: <UnitStatusTag status={s} />,
-          key: s,
-          width: 120,
-          align: 'end' as const,
-          render: (_: unknown, r: (typeof rows)[number]) => r.counts[s] ?? 0,
-        })),
-        { title: t('equipmentDetail.total'), dataIndex: 'total', width: 100, align: 'end' as const },
-      ]}
-      summary={() => (
-        <Table.Summary.Row>
-          <Table.Summary.Cell index={0}>
-            <strong>{t('equipmentDetail.total')}</strong>
-          </Table.Summary.Cell>
-          {UNIT_STATUSES.map((s, i) => (
-            <Table.Summary.Cell key={s} index={i + 1} align="end">
-              {equipment.unitStatusCounts[s] ?? 0}
-            </Table.Summary.Cell>
-          ))}
-          <Table.Summary.Cell index={UNIT_STATUSES.length + 1} align="end">
-            <strong>{equipment.stock}</strong>
-          </Table.Summary.Cell>
-        </Table.Summary.Row>
-      )}
-    />
-  );
-}
 
 const HISTORY_PAGE = 20;
 
