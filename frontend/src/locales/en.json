@@ -118,6 +118,8 @@
     "camera": "Camera",
     "cameraTitle": "Scan with camera",
     "cameraHint": "Bring the QR label into the frame. Existing labels on the devices are read as well.",
+    "cameraHintSingle": "Hold the QR label inside the frame. The window closes as soon as it is read and the code is filled in.",
+    "read": "Read: {{code}}",
     "cameraError": "Could not open the camera. Check the browser camera permission and the HTTPS connection.",
     "progress": "Packing progress",
     "packingList": "Packing list",
@@ -260,8 +262,7 @@
     "labels": "Labels",
     "changeStatus": "Status",
     "labelCode": "Label code (optional)",
-    "labelCodeHint": "You can scan the existing QR label on the device.",
-    "scanToFill": "Scan the label"
+    "labelCodeHint": "You can scan the existing QR label on the device."
   },
   "labels": {
     "assignTitle": "Link label to a device",

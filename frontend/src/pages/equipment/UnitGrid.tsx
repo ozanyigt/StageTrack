@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { unitApi } from '../../api/endpoints';
 import { UNIT_STATUSES, type EquipmentUnit } from '../../api/types';
 import { ExportButton } from '../../components/ExcelButtons';
-import { ScanInput } from '../../components/ScanInput';
+import { ScanCameraButton } from '../../components/ScanInput';
 import { StockLocationSelect } from '../../components/Selects';
 import { UnitStatusTag } from '../../components/StatusTags';
 import { useErrorToast } from '../../utils/errors';
@@ -411,10 +411,24 @@ function CreateUnitModal({ equipmentId, open, onClose, onCreated }: { equipmentI
         <Form.Item name="supplierId" label={t('unitDetail.supplier')}>
           <SupplierSelect />
         </Form.Item>
+        {/* The camera sits on the field itself, so the scanned code lands where the user is already looking. */}
         <Form.Item name="labelCode" label={t('units.labelCode')} extra={t('units.labelCodeHint')}>
-          <Input maxLength={512} />
+          <Input
+            maxLength={512}
+            allowClear
+            addonAfter={
+              <ScanCameraButton
+                type="text"
+                size="small"
+                label={t('scan.camera')}
+                onScan={(code) => {
+                  form.setFieldValue('labelCode', code);
+                  guard.onValuesChange();
+                }}
+              />
+            }
+          />
         </Form.Item>
-        <ScanInput size="middle" placeholder={t('units.scanToFill')} onScan={(code) => form.setFieldValue('labelCode', code)} />
       </Form>
     </Modal>
   );

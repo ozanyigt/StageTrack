@@ -72,6 +72,26 @@ body {
   animation: scan-in 0.25s ease-out;
 }
 
+/* Green flash over the camera picture: a read must be visible even with the sound off. */
+.scan-flash {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: #52c41a;
+  opacity: 0;
+  pointer-events: none;
+  animation: scan-flash 0.45s ease-out;
+}
+
+@keyframes scan-flash {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes scan-in {
   from {
     opacity: 0;
