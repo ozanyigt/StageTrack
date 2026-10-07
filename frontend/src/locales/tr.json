@@ -118,6 +118,8 @@
     "camera": "Kamera",
     "cameraTitle": "Kamerayla okut",
     "cameraHint": "QR etiketi çerçevenin içine getirin. Cihazların üzerindeki mevcut etiketler de okunur.",
+    "cameraHintSingle": "QR etiketi çerçevenin içine getirin. Okunduğunda pencere kapanır ve kod alana yazılır.",
+    "read": "Okundu: {{code}}",
     "cameraError": "Kamera açılamadı. Tarayıcının kamera iznini ve HTTPS bağlantısını kontrol edin.",
     "progress": "Paketleme ilerlemesi",
     "packingList": "Paketleme listesi",
@@ -260,8 +262,7 @@
     "labels": "Etiket",
     "changeStatus": "Durum",
     "labelCode": "Etiket kodu (isteğe bağlı)",
-    "labelCodeHint": "Cihazın üzerindeki mevcut QR etiketini okutabilirsiniz.",
-    "scanToFill": "Etiketi okutun"
+    "labelCodeHint": "Cihazın üzerindeki mevcut QR etiketini okutabilirsiniz."
   },
   "labels": {
     "assignTitle": "Etiketi cihaza bağla",

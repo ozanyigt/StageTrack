@@ -10,15 +10,9 @@ import { ApiError } from '../../api/http';
 import type { ProjectListItem, ProjectStatus, ScanDirection, ScanResult, ScanSheet, ScanSheetLine } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { LabelAssignModal } from '../../components/LabelAssignModal';
-import { ScanInput, type ScanInputHandle } from '../../components/ScanInput';
+import { ScanInput, type ScanFeedback, type ScanInputHandle } from '../../components/ScanInput';
 import { ProjectStatusTag } from '../../components/StatusTags';
 import { translateError, useErrorToast } from '../../utils/errors';
-
-interface Feedback {
-  kind: 'ok' | 'warn' | 'error';
-  title: string;
-  detail?: string;
-}
 
 const SCANNABLE: ProjectStatus[] = ['Confirmed', 'Prepped', 'OnLocation'];
 
@@ -67,7 +61,7 @@ export function ScanPage() {
   const inputRef = useRef<ScanInputHandle>(null);
 
   const [direction, setDirection] = useState<ScanDirection>('Out');
-  const [last, setLast] = useState<Feedback | null>(null);
+  const [last, setLast] = useState<ScanFeedback | null>(null);
   const [highlight, setHighlight] = useState<string | null>(null);
   const [unknownCode, setUnknownCode] = useState<string | null>(null);
 
@@ -248,7 +242,15 @@ export function ScanPage() {
               ]}
             />
             <div style={{ flex: '1 1 360px' }}>
-              <ScanInput ref={inputRef} autoFocus disabled={scan.isPending} onScan={(code) => scan.mutate({ code })} />
+              {/* Continuous: the camera stays open for the next label, so every result is repeated inside it. */}
+              <ScanInput
+                ref={inputRef}
+                autoFocus
+                mode="continuous"
+                feedback={last}
+                disabled={scan.isPending}
+                onScan={(code) => scan.mutate({ code })}
+              />
             </div>
             <div style={{ flex: '0 1 240px', minWidth: 180 }}>
               <Progress
