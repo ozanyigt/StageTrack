@@ -7,8 +7,10 @@
     <Project Path="src/StageTrack.EntityFrameworkCore/StageTrack.EntityFrameworkCore.csproj" />
     <Project Path="src/StageTrack.HttpApi.Host/StageTrack.HttpApi.Host.csproj" />
     <Project Path="src/StageTrack.HttpApi/StageTrack.HttpApi.csproj" />
+    <Project Path="src/StageTrack.Led/StageTrack.Led.csproj" />
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/StageTrack.Domain.Tests/StageTrack.Domain.Tests.csproj" />
+    <Project Path="test/StageTrack.Led.Tests/StageTrack.Led.Tests.csproj" />
   </Folder>
 </Solution>
