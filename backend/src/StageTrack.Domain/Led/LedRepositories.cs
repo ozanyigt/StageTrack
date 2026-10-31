@@ -1,4 +1,4 @@
-using StageTrack.Inventory;
+﻿using StageTrack.Inventory;
 using StageTrack.Repositories;
 
 namespace StageTrack.Led;
@@ -36,6 +36,13 @@ public interface IEquipmentLedSpecRepository : IRepository<EquipmentLedSpec>
 
     /// <summary>The given equipment with their LED data, whatever the role; missing ids are simply not returned.</summary>
     Task<List<LedItem<EquipmentLedSpec>>> GetItemsAsync(IReadOnlyCollection<Guid> equipmentIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Stock of the given equipment per warehouse: devices counted per location for serial-tracked items, the plain
+    /// stock count under <c>null</c> for quantity-tracked ones (they are not kept per warehouse).
+    /// </summary>
+    Task<Dictionary<(Guid EquipmentId, Guid? StockLocationId), int>> GetStockByLocationAsync(IReadOnlyCollection<Guid> equipmentIds,
+        CancellationToken cancellationToken = default);
 
     /// <summary>For each panel: the processors it is restricted to (empty when it works with any).</summary>
     Task<Dictionary<Guid, List<Guid>>> GetCompatibleProcessorsAsync(IReadOnlyCollection<Guid> panelEquipmentIds,

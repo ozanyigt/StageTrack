@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using StageTrack.EntityFrameworkCore;
 using StageTrack.Inventory;
 using StageTrack.Led;
@@ -34,6 +34,30 @@ public class EquipmentLedSpecRepository(StageTrackDbContext dbContext)
                 join equipment in DbContext.Equipment on spec.EquipmentId equals equipment.Id
                 select new LedItem<EquipmentLedSpec>(equipment, spec))
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Dictionary<(Guid EquipmentId, Guid? StockLocationId), int>> GetStockByLocationAsync(
+        IReadOnlyCollection<Guid> equipmentIds, CancellationToken cancellationToken = default)
+    {
+        var ids = equipmentIds.Distinct().ToList();
+        var serialized = await DbContext.EquipmentUnits
+            .Where(u => ids.Contains(u.EquipmentId) && !u.IsArchived && u.Status != UnitStatus.Lost)
+            .GroupBy(u => new { u.EquipmentId, u.StockLocationId })
+            .Select(g => new { g.Key.EquipmentId, g.Key.StockLocationId, Count = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        var quantity = await DbContext.Equipment
+            .Where(e => ids.Contains(e.Id) && !e.IsSerialized && e.StockQuantity > 0)
+            .Select(e => new { e.Id, e.StockQuantity })
+            .ToListAsync(cancellationToken);
+
+        var result = serialized.ToDictionary(r => (r.EquipmentId, r.StockLocationId), r => r.Count);
+        foreach (var row in quantity)
+        {
+            result[(row.Id, (Guid?)null)] = row.StockQuantity;
+        }
+
+        return result;
     }
 
     public async Task<Dictionary<Guid, List<Guid>>> GetCompatibleProcessorsAsync(IReadOnlyCollection<Guid> panelEquipmentIds,

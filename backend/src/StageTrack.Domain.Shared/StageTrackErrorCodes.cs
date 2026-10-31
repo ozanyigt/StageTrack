@@ -1,4 +1,4 @@
-namespace StageTrack;
+﻿namespace StageTrack;
 
 /// <summary>
 /// Error codes thrown by the domain. Every code has a translation in
@@ -130,4 +130,10 @@ public static class StageTrackErrorCodes
     public const string LedPanelNotFound = "Led.PanelNotFound";
     public const string LedNoVehicles = "Led.NoVehicles";
     public const string LedScreenTooLarge = "Led.ScreenTooLarge";
+    public const string LedCutoutOutside = "Led.CutoutOutside";
+    public const string LedCornerPosition = "Led.CornerPosition";
+    public const string LedScreenFullyCut = "Led.ScreenFullyCut";
+    public const string LedCornerPanelInvalid = "Led.CornerPanelInvalid";
+    public const string LedTooManyScreens = "Led.TooManyScreens";
+    public const string LedInvalidRequest = "Led.InvalidRequest";
 }

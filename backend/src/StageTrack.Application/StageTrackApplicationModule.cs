@@ -43,6 +43,15 @@ public static class StageTrackApplicationModule
         services.AddScoped<ICustomerAppService, CustomerAppService>();
         services.AddScoped<IProjectAppService, ProjectAppService>();
         services.AddScoped<IWarehouseAppService, WarehouseAppService>();
+
+        // LED module (Panelyze): the calculation constants are fixed configuration, the rest is per request.
+        services.AddSingleton(Led.Calculation.CalcSettings.Default);
+        services.AddScoped<Led.LedCatalogLoader>();
+        services.AddScoped<Led.ILedCalculationAppService, Led.LedCalculationAppService>();
+        services.AddScoped<Led.ILedInventoryAppService, Led.LedInventoryAppService>();
+        services.AddScoped<Led.ILedTransportAppService, Led.LedTransportAppService>();
+        services.AddScoped<Led.ILedStageAppService, Led.LedStageAppService>();
+        services.AddScoped<Led.ILedStockStatusAppService, Led.LedStockStatusAppService>();
         services.AddScoped<IRentalFactorProfileAppService, RentalFactorProfileAppService>();
         services.AddScoped<IQuoteAppService, QuoteAppService>();
         services.AddScoped<ILabelTemplateAppService, LabelTemplateAppService>();

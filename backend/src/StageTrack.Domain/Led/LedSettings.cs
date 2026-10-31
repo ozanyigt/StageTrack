@@ -1,4 +1,4 @@
-using StageTrack.Entities;
+﻿using StageTrack.Entities;
 
 namespace StageTrack.Led;
 
@@ -58,21 +58,6 @@ public class LedStageSettings : CompanyAggregateRoot
     private static decimal NotNegative(decimal value) => Math.Max(0, value);
 }
 
-/// <summary>The 3D stage values as one value, so defaults and a save can be handled alike.</summary>
-public record LedStageValues(
-    decimal StageWidthM,
-    decimal StageDepthM,
-    decimal StageHeightM,
-    decimal FrontGapM,
-    LedStageMount Mount,
-    LedStageCarrier Carrier,
-    decimal LegDepthM,
-    decimal BottomM,
-    bool GroundSupport,
-    decimal GroundSupportHeightM,
-    decimal TrussHeightM,
-    decimal HangAllowanceM);
-
 /// <summary>The loading plan's settings of one firm location: the space left between cases and to the walls.</summary>
 public class LedTransportSettings : CompanyAggregateRoot
 {
@@ -92,6 +77,13 @@ public class LedTransportSettings : CompanyAggregateRoot
 /// <summary>A vehicle of the loading plan: its load space in millimetres and how much it may carry.</summary>
 public class LedTransportVehicle : CompanyAggregateRoot
 {
+    /// <summary>The vehicles a firm starts with: Kamyon 10,00 × 2,45 × 2,70 m / 25.000 kg and Tır 20,00 × 2,40 × 2,70 m / 35.500 kg.</summary>
+    public static readonly IReadOnlyList<(string Name, int LengthMm, int WidthMm, int HeightMm, int CapacityKg)> Defaults =
+    [
+        ("Kamyon", 10_000, 2_450, 2_700, 25_000),
+        ("Tır", 20_000, 2_400, 2_700, 35_500)
+    ];
+
     public string Name { get; private set; } = null!;
     public int LengthMm { get; private set; }
     public int WidthMm { get; private set; }

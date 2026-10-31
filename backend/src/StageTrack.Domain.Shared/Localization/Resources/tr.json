@@ -102,5 +102,6 @@
   "Equipment.UsedInHistory": "{code} projelerde veya tekliflerde kullanılmış; geçmiş kayıtlar bozulmasın diye silinemez. Arşivleyebilirsiniz.",
   "Project.ContentLineLocked": "Case içeriğindeki satırlar case'e bağlıdır; adet, taşıma ve silme case satırından yapılır.",
   "Quote.AlreadyExistsForJob": "Bu işin zaten bir teklifi var; değişiklik için mevcut teklifin yeni revizyonunu açın.",
-  "Firm.LogoInvalid": "Logo en fazla 2 MB büyüklüğünde bir resim dosyası olmalıdır."
+  "Firm.LogoInvalid": "Logo en fazla 2 MB büyüklüğünde bir resim dosyası olmalıdır.",
+  "Led.NoWarehouse": "Depo atanmamış"
 }

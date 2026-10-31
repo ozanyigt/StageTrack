@@ -1,4 +1,4 @@
-namespace StageTrack.Led;
+﻿namespace StageTrack.Led;
 
 /// <summary>Which LED page an equipment item takes part in; the discriminator of its technical data.</summary>
 public enum LedRole
@@ -25,3 +25,18 @@ public static class LedConsts
     /// <summary>Gap left between cases and to the vehicle's walls until a firm saves its own value.</summary>
     public const int DefaultTransportGapMm = 20;
 }
+
+/// <summary>The 3D stage values as one value, so defaults and a save can be handled alike.</summary>
+public record LedStageValues(
+    decimal StageWidthM,
+    decimal StageDepthM,
+    decimal StageHeightM,
+    decimal FrontGapM,
+    LedStageMount Mount,
+    LedStageCarrier Carrier,
+    decimal LegDepthM,
+    decimal BottomM,
+    bool GroundSupport,
+    decimal GroundSupportHeightM,
+    decimal TrussHeightM,
+    decimal HangAllowanceM);
