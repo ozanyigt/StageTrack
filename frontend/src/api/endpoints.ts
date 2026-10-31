@@ -337,7 +337,9 @@ export const ledApi = {
 
 /** A job's site plan: what stands where on the real ground, as inventory rather than a drawing. */
 export const sitePlanApi = {
-  byProject: (projectId: T.Guid) => get<S.SitePlan | null>(`/site-plans/by-project/${projectId}`),
+  // A job with no plan answers 204, which axios hands back as an empty string rather than null.
+  byProject: (projectId: T.Guid) =>
+    get<S.SitePlan | ''>(`/site-plans/by-project/${projectId}`).then((plan) => plan || null),
   create: (input: S.CreateSitePlanInput) => post<S.SitePlan>('/site-plans', input),
   updateView: (id: T.Guid, input: S.SitePlanViewInput) => put<S.SitePlan>(`/site-plans/${id}/view`, input),
   rename: (id: T.Guid, name: string) => put<S.SitePlan>(`/site-plans/${id}/name`, { name }),
