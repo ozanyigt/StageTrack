@@ -1938,5 +1938,24 @@
     "overPoint": "{{load}} kg lands on each point and the weakest takes {{capacity}} kg.",
     "overTotal": "The hang is {{load}} kg against {{capacity}} kg of capacity.",
     "hint": "The arithmetic is the kind a rigger does on the back of the rider: everything hanging, divided by the points it hangs from. A real bridle calculation needs angles and sling lengths that are not in any inventory, so they are not pretended at here."
+  },
+  "cable": {
+    "title": "Cable and distribution",
+    "nothingToFeed": "Nothing to feed yet; add a screen or a product on the design screens first.",
+    "addDistro": "Place a distro",
+    "setMains": "Mark the mains",
+    "moveMains": "Move the mains",
+    "clickPlan": "Click the plan.",
+    "distroName": "Box {{n}}",
+    "distro": "Box",
+    "distros": "Boxes",
+    "mains": "MAINS",
+    "metres": "Cable",
+    "totalCable": "Total cable",
+    "feeder": "Feeder",
+    "noDistros": "No distro boxes yet.",
+    "noDistrosHint": "Put the boxes on the plan; everything runs to its nearest one and the metres fall out.",
+    "noMains": "The mains is not marked, so the feeder length cannot be worked out.",
+    "hint": "Everything runs to its nearest box. The run allows {{slack}}% over the straight line (cable never goes straight), and anything hanging counts its drop twice. The circuit counts come from the server calculation."
   }
 }

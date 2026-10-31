@@ -1938,5 +1938,24 @@
     "overPoint": "Nokta başına {{load}} kg düşüyor, en zayıf nokta {{capacity}} kg taşıyor.",
     "overTotal": "Asılı yük {{load}} kg, toplam kapasite {{capacity}} kg.",
     "hint": "Hesap riggerın rider arkasına yaptığı hesap: asılı olan her şey, asıldığı nokta sayısına bölünüyor. Gerçek bridle hesabı açı ve sapan boyu ister; onlar envanterde yok, o yüzden burada da yok."
+  },
+  "cable": {
+    "title": "Kablo ve dağıtım",
+    "nothingToFeed": "Beslenecek bir şey yok; önce tasarım ekranlarından ekran ya da ürün ekleyin.",
+    "addDistro": "Dağıtım kutusu koy",
+    "setMains": "Enerji girişini işaretle",
+    "moveMains": "Enerji girişini taşı",
+    "clickPlan": "Plana tıklayın.",
+    "distroName": "Kutu {{n}}",
+    "distro": "Kutu",
+    "distros": "Kutu sayısı",
+    "mains": "ENERJİ",
+    "metres": "Kablo",
+    "totalCable": "Toplam kablo",
+    "feeder": "Besleme hattı",
+    "noDistros": "Henüz dağıtım kutusu yok.",
+    "noDistrosHint": "Kutuları plana koyun; her tüketici en yakın kutuya bağlanır ve metre hesabı çıkar.",
+    "noMains": "Enerji girişi işaretlenmedi; besleme hattı metresi hesaplanamıyor.",
+    "hint": "Her tüketici en yakın kutuya bağlanır. Mesafeye %{{slack}} pay eklenir (kabloyu düz çekmezsiniz), asılı olanlar iniş-çıkışı iki kez sayar. Devre sayısı sunucunun hesabından gelir."
   }
 }
