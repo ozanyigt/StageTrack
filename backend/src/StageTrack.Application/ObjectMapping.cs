@@ -47,6 +47,7 @@ internal static class ObjectMapping
         dto.WidthCm = e.WidthCm;
         dto.HeightCm = e.HeightCm;
         dto.PowerW = e.PowerW;
+        dto.CapacityKg = e.CapacityKg;
         dto.ShowInQuotes = e.ShowInQuotes;
         dto.PurchaseDate = e.PurchaseDate;
         dto.WarrantyEndDate = e.WarrantyEndDate;

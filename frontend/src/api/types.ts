@@ -112,6 +112,8 @@ export interface Equipment {
   widthCm?: number | null;
   heightCm?: number | null;
   powerW?: number | null;
+  /** What it can carry, kg: a truss section's point load, a hoist's rating. */
+  capacityKg?: number | null;
   /** False: office/internal equipment that cannot be planned on projects or quotes. */
   showInQuotes: boolean;
   /** Quantity-tracked equipment: purchase data (devices keep it per device). */
@@ -167,6 +169,8 @@ export interface EquipmentDetail extends Equipment {
   heightCm?: number | null;
   powerW?: number | null;
   currentA?: number | null;
+  /** What it can carry, kg; empty for anything that carries nothing. */
+  capacityKg?: number | null;
   packedPer: number;
   imageAttachmentId?: Guid | null;
   inspectionIntervalMonths?: number | null;
@@ -199,6 +203,8 @@ export interface EquipmentInput {
   volumeM3?: number | null;
   powerW?: number | null;
   currentA?: number | null;
+  /** What it can carry, kg; empty for anything that carries nothing. */
+  capacityKg?: number | null;
   packedPer: number;
   inspectionIntervalMonths?: number | null;
   inspectionDescription?: string | null;

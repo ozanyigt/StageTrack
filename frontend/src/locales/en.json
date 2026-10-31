@@ -258,7 +258,9 @@
     "powerW": "Power (W)",
     "renameFolder": "Edit folder",
     "volumeAuto": "Calculated from dimensions: {{value}} m³",
-    "widthCm": "Width (cm)"
+    "widthCm": "Width (cm)",
+    "capacityKg": "Load capacity (kg)",
+    "capacityHint": "A truss section's point load, a hoist's rating"
   },
   "units": {
     "title": "Devices (serial numbers)",
@@ -1922,5 +1924,19 @@
     "applyScale": "Apply the scale",
     "planImage": "Venue plan",
     "noPlanImage": "Upload a plan image first."
+  },
+  "rigging": {
+    "title": "Rigging load",
+    "totalHanging": "Total hanging",
+    "perPoint": "Per point",
+    "points": "Points",
+    "hanging": "Hanging group",
+    "weight": "Weight",
+    "noWeight": "not entered",
+    "noHoists": "No hoist with a rating is in the draft.",
+    "noHoistsHint": "Add the hoist on the truss design; its \"Load capacity\" must be filled in on the equipment card.",
+    "overPoint": "{{load}} kg lands on each point and the weakest takes {{capacity}} kg.",
+    "overTotal": "The hang is {{load}} kg against {{capacity}} kg of capacity.",
+    "hint": "The arithmetic is the kind a rigger does on the back of the rider: everything hanging, divided by the points it hangs from. A real bridle calculation needs angles and sling lengths that are not in any inventory, so they are not pretended at here."
   }
 }

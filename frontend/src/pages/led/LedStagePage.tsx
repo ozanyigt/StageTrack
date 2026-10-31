@@ -8,6 +8,7 @@ import { StagePropsPanel } from '../draft/StagePropsPanel';
 import { usePlanTexture } from '../draft/usePlanTexture';
 import { usePlanImage } from '../draft/useVenue';
 import { useStageScene } from '../draft/useStageScene';
+import { RiggingCard } from '../draft/RiggingCard';
 import { VenueCard } from '../draft/VenueCard';
 import { useErrorToast } from '../../utils/errors';
 import { useBomLines } from './components/CarrierFacts';
@@ -49,6 +50,7 @@ export function LedStagePage() {
     job,
     settings,
     loadingSettings,
+    equipmentById,
     layout,
     placements,
     setPlacements,
@@ -368,6 +370,16 @@ export function LedStagePage() {
 
           <div style={{ marginTop: 12 }}>
             <VenueCard projectId={job.projectId} rigHeightM={rigHeightM} />
+          </div>
+
+          <div style={{ marginTop: 12 }}>
+            <RiggingCard
+              flownScreenKg={totals.weightKg}
+              flown={settings?.mount === 'Flown'}
+              props={sceneProps}
+              lines={job.lines}
+              equipmentById={equipmentById}
+            />
           </div>
 
           <div style={{ marginTop: 12 }}>

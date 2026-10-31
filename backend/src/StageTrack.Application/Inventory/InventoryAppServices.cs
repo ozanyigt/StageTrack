@@ -309,6 +309,7 @@ public class EquipmentAppService(
     private async Task ApplyAsync(Equipment equipment, CreateUpdateEquipmentDto input)
     {
         equipment.Update(input.Name.Trim(), input.Brand, input.Model, input.FolderId, input.Type, input.CountryOfOrigin, input.Notes);
+        equipment.SetCapacity(input.CapacityKg);
         equipment.UpdatePhysical(input.LengthCm, input.WidthCm, input.HeightCm, input.WeightKg, input.VolumeM3, input.PowerW,
             input.CurrentA, input.PackedPer);
         equipment.SetInspection(input.InspectionIntervalMonths, input.InspectionDescription);

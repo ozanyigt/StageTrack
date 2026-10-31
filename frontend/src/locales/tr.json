@@ -258,7 +258,9 @@
     "powerW": "Güç (W)",
     "renameFolder": "Klasörü düzenle",
     "volumeAuto": "Ölçülerden hesaplandı: {{value}} m³",
-    "widthCm": "Genişlik (cm)"
+    "widthCm": "Genişlik (cm)",
+    "capacityKg": "Taşıma kapasitesi (kg)",
+    "capacityHint": "Truss kesitinin nokta yükü, motorun kapasitesi"
   },
   "units": {
     "title": "Cihazlar (seri numaraları)",
@@ -1922,5 +1924,19 @@
     "applyScale": "Ölçeği uygula",
     "planImage": "Mekân planı",
     "noPlanImage": "Önce bir plan görseli yükleyin."
+  },
+  "rigging": {
+    "title": "Rigging yükü",
+    "totalHanging": "Asılı toplam",
+    "perPoint": "Nokta başına",
+    "points": "Nokta sayısı",
+    "hanging": "Asılı grup",
+    "weight": "Ağırlık",
+    "noWeight": "girilmemiş",
+    "noHoists": "Taslakta kapasitesi girili motor yok.",
+    "noHoistsHint": "Truss tasarımından motoru ekleyin; ekipman kartındaki \"Taşıma kapasitesi\" alanı dolu olmalı.",
+    "overPoint": "Nokta başına {{load}} kg düşüyor, en zayıf nokta {{capacity}} kg taşıyor.",
+    "overTotal": "Asılı yük {{load}} kg, toplam kapasite {{capacity}} kg.",
+    "hint": "Hesap riggerın rider arkasına yaptığı hesap: asılı olan her şey, asıldığı nokta sayısına bölünüyor. Gerçek bridle hesabı açı ve sapan boyu ister; onlar envanterde yok, o yüzden burada da yok."
   }
 }

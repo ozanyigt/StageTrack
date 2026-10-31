@@ -58,6 +58,9 @@ public class EquipmentDto
     public decimal? HeightCm { get; set; }
     public decimal? PowerW { get; set; }
 
+    /// <summary>What it can carry, kilograms: a truss section's point load, a hoist's rating.</summary>
+    public decimal? CapacityKg { get; set; }
+
     /// <summary>False: office/internal equipment that cannot be planned on projects or quotes.</summary>
     public bool ShowInQuotes { get; set; }
 
@@ -179,6 +182,9 @@ public class CreateUpdateEquipmentDto
     [Range(0, 100_000)] public decimal? VolumeM3 { get; set; }
     [Range(0, 1_000_000)] public decimal? PowerW { get; set; }
     [Range(0, 10_000)] public decimal? CurrentA { get; set; }
+
+    /// <summary>What it can carry, kilograms; left empty for anything that carries nothing.</summary>
+    [Range(0, 1_000_000)] public decimal? CapacityKg { get; set; }
     [Range(1, 10_000)] public int PackedPer { get; set; } = 1;
 
     [Range(1, 120)]

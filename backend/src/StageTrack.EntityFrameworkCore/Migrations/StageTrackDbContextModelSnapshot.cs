@@ -498,6 +498,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
+                    b.Property<decimal?>("CapacityKg")
+                        .HasColumnType("decimal(12,3)");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(64)

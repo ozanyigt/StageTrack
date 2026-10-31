@@ -24,6 +24,8 @@ export interface StageProp {
   rotationDeg: number;
   /** Lighting gets a beam so the dark corners of a plan are visible from above. */
   beam: boolean;
+  /** Hung rather than standing: it is a load on the rig and blocks nobody's view. */
+  flown: boolean;
 }
 
 export interface PropPlacement {
@@ -100,6 +102,7 @@ export function stageProps(
         y: flown ? flownHeight : deckHeight,
         rotationDeg: placement?.rotationDeg ?? 0,
         beam: line.discipline === 'Light',
+        flown,
       };
     });
 }

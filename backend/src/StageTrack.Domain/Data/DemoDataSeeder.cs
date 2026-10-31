@@ -419,6 +419,12 @@ public class DemoDataSeeder(
         _equipment["ledfloor"].UpdatePhysical(80, 133, 99, 160, null, 2000, 9m, 10);
         _equipment["roof"].UpdatePhysical(null, null, null, 1850, 12, null, null, 1);
 
+        // What the rigging officer asks for: a truss section's point load and a hoist's rating.
+        _equipment["truss3"].SetCapacity(750);
+        _equipment["truss2"].SetCapacity(900);
+        _equipment["tower"].SetCapacity(1500);
+        _equipment["hoist"].SetCapacity(1000);
+
         // The roof system is a kit: its sections travel with it (printed indented on the packing slip).
         await equipmentManager.AddRelationAsync(_equipment["roof"], EquipmentRelationKind.Content, _equipment["truss3"].Id, 12);
         await equipmentManager.AddRelationAsync(_equipment["roof"], EquipmentRelationKind.Content, _equipment["tower"].Id, 12);
