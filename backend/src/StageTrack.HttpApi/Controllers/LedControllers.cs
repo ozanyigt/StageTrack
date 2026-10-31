@@ -102,3 +102,19 @@ public class LedStockStatusController(ILedStockStatusAppService appService) : Co
     [HttpPost]
     public Task<LedStockStatusResponse> GetAsync(LedStockStatusRequest request) => appService.GetAsync(request);
 }
+
+/// <summary>
+/// The bridge: a calculated LED job becomes planned equipment on a real job, and from there its draft quote,
+/// packing list and warehouse scan.
+/// </summary>
+[ApiController]
+[Route("api/led/jobs/{projectId:guid}")]
+[Authorize(StageTrackPermissions.Led.Quote)]
+public class LedJobController(ILedJobAppService appService) : ControllerBase
+{
+    [HttpPost("preview")]
+    public Task<LedToJobResultDto> PreviewAsync(Guid projectId, LedToJobInput input) => appService.PreviewAsync(projectId, input);
+
+    [HttpPost("transfer")]
+    public Task<LedToJobResultDto> TransferAsync(Guid projectId, LedToJobInput input) => appService.TransferAsync(projectId, input);
+}

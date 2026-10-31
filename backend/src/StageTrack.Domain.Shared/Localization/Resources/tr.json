@@ -103,5 +103,6 @@
   "Project.ContentLineLocked": "Case içeriğindeki satırlar case'e bağlıdır; adet, taşıma ve silme case satırından yapılır.",
   "Quote.AlreadyExistsForJob": "Bu işin zaten bir teklifi var; değişiklik için mevcut teklifin yeni revizyonunu açın.",
   "Firm.LogoInvalid": "Logo en fazla 2 MB büyüklüğünde bir resim dosyası olmalıdır.",
-  "Led.NoWarehouse": "Depo atanmamış"
+  "Led.NoWarehouse": "Depo atanmamış",
+  "Led.JobSection": "LED ekranları"
 }

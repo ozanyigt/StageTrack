@@ -52,6 +52,7 @@ public static class StageTrackApplicationModule
         services.AddScoped<Led.ILedTransportAppService, Led.LedTransportAppService>();
         services.AddScoped<Led.ILedStageAppService, Led.LedStageAppService>();
         services.AddScoped<Led.ILedStockStatusAppService, Led.LedStockStatusAppService>();
+        services.AddScoped<Led.ILedJobAppService, Led.LedJobAppService>();
         services.AddScoped<IRentalFactorProfileAppService, RentalFactorProfileAppService>();
         services.AddScoped<IQuoteAppService, QuoteAppService>();
         services.AddScoped<ILabelTemplateAppService, LabelTemplateAppService>();
