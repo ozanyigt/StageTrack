@@ -106,3 +106,27 @@ export interface SaveSitePlanZoneInput {
   color: string;
   layer?: string | null;
 }
+
+export interface SitePowerLine {
+  equipmentId: Guid;
+  code: string;
+  name: string;
+  count: number;
+  isLight: boolean;
+  weightKg: number;
+  watt: number;
+  currentA: number;
+  circuits: number;
+}
+
+export interface SitePower {
+  lines: SitePowerLine[];
+  totalWeightKg: number;
+  totalWatt: number;
+  totalCurrentA: number;
+  totalCircuits: number;
+  lightingWatt: number;
+  lightingCircuits: number;
+  /** Equipment on the plan whose power is not entered, so the figures are short. */
+  missingWatt: string[];
+}

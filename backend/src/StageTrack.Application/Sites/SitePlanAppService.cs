@@ -1,4 +1,5 @@
-using StageTrack.Inventory;
+﻿using StageTrack.Inventory;
+using StageTrack.Led.Calculation;
 using StageTrack.Projects;
 using StageTrack.Repositories;
 
@@ -8,8 +9,58 @@ public class SitePlanAppService(
     ISitePlanRepository planRepository,
     IProjectRepository projectRepository,
     IEquipmentRepository equipmentRepository,
+    CalcSettings calcSettings,
     IUnitOfWork unitOfWork) : ISitePlanAppService
 {
+    /// <summary>
+    /// What the site draws. The arithmetic is the same one the LED module uses for everything that is not a
+    /// panel - watts to amps to 16 A circuits - because it is ordinary mains maths, not an LED concern; running
+    /// one calculator means a lighting tower is costed the same whether it is on a site plan or in a job.
+    /// </summary>
+    public async Task<SitePowerDto> GetPowerAsync(Guid id, double voltage)
+    {
+        var plan = await planRepository.GetAsync(id);
+        var totals = plan.Items
+            .Where(i => i.EquipmentId.HasValue)
+            .GroupBy(i => i.EquipmentId!.Value)
+            .ToDictionary(g => g.Key, g => (Count: g.Sum(i => i.Quantity), IsLight: g.Any(i => i.LightHeightM.HasValue)));
+
+        var equipment = (await equipmentRepository.GetListByIdsAsync(totals.Keys)).ToDictionary(e => e.Id);
+        var mains = voltage is > 0 and <= 1000 ? voltage : 220;
+
+        var lines = new List<SitePowerLineDto>();
+        var missing = new List<string>();
+        foreach (var (equipmentId, row) in totals)
+        {
+            if (!equipment.TryGetValue(equipmentId, out var item))
+            {
+                continue;
+            }
+
+            if (item.PowerW is null)
+            {
+                missing.Add(item.Code);
+            }
+
+            var spec = new EquipmentPowerSpec((double)(item.WeightKg ?? 0), (double?)item.PowerW, (double?)item.PowerW);
+            var result = EquipmentPowerCalculator.Line(spec, row.Count, PowerMode.Max, mains, calcSettings);
+            lines.Add(new SitePowerLineDto(item.Id, item.Code, item.Name, row.Count, row.IsLight,
+                result.WeightKg, result.Watt, result.CurrentA, result.Circuits));
+        }
+
+        var ordered = lines.OrderByDescending(l => l.Watt).ThenBy(l => l.Code).ToList();
+        var lighting = ordered.Where(l => l.IsLight).ToList();
+        return new SitePowerDto(
+            ordered,
+            ordered.Sum(l => l.WeightKg),
+            ordered.Sum(l => l.Watt),
+            ordered.Sum(l => l.CurrentA),
+            ordered.Sum(l => l.Circuits),
+            lighting.Sum(l => l.Watt),
+            lighting.Sum(l => l.Circuits),
+            missing.OrderBy(c => c).ToList());
+    }
+
     public async Task<SitePlanDto?> FindByProjectAsync(Guid projectId)
     {
         var plan = await planRepository.FindByProjectAsync(projectId);

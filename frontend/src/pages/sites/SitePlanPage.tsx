@@ -10,6 +10,7 @@ import type { EquipmentLookup } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { useErrorToast } from '../../utils/errors';
 import { SiteMap, type SiteMapHandle } from './SiteMap';
+import { SitePowerCard } from './SitePowerCard';
 import { SiteZoneTools } from './SiteZoneTools';
 
 /**
@@ -277,6 +278,8 @@ export function SitePlanPage() {
                 ))}
               </Space>
             </Card>
+
+            <SitePowerCard plan={data} />
 
             {shortages.length > 0 && (
               <Alert

@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace StageTrack.Sites;
 
@@ -201,4 +201,36 @@ public interface ISitePlanAppService
     Task<SitePlanDto> SaveZoneAsync(Guid id, Guid? zoneId, SaveSitePlanZoneInput input);
 
     Task<SitePlanDto> RemoveZoneAsync(Guid id, Guid zoneId);
+
+    /// <summary>What the equipment on the plan draws, at the given mains voltage.</summary>
+    Task<SitePowerDto> GetPowerAsync(Guid id, double voltage);
 }
+
+// ---------------------------------------------------------------- What the site draws
+
+/// <summary>One equipment on the plan and what it costs in power and weight.</summary>
+public sealed record SitePowerLineDto(
+    Guid EquipmentId,
+    string Code,
+    string Name,
+    int Count,
+    bool IsLight,
+    double WeightKg,
+    double Watt,
+    double CurrentA,
+    int Circuits);
+
+/// <summary>
+/// What the whole plan draws. Lighting is reported on its own because it is the part that is decided late and
+/// grows fastest: another tower on a dark corner is another circuit somebody has to feed.
+/// </summary>
+public sealed record SitePowerDto(
+    IReadOnlyList<SitePowerLineDto> Lines,
+    double TotalWeightKg,
+    double TotalWatt,
+    double TotalCurrentA,
+    int TotalCircuits,
+    double LightingWatt,
+    int LightingCircuits,
+    /// <summary>Equipment on the plan whose power is not entered, so these figures are short.</summary>
+    IReadOnlyList<string> MissingWatt);

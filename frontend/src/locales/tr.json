@@ -1780,6 +1780,13 @@
     "zonePoints": "{{count}} nokta (en az {{needed}})",
     "undoPoint": "Son noktayı sil",
     "drawHint": "Haritaya tıklayarak köşeleri koyun, sonra kaydedin.",
-    "noZones": "Henüz bölge yok."
+    "noZones": "Henüz bölge yok.",
+    "power": "Güç",
+    "noEquipmentYet": "Haritada henüz ekipman yok.",
+    "totalWatt": "Toplam",
+    "circuits": "Devre",
+    "weight": "Ağırlık",
+    "lightingLoad": "Aydınlatma: {{watt}} W · {{circuits}} devre",
+    "missingWatt": "Güç değeri girilmemiş: {{codes}} — rakamlar eksik."
   }
 }

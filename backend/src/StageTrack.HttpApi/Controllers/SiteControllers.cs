@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StageTrack.Permissions;
 using StageTrack.Sites;
@@ -48,6 +48,9 @@ public class SitePlanController(ISitePlanAppService appService) : ControllerBase
     [HttpDelete("{id:guid}/items/{itemId:guid}")]
     [Authorize(StageTrackPermissions.Projects.Manage)]
     public Task<SitePlanDto> RemoveItemAsync(Guid id, Guid itemId) => appService.RemoveItemAsync(id, itemId);
+
+    [HttpGet("{id:guid}/power")]
+    public Task<SitePowerDto> GetPowerAsync(Guid id, [FromQuery] double voltage = 220) => appService.GetPowerAsync(id, voltage);
 
     [HttpPost("{id:guid}/zones")]
     [Authorize(StageTrackPermissions.Projects.Manage)]

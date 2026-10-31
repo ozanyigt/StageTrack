@@ -350,6 +350,9 @@ export const sitePlanApi = {
     put<S.SitePlan>(`/site-plans/${id}/items/${itemId}`, input),
   removeItem: (id: T.Guid, itemId: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/items/${itemId}`),
 
+  /** What the equipment on the plan draws, at the given mains voltage. */
+  power: (id: T.Guid, voltage = 220) => get<S.SitePower>(`/site-plans/${id}/power`, { voltage }),
+
   addZone: (id: T.Guid, input: S.SaveSitePlanZoneInput) => post<S.SitePlan>(`/site-plans/${id}/zones`, input),
   updateZone: (id: T.Guid, zoneId: T.Guid, input: S.SaveSitePlanZoneInput) =>
     put<S.SitePlan>(`/site-plans/${id}/zones/${zoneId}`, input),

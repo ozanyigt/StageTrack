@@ -1780,6 +1780,13 @@
     "zonePoints": "{{count}} points (at least {{needed}})",
     "undoPoint": "Undo last point",
     "drawHint": "Click the map to drop corners, then save.",
-    "noZones": "No zones yet."
+    "noZones": "No zones yet.",
+    "power": "Power",
+    "noEquipmentYet": "No equipment on the map yet.",
+    "totalWatt": "Total",
+    "circuits": "Circuits",
+    "weight": "Weight",
+    "lightingLoad": "Lighting: {{watt}} W · {{circuits}} circuits",
+    "missingWatt": "No power entered for: {{codes}} — the figures are short."
   }
 }
