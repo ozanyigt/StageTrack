@@ -1572,7 +1572,16 @@
     "areaUsed": "Kullanılan alan",
     "shortageHint": "{{count}} panel eksik; başka depodan getirin veya ekranı küçültün.",
     "resetOverrides": "Elle girişleri sıfırla",
-    "noStockLines": "Bu iş için stok satırı yok."
+    "noStockLines": "Bu iş için stok satırı yok.",
+    "weight": "Ağırlık",
+    "backToAuto": "Otomatik plana dön",
+    "autoFit": "Boşluğa yerleştir",
+    "rotate": "Çevir",
+    "rotateHint": "Çift tıklayın veya R",
+    "moveToVehicle": "Araca taşı",
+    "floorFill": "Taban doluluğu",
+    "freeLength": "{{m}} m boş",
+    "planHint": "İstifi sürükleyin, çift tıklayarak çevirin; ok tuşları 1 cm (Shift ile 10 cm) kaydırır."
   },
   "pixel": {
     "label": {

@@ -1572,7 +1572,16 @@
     "areaUsed": "Area used",
     "shortageHint": "{{count}} panels short; bring them from another warehouse or make the screen smaller.",
     "resetOverrides": "Reset the typed values",
-    "noStockLines": "No stock lines for this job."
+    "noStockLines": "No stock lines for this job.",
+    "weight": "Weight",
+    "backToAuto": "Back to the automatic plan",
+    "autoFit": "Drop into the nearest free spot",
+    "rotate": "Rotate",
+    "rotateHint": "Double-click or press R",
+    "moveToVehicle": "Move to vehicle",
+    "floorFill": "Floor used",
+    "freeLength": "{{m}} m free",
+    "planHint": "Drag a stack, double-click to turn it; the arrow keys move it 1 cm (10 cm with Shift)."
   },
   "pixel": {
     "label": {
