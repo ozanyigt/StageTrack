@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using StageTrack.Account;
 using StageTrack.Dtos;
 using StageTrack.Tenants;
@@ -21,6 +21,9 @@ public class TenantDto
     public DateTime? EndDate { get; set; }
     public int? MaxUsers { get; set; }
     public int? MaxLocations { get; set; }
+    /// <summary>Add-on modules the firm bought (<see cref="TenantModules"/>).</summary>
+    public List<string> Modules { get; set; } = [];
+
     public int UserCount { get; set; }
     public int LocationCount { get; set; }
     public DateTime CreationTime { get; set; }
@@ -98,6 +101,9 @@ public class UpdateTenantInput
 
     [Range(1, 1_000)]
     public int? MaxLocations { get; set; }
+
+    /// <summary>Add-on modules the firm is given; unknown names are ignored.</summary>
+    public List<string> Modules { get; set; } = [];
 }
 
 public class TenantLocationInput

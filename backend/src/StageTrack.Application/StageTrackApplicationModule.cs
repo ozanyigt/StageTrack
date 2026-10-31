@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using StageTrack.Account;
 using StageTrack.Authorization;
 using StageTrack.Collaboration;
@@ -21,6 +21,7 @@ public static class StageTrackApplicationModule
     {
         services.AddStageTrackDomain();
 
+        services.AddScoped<IModuleAccess, ModuleAccess>();
         services.AddScoped<IPermissionChecker, PermissionChecker>();
         services.AddScoped<PriceVisibility>();
         services.AddScoped<ImportRunner>();

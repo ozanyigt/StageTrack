@@ -68,7 +68,12 @@
     "labelTemplates": "Etiket şablonları",
     "tenants": "Firmalar",
     "auditLog": "İşlem kaydı",
-    "firm": "Firma ve logo"
+    "firm": "Firma ve logo",
+    "led": "LED",
+    "ledPanels": "LED envanteri",
+    "ledDesign": "Ekran tasarımı",
+    "ledPower": "Güç ve işlemci",
+    "ledLogistics": "Yükleme planı"
   },
   "dashboard": {
     "welcome": "Hoş geldiniz, {{name}}",
@@ -719,7 +724,8 @@
     "Settings": "Ayarlar",
     "Identity": "Kullanıcı yönetimi",
     "Maintenance": "Bakım",
-    "Suppliers": "Tedarikçiler"
+    "Suppliers": "Tedarikçiler",
+    "Led": "LED"
   },
   "permissions": {
     "Equipment": "Ekipmanı görüntüleme",
@@ -748,7 +754,12 @@
     "Prices": "Fiyatları ve tutarları görme",
     "Settings_LabelTemplates": "Etiket şablonlarını yönetme",
     "Equipment_Delete": "Ekipman silme (işlem kaydına yazılır)",
-    "Settings_AuditLog": "İşlem kaydını görüntüleme"
+    "Settings_AuditLog": "İşlem kaydını görüntüleme",
+    "Led": "LED modülü",
+    "Led_Manage": "LED teknik verisini düzenle",
+    "Led_Design": "Pixel Map, simülasyon ve 3D sahne",
+    "Led_Transport": "Yükleme planı ve araçlar",
+    "Led_Quote": "Hesabı teklife aktar"
   },
   "excel": {
     "export": "Excel",
@@ -1182,7 +1193,13 @@
     "createdAt": "Oluşturma",
     "detail": "Detay",
     "backToList": "Firmalar",
-    "statusColumn": "Durum"
+    "statusColumn": "Durum",
+    "modules": "Modüller",
+    "modulesHint": "Firmanın satın aldığı ek modüller. Firma içinde kimin kullanacağı rollerle belirlenir.",
+    "noModules": "Ek modül yok",
+    "module": {
+      "Led": "LED (ekran tasarımı ve hesap)"
+    }
   },
   "subscriptionWarning": "Aboneliğiniz {{date}} tarihinde sona eriyor ({{count}} gün kaldı). Yenilemek için bizimle iletişime geçin.",
   "archivePage": {

@@ -1,5 +1,7 @@
 import {
   AppstoreOutlined,
+  BgColorsOutlined,
+  BorderOuterOutlined,
   InboxOutlined,
   CalendarOutlined,
   DashboardOutlined,
@@ -24,6 +26,8 @@ import {
   IdcardOutlined,
   QrcodeOutlined,
   ApartmentOutlined,
+  ThunderboltOutlined,
+  TruckOutlined,
 } from '@ant-design/icons';
 import { Alert, Avatar, Button, Dropdown, Flex, Layout, Menu, Select, Tag, Typography, theme, type MenuProps } from 'antd';
 import { useState } from 'react';
@@ -83,6 +87,20 @@ export function AppLayout() {
         ...(can(Permissions.Maintenance) ? [{ key: '/maintenance/repairs', icon: <BuildOutlined />, label: t('nav.repairs') }] : []),
       ],
     },
+    // The LED module: the server strips its permissions for a firm that did not buy it, so this group
+    // simply disappears rather than needing a module check of its own.
+    {
+      key: 'led',
+      icon: <BgColorsOutlined />,
+      label: t('nav.led'),
+      permission: Permissions.Led,
+      children: [
+        { key: '/led/panels', icon: <BorderOuterOutlined />, label: t('nav.ledPanels') },
+        { key: '/led/design', icon: <AppstoreOutlined />, label: t('nav.ledDesign'), permission: Permissions.LedDesign },
+        { key: '/led/power', icon: <ThunderboltOutlined />, label: t('nav.ledPower'), permission: Permissions.LedDesign },
+        { key: '/led/logistics', icon: <TruckOutlined />, label: t('nav.ledLogistics'), permission: Permissions.LedTransport },
+      ].filter((i) => !('permission' in i) || can(i.permission as string)),
+    },
     { key: '/customers', icon: <TeamOutlined />, label: t('nav.customers'), permission: Permissions.Customers },
     { key: '/suppliers', icon: <ShopOutlined />, label: t('nav.suppliers'), permission: Permissions.Suppliers },
     { key: '/crew', icon: <IdcardOutlined />, label: t('nav.crew') },
@@ -109,7 +127,7 @@ export function AppLayout() {
 
   const path = location.pathname;
   const selected =
-    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
+    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/led/panels', '/led/design', '/led/power', '/led/logistics', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
       .find((p) => path.startsWith(p)) ??
     ['/warehouse', '/projects', '/quotes', '/equipment', '/customers', '/suppliers', '/crew'].find((p) => path.startsWith(p) && !user?.isHost) ??
     '/';

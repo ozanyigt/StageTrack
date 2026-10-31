@@ -68,7 +68,12 @@
     "labelTemplates": "Label templates",
     "tenants": "Firms",
     "auditLog": "Audit log",
-    "firm": "Firm and logo"
+    "firm": "Firm and logo",
+    "led": "LED",
+    "ledPanels": "LED inventory",
+    "ledDesign": "Screen design",
+    "ledPower": "Power and processors",
+    "ledLogistics": "Loading plan"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -719,7 +724,8 @@
     "Settings": "Settings",
     "Identity": "User management",
     "Maintenance": "Maintenance",
-    "Suppliers": "Suppliers"
+    "Suppliers": "Suppliers",
+    "Led": "LED"
   },
   "permissions": {
     "Equipment": "View equipment",
@@ -748,7 +754,12 @@
     "Prices": "See prices and totals",
     "Settings_LabelTemplates": "Manage label templates",
     "Equipment_Delete": "Delete equipment (written to the audit log)",
-    "Settings_AuditLog": "View the audit log"
+    "Settings_AuditLog": "View the audit log",
+    "Led": "LED module",
+    "Led_Manage": "Edit LED technical data",
+    "Led_Design": "Pixel Map, simulation and 3D stage",
+    "Led_Transport": "Loading plan and vehicles",
+    "Led_Quote": "Turn a calculation into quote lines"
   },
   "excel": {
     "export": "Excel",
@@ -1182,7 +1193,13 @@
     "createdAt": "Created",
     "detail": "Details",
     "backToList": "Firms",
-    "statusColumn": "Status"
+    "statusColumn": "Status",
+    "modules": "Modules",
+    "modulesHint": "Add-on modules the firm bought. Who uses them inside the firm is a matter of roles.",
+    "noModules": "No add-on modules",
+    "module": {
+      "Led": "LED (screen design and calculation)"
+    }
   },
   "subscriptionWarning": "Your subscription ends on {{date}} ({{count}} days left). Please contact us to renew.",
   "archivePage": {

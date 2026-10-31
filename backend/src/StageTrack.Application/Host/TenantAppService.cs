@@ -1,4 +1,4 @@
-using StageTrack.Account;
+﻿using StageTrack.Account;
 using StageTrack.Companies;
 using StageTrack.Dtos;
 using StageTrack.Identity;
@@ -118,6 +118,7 @@ public class TenantAppService(
     {
         tenant.Update(input.Name, input.ContactName, input.Email, input.Phone, input.Notes);
         tenant.SetSubscription(input.PlanName, input.StartDate, input.EndDate, input.MaxUsers, input.MaxLocations);
+        tenant.SetModules(input.Modules);
     }
 
     private static TenantProvisioningManager.LocationSetup ToSetup(TenantLocationInput input) =>
@@ -170,6 +171,7 @@ public class TenantAppService(
         dto.EndDate = t.EndDate;
         dto.MaxUsers = t.MaxUsers;
         dto.MaxLocations = t.MaxLocations;
+        dto.Modules = t.GetModules().ToList();
         dto.UserCount = userCount;
         dto.LocationCount = locationCount;
         dto.CreationTime = t.CreationTime;

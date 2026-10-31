@@ -68,7 +68,12 @@
     "labelTemplates": "قوالب الملصقات",
     "tenants": "الشركات",
     "auditLog": "سجل العمليات",
-    "firm": "الشركة والشعار"
+    "firm": "الشركة والشعار",
+    "led": "LED",
+    "ledPanels": "مخزون LED",
+    "ledDesign": "تصميم الشاشة",
+    "ledPower": "الطاقة والمعالجات",
+    "ledLogistics": "خطة التحميل"
   },
   "dashboard": {
     "welcome": "مرحبًا، {{name}}",
@@ -719,7 +724,8 @@
     "Settings": "الإعدادات",
     "Identity": "إدارة المستخدمين",
     "Maintenance": "الصيانة",
-    "Suppliers": "الموردون"
+    "Suppliers": "الموردون",
+    "Led": "LED"
   },
   "permissions": {
     "Equipment": "عرض المعدات",
@@ -748,7 +754,12 @@
     "Prices": "رؤية الأسعار والمبالغ",
     "Settings_LabelTemplates": "إدارة قوالب الملصقات",
     "Equipment_Delete": "حذف المعدات (يُسجَّل في سجل العمليات)",
-    "Settings_AuditLog": "عرض سجل العمليات"
+    "Settings_AuditLog": "عرض سجل العمليات",
+    "Led": "وحدة LED",
+    "Led_Manage": "تحرير بيانات LED الفنية",
+    "Led_Design": "خريطة البكسل والمحاكاة والمسرح ثلاثي الأبعاد",
+    "Led_Transport": "خطة التحميل والمركبات",
+    "Led_Quote": "تحويل الحساب إلى بنود عرض سعر"
   },
   "excel": {
     "export": "Excel",
@@ -1182,7 +1193,13 @@
     "createdAt": "تاريخ الإنشاء",
     "detail": "التفاصيل",
     "backToList": "الشركات",
-    "statusColumn": "الحالة"
+    "statusColumn": "الحالة",
+    "modules": "الوحدات",
+    "modulesHint": "الوحدات الإضافية التي اشترتها الشركة. أما من يستخدمها داخل الشركة فتحدده الأدوار.",
+    "noModules": "لا توجد وحدات إضافية",
+    "module": {
+      "Led": "LED (تصميم الشاشات والحساب)"
+    }
   },
   "subscriptionWarning": "ينتهي اشتراككم في {{date}} (متبقٍ {{count}} يوم). يرجى التواصل معنا للتجديد.",
   "archivePage": {

@@ -1926,6 +1926,10 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<int?>("MaxUsers")
                         .HasColumnType("int");
 
+                    b.Property<string>("Modules")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)

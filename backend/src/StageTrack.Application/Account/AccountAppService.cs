@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using StageTrack.Companies;
 using StageTrack.Identity;
 using StageTrack.Repositories;
@@ -23,6 +23,7 @@ public class AccountAppService(
     ICurrentUser currentUser,
     ICurrentCompany currentCompany,
     IUnitOfWork unitOfWork,
+    Authorization.IModuleAccess moduleAccess,
     ILogger<AccountAppService> logger) : IAccountAppService
 {
     public async Task<LoginResultDto> LoginAsync(LoginInput input)
@@ -112,7 +113,8 @@ public class AccountAppService(
             Email = user.Email,
             Language = user.Language,
             Roles = await userRepository.GetRoleNamesAsync(user.Id),
-            Permissions = await userRepository.GetPermissionsAsync(user.Id),
+            Permissions = await moduleAccess.FilterPermissionsAsync(user, await userRepository.GetPermissionsAsync(user.Id)),
+            Modules = tenant?.GetModules().ToList() ?? [],
             // Ids are Guid v7 (time-ordered): the company created first (the main one) comes first and is the default.
             Companies = companies.OrderBy(c => c.Id).Select(c => c.ToDto()).ToList(),
             ImpersonatorName = impersonator?.FullName

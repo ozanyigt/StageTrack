@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace StageTrack.Account;
 
@@ -52,6 +52,13 @@ public class CurrentUserDto
 
     /// <summary>The firm uploaded a logo (GET /api/firm/logo).</summary>
     public bool HasFirmLogo { get; set; }
+
+    /// <summary>
+    /// Add-on modules the firm bought. Permissions of a module it does not have are already stripped from
+    /// <see cref="Permissions"/>, so screens normally need only the permission; this is for wording like
+    /// "the LED module is not part of your subscription".
+    /// </summary>
+    public List<string> Modules { get; set; } = [];
 }
 
 public class SetLanguageInput

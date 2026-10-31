@@ -1,4 +1,4 @@
-namespace StageTrack.Tenants;
+﻿namespace StageTrack.Tenants;
 
 /// <summary>Subscription state of a customer firm, derived from its dates and the active flag.</summary>
 public enum TenantStatus
@@ -15,6 +15,15 @@ public enum TenantStatus
     NotStarted = 4
 }
 
+/// <summary>Add-on modules a firm can be given. Kept as names so a new module needs no migration.</summary>
+public static class TenantModules
+{
+    /// <summary>LED screen design and calculation (Panelyze): Pixel Map, power, processors, 3D stage, logistics.</summary>
+    public const string Led = "Led";
+
+    public static readonly IReadOnlyList<string> All = [Led];
+}
+
 public static class TenantConsts
 {
     public const int MaxNameLength = 128;
@@ -24,6 +33,7 @@ public static class TenantConsts
     public const int MaxPhoneLength = 32;
     public const int MaxPlanLength = 64;
     public const int MaxNotesLength = 2000;
+    public const int MaxModulesLength = 256;
 
     /// <summary>The built-in platform administrator role (users without a firm).</summary>
     public const string HostAdminRoleName = "host-admin";
