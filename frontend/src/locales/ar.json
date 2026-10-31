@@ -69,17 +69,19 @@
     "tenants": "الشركات",
     "auditLog": "سجل العمليات",
     "firm": "الشركة والشعار",
-    "led": "LED",
-    "ledPanels": "مخزون LED",
-    "ledDesign": "تصميم الشاشة",
-    "ledPower": "الطاقة والمعالجات",
     "ledLogistics": "خطة التحميل",
     "ledPixelMap": "خريطة البكسل",
-    "ledProcessors": "اختيار المعالج",
     "ledStock": "حالة المخزون",
     "ledSimulation": "المحاكاة",
     "ledStage": "المسرح ثلاثي الأبعاد",
-    "sitePlan": "مخطط الموقع"
+    "sitePlan": "مخطط الموقع",
+    "quoteDraft": "إعداد مسودة عرض سعر",
+    "designLed": "تصميم LED",
+    "designSound": "تصميم الصوت",
+    "designLight": "تصميم الإضاءة",
+    "designTruss": "تصميم الترس",
+    "designScaff": "تصميم السقالة",
+    "totalPower": "إجمالي الطاقة"
   },
   "dashboard": {
     "welcome": "مرحبًا، {{name}}",
@@ -1807,5 +1809,26 @@
     "transferShortage": "المخزون غير كافٍ: {{codes}}",
     "transferEmpty": "لا توجد معدات على الخريطة؛ العلامات وحدها لا تُرسل.",
     "transferred": "تم تخطيط {{count}} سطر على العمل."
+  },
+  "draft": {
+    "designTitle": "تصميم {{trade}}",
+    "lineName": "مجموعة {{trade}} {{n}}",
+    "groups": "المجموعات",
+    "groupsHint": "ما سيُستخدم وبأي عدد",
+    "groupName": "اسم المجموعة",
+    "addGroup": "إضافة مجموعة",
+    "noGroups": "لا توجد مجموعات بعد.",
+    "product": "المنتج",
+    "pickProduct": "اختر منتجًا",
+    "count": "الكمية",
+    "stock": "المخزون",
+    "power": "الطاقة",
+    "noPower": "غير مُدخلة",
+    "totalCount": "إجمالي الكمية",
+    "totalPower": "إجمالي الطاقة",
+    "totalWeight": "إجمالي الوزن",
+    "shortLines": "سطور المخزون غير الكافي",
+    "noTradeEquipment": "لا توجد منتجات في تخصص {{trade}}.",
+    "noTradeEquipmentHint": "امنح مجلدًا هذا التخصص من المعدات > المجلدات؛ وسيظهر ما تحته هنا."
   }
 }

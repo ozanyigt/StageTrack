@@ -2,6 +2,10 @@ import {
   AppstoreOutlined,
   BgColorsOutlined,
   BorderOuterOutlined,
+  BulbOutlined,
+  SoundOutlined,
+  ColumnHeightOutlined,
+  TableOutlined,
   InboxOutlined,
   CalendarOutlined,
   DashboardOutlined,
@@ -94,20 +98,23 @@ export function AppLayout() {
     // The LED module: the server strips its permissions for a firm that did not buy it, so this group
     // simply disappears rather than needing a module check of its own.
     {
-      key: 'led',
+      key: 'draft',
       icon: <BgColorsOutlined />,
-      label: t('nav.led'),
+      label: t('nav.quoteDraft'),
       permission: Permissions.Led,
       children: [
-        { key: '/led/panels', icon: <BorderOuterOutlined />, label: t('nav.ledPanels') },
-        { key: '/led/design', icon: <AppstoreOutlined />, label: t('nav.ledDesign'), permission: Permissions.LedDesign },
-        { key: '/led/pixel-map', icon: <BorderOuterOutlined />, label: t('nav.ledPixelMap'), permission: Permissions.LedDesign },
-        { key: '/led/simulation', icon: <NodeIndexOutlined />, label: t('nav.ledSimulation'), permission: Permissions.LedDesign },
-        { key: '/led/stage', icon: <BuildOutlined />, label: t('nav.ledStage'), permission: Permissions.LedDesign },
-        { key: '/led/processors', icon: <ApartmentOutlined />, label: t('nav.ledProcessors'), permission: Permissions.LedDesign },
-        { key: '/led/power', icon: <ThunderboltOutlined />, label: t('nav.ledPower'), permission: Permissions.LedDesign },
-        { key: '/led/stock', icon: <InboxOutlined />, label: t('nav.ledStock') },
-        { key: '/led/logistics', icon: <TruckOutlined />, label: t('nav.ledLogistics'), permission: Permissions.LedTransport },
+        // Five doors, one page: the trade is in the URL, so each is a link of its own.
+        { key: '/draft/design/led', icon: <BorderOuterOutlined />, label: t('nav.designLed'), permission: Permissions.LedDesign },
+        { key: '/draft/design/sound', icon: <SoundOutlined />, label: t('nav.designSound'), permission: Permissions.LedDesign },
+        { key: '/draft/design/light', icon: <BulbOutlined />, label: t('nav.designLight'), permission: Permissions.LedDesign },
+        { key: '/draft/design/truss', icon: <ColumnHeightOutlined />, label: t('nav.designTruss'), permission: Permissions.LedDesign },
+        { key: '/draft/design/scaff', icon: <TableOutlined />, label: t('nav.designScaff'), permission: Permissions.LedDesign },
+        { key: '/draft/pixel-map', icon: <AppstoreOutlined />, label: t('nav.ledPixelMap'), permission: Permissions.LedDesign },
+        { key: '/draft/simulation', icon: <NodeIndexOutlined />, label: t('nav.ledSimulation'), permission: Permissions.LedDesign },
+        { key: '/draft/stage', icon: <BuildOutlined />, label: t('nav.ledStage'), permission: Permissions.LedDesign },
+        { key: '/draft/power', icon: <ThunderboltOutlined />, label: t('nav.totalPower'), permission: Permissions.LedDesign },
+        { key: '/draft/stock', icon: <InboxOutlined />, label: t('nav.ledStock') },
+        { key: '/draft/logistics', icon: <TruckOutlined />, label: t('nav.ledLogistics'), permission: Permissions.LedTransport },
       ].filter((i) => !('permission' in i) || can(i.permission as string)),
     },
     { key: '/customers', icon: <TeamOutlined />, label: t('nav.customers'), permission: Permissions.Customers },
@@ -136,7 +143,10 @@ export function AppLayout() {
 
   const path = location.pathname;
   const selected =
-    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/site-plan', '/led/panels', '/led/design', '/led/pixel-map', '/led/simulation', '/led/stage', '/led/processors', '/led/power', '/led/stock', '/led/logistics', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
+    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/site-plan',
+      '/draft/design/led', '/draft/design/sound', '/draft/design/light', '/draft/design/truss', '/draft/design/scaff',
+      '/draft/pixel-map', '/draft/simulation', '/draft/stage', '/draft/power', '/draft/stock', '/draft/logistics',
+      '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
       .find((p) => path.startsWith(p)) ??
     ['/warehouse', '/projects', '/quotes', '/equipment', '/customers', '/suppliers', '/crew'].find((p) => path.startsWith(p) && !user?.isHost) ??
     '/';

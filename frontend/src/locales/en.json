@@ -69,17 +69,19 @@
     "tenants": "Firms",
     "auditLog": "Audit log",
     "firm": "Firm and logo",
-    "led": "LED",
-    "ledPanels": "LED inventory",
-    "ledDesign": "Screen design",
-    "ledPower": "Power and processors",
     "ledLogistics": "Loading plan",
     "ledPixelMap": "Pixel Map",
-    "ledProcessors": "Processor choice",
     "ledStock": "Stock status",
     "ledSimulation": "Simulation",
     "ledStage": "3D stage",
-    "sitePlan": "Site plan"
+    "sitePlan": "Site plan",
+    "quoteDraft": "Prepare a quote draft",
+    "designLed": "LED design",
+    "designSound": "Sound design",
+    "designLight": "Lighting design",
+    "designTruss": "Truss design",
+    "designScaff": "Scaffolding design",
+    "totalPower": "Total power"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -1807,5 +1809,26 @@
     "transferShortage": "Not enough in stock: {{codes}}",
     "transferEmpty": "No equipment on the map; plain markers are not sent.",
     "transferred": "{{count}} lines planned onto the job."
+  },
+  "draft": {
+    "designTitle": "{{trade}} design",
+    "lineName": "{{trade}} group {{n}}",
+    "groups": "Groups",
+    "groupsHint": "What is used and how many",
+    "groupName": "Group name",
+    "addGroup": "Add a group",
+    "noGroups": "No groups yet.",
+    "product": "Product",
+    "pickProduct": "Pick a product",
+    "count": "Quantity",
+    "stock": "Stock",
+    "power": "Power",
+    "noPower": "not entered",
+    "totalCount": "Total quantity",
+    "totalPower": "Total power",
+    "totalWeight": "Total weight",
+    "shortLines": "Lines short of stock",
+    "noTradeEquipment": "No products in the {{trade}} trade.",
+    "noTradeEquipmentHint": "Give a folder this trade under Equipment > folders; everything under it appears here."
   }
 }

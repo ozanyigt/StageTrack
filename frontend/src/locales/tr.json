@@ -69,17 +69,19 @@
     "tenants": "Firmalar",
     "auditLog": "İşlem kaydı",
     "firm": "Firma ve logo",
-    "led": "LED",
-    "ledPanels": "LED envanteri",
-    "ledDesign": "Ekran tasarımı",
-    "ledPower": "Güç ve işlemci",
     "ledLogistics": "Yükleme planı",
     "ledPixelMap": "Pixel Map",
-    "ledProcessors": "İşlemci seçimi",
     "ledStock": "Stok durumu",
     "ledSimulation": "Simülasyon",
     "ledStage": "3D sahne",
-    "sitePlan": "Saha planı"
+    "sitePlan": "Saha planı",
+    "quoteDraft": "Teklif Taslağı Hazırla",
+    "designLed": "LED tasarımı",
+    "designSound": "Ses tasarımı",
+    "designLight": "Işık tasarımı",
+    "designTruss": "Truss tasarımı",
+    "designScaff": "Scaff tasarımı",
+    "totalPower": "Toplam güç"
   },
   "dashboard": {
     "welcome": "Hoş geldiniz, {{name}}",
@@ -1807,5 +1809,26 @@
     "transferShortage": "Stok yetmiyor: {{codes}}",
     "transferEmpty": "Haritada ekipman yok; yalnız işaretler işe aktarılmaz.",
     "transferred": "{{count}} satır işe planlandı."
+  },
+  "draft": {
+    "designTitle": "{{trade}} tasarımı",
+    "lineName": "{{trade}} grubu {{n}}",
+    "groups": "Gruplar",
+    "groupsHint": "Ne kullanılacak ve kaç adet",
+    "groupName": "Grup adı",
+    "addGroup": "Grup ekle",
+    "noGroups": "Henüz grup yok.",
+    "product": "Ürün",
+    "pickProduct": "Ürün seçin",
+    "count": "Adet",
+    "stock": "Stok",
+    "power": "Güç",
+    "noPower": "girilmemiş",
+    "totalCount": "Toplam adet",
+    "totalPower": "Toplam güç",
+    "totalWeight": "Toplam ağırlık",
+    "shortLines": "Stok yetmeyen satır",
+    "noTradeEquipment": "{{trade}} dalında ürün yok.",
+    "noTradeEquipmentHint": "Ekipman > klasörler bölümünden bir klasöre bu dalı verin; altındaki ürünler burada çıkar."
   }
 }
