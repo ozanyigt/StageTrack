@@ -51,6 +51,7 @@ public static class StageTrackEntityFrameworkCoreModule
         services.AddScoped<Led.ILedTransportSettingsRepository, LedTransportSettingsRepository>();
         services.AddScoped<Led.ILedTransportVehicleRepository, LedTransportVehicleRepository>();
         services.AddScoped<Led.ILedPanelFavoriteRepository, LedPanelFavoriteRepository>();
+        services.AddScoped<Sites.ISitePlanRepository, SitePlanRepository>();
         return services;
     }
 }

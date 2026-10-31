@@ -1799,6 +1799,156 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.ToTable("QuoteLines", (string)null);
                 });
 
+            modelBuilder.Entity("StageTrack.Sites.SitePlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BaseLayer")
+                        .HasColumnType("int");
+
+                    b.Property<double>("CentreLat")
+                        .HasColumnType("float");
+
+                    b.Property<double>("CentreLng")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<bool>("NightMode")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Zoom")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("CompanyId", "ProjectId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("SitePlans");
+                });
+
+            modelBuilder.Entity("StageTrack.Sites.SitePlanItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("EquipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Label")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<double>("Lat")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Layer")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<decimal?>("LightHeightM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<int?>("LightIntensity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("LightRadiusM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<double>("Lng")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<double>("RotationDeg")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("SitePlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipmentId");
+
+                    b.HasIndex("SitePlanId");
+
+                    b.ToTable("SitePlanItem");
+                });
+
+            modelBuilder.Entity("StageTrack.Sites.SitePlanZone", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Layer")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Points")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SitePlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SitePlanId");
+
+                    b.ToTable("SitePlanZone");
+                });
+
             modelBuilder.Entity("StageTrack.Suppliers.Supplier", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2416,6 +2566,38 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("StageTrack.Sites.SitePlan", b =>
+                {
+                    b.HasOne("StageTrack.Projects.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Sites.SitePlanItem", b =>
+                {
+                    b.HasOne("StageTrack.Inventory.Equipment", null)
+                        .WithMany()
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("StageTrack.Sites.SitePlan", null)
+                        .WithMany("Items")
+                        .HasForeignKey("SitePlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Sites.SitePlanZone", b =>
+                {
+                    b.HasOne("StageTrack.Sites.SitePlan", null)
+                        .WithMany("Zones")
+                        .HasForeignKey("SitePlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("StageTrack.Warehouse.WarehouseMovement", b =>
                 {
                     b.HasOne("StageTrack.Inventory.Equipment", null)
@@ -2476,6 +2658,13 @@ namespace StageTrack.EntityFrameworkCore.Migrations
             modelBuilder.Entity("StageTrack.Quotes.Quote", b =>
                 {
                     b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("StageTrack.Sites.SitePlan", b =>
+                {
+                    b.Navigation("Items");
+
+                    b.Navigation("Zones");
                 });
 #pragma warning restore 612, 618
         }

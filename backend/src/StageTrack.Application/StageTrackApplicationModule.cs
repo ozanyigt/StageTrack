@@ -53,6 +53,9 @@ public static class StageTrackApplicationModule
         services.AddScoped<Led.ILedStageAppService, Led.LedStageAppService>();
         services.AddScoped<Led.ILedStockStatusAppService, Led.LedStockStatusAppService>();
         services.AddScoped<Led.ILedJobAppService, Led.LedJobAppService>();
+
+        // Site plan: what stands where on the real ground, as inventory rather than a drawing.
+        services.AddScoped<Sites.ISitePlanAppService, Sites.SitePlanAppService>();
         services.AddScoped<IRentalFactorProfileAppService, RentalFactorProfileAppService>();
         services.AddScoped<IQuoteAppService, QuoteAppService>();
         services.AddScoped<ILabelTemplateAppService, LabelTemplateAppService>();

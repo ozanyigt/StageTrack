@@ -136,4 +136,9 @@ public static class StageTrackErrorCodes
     public const string LedCornerPanelInvalid = "Led.CornerPanelInvalid";
     public const string LedTooManyScreens = "Led.TooManyScreens";
     public const string LedInvalidRequest = "Led.InvalidRequest";
+
+    public const string SitePlanTooManyItems = "SitePlan.TooManyItems";
+    public const string SiteItemNeedsEquipmentOrLabel = "SitePlan.ItemNeedsEquipmentOrLabel";
+    public const string SiteZoneInvalidShape = "SitePlan.ZoneInvalidShape";
+    public const string SitePlanAlreadyExists = "SitePlan.AlreadyExists";
 }
