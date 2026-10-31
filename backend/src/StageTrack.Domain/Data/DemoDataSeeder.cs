@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using StageTrack.Companies;
 using StageTrack.Customers;
 using StageTrack.Identity;
@@ -211,7 +211,13 @@ public class DemoDataSeeder(
             ("console-l", "Işık Konsolu", "light"), ("cable-l", "Kablo", "light"),
             ("video", "VIDEO", null), ("display", "Display", "video"), ("led", "Led Screen", "video"), ("projection", "Projeksiyon", "video"),
             ("media", "Media Server", "video"), ("network", "Network", "video"),
-            ("truss", "TRUSS", null), ("rigging", "Motor / Vinç", "truss"));
+            ("truss", "TRUSS", null), ("rigging", "Motor / Vinç", "truss"),
+            ("scaff", "SCAFF", null), ("scaff-deck", "Platform / Dikme", "scaff"));
+
+        // The trades, tagged once at the top: everything below follows, so the design tabs know a speaker from a fixture.
+        await TagDisciplinesAsync(folders,
+            ("audio", EquipmentDiscipline.Sound), ("light", EquipmentDiscipline.Light),
+            ("led", EquipmentDiscipline.Led), ("truss", EquipmentDiscipline.Truss), ("scaff", EquipmentDiscipline.Scaff));
 
         // key, code, name, brand, model, folder, units (0 = quantity tracked), stock, daily price (TRY), unit ref prefix
         await SeedEquipmentAsync(folders, gunesli.Id, suppliers,
@@ -251,7 +257,10 @@ public class DemoDataSeeder(
             ("truss2", "Truss-085", "HTS TRUSS 2M SECTION 45*45", "HTS", "45*45", "truss", 0, 30, 150, ""),
             ("tower", "Truss-087", "HTS TRUSS 3M TOWER SECTION 45*45", "HTS", "45*45", "truss", 0, 16, 250, ""),
             ("hoist", "Truss-104", "CM LODESTAR 1000KG CHAINHOIST", "CM", "Lodestar 1T", "rigging", 6, 0, 750, "LODESTAR"),
-            ("roof", "Truss-200", "TOTAL FABRICATIONS ROOF SYSTEM 12X10MT, 6 TOWERS H:8MT", "Total Fabrications", "Roof 12x10", "truss", 0, 1, 25000, "")
+            ("roof", "Truss-200", "TOTAL FABRICATIONS ROOF SYSTEM 12X10MT, 6 TOWERS H:8MT", "Total Fabrications", "Roof 12x10", "truss", 0, 1, 25000, ""),
+            ("deck", "Scaff-010", "SAHNE PLATFORMU 2X1M", "Layher", "Deck 2x1", "scaff-deck", 0, 120, 90, ""),
+            ("leg", "Scaff-020", "PLATFORM DİKMESİ 100CM", "Layher", "Leg 100", "scaff-deck", 0, 240, 25, ""),
+            ("stair", "Scaff-030", "SAHNE MERDİVENİ 4 BASAMAK", "Layher", "Stair 4", "scaff-deck", 0, 8, 150, "")
         ]);
 
         await SeedEquipmentDetailsAsync(suppliers);
@@ -330,6 +339,16 @@ public class DemoDataSeeder(
         }
 
         return result;
+    }
+
+    private async Task TagDisciplinesAsync(Dictionary<string, Guid> folders, params (string Key, EquipmentDiscipline Discipline)[] items)
+    {
+        foreach (var (key, discipline) in items)
+        {
+            (await folderRepository.GetAsync(folders[key])).SetDiscipline(discipline);
+        }
+
+        await unitOfWork.SaveChangesAsync();
     }
 
     private async Task SeedEquipmentAsync(Dictionary<string, Guid> folders, Guid locationId, Dictionary<string, Guid>? suppliers,

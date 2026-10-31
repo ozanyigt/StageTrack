@@ -51,14 +51,16 @@ export const dashboardApi = {
 
 export const folderApi = {
   list: () => get<T.EquipmentFolder[]>('/equipment-folders'),
-  create: (input: { name: string; parentId?: T.Guid | null }) => post<T.EquipmentFolder>('/equipment-folders', input),
-  update: (id: T.Guid, input: { name: string; parentId?: T.Guid | null }) => put<T.EquipmentFolder>(`/equipment-folders/${id}`, input),
+  create: (input: { name: string; parentId?: T.Guid | null; discipline?: T.EquipmentDiscipline | null }) =>
+    post<T.EquipmentFolder>('/equipment-folders', input),
+  update: (id: T.Guid, input: { name: string; parentId?: T.Guid | null; discipline?: T.EquipmentDiscipline | null }) =>
+    put<T.EquipmentFolder>(`/equipment-folders/${id}`, input),
   remove: (id: T.Guid) => del(`/equipment-folders/${id}`),
 };
 
 export const equipmentApi = {
   list: (
-    params: T.PagedRequest & { text?: string; folderId?: T.Guid; includeSubfolders?: boolean; type?: T.EquipmentType; isArchived?: boolean },
+    params: T.PagedRequest & { text?: string; folderId?: T.Guid; includeSubfolders?: boolean; type?: T.EquipmentType; isArchived?: boolean; discipline?: T.EquipmentDiscipline },
   ) => get<T.PagedResult<T.Equipment>>('/equipment', params),
   get: (id: T.Guid) => get<T.EquipmentDetail>(`/equipment/${id}`),
   /** forQuote: projects and quotes — leaves out office equipment and equipment with nothing rentable (e.g. in repair). */

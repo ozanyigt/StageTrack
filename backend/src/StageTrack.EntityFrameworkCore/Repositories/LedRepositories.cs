@@ -83,7 +83,8 @@ public class EquipmentLedSpecRepository(StageTrackDbContext dbContext)
             query = query.Where(x => !x.equipment.IsArchived);
         }
 
-        if (filter.FolderIds is { Count: > 0 })
+        // null = every folder; a list = these and no others, empty included - a trade with no folders owns nothing.
+        if (filter.FolderIds is not null)
         {
             var folderIds = filter.FolderIds.ToList();
             query = query.Where(x => x.equipment.FolderId != null && folderIds.Contains(x.equipment.FolderId.Value));

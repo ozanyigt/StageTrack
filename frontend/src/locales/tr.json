@@ -552,6 +552,13 @@
       "Area": "Alan",
       "Route": "Güzergâh",
       "Barrier": "Bariyer"
+    },
+    "equipmentDiscipline": {
+      "Led": "LED",
+      "Sound": "Ses",
+      "Light": "Işık",
+      "Truss": "Truss",
+      "Scaff": "Scaff"
     }
   },
   "errors": {
@@ -1316,7 +1323,9 @@
     "addSub": "Alt klasör ekle",
     "deleteConfirm": "\"{{name}}\" klasörü silinsin mi?",
     "empty": "Henüz klasör yok",
-    "hint": "Bir klasörün altına eklemek için satırın üzerine gelip + simgesine basın. Değişiklikler hemen kaydedilir."
+    "hint": "Bir klasörün altına eklemek için satırın üzerine gelip + simgesine basın. Değişiklikler hemen kaydedilir.",
+    "noDiscipline": "Dal yok",
+    "disciplineHint": "Klasöre dal verin; altındaki her ürün o dala sayılır, alt klasör başka bir dal diyene kadar."
   },
   "labelGen": {
     "title": "Etiket oluştur",

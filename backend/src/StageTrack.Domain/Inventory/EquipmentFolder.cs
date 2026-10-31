@@ -1,4 +1,4 @@
-using StageTrack.Entities;
+﻿using StageTrack.Entities;
 
 namespace StageTrack.Inventory;
 
@@ -8,6 +8,9 @@ public class EquipmentFolder : CompanyAggregateRoot
     public string Name { get; private set; } = null!;
     public Guid? ParentId { get; private set; }
     public int SortOrder { get; private set; }
+
+    /// <summary>The trade of everything in here; null = the same as the folder above (see <see cref="EquipmentDisciplines"/>).</summary>
+    public EquipmentDiscipline? Discipline { get; private set; }
 
     private EquipmentFolder()
     {
@@ -23,6 +26,8 @@ public class EquipmentFolder : CompanyAggregateRoot
     public void Rename(string name) => Name = name;
 
     public void SetSortOrder(int sortOrder) => SortOrder = sortOrder;
+
+    public void SetDiscipline(EquipmentDiscipline? discipline) => Discipline = discipline;
 
     internal void SetParent(Guid? parentId) => ParentId = parentId;
 }

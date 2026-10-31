@@ -642,6 +642,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("Discipline")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -663,6 +666,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId", "Discipline");
 
                     b.HasIndex("CompanyId", "ParentId");
 

@@ -1,11 +1,11 @@
 import { DeleteOutlined, EditOutlined, FolderOutlined, InboxOutlined, PlusOutlined, FolderAddOutlined } from '@ant-design/icons';
-import { Button, Card, Drawer, Empty, Flex, Input, Popconfirm, Tree, Typography, theme } from 'antd';
+import { Button, Card, Drawer, Empty, Flex, Input, Popconfirm, Select, Tree, Typography, theme } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useMatch, useNavigate, useSearchParams } from 'react-router-dom';
 import { equipmentApi, folderApi } from '../../api/endpoints';
-import type { EquipmentFolder } from '../../api/types';
+import { EQUIPMENT_DISCIPLINES, type EquipmentDiscipline, type EquipmentFolder } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { useUnsavedChanges } from '../../components/UnsavedChanges';
 import { useErrorToast } from '../../utils/errors';
@@ -15,6 +15,17 @@ interface TreeNode {
   key: string;
   title: ReactNode;
   children: TreeNode[];
+}
+
+/** The trade a folder takes from above when it sets none of its own. */
+function inheritedOf(folders: EquipmentFolder[], id: string): EquipmentDiscipline | null {
+  let current = folders.find((f) => f.id === id)?.parentId ?? null;
+  for (let guard = 0; current && guard < 64; guard++) {
+    const folder = folders.find((f) => f.id === current);
+    if (folder?.discipline) return folder.discipline;
+    current = folder?.parentId ?? null;
+  }
+  return null;
 }
 
 /** Equipment count of a folder including its sub-folders. */
@@ -163,7 +174,10 @@ function FolderManagerDrawer({ open, folders, onClose }: { open: boolean; folder
       const value = name.trim();
       if (!value || !editing) return;
       if (editing.mode === 'add') await folderApi.create({ name: value, parentId: editing.parentId });
-      else await folderApi.update(editing.id, { name: value, parentId: folders.find((f) => f.id === editing.id)?.parentId ?? null });
+      else {
+        const folder = folders.find((f) => f.id === editing.id);
+        await folderApi.update(editing.id, { name: value, parentId: folder?.parentId ?? null, discipline: folder?.discipline ?? null });
+      }
     },
     onSuccess: () => {
       if (editing?.mode === 'add' && editing.parentId) setExpanded((e) => Array.from(new Set([...e, editing.parentId!])));
@@ -171,6 +185,16 @@ function FolderManagerDrawer({ open, folders, onClose }: { open: boolean; folder
       setName('');
       refresh();
     },
+    onError: showError,
+  });
+
+  /** The trade of a folder, and with it of everything under it that does not say otherwise. */
+  const setDiscipline = useMutation({
+    mutationFn: ({ id, discipline }: { id: string; discipline: EquipmentDiscipline | null }) => {
+      const folder = folders.find((f) => f.id === id);
+      return folderApi.update(id, { name: folder?.name ?? '', parentId: folder?.parentId ?? null, discipline });
+    },
+    onSuccess: refresh,
     onError: showError,
   });
 
@@ -239,7 +263,23 @@ function FolderManagerDrawer({ open, folders, onClose }: { open: boolean; folder
         ) : (
           <Flex justify="space-between" align="center" gap={8} className="folder-row">
             <Typography.Text ellipsis>{n.title}</Typography.Text>
-            <Flex gap={2} className="folder-row-actions" onClick={(e) => e.stopPropagation()}>
+            <Flex gap={2} align="center" onClick={(e) => e.stopPropagation()}>
+              <Select
+                size="small"
+                allowClear
+                variant="borderless"
+                style={{ minWidth: 118 }}
+                value={folders.find((f) => f.id === n.key)?.discipline ?? undefined}
+                // Empty does not mean "none": it means the folder above decides, so its trade is the placeholder.
+                placeholder={
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    {inheritedOf(folders, n.key) ? t(`enums.equipmentDiscipline.${inheritedOf(folders, n.key)}`) : t('folderManager.noDiscipline')}
+                  </Typography.Text>
+                }
+                onChange={(value) => setDiscipline.mutate({ id: n.key, discipline: (value as EquipmentDiscipline) ?? null })}
+                options={EQUIPMENT_DISCIPLINES.map((d) => ({ value: d, label: t(`enums.equipmentDiscipline.${d}`) }))}
+              />
+              <Flex gap={2} className="folder-row-actions">
               <Button size="small" type="text" icon={<PlusOutlined />} aria-label={t('folderManager.addSub')} title={t('folderManager.addSub')}
                 onClick={() => startAdd(n.key)} />
               <Button size="small" type="text" icon={<EditOutlined />} aria-label={t('equipment.renameFolder')} title={t('equipment.renameFolder')}
@@ -248,6 +288,7 @@ function FolderManagerDrawer({ open, folders, onClose }: { open: boolean; folder
                 okText={t('common.delete')} cancelText={t('common.cancel')} okButtonProps={{ danger: true }}>
                 <Button size="small" type="text" danger icon={<DeleteOutlined />} aria-label={t('common.delete')} title={t('common.delete')} />
               </Popconfirm>
+              </Flex>
             </Flex>
           </Flex>
         ),

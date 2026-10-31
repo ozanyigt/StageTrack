@@ -73,12 +73,21 @@ export type StockLocationType = (typeof STOCK_LOCATION_TYPES)[number];
 export const RELATION_KINDS = ['Content', 'Accessory', 'Alternative'] as const;
 export type RelationKind = (typeof RELATION_KINDS)[number];
 
+/** The trade a product belongs to; the firm tags folders, not products. */
+export type EquipmentDiscipline = 'Led' | 'Sound' | 'Light' | 'Truss' | 'Scaff';
+
+export const EQUIPMENT_DISCIPLINES: EquipmentDiscipline[] = ['Led', 'Sound', 'Light', 'Truss', 'Scaff'];
+
 export interface EquipmentFolder {
   id: Guid;
   name: string;
   parentId?: Guid | null;
   sortOrder: number;
   equipmentCount: number;
+  /** What was set on this folder; null means it takes the one above it. */
+  discipline?: EquipmentDiscipline | null;
+  /** The trade in force here - its own, or the nearest one above it. */
+  effectiveDiscipline?: EquipmentDiscipline | null;
 }
 
 export interface Equipment {

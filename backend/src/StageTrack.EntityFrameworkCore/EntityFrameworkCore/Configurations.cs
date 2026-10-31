@@ -148,6 +148,7 @@ public class EquipmentFolderConfiguration : IEntityTypeConfiguration<EquipmentFo
     {
         b.Property(x => x.Name).HasMaxLength(EquipmentFolderConsts.MaxNameLength).IsRequired();
         b.HasIndex(x => new { x.CompanyId, x.ParentId });
+        b.HasIndex(x => new { x.CompanyId, x.Discipline });
     }
 }
 

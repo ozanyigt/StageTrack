@@ -1,4 +1,4 @@
-using StageTrack.Account;
+﻿using StageTrack.Account;
 using StageTrack.Companies;
 using StageTrack.Customers;
 using StageTrack.Inventory;
@@ -22,7 +22,7 @@ internal static class ObjectMapping
 
     public static EquipmentFolderDto ToDto(this EquipmentFolder f) => new()
     {
-        Id = f.Id, Name = f.Name, ParentId = f.ParentId, SortOrder = f.SortOrder
+        Id = f.Id, Name = f.Name, ParentId = f.ParentId, SortOrder = f.SortOrder, Discipline = f.Discipline
     };
 
     /// <param name="showPrice">False hides the rental price (users without the price permission).</param>

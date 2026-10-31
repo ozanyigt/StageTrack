@@ -552,6 +552,13 @@
       "Area": "Area",
       "Route": "Route",
       "Barrier": "Barrier"
+    },
+    "equipmentDiscipline": {
+      "Led": "LED",
+      "Sound": "Sound",
+      "Light": "Light",
+      "Truss": "Truss",
+      "Scaff": "Scaff"
     }
   },
   "errors": {
@@ -1316,7 +1323,9 @@
     "addSub": "Add sub-folder",
     "deleteConfirm": "Delete the folder \"{{name}}\"?",
     "empty": "No folders yet",
-    "hint": "To add a folder under another one, hover the row and click +. Changes are saved immediately."
+    "hint": "To add a folder under another one, hover the row and click +. Changes are saved immediately.",
+    "noDiscipline": "No trade",
+    "disciplineHint": "Give the folder a trade; everything under it counts as that trade until a subfolder says otherwise."
   },
   "labelGen": {
     "title": "Create labels",
