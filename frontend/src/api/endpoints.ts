@@ -1,5 +1,6 @@
 import { http, toQuery } from './http';
 import type * as T from './types';
+import type * as L from './ledTypes';
 
 const get = <R>(url: string, params?: object) =>
   http.get<R>(url, { params: params ? toQuery(params as Record<string, unknown>) : undefined }).then((r) => r.data);
@@ -301,4 +302,34 @@ export const firmApi = {
     return http.put('/firm/logo', form).then((r) => r.data);
   },
   removeLogo: () => del('/firm/logo'),
+};
+
+/** LED module (sold separately; the server strips its permissions for firms without it). */
+export const ledApi = {
+  settings: () => get<L.CalcSettings>('/led/calc/settings'),
+  evaluate: (input: L.EvaluateRequest) => post<L.EvaluateResponse>('/led/calc/evaluate', input),
+  equipmentPower: (input: L.EquipmentPowerRequest) => post<L.EquipmentPowerResponse>('/led/calc/equipment-power', input),
+
+  panels: (filter?: L.LedCatalogFilter) => get<L.LedPanel[]>('/led/inventory/panels', filter),
+  processors: (filter?: L.LedCatalogFilter) => get<L.LedProcessor[]>('/led/inventory/processors', filter),
+  extenders: (filter?: L.LedCatalogFilter) => get<L.LedExtender[]>('/led/inventory/extenders', filter),
+  savePanel: (equipmentId: T.Guid, input: L.LedPanelInput) => put<L.LedPanel>(`/led/inventory/panels/${equipmentId}`, input),
+  saveProcessor: (equipmentId: T.Guid, input: L.LedProcessorInput) => put<L.LedProcessor>(`/led/inventory/processors/${equipmentId}`, input),
+  saveExtender: (equipmentId: T.Guid, input: L.LedExtenderInput) => put<L.LedExtender>(`/led/inventory/extenders/${equipmentId}`, input),
+  /** Takes the equipment out of the LED module; the equipment record itself stays. */
+  removeFromLed: (equipmentId: T.Guid) => del(`/led/inventory/${equipmentId}`),
+  setFavorite: (equipmentId: T.Guid, favorite: boolean) => put<void>(`/led/inventory/panels/${equipmentId}/favorite`, { favorite }),
+
+  vehicles: () => get<L.TransportSettings>('/led/transport/vehicles'),
+  saveVehicles: (vehicles: L.SaveTransportVehicle[], gapMm?: number) =>
+    put<L.TransportSettings>('/led/transport/vehicles', { vehicles, gapMm }),
+  plan: (input: L.TransportPlanRequest) => post<L.TransportPlanResponse>('/led/transport/plan', input),
+
+  stage: () => get<L.LedStageSettings>('/led/stage'),
+  saveStage: (input: L.LedStageSettings) => put<L.LedStageSettings>('/led/stage', input),
+
+  stockStatus: (screens: L.LedStockScreenRequest[]) => post<L.LedStockStatusResponse>('/led/stock-status', { screens }),
+
+  previewJob: (projectId: T.Guid, input: L.LedToJobInput) => post<L.LedToJobResult>(`/led/jobs/${projectId}/preview`, input),
+  transferToJob: (projectId: T.Guid, input: L.LedToJobInput) => post<L.LedToJobResult>(`/led/jobs/${projectId}/transfer`, input),
 };

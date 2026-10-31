@@ -145,3 +145,12 @@ body {
   border-color: #6366f1;
   transform: translateY(-1px);
 }
+
+/*
+ * Tailwind for the LED module's screens only. The base layer (Tailwind's reset) is deliberately not
+ * imported: it would restyle antd's buttons, inputs and tables across the rest of the app. Utilities and
+ * the theme are enough for the LED pages, which were written against them.
+ */
+@layer theme, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
