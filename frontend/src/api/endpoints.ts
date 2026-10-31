@@ -357,4 +357,10 @@ export const sitePlanApi = {
   updateZone: (id: T.Guid, zoneId: T.Guid, input: S.SaveSitePlanZoneInput) =>
     put<S.SitePlan>(`/site-plans/${id}/zones/${zoneId}`, input),
   removeZone: (id: T.Guid, zoneId: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/zones/${zoneId}`),
+
+  /** What the job would take from the plan, without touching it. */
+  previewJob: (id: T.Guid, input: Partial<S.SiteToJobInput>) =>
+    post<S.SiteToJobResult>(`/site-plans/${id}/job/preview`, input),
+  transferToJob: (id: T.Guid, input: Partial<S.SiteToJobInput>) =>
+    post<S.SiteToJobResult>(`/site-plans/${id}/job/transfer`, input),
 };

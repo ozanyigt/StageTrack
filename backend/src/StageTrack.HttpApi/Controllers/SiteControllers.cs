@@ -65,6 +65,19 @@ public class SitePlanController(ISitePlanAppService appService) : ControllerBase
     public Task<SitePlanDto> RemoveZoneAsync(Guid id, Guid zoneId) => appService.RemoveZoneAsync(id, zoneId);
 }
 
+/// <summary>The bridge: a site plan becomes planned equipment on its job, and from there the quote and the warehouse.</summary>
+[ApiController]
+[Route("api/site-plans/{planId:guid}/job")]
+[Authorize(StageTrackPermissions.Projects.Manage)]
+public class SiteJobController(ISiteJobAppService appService) : ControllerBase
+{
+    [HttpPost("preview")]
+    public Task<SiteToJobResultDto> PreviewAsync(Guid planId, SiteToJobInput input) => appService.PreviewAsync(planId, input);
+
+    [HttpPost("transfer")]
+    public Task<SiteToJobResultDto> TransferAsync(Guid planId, SiteToJobInput input) => appService.TransferAsync(planId, input);
+}
+
 public class RenameSitePlanInput
 {
     public string Name { get; set; } = null!;

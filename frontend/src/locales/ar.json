@@ -1787,6 +1787,16 @@
     "circuits": "الدوائر",
     "weight": "الوزن",
     "lightingLoad": "الإضاءة: {{watt}} واط · {{circuits}} دائرة",
-    "missingWatt": "لم تُدخل قيمة الطاقة لـ: {{codes}} — الأرقام ناقصة."
+    "missingWatt": "لم تُدخل قيمة الطاقة لـ: {{codes}} — الأرقام ناقصة.",
+    "transferToJob": "إرسال إلى العمل",
+    "transfer": "إرسال",
+    "transferHint": "تُخطَّط المعدات الموجودة على الخريطة على العمل رقم {{number}} «{{name}}»، ويتبعها عرض السعر المبدئي.",
+    "allLayers": "كل الطبقات",
+    "section": "القسم",
+    "appendToSection": "أضف إلى ما يحتويه القسم (وإلا يُحدَّث القسم)",
+    "transferProblems": "لا يمكن إرسال {{count}} سطر.",
+    "transferShortage": "المخزون غير كافٍ: {{codes}}",
+    "transferEmpty": "لا توجد معدات على الخريطة؛ العلامات وحدها لا تُرسل.",
+    "transferred": "تم تخطيط {{count}} سطر على العمل."
   }
 }

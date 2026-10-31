@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ledApi, projectApi } from '../../api/endpoints';
 import type { EvaluateResponse, EvaluateScreenRequest, LedJobLine, LedToJobInput } from '../../api/ledTypes';
-import { translateError, useErrorToast } from '../../utils/errors';
+import { useErrorToast } from '../../utils/errors';
 
 interface Props {
   open: boolean;
@@ -152,7 +152,7 @@ export function LedToJobModal({ open, screens, evaluation, onClose }: Props) {
             title: '',
             width: 160,
             render: (_: unknown, r: LedJobLine) =>
-              r.problem ? <Tag color="red">{translateError(t, { code: r.problem })}</Tag> : null,
+              r.problem ? <Tag color="red">{t(`errors.${r.problem}`, { defaultValue: r.problem })}</Tag> : null,
           },
         ]}
       />

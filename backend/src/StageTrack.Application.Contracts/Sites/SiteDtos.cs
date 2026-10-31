@@ -234,3 +234,32 @@ public sealed record SitePowerDto(
     int LightingCircuits,
     /// <summary>Equipment on the plan whose power is not entered, so these figures are short.</summary>
     IReadOnlyList<string> MissingWatt);
+
+// ---------------------------------------------------------------- From plan to job
+
+public class SiteToJobInput
+{
+    /// <summary>Section to plan the lines into; null = one named after the plan.</summary>
+    public Guid? SectionId { get; set; }
+
+    [StringLength(128)]
+    public string? SectionName { get; set; }
+
+    /// <summary>Add to what the section already holds instead of replacing it.</summary>
+    public bool Append { get; set; }
+
+    /// <summary>Only these layers; empty = everything on the plan.</summary>
+    public List<string> Layers { get; set; } = [];
+}
+
+public sealed record SiteToJobLineDto(Guid EquipmentId, string Code, string Name, int Quantity, int Stock, bool Added, string? Problem);
+
+public sealed record SiteToJobResultDto(Guid ProjectId, Guid? SectionId, string SectionName, IReadOnlyList<SiteToJobLineDto> Lines);
+
+/// <summary>Turns a site plan into planned equipment on its job; the job's draft quote follows along.</summary>
+public interface ISiteJobAppService
+{
+    Task<SiteToJobResultDto> PreviewAsync(Guid planId, SiteToJobInput input);
+
+    Task<SiteToJobResultDto> TransferAsync(Guid planId, SiteToJobInput input);
+}

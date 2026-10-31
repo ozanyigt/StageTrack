@@ -1787,6 +1787,16 @@
     "circuits": "Circuits",
     "weight": "Weight",
     "lightingLoad": "Lighting: {{watt}} W · {{circuits}} circuits",
-    "missingWatt": "No power entered for: {{codes}} — the figures are short."
+    "missingWatt": "No power entered for: {{codes}} — the figures are short.",
+    "transferToJob": "Send to job",
+    "transfer": "Send",
+    "transferHint": "The equipment on the map is planned onto job {{number}} \"{{name}}\", and the draft quote follows.",
+    "allLayers": "All layers",
+    "section": "Section",
+    "appendToSection": "Add to what the section holds (otherwise the section is refreshed)",
+    "transferProblems": "{{count}} lines cannot be sent.",
+    "transferShortage": "Not enough in stock: {{codes}}",
+    "transferEmpty": "No equipment on the map; plain markers are not sent.",
+    "transferred": "{{count}} lines planned onto the job."
   }
 }

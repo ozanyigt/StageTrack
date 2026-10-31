@@ -1787,6 +1787,16 @@
     "circuits": "Devre",
     "weight": "Ağırlık",
     "lightingLoad": "Aydınlatma: {{watt}} W · {{circuits}} devre",
-    "missingWatt": "Güç değeri girilmemiş: {{codes}} — rakamlar eksik."
+    "missingWatt": "Güç değeri girilmemiş: {{codes}} — rakamlar eksik.",
+    "transferToJob": "İşe aktar",
+    "transfer": "Aktar",
+    "transferHint": "Haritadaki ekipman {{number}} no.lu \"{{name}}\" işine planlanır; taslak teklif de birlikte güncellenir.",
+    "allLayers": "Tüm katmanlar",
+    "section": "Bölüm",
+    "appendToSection": "Bölümdekilerin üzerine ekle (işaretlenmezse bölüm yenilenir)",
+    "transferProblems": "{{count}} satır aktarılamıyor.",
+    "transferShortage": "Stok yetmiyor: {{codes}}",
+    "transferEmpty": "Haritada ekipman yok; yalnız işaretler işe aktarılmaz.",
+    "transferred": "{{count}} satır işe planlandı."
   }
 }

@@ -56,6 +56,7 @@ public static class StageTrackApplicationModule
 
         // Site plan: what stands where on the real ground, as inventory rather than a drawing.
         services.AddScoped<Sites.ISitePlanAppService, Sites.SitePlanAppService>();
+        services.AddScoped<Sites.ISiteJobAppService, Sites.SiteJobAppService>();
         services.AddScoped<IRentalFactorProfileAppService, RentalFactorProfileAppService>();
         services.AddScoped<IQuoteAppService, QuoteAppService>();
         services.AddScoped<ILabelTemplateAppService, LabelTemplateAppService>();

@@ -1,4 +1,4 @@
-import { AimOutlined, BulbOutlined, DeleteOutlined, EnvironmentOutlined, PlusOutlined, SaveOutlined } from '@ant-design/icons';
+import { AimOutlined, BulbOutlined, DeleteOutlined, EnvironmentOutlined, ExportOutlined, PlusOutlined, SaveOutlined } from '@ant-design/icons';
 import { Alert, App, Button, Card, Checkbox, Col, Empty, Flex, Input, InputNumber, Row, Segmented, Select, Slider, Space, Switch, Tag, Tooltip, Typography } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -11,6 +11,7 @@ import { Permissions, useAuth } from '../../auth/AuthContext';
 import { useErrorToast } from '../../utils/errors';
 import { SiteMap, type SiteMapHandle } from './SiteMap';
 import { SitePowerCard } from './SitePowerCard';
+import { SiteToJobModal } from './SiteToJobModal';
 import { SiteZoneTools } from './SiteZoneTools';
 
 /**
@@ -22,7 +23,7 @@ export function SitePlanPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { can } = useAuth();
-  const { modal } = App.useApp();
+  const { modal, message } = App.useApp();
   const showError = useErrorToast();
   const queryClient = useQueryClient();
   const manage = can(Permissions.ProjectsManage);
@@ -33,6 +34,7 @@ export function SitePlanPage() {
   const [layerForNew, setLayerForNew] = useState<string>('Structures');
   const [draft, setDraft] = useState<[number, number][]>([]);
   const [drawing, setDrawing] = useState(false);
+  const [transferring, setTransferring] = useState(false);
   const mapHandle = useRef<SiteMapHandle | null>(null);
 
   const jobs = useQuery({
@@ -208,9 +210,27 @@ export function SitePlanPage() {
             <Tooltip title={t('site.saveViewHint')}>
               <Button icon={<SaveOutlined />} loading={saveView.isPending} onClick={() => saveView.mutate({})} />
             </Tooltip>
+            {manage && (
+              <Button type="primary" icon={<ExportOutlined />} onClick={() => setTransferring(true)}>
+                {t('site.transferToJob')}
+              </Button>
+            )}
           </Space>
         )}
       </div>
+
+      {data && transferring && (
+        <SiteToJobModal
+          open
+          plan={data}
+          onClose={() => setTransferring(false)}
+          onTransferred={(result) => {
+            setTransferring(false);
+            message.success(t('site.transferred', { count: result.lines.filter((l) => l.added).length }));
+            void queryClient.invalidateQueries({ queryKey: planKey });
+          }}
+        />
+      )}
 
       {!data ? (
         <Card>

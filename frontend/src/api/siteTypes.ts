@@ -130,3 +130,29 @@ export interface SitePower {
   /** Equipment on the plan whose power is not entered, so the figures are short. */
   missingWatt: string[];
 }
+
+export interface SiteToJobInput {
+  sectionId?: Guid | null;
+  sectionName?: string;
+  /** Add to what the section already holds instead of replacing it. */
+  append: boolean;
+  /** Only these layers; empty = everything on the plan. */
+  layers: string[];
+}
+
+export interface SiteToJobLine {
+  equipmentId: Guid;
+  code: string;
+  name: string;
+  quantity: number;
+  stock: number;
+  added: boolean;
+  problem?: string | null;
+}
+
+export interface SiteToJobResult {
+  projectId: Guid;
+  sectionId?: Guid | null;
+  sectionName: string;
+  lines: SiteToJobLine[];
+}
