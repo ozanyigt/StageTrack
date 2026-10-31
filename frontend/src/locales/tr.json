@@ -1829,6 +1829,15 @@
     "totalWeight": "Toplam ağırlık",
     "shortLines": "Stok yetmeyen satır",
     "noTradeEquipment": "{{trade}} dalında ürün yok.",
-    "noTradeEquipmentHint": "Ekipman > klasörler bölümünden bir klasöre bu dalı verin; altındaki ürünler burada çıkar."
+    "noTradeEquipmentHint": "Ekipman > klasörler bölümünden bir klasöre bu dalı verin; altındaki ürünler burada çıkar.",
+    "totalPowerTitle": "Toplam güç",
+    "nothingForPower": "Henüz hiçbir dalda seçim yok; tasarım ekranlarından ekleyin.",
+    "grandWatt": "Genel toplam",
+    "grandCircuits": "Toplam devre",
+    "ledShare": "LED payı",
+    "tradeShare": "Diğer dallar",
+    "tradeWeight": "Diğer dalların ağırlığı",
+    "perTrade": "Dallara göre",
+    "trade": "Dal"
   }
 }

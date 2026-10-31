@@ -1829,6 +1829,15 @@
     "totalWeight": "إجمالي الوزن",
     "shortLines": "سطور المخزون غير الكافي",
     "noTradeEquipment": "لا توجد منتجات في تخصص {{trade}}.",
-    "noTradeEquipmentHint": "امنح مجلدًا هذا التخصص من المعدات > المجلدات؛ وسيظهر ما تحته هنا."
+    "noTradeEquipmentHint": "امنح مجلدًا هذا التخصص من المعدات > المجلدات؛ وسيظهر ما تحته هنا.",
+    "totalPowerTitle": "إجمالي الطاقة",
+    "nothingForPower": "لم يُختَر شيء في أي تخصص بعد؛ أضفه من شاشات التصميم.",
+    "grandWatt": "المجموع الكلي",
+    "grandCircuits": "إجمالي الدوائر",
+    "ledShare": "حصة LED",
+    "tradeShare": "التخصصات الأخرى",
+    "tradeWeight": "وزن التخصصات الأخرى",
+    "perTrade": "حسب التخصص",
+    "trade": "التخصص"
   }
 }

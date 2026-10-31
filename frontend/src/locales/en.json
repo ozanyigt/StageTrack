@@ -1829,6 +1829,15 @@
     "totalWeight": "Total weight",
     "shortLines": "Lines short of stock",
     "noTradeEquipment": "No products in the {{trade}} trade.",
-    "noTradeEquipmentHint": "Give a folder this trade under Equipment > folders; everything under it appears here."
+    "noTradeEquipmentHint": "Give a folder this trade under Equipment > folders; everything under it appears here.",
+    "totalPowerTitle": "Total power",
+    "nothingForPower": "Nothing picked in any trade yet; add it on the design screens.",
+    "grandWatt": "Grand total",
+    "grandCircuits": "Total circuits",
+    "ledShare": "LED share",
+    "tradeShare": "Other trades",
+    "tradeWeight": "Weight of the other trades",
+    "perTrade": "By trade",
+    "trade": "Trade"
   }
 }
