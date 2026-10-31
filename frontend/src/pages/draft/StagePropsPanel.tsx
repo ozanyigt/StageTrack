@@ -1,5 +1,5 @@
-import { AimOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Button, Card, Checkbox, Empty, Flex, Tag, Tooltip, Typography } from 'antd';
+import { AimOutlined, ColumnWidthOutlined, DeleteOutlined, SwapOutlined } from '@ant-design/icons';
+import { Button, Card, Checkbox, Empty, Flex, InputNumber, Space, Tag, Tooltip, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { EquipmentDiscipline } from '../../api/types';
 import { TRADE_COLOR, type PropPlacements, type StageProp } from './stageProps';
@@ -15,6 +15,12 @@ interface Props {
   onFlown: (id: string, flown: boolean) => void;
   onRotate: (id: string, degrees: number) => void;
   onReset: (id: string) => void;
+  /** Exactly where it goes, typed rather than dragged. */
+  onPlaceAt: (id: string, at: { x?: number; z?: number; rotationDeg?: number }) => void;
+  /** The same distance the other way across the centre line. */
+  onMirror: (id: string) => void;
+  /** This trade's placed groups, spaced evenly across the stage. */
+  onSpread: (trade: EquipmentDiscipline) => void;
 }
 
 /**
@@ -22,7 +28,7 @@ interface Props {
  * possible: drag it onto the stage, or pick it up here and click where it goes - the second is what works on a
  * touch screen and with a trackpad on a laptop in a truck.
  */
-export function StagePropsPanel({ props, placements, selectedId, armedId, onArm, onSelect, onFlown, onRotate, onReset }: Props) {
+export function StagePropsPanel({ props, placements, selectedId, armedId, onArm, onSelect, onFlown, onRotate, onReset, onPlaceAt, onMirror, onSpread }: Props) {
   const { t } = useTranslation();
 
   if (props.length === 0) {
@@ -34,7 +40,12 @@ export function StagePropsPanel({ props, placements, selectedId, armedId, onArm,
   }
 
   return (
-    <Card size="small" title={t('draft.sceneGroups')} extra={<Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('draft.dragHint')}</Typography.Text>}>
+    <Card
+      size="small"
+      title={t('draft.sceneGroups')}
+      extra={<Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('draft.dragHint')}</Typography.Text>}
+    >
+      <Typography.Paragraph type="secondary" style={{ fontSize: 12, marginBottom: 8 }}>{t('draft.nudgeHint')}</Typography.Paragraph>
       <Flex vertical gap={6}>
         {props.map((prop) => {
           const placed = !!placements[prop.id];
@@ -66,6 +77,12 @@ export function StagePropsPanel({ props, placements, selectedId, armedId, onArm,
                   <Tooltip title={t('draft.rotate')}>
                     <Button size="small" type="text" onClick={() => onRotate(prop.id, 45)}>45°</Button>
                   </Tooltip>
+                  <Tooltip title={t('draft.mirror')}>
+                    <Button size="small" type="text" icon={<SwapOutlined />} onClick={() => onMirror(prop.id)} />
+                  </Tooltip>
+                  <Tooltip title={t('draft.spread')}>
+                    <Button size="small" type="text" icon={<ColumnWidthOutlined />} onClick={() => onSpread(prop.trade)} />
+                  </Tooltip>
                   {placed && (
                     <Tooltip title={t('draft.unplace')}>
                       <Button size="small" type="text" danger icon={<DeleteOutlined />} onClick={() => onReset(prop.id)} />
@@ -73,6 +90,38 @@ export function StagePropsPanel({ props, placements, selectedId, armedId, onArm,
                   )}
                 </Flex>
               </Flex>
+
+              {selectedId === prop.id && (
+                // Typed to the centimetre: a dragged speaker is never quite where the drawing says it is.
+                <Space size={4} style={{ marginTop: 6 }} onClick={(e) => e.stopPropagation()}>
+                  <InputNumber
+                    size="small"
+                    style={{ width: 86 }}
+                    step={0.1}
+                    addonBefore="x"
+                    value={Number(prop.x.toFixed(2))}
+                    onChange={(value) => value != null && onPlaceAt(prop.id, { x: value })}
+                  />
+                  <InputNumber
+                    size="small"
+                    style={{ width: 86 }}
+                    step={0.1}
+                    addonBefore="z"
+                    value={Number(prop.z.toFixed(2))}
+                    onChange={(value) => value != null && onPlaceAt(prop.id, { z: value })}
+                  />
+                  <InputNumber
+                    size="small"
+                    style={{ width: 76 }}
+                    step={5}
+                    min={0}
+                    max={360}
+                    addonAfter="°"
+                    value={Math.round(prop.rotationDeg)}
+                    onChange={(value) => value != null && onPlaceAt(prop.id, { rotationDeg: value })}
+                  />
+                </Space>
+              )}
 
               <Flex gap={12} align="center" style={{ marginTop: 4 }}>
                 <Checkbox

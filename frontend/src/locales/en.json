@@ -1856,14 +1856,16 @@
     "coverageSettings": "Coverage settings",
     "soundCoverageHint": "How wide and how far each group throws. There is no dispersion data in an inventory, so you say; where they point comes from the 3D stage.",
     "lightCoverageHint": "Left at 0 the light draws a pool under itself; give it an angle and it becomes a cone the way it faces. Placement comes from the 3D stage.",
-    "spread": "Spread",
+    "spread": "Space this trade evenly",
     "beam": "Beam angle",
     "throw": "Throw",
     "stageArea": "STAGE",
     "audienceArea": "AUDIENCE",
     "noTradeGroups": "No {{trade}} groups; add them on the design screen.",
     "unplacedGroups": "{{count}} groups are not placed on the 3D stage yet, so they all sit at its centre.",
-    "pickJob": "Pick a job"
+    "pickJob": "Pick a job",
+    "mirror": "Mirror to the other side",
+    "nudgeHint": "Arrow keys nudge the selected group 10 cm, a metre with Shift. Dragging snaps to the centre line and the stage edges; Shift turns snapping off."
   },
   "ledTab": {
     "notInLed": "This product is not in the LED module.",

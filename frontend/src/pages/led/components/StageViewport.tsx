@@ -388,8 +388,12 @@ export default function StageViewport({ layout, props = [], carriers, carrierLab
     if (d.prop) {
       const floor = floorPoint(e.clientX, e.clientY, d.prop.planeY);
       if (!floor) return;
+      const host = hostRef.current!;
+      const metresPerPixel = (2 * v.distance * Math.tan(((FOV / 2) * Math.PI) / 180)) / Math.max(1, host.clientHeight);
+      const snapped = snapProp(d.prop.id, floor.x + d.prop.dx, floor.z + d.prop.dz, SNAP_PX * metresPerPixel, e.shiftKey);
       const round = (n: number) => Math.round(n * 100) / 100;
-      onMoveProp?.(d.prop.id, { x: round(floor.x + d.prop.dx), z: round(floor.z + d.prop.dz) });
+      onMoveProp?.(d.prop.id, { x: round(snapped.x), z: round(snapped.z) });
+      showGuides(snapped.guideX, snapped.guideZ);
       return;
     }
     if (d.screen) {
@@ -416,6 +420,30 @@ export default function StageViewport({ layout, props = [], carriers, carrierLab
     if (moving && d.moved) onSelect(moving.id);
     else if (!d.moved && e.type === "pointerup") onSelect(moving?.id ?? null);
   }
+  /**
+   * A dragged group lines itself up with what is already there: the centre line, the podium's edges, and the
+   * other groups' and screens' own x and z. Holding Shift turns it off, which is the convention everywhere else
+   * in this viewport.
+   */
+  function snapProp(id: string, x: number, z: number, tolerance: number, off: boolean) {
+    if (off) return { x, z, guideX: null as number | null, guideZ: null as number | null };
+    const layout = layoutRef.current;
+    const xs = [0, ...propsRef.current.filter((p) => p.id !== id).map((p) => p.x), ...layout.screens.map((p) => p.x)];
+    const zs = [layout.podium.front, layout.podium.back, ...propsRef.current.filter((p) => p.id !== id).map((p) => p.z), ...layout.screens.map((p) => p.z)];
+    const nearest = (value: number, candidates: number[]) => {
+      let best: number | null = null;
+      for (const candidate of candidates) {
+        if (Math.abs(candidate - value) <= tolerance && (best === null || Math.abs(candidate - value) < Math.abs(best - value))) {
+          best = candidate;
+        }
+      }
+      return best;
+    };
+    const guideX = nearest(x, xs);
+    const guideZ = nearest(z, zs);
+    return { x: guideX ?? x, z: guideZ ?? z, guideX, guideZ };
+  }
+
   /** The snapping lines across the stage while a screen is dragged (none: hidden). */
   function showGuides(x: number | null, z: number | null) {
     const s = sceneRef.current;

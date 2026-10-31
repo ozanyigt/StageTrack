@@ -141,6 +141,69 @@ export function LedStagePage() {
   const moveProp = (id: string, at: { x: number; z: number }) =>
     setPropPlacements((p) => ({ ...p, [id]: { rotationDeg: p[id]?.rotationDeg ?? 0, flown: p[id]?.flown, ...at } }));
 
+  /** Where a group is now - its placement, or where it was parked before anyone placed it. */
+  const placementOf = (id: string) => {
+    const existing = propPlacements[id];
+    if (existing) return existing;
+    const parked = sceneProps.find((p) => p.id === id);
+    return { x: parked?.x ?? 0, z: parked?.z ?? 0, rotationDeg: parked?.rotationDeg ?? 0 };
+  };
+
+  const placeProp = (id: string, at: { x?: number; z?: number; rotationDeg?: number }) =>
+    setPropPlacements((p) => ({ ...p, [id]: { ...placementOf(id), ...at } }));
+
+  /** The same distance the other way across the centre line, which is how a second hang is usually described. */
+  const mirrorProp = (id: string) => {
+    const current = placementOf(id);
+    placeProp(id, { x: -current.x, rotationDeg: (360 - current.rotationDeg) % 360 });
+  };
+
+  /** This trade's placed groups, spaced evenly across the stage at the depth they already share. */
+  const spreadTrade = (trade: string) => {
+    const of = sceneProps.filter((p) => p.trade === trade);
+    if (of.length < 2 || !settings) return;
+    const half = settings.stageWidthM / 2;
+    const z = of.reduce((sum, p) => sum + p.z, 0) / of.length;
+    setPropPlacements((p) => {
+      const next = { ...p };
+      of.forEach((prop, index) => {
+        const x = -half + ((index + 0.5) * (half * 2)) / of.length;
+        next[prop.id] = { ...placementOf(prop.id), x: Math.round(x * 100) / 100, z: Math.round(z * 100) / 100 };
+      });
+      return next;
+    });
+  };
+
+  // Arrow keys nudge the selected group: 10 cm, or a metre with Shift. Not while a field has the focus.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!selectedId || !propPlacements[selectedId]) return;
+      const target = e.target as HTMLElement | null;
+      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      const step = e.shiftKey ? 1 : 0.1;
+      const by: Record<string, { x?: number; z?: number }> = {
+        ArrowLeft: { x: -step },
+        ArrowRight: { x: step },
+        ArrowUp: { z: -step },
+        ArrowDown: { z: step },
+      };
+      const delta = by[e.key];
+      if (!delta) return;
+      e.preventDefault();
+      const current = propPlacements[selectedId];
+      setPropPlacements((p) => ({
+        ...p,
+        [selectedId]: {
+          ...current,
+          x: Math.round((current.x + (delta.x ?? 0)) * 100) / 100,
+          z: Math.round((current.z + (delta.z ?? 0)) * 100) / 100,
+        },
+      }));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selectedId, propPlacements]);
+
   /** The room around the design, and how high the rig reaches inside it. */
   const room = useMemo(
     () => (venue && layout ? roomBox(venue, layout.podium.back) : null),
@@ -396,6 +459,9 @@ export function LedStagePage() {
                   return next;
                 })
               }
+              onPlaceAt={placeProp}
+              onMirror={mirrorProp}
+              onSpread={spreadTrade}
             />
           </div>
 
