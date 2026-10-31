@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ledApi, projectApi } from '../../api/endpoints';
 import type { EvaluateResponse, EvaluateScreenRequest, LedJobLine, LedToJobInput } from '../../api/ledTypes';
 import { useErrorToast } from '../../utils/errors';
+import { useLedJob } from './useLedJob';
 
 interface Props {
   open: boolean;
@@ -14,12 +15,14 @@ interface Props {
 }
 
 /**
- * Turns the calculated screens into planned equipment on a job. What the panels come to is worked out on the
- * server, so the preview shown here is exactly what will be planned; the processors and extenders are the
- * options the calculation selected for each screen.
+ * Turns the draft into planned equipment on a job - the point of the whole workspace. What the panels come to is
+ * worked out on the server, so the preview shown here is exactly what will be planned; the processors and
+ * extenders are the options the calculation selected for each screen; and the other trades' groups come over as
+ * themselves. From there the job reserves the stock and its draft quote prices the lot.
  */
 export function LedToJobModal({ open, screens, evaluation, onClose }: Props) {
   const { t } = useTranslation();
+  const { job } = useLedJob();
   const showError = useErrorToast();
   const [projectId, setProjectId] = useState<string>();
   const [sectionName, setSectionName] = useState('');
@@ -56,6 +59,15 @@ export function LedToJobModal({ open, screens, evaluation, onClose }: Props) {
     };
   }, [evaluation]);
 
+  /** The other trades, added up per product: two sound groups on the same top are six of it, not two lines. */
+  const tradeLines = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const line of job.lines) {
+      if (line.equipmentId) counts.set(line.equipmentId, (counts.get(line.equipmentId) ?? 0) + line.count);
+    }
+    return [...counts].map(([equipmentId, count]) => ({ equipmentId, count }));
+  }, [job.lines]);
+
   const input: LedToJobInput = useMemo(
     () => ({
       screens: screens.map((s) => ({
@@ -69,10 +81,11 @@ export function LedToJobModal({ open, screens, evaluation, onClose }: Props) {
       })),
       processors: devices.processors,
       extenders: devices.extenders,
+      equipment: tradeLines,
       sectionName: sectionName.trim() || undefined,
       append,
     }),
-    [screens, devices, sectionName, append],
+    [screens, devices, tradeLines, sectionName, append],
   );
 
   const preview = useQuery({

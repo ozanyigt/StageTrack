@@ -1,8 +1,12 @@
-import { Typography } from 'antd';
+import { ExportOutlined } from '@ant-design/icons';
+import { Button, Space, Typography } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useParams } from 'react-router-dom';
 import type { EquipmentDiscipline } from '../../api/types';
+import { Permissions, useAuth } from '../../auth/AuthContext';
 import { LedDesignPage } from '../led/LedDesignPage';
+import { LedToJobModal } from '../led/LedToJobModal';
 import { useLedJob } from '../led/useLedJob';
 import { DisciplineDesign } from './DisciplineDesign';
 
@@ -24,9 +28,11 @@ export const DESIGN_PATHS = Object.keys(BY_PATH);
  */
 export function DesignPage() {
   const { t } = useTranslation();
+  const { can } = useAuth();
   const { discipline: path } = useParams<{ discipline?: string }>();
   const discipline = path ? BY_PATH[path] : undefined;
   const { job, addLine, updateLine, removeLine } = useLedJob();
+  const [transferOpen, setTransferOpen] = useState(false);
 
   if (!discipline) {
     return <Navigate to="/draft/design/led" replace />;
@@ -42,7 +48,21 @@ export function DesignPage() {
         <Typography.Title level={3} style={{ margin: 0 }}>
           {t('draft.designTitle', { trade: t(`enums.equipmentDiscipline.${discipline}`) })}
         </Typography.Title>
+        {/* The draft goes over as a whole - screens and every trade's groups - from whichever door it is sent. */}
+        {can(Permissions.LedQuote) && (
+          <Space>
+            <Button
+              icon={<ExportOutlined />}
+              disabled={job.lines.every((l) => !l.equipmentId) && job.screens.length === 0}
+              onClick={() => setTransferOpen(true)}
+            >
+              {t('led.transferToJob')}
+            </Button>
+          </Space>
+        )}
       </div>
+
+      <LedToJobModal open={transferOpen} screens={[]} onClose={() => setTransferOpen(false)} />
 
       <DisciplineDesign
         discipline={discipline}
