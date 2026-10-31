@@ -74,7 +74,8 @@
     "ledDesign": "تصميم الشاشة",
     "ledPower": "الطاقة والمعالجات",
     "ledLogistics": "خطة التحميل",
-    "ledPixelMap": "خريطة البكسل"
+    "ledPixelMap": "خريطة البكسل",
+    "ledProcessors": "اختيار المعالج"
   },
   "dashboard": {
     "welcome": "مرحبًا، {{name}}",
@@ -1552,7 +1553,15 @@
       "showType": "نوع اللوحة",
       "split": "فك الدمج",
       "resetMap": "إعادة ضبط الخريطة"
-    }
+    },
+    "processorTitle": "اختيار المعالج",
+    "noScreensForProcessor": "أضف شاشة في صفحة التصميم أولاً.",
+    "directConnection": "اتصال مباشر",
+    "pixelsUsed": "{{used}} / {{capacity}} بكسل",
+    "notEnoughStock": "المخزون غير كافٍ",
+    "optionCount": "{{count}} خيار",
+    "pickPanelFirst": "اختر لوحة لهذه الشاشة أولاً.",
+    "infeasibleHint": "لا يوجد معالج في المخزون يكفي لهذه الشاشات؛ أضف معالجًا أكبر أو صغّر الشاشة."
   },
   "pixel": {
     "label": {

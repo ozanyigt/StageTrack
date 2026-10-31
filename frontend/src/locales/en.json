@@ -74,7 +74,8 @@
     "ledDesign": "Screen design",
     "ledPower": "Power and processors",
     "ledLogistics": "Loading plan",
-    "ledPixelMap": "Pixel Map"
+    "ledPixelMap": "Pixel Map",
+    "ledProcessors": "Processor choice"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -1552,7 +1553,15 @@
       "showType": "Panel type",
       "split": "Split the merge",
       "resetMap": "Reset the map"
-    }
+    },
+    "processorTitle": "Processor choice",
+    "noScreensForProcessor": "Add a screen on the design page first.",
+    "directConnection": "Direct connection",
+    "pixelsUsed": "{{used}} / {{capacity}} pixels",
+    "notEnoughStock": "Not enough in stock",
+    "optionCount": "{{count}} options",
+    "pickPanelFirst": "Pick a panel for this screen first.",
+    "infeasibleHint": "No processor in the inventory can drive these screens; add a larger one or make the screen smaller."
   },
   "pixel": {
     "label": {

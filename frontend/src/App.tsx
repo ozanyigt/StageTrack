@@ -73,6 +73,7 @@ function Themed({ children }: { children: ReactNode }) {
 const LedInventoryPage = lazy(() => import('./pages/led/LedInventoryPage').then((m) => ({ default: m.LedInventoryPage })));
 const LedDesignPage = lazy(() => import('./pages/led/LedDesignPage').then((m) => ({ default: m.LedDesignPage })));
 const LedPixelMapPage = lazy(() => import('./pages/led/LedPixelMapPage').then((m) => ({ default: m.LedPixelMapPage })));
+const LedProcessorPage = lazy(() => import('./pages/led/LedProcessorPage').then((m) => ({ default: m.LedProcessorPage })));
 const LedPowerPage = lazy(() => import('./pages/led/LedPowerPage').then((m) => ({ default: m.LedPowerPage })));
 const LedLogisticsPage = lazy(() => import('./pages/led/LedLogisticsPage').then((m) => ({ default: m.LedLogisticsPage })));
 
@@ -159,6 +160,7 @@ function AppRoutes() {
         <Route path="led/panels" element={<Guard permission={Permissions.Led}><Led><LedInventoryPage /></Led></Guard>} />
         <Route path="led/design" element={<Guard permission={Permissions.LedDesign}><Led><LedDesignPage /></Led></Guard>} />
         <Route path="led/pixel-map" element={<Guard permission={Permissions.LedDesign}><Led><LedPixelMapPage /></Led></Guard>} />
+        <Route path="led/processors" element={<Guard permission={Permissions.LedDesign}><Led><LedProcessorPage /></Led></Guard>} />
         <Route path="led/power" element={<Guard permission={Permissions.LedDesign}><Led><LedPowerPage /></Led></Guard>} />
         <Route path="led/logistics" element={<Guard permission={Permissions.LedTransport}><Led><LedLogisticsPage /></Led></Guard>} />
         <Route path="settings/firm" element={<Guard permission={Permissions.Firm}><FirmSettingsPage /></Guard>} />

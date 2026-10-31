@@ -74,7 +74,8 @@
     "ledDesign": "Ekran tasarımı",
     "ledPower": "Güç ve işlemci",
     "ledLogistics": "Yükleme planı",
-    "ledPixelMap": "Pixel Map"
+    "ledPixelMap": "Pixel Map",
+    "ledProcessors": "İşlemci seçimi"
   },
   "dashboard": {
     "welcome": "Hoş geldiniz, {{name}}",
@@ -1552,7 +1553,15 @@
       "showType": "Panel tipi",
       "split": "Birleşimi çöz",
       "resetMap": "Haritayı sıfırla"
-    }
+    },
+    "processorTitle": "İşlemci seçimi",
+    "noScreensForProcessor": "Önce ekran tasarımı sayfasında ekran ekleyin.",
+    "directConnection": "Doğrudan bağlantı",
+    "pixelsUsed": "{{used}} / {{capacity}} piksel",
+    "notEnoughStock": "Stok yetersiz",
+    "optionCount": "{{count}} seçenek",
+    "pickPanelFirst": "Önce bu ekrana panel seçin.",
+    "infeasibleHint": "Envanterdeki işlemciler bu ekranları sürmeye yetmiyor; daha büyük bir işlemci tanımlayın veya ekranı küçültün."
   },
   "pixel": {
     "label": {
