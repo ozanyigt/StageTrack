@@ -1,5 +1,5 @@
 import { PrinterOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Empty, Flex, InputNumber, Space, Statistic, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Empty, Flex, InputNumber, Space, Statistic, Table, Tag } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,8 +15,10 @@ const OVERRIDES_KEY = 'stagetrack-led-stock-overrides-v1';
  * counted from the screens themselves (cut-outs left out, a corner column counting for its own model), so it can
  * never drift from the loading plan or the transfer. A line can still be overridden by hand — a planner often
  * knows that half a wall is already promised elsewhere — and the shortage then follows what is shown.
+ *
+ * The LED half of the stock screen; the other trades count their own lines beside it, under their own tab.
  */
-export function LedStockStatusPage() {
+export function LedStockBody() {
   const { t } = useTranslation();
   const { job, walls } = useLedJob();
   const [overrides, setOverrides] = useState<Record<string, number>>(() => {
@@ -80,18 +82,12 @@ export function LedStockStatusPage() {
   }, [status.data, overrides]);
 
   if (job.screens.length === 0) {
-    return (
-      <>
-        <Typography.Title level={3} style={{ marginTop: 0 }}>{t('led.stockTitle')}</Typography.Title>
-        <Card><Empty description={t('led.noScreensForStock')} /></Card>
-      </>
-    );
+    return <Card><Empty description={t('led.noScreensForStock')} /></Card>;
   }
 
   return (
     <>
       <div className="page-header">
-        <Typography.Title level={3}>{t('led.stockTitle')}</Typography.Title>
         <Space size="large" wrap>
           <Statistic title={t('led.owned')} value={totals.owned} valueStyle={{ fontSize: 18 }} />
           <Statistic title={t('led.usedByJob')} value={totals.used} valueStyle={{ fontSize: 18 }} />

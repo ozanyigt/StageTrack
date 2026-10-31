@@ -78,7 +78,7 @@ const LedStagePage = lazy(() => import('./pages/led/LedStagePage').then((m) => (
 const LedSimulationPage = lazy(() => import('./pages/led/LedSimulationPage').then((m) => ({ default: m.LedSimulationPage })));
 const LedProcessorPage = lazy(() => import('./pages/led/LedProcessorPage').then((m) => ({ default: m.LedProcessorPage })));
 const LedPowerPage = lazy(() => import('./pages/led/LedPowerPage').then((m) => ({ default: m.LedPowerPage })));
-const LedStockStatusPage = lazy(() => import('./pages/led/LedStockStatusPage').then((m) => ({ default: m.LedStockStatusPage })));
+const StockStatusPage = lazy(() => import('./pages/draft/StockStatusPage').then((m) => ({ default: m.StockStatusPage })));
 const LedLogisticsPage = lazy(() => import('./pages/led/LedLogisticsPage').then((m) => ({ default: m.LedLogisticsPage })));
 
 /** The LED screens arrive in their own bundle; until it does, the page area shows a spinner. */
@@ -170,7 +170,7 @@ function AppRoutes() {
         <Route path="draft/stage" element={<Guard permission={Permissions.LedDesign}><Led><LedStagePage /></Led></Guard>} />
         <Route path="draft/simulation" element={<Guard permission={Permissions.LedDesign}><Led><LedSimulationPage /></Led></Guard>} />
         <Route path="draft/power" element={<Guard permission={Permissions.LedDesign}><Led><LedPowerPage /></Led></Guard>} />
-        <Route path="draft/stock" element={<Guard permission={Permissions.Led}><Led><LedStockStatusPage /></Led></Guard>} />
+        <Route path="draft/stock" element={<Guard permission={Permissions.Led}><Led><StockStatusPage /></Led></Guard>} />
         <Route path="draft/logistics" element={<Guard permission={Permissions.LedTransport}><Led><LedLogisticsPage /></Led></Guard>} />
         {/* Off the menu but still reachable until their work moves: panel specs to the equipment card, the
             processor recommendation into the LED design screen. */}
