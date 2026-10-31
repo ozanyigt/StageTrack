@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ledApi } from '../../api/endpoints';
 import type { EvaluateScreenRequest, LedPanel, PowerMode } from '../../api/ledTypes';
@@ -81,6 +81,25 @@ function load(): StoredJob {
   }
 }
 
+/**
+ * One job, shared by every screen that asks for it. Two components used to keep their own copy of the same
+ * localStorage, so a change made in one - picking the job, adding a line - left the other showing yesterday's
+ * draft until it happened to remount. A single store with subscribers means there is only ever one answer.
+ */
+let current: StoredJob = load();
+const listeners = new Set<() => void>();
+
+function setStored(next: StoredJob) {
+  current = next;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  for (const listener of listeners) listener();
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
 const newId = (prefix: string) => `${prefix}${Date.now().toString(36)}${Math.round(Math.random() * 1e6).toString(36)}`;
 
 export const newStoredScreen = (): StoredScreen => ({
@@ -98,11 +117,8 @@ export const newStoredScreen = (): StoredScreen => ({
  */
 export function useLedJob({ wiring = false }: { wiring?: boolean } = {}) {
   const { t } = useTranslation();
-  const [job, setJob] = useState<StoredJob>(load);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(job));
-  }, [job]);
+  const job = useSyncExternalStore(subscribe, () => current);
+  const setJob = useCallback((change: (previous: StoredJob) => StoredJob) => setStored(change(current)), []);
 
   const panels = useQuery({ queryKey: ['led-inventory', 'Panel', undefined], queryFn: () => ledApi.panels() });
 
@@ -202,7 +218,7 @@ export function useLedJob({ wiring = false }: { wiring?: boolean } = {}) {
 
   const removeLine = useCallback((id: string) => setJob((j) => ({ ...j, lines: j.lines.filter((l) => l.id !== id) })), []);
 
-  const clear = useCallback(() => setJob(DEFAULT_JOB), []);
+  const clear = useCallback(() => setJob((j) => ({ ...DEFAULT_JOB, projectId: j.projectId })), []);
 
   return { job, walls, nameOf, panels, panelById, location, request, evaluation, add, update, remove, setPower, clear, addLine, updateLine, removeLine, setProject };
 }

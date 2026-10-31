@@ -1686,7 +1686,8 @@
         "perspective": "Perspective",
         "front": "Front",
         "top": "Top",
-        "side": "Side"
+        "side": "Side",
+        "audience": "Audience eye"
       },
       "carrierLabel": {
         "LedFrame": "LED frame · {{m}} m",
@@ -1865,7 +1866,22 @@
     "unplacedGroups": "{{count}} groups are not placed on the 3D stage yet, so they all sit at its centre.",
     "pickJob": "Pick a job",
     "mirror": "Mirror to the other side",
-    "nudgeHint": "Arrow keys nudge the selected group 10 cm, a metre with Shift. Dragging snaps to the centre line and the stage edges; Shift turns snapping off."
+    "nudgeHint": "Arrow keys nudge the selected group 10 cm, a metre with Shift. Dragging snaps to the centre line and the stage edges; Shift turns snapping off.",
+    "sightlines": "Sightlines",
+    "noScreensForSightlines": "Add a screen on the LED design first; sightlines are worked out against the screens.",
+    "noRoomForSightlines": "No room entered, so 40 metres of open ground in front of the stage is assumed. Enter the real hall on the 3D stage.",
+    "unpitchedScreens": "{{count}} screens have no panel picked, so the minimum-distance rule could not be applied to them.",
+    "goodShare": "Area that sees properly",
+    "sightlineRules": "The rules: closer than the pitch in metres is grainy, further than {{heights}} screen heights is too small, more than {{offAxis}}° off the face is looking along the screen. Anything standing in the way counts as blocked.",
+    "eyeHeight": "Eye height",
+    "rakeCounted": "The {{deg}}° rake is counted in",
+    "verdict": {
+      "Good": "Sees it",
+      "TooClose": "Too close",
+      "TooFar": "Too far",
+      "TooSteep": "Too far off axis",
+      "Blocked": "Blocked"
+    }
   },
   "ledTab": {
     "notInLed": "This product is not in the LED module.",

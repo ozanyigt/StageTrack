@@ -2,29 +2,22 @@ import { Button, Card, Checkbox, Col, Empty, Flex, InputNumber, Row, Segmented, 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { equipmentApi, ledApi, projectApi } from '../../api/endpoints';
+import { ledApi, projectApi } from '../../api/endpoints';
 import type { LedStageSettings } from '../../api/ledTypes';
 import { StagePropsPanel } from '../draft/StagePropsPanel';
-import { sanitizePropPlacements, stageProps, type PropPlacements } from '../draft/stageProps';
 import { usePlanTexture } from '../draft/usePlanTexture';
-import { usePlanImage, useVenue } from '../draft/useVenue';
+import { usePlanImage } from '../draft/useVenue';
+import { useStageScene } from '../draft/useStageScene';
 import { VenueCard } from '../draft/VenueCard';
-import { roomBox } from '../draft/venueObjects';
 import { useErrorToast } from '../../utils/errors';
 import { useBomLines } from './components/CarrierFacts';
 import StageViewport, { type StageView } from './components/StageViewport';
 import { CAMERA_PRESETS, type CameraPreset } from './core/stage3d/camera';
 import { carrierLabel, carriers, totalBom } from './core/stage3d/carriers';
-import { sanitizePlacements, type Placements } from './core/stage3d/placements';
-import { sceneLayout } from './core/stage3d/scene';
-import { stage3dScreens } from './core/stage3d/screens';
-import { STAGE_LIMITS, STAGE_STEPS, clampSetting, type StageSettings } from './core/stage3d/settings';
+import { STAGE_LIMITS, STAGE_STEPS, clampSetting } from './core/stage3d/settings';
 import { stageTotals } from './core/stage3d/totals';
-import { usePixelMap } from './usePixelMap';
 import { useLedJob } from './useLedJob';
 
-const PLACEMENTS_KEY = 'stagetrack-led-stage-placements-v1';
-const PROP_PLACEMENTS_KEY = 'stagetrack-stage-prop-placements-v1';
 const VIEW_KEY = 'stagetrack-led-stage-view-v1';
 
 const DEFAULT_VIEW: StageView = {
@@ -52,16 +45,23 @@ export function LedStagePage() {
   const { t } = useTranslation();
   const showError = useErrorToast();
   const queryClient = useQueryClient();
-  const { job, walls, nameOf, evaluation, setProject } = useLedJob();
-  const { state: mapState } = usePixelMap(walls, nameOf);
+  const {
+    job,
+    settings,
+    loadingSettings,
+    layout,
+    placements,
+    setPlacements,
+    propPlacements,
+    setPropPlacements,
+    sceneProps,
+    venue,
+    room,
+    rigHeightM,
+    evaluation,
+  } = useStageScene();
+  const { setProject } = useLedJob();
 
-  const [placements, setPlacements] = useState<Placements>(() => {
-    try {
-      return sanitizePlacements(JSON.parse(localStorage.getItem(PLACEMENTS_KEY) ?? 'null'));
-    } catch {
-      return {};
-    }
-  });
   const [view, setView] = useState<StageView>(() => {
     try {
       return { ...DEFAULT_VIEW, ...(JSON.parse(localStorage.getItem(VIEW_KEY) ?? 'null') ?? {}) };
@@ -69,23 +69,12 @@ export function LedStagePage() {
       return DEFAULT_VIEW;
     }
   });
-  const [propPlacements, setPropPlacements] = useState<PropPlacements>(() => {
-    try {
-      return sanitizePropPlacements(JSON.parse(localStorage.getItem(PROP_PLACEMENTS_KEY) ?? 'null'));
-    } catch {
-      return {};
-    }
-  });
   const [armedId, setArmedId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [preset, setPreset] = useState<CameraPreset>('perspective');
   const [presetKey, setPresetKey] = useState(0);
 
-  useEffect(() => localStorage.setItem(PLACEMENTS_KEY, JSON.stringify(placements)), [placements]);
   useEffect(() => localStorage.setItem(VIEW_KEY, JSON.stringify(view)), [view]);
-  useEffect(() => localStorage.setItem(PROP_PLACEMENTS_KEY, JSON.stringify(propPlacements)), [propPlacements]);
-
-  const stored = useQuery({ queryKey: ['led-stage'], queryFn: () => ledApi.stage() });
 
   /** Which job this draft is for: the room hangs off it, and so will the transfer. */
   const jobs = useQuery({
@@ -93,50 +82,14 @@ export function LedStagePage() {
     queryFn: () => projectApi.list({ statuses: ['Draft', 'Pending', 'Confirmed', 'Prepped', 'OnLocation'], maxResultCount: 300, sorting: 'planStart' }),
   });
 
-  const { venue } = useVenue(job.projectId);
   const planUrl = usePlanImage(venue?.planAttachmentId);
   const planTexture = usePlanTexture(planUrl, venue?.planMetresPerPixel);
-
-  /** Every product the other trades picked, for their measurements and names. */
-  const catalogue = useQuery({
-    queryKey: ['equipment', 'for-stage'],
-    queryFn: () => equipmentApi.list({ maxResultCount: 1000, sorting: 'code' }),
-    enabled: job.lines.some((l) => l.equipmentId),
-  });
 
   const save = useMutation({
     mutationFn: (next: LedStageSettings) => ledApi.saveStage(next),
     onSuccess: (next) => queryClient.setQueryData(['led-stage'], next),
     onError: showError,
   });
-
-  /** The server's DTO and the ported library share field names and enum values, so no mapping is needed. */
-  const settings = (stored.data ?? null) as StageSettings | null;
-
-  const layout = useMemo(() => {
-    if (!settings) return null;
-    const built = stage3dScreens(walls, mapState, evaluation.data?.screens, nameOf, true);
-    return built.screens.length > 0 ? sceneLayout(built.screens, settings, placements) : null;
-  }, [walls, mapState, evaluation.data, nameOf, settings, placements]);
-
-  const equipmentById = useMemo(
-    () => new Map((catalogue.data?.items ?? []).map((e) => [e.id, e])),
-    [catalogue.data],
-  );
-
-  /** The groups standing on the stage: on the deck, or at the trim height when they hang. */
-  const sceneProps = useMemo(
-    () =>
-      stageProps(
-        job.lines,
-        equipmentById,
-        propPlacements,
-        layout?.podium.height ?? 0,
-        settings?.trussHeightM ?? (layout?.podium.height ?? 0) + 6,
-        (line, item) => (item ? `${line.name} · ${item.code}` : line.name),
-      ),
-    [job.lines, equipmentById, propPlacements, layout, settings],
-  );
 
   const moveProp = (id: string, at: { x: number; z: number }) =>
     setPropPlacements((p) => ({ ...p, [id]: { rotationDeg: p[id]?.rotationDeg ?? 0, flown: p[id]?.flown, ...at } }));
@@ -203,21 +156,6 @@ export function LedStagePage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [selectedId, propPlacements]);
-
-  /** The room around the design, and how high the rig reaches inside it. */
-  const room = useMemo(
-    () => (venue && layout ? roomBox(venue, layout.podium.back) : null),
-    [venue, layout],
-  );
-
-  const rigHeightM = useMemo(
-    () =>
-      Math.max(
-        settings?.mount === 'Flown' ? settings.trussHeightM : 0,
-        ...(layout?.screens.map((p) => p.bottom + p.screen.heightM) ?? [0]),
-      ),
-    [settings, layout],
-  );
 
   const rig = useMemo(() => (layout && settings ? carriers(layout, settings) : []), [layout, settings]);
   const label = useMemo(() => (layout && settings ? carrierLabel(layout, settings, rig) : null), [layout, settings, rig]);
@@ -368,7 +306,7 @@ export function LedStagePage() {
         </Col>
 
         <Col xs={24} xl={7}>
-          <Card size="small" title={t('led.stage.settings')} loading={stored.isLoading}>
+          <Card size="small" title={t('led.stage.settings')} loading={loadingSettings}>
             {settings && (
               <Space direction="vertical" size={10} style={{ width: '100%' }}>
                 <Segmented

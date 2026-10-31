@@ -7,6 +7,7 @@ import type { EquipmentDiscipline } from '../../api/types';
 import { LedSimulationPage } from '../led/LedSimulationPage';
 import { useLedJob, type JobLine } from '../led/useLedJob';
 import { CoverageView, type CoverageItem } from './CoverageView';
+import { SightlinePanel } from './SightlinePanel';
 import { sanitizePropPlacements, type PropPlacements } from './stageProps';
 
 const PROP_PLACEMENTS_KEY = 'stagetrack-stage-prop-placements-v1';
@@ -23,7 +24,7 @@ const DEFAULTS: Record<string, Coverage> = {
   Light: { spreadDeg: 0, throwM: 4 },
 };
 
-type SimTab = 'Screen' | 'Sound' | 'Light';
+type SimTab = 'Screen' | 'Sound' | 'Light' | 'Sightline';
 
 /**
  * Simulation, one trade at a time. The screens keep the wiring simulation they always had - how the panels chain
@@ -48,11 +49,14 @@ export function SimulationPage() {
             { value: 'Screen', label: t('draft.simScreen') },
             { value: 'Sound', label: t('enums.equipmentDiscipline.Sound') },
             { value: 'Light', label: t('enums.equipmentDiscipline.Light') },
+            { value: 'Sightline', label: t('draft.sightlines') },
           ]}
         />
       </div>
 
-      {tab === 'Screen' ? <LedSimulationPage hideTitle /> : <CoverageSimulation trade={tab} />}
+      {tab === 'Screen' && <LedSimulationPage hideTitle />}
+      {tab === 'Sightline' && <SightlinePanel />}
+      {(tab === 'Sound' || tab === 'Light') && <CoverageSimulation trade={tab} />}
     </>
   );
 }

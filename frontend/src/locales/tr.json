@@ -1686,7 +1686,8 @@
         "perspective": "Perspektif",
         "front": "Önden",
         "top": "Üstten",
-        "side": "Yandan"
+        "side": "Yandan",
+        "audience": "Seyirci gözü"
       },
       "carrierLabel": {
         "LedFrame": "LED demiri · {{m}} m",
@@ -1865,7 +1866,22 @@
     "unplacedGroups": "{{count}} grup henüz 3D sahneye yerleştirilmedi; hepsi sahnenin ortasında duruyor.",
     "pickJob": "İş seçin",
     "mirror": "Karşı tarafa aynala",
-    "nudgeHint": "Seçili grubu ok tuşlarıyla 10 cm, Shift ile 1 m itebilirsiniz. Sürüklerken merkez eksenine ve sahne kenarına yapışır; Shift basılıysa yapışmaz."
+    "nudgeHint": "Seçili grubu ok tuşlarıyla 10 cm, Shift ile 1 m itebilirsiniz. Sürüklerken merkez eksenine ve sahne kenarına yapışır; Shift basılıysa yapışmaz.",
+    "sightlines": "Görüş hattı",
+    "noScreensForSightlines": "Önce LED tasarımından ekran ekleyin; görüş hattı ekranlara göre hesaplanıyor.",
+    "noRoomForSightlines": "Mekân girilmedi; sahnenin önünde 40 metrelik açık alan varsayıldı. 3D sahnedeki mekân kartından gerçek salonu girin.",
+    "unpitchedScreens": "{{count}} ekranda panel seçilmemiş; o ekranlar için en yakın mesafe kuralı uygulanamadı.",
+    "goodShare": "Düzgün gören alan",
+    "sightlineRules": "Kurallar: pitch (mm) kadar metreden yakını taneli, ekran yüksekliğinin {{heights}} katından uzağı küçük, {{offAxis}}°’den fazla yandan bakan ekrana değil ekranın yanına bakıyor. Önünde duran bir şey varsa kapalı sayılır.",
+    "eyeHeight": "Göz yüksekliği",
+    "rakeCounted": "Tribün eğimi hesaba katıldı: {{deg}}°",
+    "verdict": {
+      "Good": "Görüyor",
+      "TooClose": "Çok yakın",
+      "TooFar": "Çok uzak",
+      "TooSteep": "Çok yandan",
+      "Blocked": "Önü kapalı"
+    }
   },
   "ledTab": {
     "notInLed": "Bu ürün LED modülünde tanımlı değil.",
