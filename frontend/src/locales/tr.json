@@ -77,7 +77,8 @@
     "ledPixelMap": "Pixel Map",
     "ledProcessors": "İşlemci seçimi",
     "ledStock": "Stok durumu",
-    "ledSimulation": "Simülasyon"
+    "ledSimulation": "Simülasyon",
+    "ledStage": "3D sahne"
   },
   "dashboard": {
     "welcome": "Hoş geldiniz, {{name}}",
@@ -537,6 +538,14 @@
       "BottomRight": "Sağ alt",
       "TopLeft": "Sol üst",
       "TopRight": "Sağ üst"
+    },
+    "ledStageMount": {
+      "Ground": "Yerden",
+      "Flown": "Asılı"
+    },
+    "ledStageCarrier": {
+      "Scaff": "Scaff kule",
+      "LedFrame": "LED demiri"
     }
   },
   "errors": {
@@ -1622,6 +1631,43 @@
         "curve_not_supported": "Bu panel curve yapılamıyor.",
         "curve_clamped": "İstenen açı panelin sınırına çekildi."
       }
+    },
+    "stageTitle": "3D sahne",
+    "noScreensForStage": "Önce ekran tasarımı sayfasında ekran ekleyin.",
+    "stageNeedsMap": "Ekranları önce Pixel Map üzerinde yerleştirin.",
+    "stage": {
+      "settings": "Sahne ve taşıyıcı",
+      "view": "Görünüm",
+      "bom": "Malzeme listesi",
+      "reframe": "Yeniden çerçevele",
+      "resetPlacements": "Yerleşimi sıfırla",
+      "stageWidth": "Sahne genişliği",
+      "stageDepth": "Sahne derinliği",
+      "stageHeight": "Sahne yüksekliği",
+      "frontGap": "Ön boşluk",
+      "bottom": "Alt kenar",
+      "legDepth": "Ayak derinliği",
+      "trussHeight": "Truss yüksekliği",
+      "hangAllowance": "Asma payı",
+      "groundSupport": "Ground support",
+      "groundSupportHeight": "Ground support yüksekliği",
+      "showGrid": "Izgara",
+      "showPodium": "Sahne",
+      "showRig": "Taşıyıcı",
+      "showDimensions": "Ölçüler",
+      "showLabels": "Etiketler",
+      "showCurveAngles": "Curve açıları",
+      "camera": {
+        "perspective": "Perspektif",
+        "front": "Önden",
+        "top": "Üstten",
+        "side": "Yandan"
+      },
+      "carrierLabel": {
+        "LedFrame": "LED demiri · {{m}} m",
+        "Scaff": "Scaff · {{m}} m",
+        "Flown": "Truss · {{m}} m"
+      }
     }
   },
   "pixel": {
@@ -1661,5 +1707,19 @@
       "n": "Ekran {{n}}"
     }
   },
-  "2d": "2D"
+  "2d": "2D",
+  "stage3d": {
+    "audience": "Seyirci",
+    "noWebgl": "Tarayıcınız 3D görüntülemeyi desteklemiyor.",
+    "bom": {
+      "basePlates": "Taban plakası",
+      "diagonals": "Çapraz",
+      "ledgers": "Yatay",
+      "posts": "Dikme",
+      "uprights": "Kolon",
+      "pcs": "adet",
+      "oneM": "1 m",
+      "twoM": "2 m"
+    }
+  }
 }

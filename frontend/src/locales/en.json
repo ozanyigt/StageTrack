@@ -77,7 +77,8 @@
     "ledPixelMap": "Pixel Map",
     "ledProcessors": "Processor choice",
     "ledStock": "Stock status",
-    "ledSimulation": "Simulation"
+    "ledSimulation": "Simulation",
+    "ledStage": "3D stage"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -537,6 +538,14 @@
       "BottomRight": "Bottom right",
       "TopLeft": "Top left",
       "TopRight": "Top right"
+    },
+    "ledStageMount": {
+      "Ground": "Ground",
+      "Flown": "Flown"
+    },
+    "ledStageCarrier": {
+      "Scaff": "Scaff tower",
+      "LedFrame": "LED frame"
     }
   },
   "errors": {
@@ -1622,6 +1631,43 @@
         "curve_not_supported": "This panel cannot be curved.",
         "curve_clamped": "The angle was pulled to what the panel allows."
       }
+    },
+    "stageTitle": "3D stage",
+    "noScreensForStage": "Add a screen on the design page first.",
+    "stageNeedsMap": "Place the screens on the Pixel Map first.",
+    "stage": {
+      "settings": "Stage and rig",
+      "view": "View",
+      "bom": "Bill of materials",
+      "reframe": "Re-frame",
+      "resetPlacements": "Reset the placement",
+      "stageWidth": "Stage width",
+      "stageDepth": "Stage depth",
+      "stageHeight": "Stage height",
+      "frontGap": "Front gap",
+      "bottom": "Bottom edge",
+      "legDepth": "Leg depth",
+      "trussHeight": "Truss height",
+      "hangAllowance": "Hang allowance",
+      "groundSupport": "Ground support",
+      "groundSupportHeight": "Ground support height",
+      "showGrid": "Grid",
+      "showPodium": "Stage",
+      "showRig": "Rig",
+      "showDimensions": "Dimensions",
+      "showLabels": "Labels",
+      "showCurveAngles": "Curve angles",
+      "camera": {
+        "perspective": "Perspective",
+        "front": "Front",
+        "top": "Top",
+        "side": "Side"
+      },
+      "carrierLabel": {
+        "LedFrame": "LED frame · {{m}} m",
+        "Scaff": "Scaff · {{m}} m",
+        "Flown": "Truss · {{m}} m"
+      }
     }
   },
   "pixel": {
@@ -1661,5 +1707,19 @@
       "n": "Screen {{n}}"
     }
   },
-  "2d": "2D"
+  "2d": "2D",
+  "stage3d": {
+    "audience": "Audience",
+    "noWebgl": "This browser cannot show 3D.",
+    "bom": {
+      "basePlates": "Base plates",
+      "diagonals": "Diagonals",
+      "ledgers": "Ledgers",
+      "posts": "Posts",
+      "uprights": "Uprights",
+      "pcs": "pcs",
+      "oneM": "1 m",
+      "twoM": "2 m"
+    }
+  }
 }

@@ -77,7 +77,8 @@
     "ledPixelMap": "خريطة البكسل",
     "ledProcessors": "اختيار المعالج",
     "ledStock": "حالة المخزون",
-    "ledSimulation": "المحاكاة"
+    "ledSimulation": "المحاكاة",
+    "ledStage": "المسرح ثلاثي الأبعاد"
   },
   "dashboard": {
     "welcome": "مرحبًا، {{name}}",
@@ -537,6 +538,14 @@
       "BottomRight": "أسفل اليمين",
       "TopLeft": "أعلى اليسار",
       "TopRight": "أعلى اليمين"
+    },
+    "ledStageMount": {
+      "Ground": "أرضي",
+      "Flown": "معلّق"
+    },
+    "ledStageCarrier": {
+      "Scaff": "برج سقالة",
+      "LedFrame": "إطار LED"
     }
   },
   "errors": {
@@ -1622,6 +1631,43 @@
         "curve_not_supported": "لا يمكن ثني هذه اللوحة.",
         "curve_clamped": "تم ضبط الزاوية على ما تسمح به اللوحة."
       }
+    },
+    "stageTitle": "المسرح ثلاثي الأبعاد",
+    "noScreensForStage": "أضف شاشة في صفحة التصميم أولاً.",
+    "stageNeedsMap": "ضع الشاشات على خريطة البكسل أولاً.",
+    "stage": {
+      "settings": "المسرح والحامل",
+      "view": "العرض",
+      "bom": "قائمة المواد",
+      "reframe": "إعادة التأطير",
+      "resetPlacements": "إعادة ضبط الوضع",
+      "stageWidth": "عرض المسرح",
+      "stageDepth": "عمق المسرح",
+      "stageHeight": "ارتفاع المسرح",
+      "frontGap": "الفراغ الأمامي",
+      "bottom": "الحافة السفلية",
+      "legDepth": "عمق القائم",
+      "trussHeight": "ارتفاع الترس",
+      "hangAllowance": "بدل التعليق",
+      "groundSupport": "دعامة أرضية",
+      "groundSupportHeight": "ارتفاع الدعامة الأرضية",
+      "showGrid": "الشبكة",
+      "showPodium": "المسرح",
+      "showRig": "الحامل",
+      "showDimensions": "الأبعاد",
+      "showLabels": "التسميات",
+      "showCurveAngles": "زوايا الانحناء",
+      "camera": {
+        "perspective": "منظور",
+        "front": "أمامي",
+        "top": "علوي",
+        "side": "جانبي"
+      },
+      "carrierLabel": {
+        "LedFrame": "إطار LED · {{m}} م",
+        "Scaff": "سقالة · {{m}} م",
+        "Flown": "ترس · {{m}} م"
+      }
     }
   },
   "pixel": {
@@ -1661,5 +1707,19 @@
       "n": "الشاشة {{n}}"
     }
   },
-  "2d": "2D"
+  "2d": "2D",
+  "stage3d": {
+    "audience": "الجمهور",
+    "noWebgl": "هذا المتصفح لا يدعم العرض ثلاثي الأبعاد.",
+    "bom": {
+      "basePlates": "ألواح القاعدة",
+      "diagonals": "أقطار",
+      "ledgers": "عوارض",
+      "posts": "قوائم",
+      "uprights": "أعمدة",
+      "pcs": "قطعة",
+      "oneM": "1 م",
+      "twoM": "2 م"
+    }
+  }
 }
