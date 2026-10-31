@@ -78,7 +78,8 @@
     "ledProcessors": "İşlemci seçimi",
     "ledStock": "Stok durumu",
     "ledSimulation": "Simülasyon",
-    "ledStage": "3D sahne"
+    "ledStage": "3D sahne",
+    "sitePlan": "Saha planı"
   },
   "dashboard": {
     "welcome": "Hoş geldiniz, {{name}}",
@@ -546,6 +547,11 @@
     "ledStageCarrier": {
       "Scaff": "Scaff kule",
       "LedFrame": "LED demiri"
+    },
+    "siteZoneKind": {
+      "Area": "Alan",
+      "Route": "Güzergâh",
+      "Barrier": "Bariyer"
     }
   },
   "errors": {
@@ -728,6 +734,12 @@
       "InvalidRequest": "İstek geçersiz; değerleri kontrol edin.",
       "JobSection": "LED ekranları",
       "NoWarehouse": "Depo atanmamış"
+    },
+    "SitePlan": {
+      "TooManyItems": "Bir plana en fazla {{limit}} nesne konabilir.",
+      "ItemNeedsEquipmentOrLabel": "Nesne ya bir ekipman olmalı ya da bir adı bulunmalı.",
+      "ZoneInvalidShape": "Şekil için en az {{needed}} köşe gerekir.",
+      "AlreadyExists": "Bu işin zaten bir saha planı var."
     }
   },
   "roles": {
@@ -1721,5 +1733,53 @@
       "oneM": "1 m",
       "twoM": "2 m"
     }
+  },
+  "site": {
+    "title": "Saha planı",
+    "pickJob": "İş seçin",
+    "pickJobHint": "Saha planı işe aittir: hangi işin alanını planlayacağınızı seçin. Haritaya koyduğunuz her ekipman o işe planlanabilir.",
+    "noPlanYet": "Bu işin saha planı yok.",
+    "createPlan": "Saha planı oluştur",
+    "satellite": "Uydu",
+    "street": "Harita",
+    "night": "Gece",
+    "nightHint": "Alanı hava karardıktan sonra görün; ışıklar yanar, karanlık noktalar ortaya çıkar.",
+    "saveViewHint": "Haritanın bulunduğu yeri ve yakınlığı kaydet",
+    "place": "Yerleştir",
+    "pickEquipment": "Ekipman seçin",
+    "addMarker": "İşaret ekle",
+    "marker": "İşaret",
+    "clickToPlace": "Haritada bir yere tıklayın.",
+    "layers": "Katmanlar",
+    "layer": {
+      "Infrastructure": "Altyapı",
+      "Structures": "Yapılar",
+      "Public": "Seyirci alanı",
+      "Operations": "Operasyon",
+      "Emergency": "Acil durum",
+      "Lighting": "Aydınlatma"
+    },
+    "shortage": "Stok yetmiyor",
+    "stock": "Stok",
+    "stockOf": "{{need}} / {{stock}} adet",
+    "selected": "Seçili nesne",
+    "pickOnMap": "Haritadan bir nesne seçin.",
+    "label": "Etiket",
+    "quantity": "Adet",
+    "rotation": "Yön",
+    "removeItem": "Bu nesne silinsin mi?",
+    "isLight": "Bu bir ışık",
+    "lightHeight": "Yükseklik",
+    "lightIntensity": "Parlaklık",
+    "lightRadius": "Erişim",
+    "lightHint": "Erişim boş bırakılırsa yüksekliğin yaklaşık üç katı alınır.",
+    "mapHint": "Nesneyi sürükleyerek taşıyın; yerleştirmek için önce soldan seçip haritaya tıklayın.",
+    "zones": "Bölgeler",
+    "drawZone": "Bölge çiz",
+    "zoneName": "Bölge adı",
+    "zonePoints": "{{count}} nokta (en az {{needed}})",
+    "undoPoint": "Son noktayı sil",
+    "drawHint": "Haritaya tıklayarak köşeleri koyun, sonra kaydedin.",
+    "noZones": "Henüz bölge yok."
   }
 }

@@ -78,7 +78,8 @@
     "ledProcessors": "Processor choice",
     "ledStock": "Stock status",
     "ledSimulation": "Simulation",
-    "ledStage": "3D stage"
+    "ledStage": "3D stage",
+    "sitePlan": "Site plan"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -546,6 +547,11 @@
     "ledStageCarrier": {
       "Scaff": "Scaff tower",
       "LedFrame": "LED frame"
+    },
+    "siteZoneKind": {
+      "Area": "Area",
+      "Route": "Route",
+      "Barrier": "Barrier"
     }
   },
   "errors": {
@@ -728,6 +734,12 @@
       "InvalidRequest": "The request is not valid; check the values.",
       "JobSection": "LED screens",
       "NoWarehouse": "No warehouse"
+    },
+    "SitePlan": {
+      "TooManyItems": "A plan holds at most {{limit}} items.",
+      "ItemNeedsEquipmentOrLabel": "An item must be equipment or at least have a name.",
+      "ZoneInvalidShape": "The shape needs at least {{needed}} corners.",
+      "AlreadyExists": "This job already has a site plan."
     }
   },
   "roles": {
@@ -1721,5 +1733,53 @@
       "oneM": "1 m",
       "twoM": "2 m"
     }
+  },
+  "site": {
+    "title": "Site plan",
+    "pickJob": "Pick a job",
+    "pickJobHint": "A site plan belongs to a job: pick whose ground you are planning. Everything you place can then be planned onto that job.",
+    "noPlanYet": "This job has no site plan yet.",
+    "createPlan": "Create a site plan",
+    "satellite": "Satellite",
+    "street": "Map",
+    "night": "Night",
+    "nightHint": "See the site after dark: the lights come on and the dark gaps show.",
+    "saveViewHint": "Save where the map is looking",
+    "place": "Place",
+    "pickEquipment": "Pick equipment",
+    "addMarker": "Add a marker",
+    "marker": "Marker",
+    "clickToPlace": "Click where it goes on the map.",
+    "layers": "Layers",
+    "layer": {
+      "Infrastructure": "Infrastructure",
+      "Structures": "Structures",
+      "Public": "Public areas",
+      "Operations": "Operations",
+      "Emergency": "Emergency",
+      "Lighting": "Lighting"
+    },
+    "shortage": "Not enough in stock",
+    "stock": "Stock",
+    "stockOf": "{{need}} of {{stock}}",
+    "selected": "Selected item",
+    "pickOnMap": "Pick an item on the map.",
+    "label": "Label",
+    "quantity": "Quantity",
+    "rotation": "Facing",
+    "removeItem": "Remove this item?",
+    "isLight": "This is a light",
+    "lightHeight": "Height",
+    "lightIntensity": "Brightness",
+    "lightRadius": "Reach",
+    "lightHint": "Left blank, the reach is about three times the height.",
+    "mapHint": "Drag an item to move it; to place one, pick it on the left and click the map.",
+    "zones": "Zones",
+    "drawZone": "Draw a zone",
+    "zoneName": "Zone name",
+    "zonePoints": "{{count}} points (at least {{needed}})",
+    "undoPoint": "Undo last point",
+    "drawHint": "Click the map to drop corners, then save.",
+    "noZones": "No zones yet."
   }
 }

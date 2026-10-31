@@ -76,6 +76,7 @@ export function AppLayout() {
     ...(crewOnly
       ? [{ key: '/projects', icon: <ProjectOutlined />, label: t('nav.myProjects') }]
       : [{ key: '/projects', icon: <ProjectOutlined />, label: t('nav.projects'), permission: Permissions.Projects }]),
+    { key: '/site-plan', icon: <EnvironmentOutlined />, label: t('nav.sitePlan'), permission: Permissions.Projects },
     { key: '/quotes', icon: <FileTextOutlined />, label: t('nav.quotes'), permission: Permissions.Quotes },
     {
       key: 'equipment',
@@ -133,7 +134,7 @@ export function AppLayout() {
 
   const path = location.pathname;
   const selected =
-    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/led/panels', '/led/design', '/led/pixel-map', '/led/simulation', '/led/stage', '/led/processors', '/led/power', '/led/stock', '/led/logistics', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
+    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/site-plan', '/led/panels', '/led/design', '/led/pixel-map', '/led/simulation', '/led/stage', '/led/processors', '/led/power', '/led/stock', '/led/logistics', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
       .find((p) => path.startsWith(p)) ??
     ['/warehouse', '/projects', '/quotes', '/equipment', '/customers', '/suppliers', '/crew'].find((p) => path.startsWith(p) && !user?.isHost) ??
     '/';

@@ -154,3 +154,59 @@ body {
 @layer theme, components, utilities;
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
+
+/* Site plan pins: drawn by Leaflet, so they are plain CSS rather than antd. */
+.site-pin {
+  position: absolute;
+  left: -16px;
+  top: -16px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #1677ff;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+}
+
+.site-pin-selected {
+  background: #fa8c16;
+  box-shadow: 0 0 0 3px rgba(250, 140, 22, 0.45);
+}
+
+.site-pin-text {
+  max-width: 28px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-inline: 2px;
+}
+
+/* The count sits upright even when the pin is rotated. */
+.site-pin-count {
+  position: absolute;
+  top: -7px;
+  inset-inline-end: -7px;
+  min-width: 16px;
+  height: 16px;
+  padding-inline: 3px;
+  border-radius: 8px;
+  background: #141414;
+  color: #fff;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* Leaflet draws its own panes; keep them under antd's drawers and modals. */
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 400;
+}

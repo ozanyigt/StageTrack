@@ -1,6 +1,7 @@
 import { http, toQuery } from './http';
 import type * as T from './types';
 import type * as L from './ledTypes';
+import type * as S from './siteTypes';
 
 const get = <R>(url: string, params?: object) =>
   http.get<R>(url, { params: params ? toQuery(params as Record<string, unknown>) : undefined }).then((r) => r.data);
@@ -332,4 +333,25 @@ export const ledApi = {
 
   previewJob: (projectId: T.Guid, input: L.LedToJobInput) => post<L.LedToJobResult>(`/led/jobs/${projectId}/preview`, input),
   transferToJob: (projectId: T.Guid, input: L.LedToJobInput) => post<L.LedToJobResult>(`/led/jobs/${projectId}/transfer`, input),
+};
+
+/** A job's site plan: what stands where on the real ground, as inventory rather than a drawing. */
+export const sitePlanApi = {
+  byProject: (projectId: T.Guid) => get<S.SitePlan | null>(`/site-plans/by-project/${projectId}`),
+  create: (input: S.CreateSitePlanInput) => post<S.SitePlan>('/site-plans', input),
+  updateView: (id: T.Guid, input: S.SitePlanViewInput) => put<S.SitePlan>(`/site-plans/${id}/view`, input),
+  rename: (id: T.Guid, name: string) => put<S.SitePlan>(`/site-plans/${id}/name`, { name }),
+  remove: (id: T.Guid) => del(`/site-plans/${id}`),
+
+  addItem: (id: T.Guid, input: S.AddSitePlanItemInput) => post<S.SitePlan>(`/site-plans/${id}/items`, input),
+  moveItem: (id: T.Guid, itemId: T.Guid, input: S.MoveSitePlanItemInput) =>
+    put<S.SitePlan>(`/site-plans/${id}/items/${itemId}/position`, input),
+  updateItem: (id: T.Guid, itemId: T.Guid, input: S.UpdateSitePlanItemInput) =>
+    put<S.SitePlan>(`/site-plans/${id}/items/${itemId}`, input),
+  removeItem: (id: T.Guid, itemId: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/items/${itemId}`),
+
+  addZone: (id: T.Guid, input: S.SaveSitePlanZoneInput) => post<S.SitePlan>(`/site-plans/${id}/zones`, input),
+  updateZone: (id: T.Guid, zoneId: T.Guid, input: S.SaveSitePlanZoneInput) =>
+    put<S.SitePlan>(`/site-plans/${id}/zones/${zoneId}`, input),
+  removeZone: (id: T.Guid, zoneId: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/zones/${zoneId}`),
 };

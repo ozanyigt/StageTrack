@@ -78,7 +78,8 @@
     "ledProcessors": "اختيار المعالج",
     "ledStock": "حالة المخزون",
     "ledSimulation": "المحاكاة",
-    "ledStage": "المسرح ثلاثي الأبعاد"
+    "ledStage": "المسرح ثلاثي الأبعاد",
+    "sitePlan": "مخطط الموقع"
   },
   "dashboard": {
     "welcome": "مرحبًا، {{name}}",
@@ -546,6 +547,11 @@
     "ledStageCarrier": {
       "Scaff": "برج سقالة",
       "LedFrame": "إطار LED"
+    },
+    "siteZoneKind": {
+      "Area": "منطقة",
+      "Route": "مسار",
+      "Barrier": "حاجز"
     }
   },
   "errors": {
@@ -728,6 +734,12 @@
       "InvalidRequest": "الطلب غير صالح؛ تحقق من القيم.",
       "JobSection": "شاشات LED",
       "NoWarehouse": "بدون مستودع"
+    },
+    "SitePlan": {
+      "TooManyItems": "يتسع المخطط لـ {{limit}} عنصر كحد أقصى.",
+      "ItemNeedsEquipmentOrLabel": "يجب أن يكون العنصر معدة أو أن يحمل اسمًا على الأقل.",
+      "ZoneInvalidShape": "يحتاج الشكل إلى {{needed}} زوايا على الأقل.",
+      "AlreadyExists": "هذا العمل لديه مخطط موقع بالفعل."
     }
   },
   "roles": {
@@ -1721,5 +1733,53 @@
       "oneM": "1 م",
       "twoM": "2 م"
     }
+  },
+  "site": {
+    "title": "مخطط الموقع",
+    "pickJob": "اختر عملاً",
+    "pickJobHint": "مخطط الموقع يخص عملاً: اختر الأرض التي تخطط لها. كل ما تضعه يمكن تخطيطه على ذلك العمل.",
+    "noPlanYet": "لا يوجد مخطط موقع لهذا العمل بعد.",
+    "createPlan": "إنشاء مخطط موقع",
+    "satellite": "قمر صناعي",
+    "street": "خريطة",
+    "night": "ليل",
+    "nightHint": "انظر إلى الموقع بعد حلول الظلام: تُضاء الأنوار وتظهر المناطق المعتمة.",
+    "saveViewHint": "احفظ موضع الخريطة",
+    "place": "وضع",
+    "pickEquipment": "اختر معدة",
+    "addMarker": "إضافة علامة",
+    "marker": "علامة",
+    "clickToPlace": "انقر على الخريطة في المكان المطلوب.",
+    "layers": "الطبقات",
+    "layer": {
+      "Infrastructure": "البنية التحتية",
+      "Structures": "الهياكل",
+      "Public": "مناطق الجمهور",
+      "Operations": "العمليات",
+      "Emergency": "الطوارئ",
+      "Lighting": "الإضاءة"
+    },
+    "shortage": "المخزون غير كافٍ",
+    "stock": "المخزون",
+    "stockOf": "{{need}} من {{stock}}",
+    "selected": "العنصر المحدد",
+    "pickOnMap": "اختر عنصرًا من الخريطة.",
+    "label": "التسمية",
+    "quantity": "الكمية",
+    "rotation": "الاتجاه",
+    "removeItem": "حذف هذا العنصر؟",
+    "isLight": "هذا مصدر إضاءة",
+    "lightHeight": "الارتفاع",
+    "lightIntensity": "السطوع",
+    "lightRadius": "المدى",
+    "lightHint": "إذا تُرك فارغًا، يكون المدى نحو ثلاثة أضعاف الارتفاع.",
+    "mapHint": "اسحب العنصر لتحريكه؛ وللإضافة اختر من اليسار ثم انقر على الخريطة.",
+    "zones": "المناطق",
+    "drawZone": "رسم منطقة",
+    "zoneName": "اسم المنطقة",
+    "zonePoints": "{{count}} نقطة (على الأقل {{needed}})",
+    "undoPoint": "تراجع عن آخر نقطة",
+    "drawHint": "انقر على الخريطة لوضع الزوايا ثم احفظ.",
+    "noZones": "لا توجد مناطق بعد."
   }
 }

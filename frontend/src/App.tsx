@@ -73,6 +73,7 @@ function Themed({ children }: { children: ReactNode }) {
 const LedInventoryPage = lazy(() => import('./pages/led/LedInventoryPage').then((m) => ({ default: m.LedInventoryPage })));
 const LedDesignPage = lazy(() => import('./pages/led/LedDesignPage').then((m) => ({ default: m.LedDesignPage })));
 const LedPixelMapPage = lazy(() => import('./pages/led/LedPixelMapPage').then((m) => ({ default: m.LedPixelMapPage })));
+const SitePlanPage = lazy(() => import('./pages/sites/SitePlanPage').then((m) => ({ default: m.SitePlanPage })));
 const LedStagePage = lazy(() => import('./pages/led/LedStagePage').then((m) => ({ default: m.LedStagePage })));
 const LedSimulationPage = lazy(() => import('./pages/led/LedSimulationPage').then((m) => ({ default: m.LedSimulationPage })));
 const LedProcessorPage = lazy(() => import('./pages/led/LedProcessorPage').then((m) => ({ default: m.LedProcessorPage })));
@@ -160,6 +161,9 @@ function AppRoutes() {
         <Route path="settings/label-templates" element={<Guard permission={Permissions.LabelTemplates}><LabelTemplatesPage /></Guard>} />
         <Route path="settings/audit-log" element={<Guard permission={Permissions.AuditLog}><AuditLogPage /></Guard>} />
         {/* LED module: lazy, because its screens pull in three.js and the canvas drawing nobody else needs. */}
+        {/* The site plan belongs to a job, so it is reachable with and without one. */}
+        <Route path="site-plan" element={<Guard permission={Permissions.Projects}><Led><SitePlanPage /></Led></Guard>} />
+        <Route path="site-plan/:projectId" element={<Guard permission={Permissions.Projects}><Led><SitePlanPage /></Led></Guard>} />
         <Route path="led/panels" element={<Guard permission={Permissions.Led}><Led><LedInventoryPage /></Led></Guard>} />
         <Route path="led/design" element={<Guard permission={Permissions.LedDesign}><Led><LedDesignPage /></Led></Guard>} />
         <Route path="led/pixel-map" element={<Guard permission={Permissions.LedDesign}><Led><LedPixelMapPage /></Led></Guard>} />
