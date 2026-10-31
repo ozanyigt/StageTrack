@@ -2,10 +2,14 @@ import { Button, Card, Checkbox, Col, Empty, Flex, InputNumber, Row, Segmented, 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { equipmentApi, ledApi } from '../../api/endpoints';
+import { equipmentApi, ledApi, projectApi } from '../../api/endpoints';
 import type { LedStageSettings } from '../../api/ledTypes';
 import { StagePropsPanel } from '../draft/StagePropsPanel';
 import { sanitizePropPlacements, stageProps, type PropPlacements } from '../draft/stageProps';
+import { usePlanTexture } from '../draft/usePlanTexture';
+import { usePlanImage, useVenue } from '../draft/useVenue';
+import { VenueCard } from '../draft/VenueCard';
+import { roomBox } from '../draft/venueObjects';
 import { useErrorToast } from '../../utils/errors';
 import { useBomLines } from './components/CarrierFacts';
 import StageViewport, { type StageView } from './components/StageViewport';
@@ -48,7 +52,7 @@ export function LedStagePage() {
   const { t } = useTranslation();
   const showError = useErrorToast();
   const queryClient = useQueryClient();
-  const { job, walls, nameOf, evaluation } = useLedJob();
+  const { job, walls, nameOf, evaluation, setProject } = useLedJob();
   const { state: mapState } = usePixelMap(walls, nameOf);
 
   const [placements, setPlacements] = useState<Placements>(() => {
@@ -82,6 +86,16 @@ export function LedStagePage() {
   useEffect(() => localStorage.setItem(PROP_PLACEMENTS_KEY, JSON.stringify(propPlacements)), [propPlacements]);
 
   const stored = useQuery({ queryKey: ['led-stage'], queryFn: () => ledApi.stage() });
+
+  /** Which job this draft is for: the room hangs off it, and so will the transfer. */
+  const jobs = useQuery({
+    queryKey: ['projects', 'draft-picker'],
+    queryFn: () => projectApi.list({ statuses: ['Draft', 'Pending', 'Confirmed', 'Prepped', 'OnLocation'], maxResultCount: 300, sorting: 'planStart' }),
+  });
+
+  const { venue } = useVenue(job.projectId);
+  const planUrl = usePlanImage(venue?.planAttachmentId);
+  const planTexture = usePlanTexture(planUrl, venue?.planMetresPerPixel);
 
   /** Every product the other trades picked, for their measurements and names. */
   const catalogue = useQuery({
@@ -127,6 +141,21 @@ export function LedStagePage() {
   const moveProp = (id: string, at: { x: number; z: number }) =>
     setPropPlacements((p) => ({ ...p, [id]: { rotationDeg: p[id]?.rotationDeg ?? 0, flown: p[id]?.flown, ...at } }));
 
+  /** The room around the design, and how high the rig reaches inside it. */
+  const room = useMemo(
+    () => (venue && layout ? roomBox(venue, layout.podium.back) : null),
+    [venue, layout],
+  );
+
+  const rigHeightM = useMemo(
+    () =>
+      Math.max(
+        settings?.mount === 'Flown' ? settings.trussHeightM : 0,
+        ...(layout?.screens.map((p) => p.bottom + p.screen.heightM) ?? [0]),
+      ),
+    [settings, layout],
+  );
+
   const rig = useMemo(() => (layout && settings ? carriers(layout, settings) : []), [layout, settings]);
   const label = useMemo(() => (layout && settings ? carrierLabel(layout, settings, rig) : null), [layout, settings, rig]);
   const bom = useMemo(() => totalBom(rig), [rig]);
@@ -142,10 +171,31 @@ export function LedStagePage() {
   };
 
   if (job.screens.length === 0 && sceneProps.length === 0) {
+    // Nothing to stand in the room yet - but the room itself can be entered now, and usually is entered first.
     return (
       <>
-        <Typography.Title level={3} style={{ marginTop: 0 }}>{t('led.stageTitle')}</Typography.Title>
-        <Card><Empty description={t('draft.nothingForStage')} /></Card>
+        <div className="page-header">
+          <Typography.Title level={3} style={{ margin: 0 }}>{t('led.stageTitle')}</Typography.Title>
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            style={{ minWidth: 260 }}
+            placeholder={t('draft.pickJob')}
+            value={job.projectId ?? undefined}
+            loading={jobs.isLoading}
+            onChange={(value) => setProject(value ?? null)}
+            options={(jobs.data?.items ?? []).map((j) => ({ value: j.id, label: `${j.number} · ${j.name}` }))}
+          />
+        </div>
+        <Row gutter={[12, 12]}>
+          <Col xs={24} xl={17}>
+            <Card><Empty description={t('draft.nothingForStage')} /></Card>
+          </Col>
+          <Col xs={24} xl={7}>
+            <VenueCard projectId={job.projectId} rigHeightM={rigHeightM} />
+          </Col>
+        </Row>
       </>
     );
   }
@@ -172,7 +222,20 @@ export function LedStagePage() {
   return (
     <>
       <div className="page-header">
-        <Typography.Title level={3}>{t('led.stageTitle')}</Typography.Title>
+        <Space align="center" wrap>
+          <Typography.Title level={3} style={{ margin: 0 }}>{t('led.stageTitle')}</Typography.Title>
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            style={{ minWidth: 260 }}
+            placeholder={t('draft.pickJob')}
+            value={job.projectId ?? undefined}
+            loading={jobs.isLoading}
+            onChange={(value) => setProject(value ?? null)}
+            options={(jobs.data?.items ?? []).map((j) => ({ value: j.id, label: `${j.number} · ${j.name}` }))}
+          />
+        </Space>
         <Space size="large" wrap>
           <Statistic title={t('led.screens')} value={layout?.screens.length ?? 0} valueStyle={{ fontSize: 18 }} />
           <Statistic title={t('led.weight')} value={Math.round(totals.weightKg)} suffix="kg" valueStyle={{ fontSize: 18 }} />
@@ -193,6 +256,19 @@ export function LedStagePage() {
                 onSelect={setSelectedId}
                 onMove={(id, at) => setPlacements((p) => ({ ...p, [id]: { ...(p[id] ?? { x: 0, z: 0, rotationDeg: 0 }), ...at } }))}
                 onMoveProp={moveProp}
+                room={room}
+                roomPlan={
+                  planTexture && venue
+                    ? {
+                        texture: planTexture.texture,
+                        widthM: planTexture.widthM,
+                        depthM: planTexture.depthM,
+                        originXM: venue.planOriginXM,
+                        originZM: venue.planOriginZM,
+                        rotationDeg: venue.planRotationDeg,
+                      }
+                    : null
+                }
                 onDropAt={(at) => {
                   // Whatever was picked up - dragged from the list or armed with the crosshair - lands here.
                   if (armedId) {
@@ -288,6 +364,10 @@ export function LedStagePage() {
               </Space>
             )}
           </Card>
+
+          <div style={{ marginTop: 12 }}>
+            <VenueCard projectId={job.projectId} rigHeightM={rigHeightM} />
+          </div>
 
           <div style={{ marginTop: 12 }}>
             <StagePropsPanel

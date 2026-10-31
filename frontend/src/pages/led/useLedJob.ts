@@ -54,13 +54,15 @@ export interface JobLine {
 const STORAGE_KEY = 'stagetrack-led-job-v2';
 
 interface StoredJob {
+  /** The job being drafted for; null until the user says. The room and the transfer both need it. */
+  projectId: string | null;
   voltage: number;
   mode: PowerMode;
   screens: StoredScreen[];
   lines: JobLine[];
 }
 
-const DEFAULT_JOB: StoredJob = { voltage: 220, mode: 'Max', screens: [], lines: [] };
+const DEFAULT_JOB: StoredJob = { projectId: null, voltage: 220, mode: 'Max', screens: [], lines: [] };
 
 function load(): StoredJob {
   try {
@@ -179,6 +181,8 @@ export function useLedJob({ wiring = false }: { wiring?: boolean } = {}) {
 
   const setPower = useCallback((voltage: number, mode: PowerMode) => setJob((j) => ({ ...j, voltage, mode })), []);
 
+  const setProject = useCallback((projectId: string | null) => setJob((j) => ({ ...j, projectId })), []);
+
   /** A new group of the trade, named after the ones already there ("Ses grubu 2"). */
   const addLine = useCallback(
     (discipline: EquipmentDiscipline) =>
@@ -200,5 +204,5 @@ export function useLedJob({ wiring = false }: { wiring?: boolean } = {}) {
 
   const clear = useCallback(() => setJob(DEFAULT_JOB), []);
 
-  return { job, walls, nameOf, panels, panelById, location, request, evaluation, add, update, remove, setPower, clear, addLine, updateLine, removeLine };
+  return { job, walls, nameOf, panels, panelById, location, request, evaluation, add, update, remove, setPower, clear, addLine, updateLine, removeLine, setProject };
 }

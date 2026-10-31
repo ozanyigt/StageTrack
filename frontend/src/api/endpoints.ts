@@ -362,6 +362,12 @@ export const sitePlanApi = {
     put<S.SitePlan>(`/site-plans/${id}/zones/${zoneId}`, input),
   removeZone: (id: T.Guid, zoneId: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/zones/${zoneId}`),
 
+  /** The room the job is built in; the first call creates it. */
+  setVenue: (id: T.Guid, input: S.SetSiteVenueInput) => put<S.SitePlan>(`/site-plans/${id}/venue`, input),
+  setVenuePlan: (id: T.Guid, input: S.SetSiteVenuePlanInput) => put<S.SitePlan>(`/site-plans/${id}/venue/plan`, input),
+  setVenueOnMap: (id: T.Guid, input: S.SetSiteVenueMapInput) => put<S.SitePlan>(`/site-plans/${id}/venue/map`, input),
+  removeVenue: (id: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/venue`),
+
   /** What the job would take from the plan, without touching it. */
   previewJob: (id: T.Guid, input: Partial<S.SiteToJobInput>) =>
     post<S.SiteToJobResult>(`/site-plans/${id}/job/preview`, input),

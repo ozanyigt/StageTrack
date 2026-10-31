@@ -748,7 +748,8 @@
       "TooManyItems": "A plan holds at most {{limit}} items.",
       "ItemNeedsEquipmentOrLabel": "An item must be equipment or at least have a name.",
       "ZoneInvalidShape": "The shape needs at least {{needed}} corners.",
-      "AlreadyExists": "This job already has a site plan."
+      "AlreadyExists": "This job already has a site plan.",
+      "VenueNotSet": "Enter the room’s measurements first."
     }
   },
   "roles": {
@@ -1861,7 +1862,8 @@
     "stageArea": "STAGE",
     "audienceArea": "AUDIENCE",
     "noTradeGroups": "No {{trade}} groups; add them on the design screen.",
-    "unplacedGroups": "{{count}} groups are not placed on the 3D stage yet, so they all sit at its centre."
+    "unplacedGroups": "{{count}} groups are not placed on the 3D stage yet, so they all sit at its centre.",
+    "pickJob": "Pick a job"
   },
   "ledTab": {
     "notInLed": "This product is not in the LED module.",
@@ -1871,5 +1873,36 @@
     "transport": "Transport",
     "compatibleProcessors": "Compatible processors",
     "stockHint": "Stock and price are managed on the properties tab."
+  },
+  "venue": {
+    "title": "Venue",
+    "none": "No room entered for this job.",
+    "add": "Add the room",
+    "pickJobFirst": "Pick a job first; the room belongs to it.",
+    "removeConfirm": "Remove the room?",
+    "width": "Width",
+    "depth": "Depth",
+    "clearHeight": "Clear height",
+    "clearHeightHint": "Roof steel, catwalk, scoreboard — the lowest thing the rig has to clear",
+    "behindStage": "Behind the stage",
+    "stageOffset": "Stage off centre",
+    "rake": "Seating rake",
+    "tooLow": "The rig reaches {{rig}} m and the hall is {{clear}} m clear.",
+    "uploadPlan": "Upload the venue plan",
+    "replacePlan": "Replace the plan",
+    "calibrate": "Set the scale",
+    "recalibrate": "Set the scale again",
+    "notScaled": "The plan is not scaled yet",
+    "planHint": "Upload the layout drawing the venue sends; point at a distance you know and its columns, doors and seating bowl fall under the design.",
+    "scaleIs": "Scale: 1 m ≈ {{value}} pixels",
+    "calibrateTitle": "Scale the plan",
+    "calibrateHint": "Click both ends of something whose length you know (the stage opening, a bay, a dimension printed on the sheet), then say how many metres it is.",
+    "knownLength": "Known length",
+    "clearPoints": "Clear the points",
+    "pointsLeft": "{{count}} more point(s)",
+    "measured": "{{pixels}} pixels · 1 m ≈ {{scale}} pixels",
+    "applyScale": "Apply the scale",
+    "planImage": "Venue plan",
+    "noPlanImage": "Upload a plan image first."
   }
 }

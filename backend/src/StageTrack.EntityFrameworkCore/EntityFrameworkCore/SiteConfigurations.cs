@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using StageTrack.Inventory;
 using StageTrack.Projects;
@@ -15,6 +15,10 @@ public class SitePlanConfiguration : IEntityTypeConfiguration<SitePlan>
         // One plan per job, like its quote: the different views are layers of the same plan.
         b.HasIndex(x => new { x.CompanyId, x.ProjectId }).IsUnique().HasFilter("[IsDeleted] = 0");
         b.HasOne<Project>().WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Cascade);
+
+        // The room lives in the plan's own row: it is one set of numbers, never queried on its own.
+        b.OwnsOne(x => x.Venue, v => v.ToTable("SitePlans"));
+        b.Navigation(x => x.Venue).IsRequired(false);
 
         b.HasMany(x => x.Items).WithOne().HasForeignKey(i => i.SitePlanId).OnDelete(DeleteBehavior.Cascade);
         b.HasMany(x => x.Zones).WithOne().HasForeignKey(z => z.SitePlanId).OnDelete(DeleteBehavior.Cascade);

@@ -185,7 +185,7 @@ export function SitePlanPage() {
             }}
             options={(jobs.data?.items ?? []).map((j) => ({ value: j.id, label: `${j.number} · ${j.name}` }))}
           />
-          {data?.venue && <Tag icon={<EnvironmentOutlined />}>{data.venue}</Tag>}
+          {data?.venueName && <Tag icon={<EnvironmentOutlined />}>{data.venueName}</Tag>}
         </Space>
 
         {data && (

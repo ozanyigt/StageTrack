@@ -8,6 +8,7 @@ import { jointMarks, snapPlacement, type SceneLayout, type ScreenPlacement } fro
 import { buildCarriers, buildDimensions, buildFloorText, buildPodium, buildScreens, disposeGroup, lines, screenLabelPoint } from "./sceneObjects";
 import { buildProps } from "../../draft/propObjects";
 import type { StageProp } from "../../draft/stageProps";
+import { buildRoom, type RoomBox } from "../../draft/venueObjects";
 
 /**
  * The 3D view of 3D Sahne (three.js, loaded with this page only). Drag: turn, wheel: zoom, Shift + drag: pan, click a
@@ -32,6 +33,10 @@ export interface StageViewportProps {
   onMoveProp?: (id: string, at: { x: number; z: number }) => void;
   /** Something dropped from the list at this floor point. */
   onDropAt?: (at: { x: number; z: number }) => void;
+  /** The room the job is built in (draft/venueObjects.ts); absent outdoors, where there is nothing to clear. */
+  room?: RoomBox | null;
+  /** The venue's own layout drawing, already scaled, laid on the floor. */
+  roomPlan?: { texture: THREE.Texture; widthM: number; depthM: number; originXM: number; originZM: number; rotationDeg: number } | null;
   /** The carriers (lib/stage3d/carriers.ts) and their label. */
   carriers: CarrierModel[];
   carrierLabel: CarrierLabel | null;
@@ -69,6 +74,8 @@ interface Scene3D {
   guides: THREE.Group;
   /** The other trades' groups. */
   props: THREE.Group;
+  /** The room: floor, walls, ceiling grid and the venue's drawing. */
+  room: THREE.Group;
 }
 
 /** A label written over the picture at a 3D point (follows the camera). */
@@ -82,7 +89,7 @@ interface Label {
   highlighted?: boolean;
 }
 
-export default function StageViewport({ layout, props = [], carriers, carrierLabel, selectedId, onSelect, onMove, onMoveProp, onDropAt, preset, presetKey, view }: StageViewportProps) {
+export default function StageViewport({ layout, props = [], carriers, carrierLabel, selectedId, onSelect, onMove, onMoveProp, onDropAt, room = null, roomPlan = null, preset, presetKey, view }: StageViewportProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language === "en" ? "en" : "tr";
   const hostRef = useRef<HTMLDivElement>(null);
@@ -215,7 +222,7 @@ export default function StageViewport({ layout, props = [], carriers, carrierLab
     scene.add(floor);
     const grid = new THREE.GridHelper(200, 200, 0x3f3f46, 0x232326);
     scene.add(grid);
-    const groups = { screens: new THREE.Group(), props: new THREE.Group(), podium: new THREE.Group(), rig: new THREE.Group(), dimensions: new THREE.Group(), floorText: new THREE.Group(), guides: new THREE.Group() };
+    const groups = { screens: new THREE.Group(), props: new THREE.Group(), room: new THREE.Group(), podium: new THREE.Group(), rig: new THREE.Group(), dimensions: new THREE.Group(), floorText: new THREE.Group(), guides: new THREE.Group() };
     // Measurements over everything else (they are drawn without depth test).
     groups.dimensions.renderOrder = 10;
     for (const g of Object.values(groups)) scene.add(g);
@@ -289,6 +296,15 @@ export default function StageViewport({ layout, props = [], carriers, carrierLab
     requestDraw();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props, selectedId]);
+
+  useEffect(() => {
+    const s = sceneRef.current;
+    if (!s) return;
+    disposeGroup(s.room);
+    if (room) s.room.add(buildRoom(room, roomPlan?.texture ?? null, roomPlan ?? null));
+    requestDraw();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, roomPlan]);
 
   useEffect(() => {
     const s = sceneRef.current;

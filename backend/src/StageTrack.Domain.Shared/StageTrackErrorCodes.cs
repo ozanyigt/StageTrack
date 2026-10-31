@@ -141,4 +141,5 @@ public static class StageTrackErrorCodes
     public const string SiteItemNeedsEquipmentOrLabel = "SitePlan.ItemNeedsEquipmentOrLabel";
     public const string SiteZoneInvalidShape = "SitePlan.ZoneInvalidShape";
     public const string SitePlanAlreadyExists = "SitePlan.AlreadyExists";
+    public const string VenueNotSet = "SitePlan.VenueNotSet";
 }

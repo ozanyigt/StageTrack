@@ -748,7 +748,8 @@
       "TooManyItems": "Bir plana en fazla {{limit}} nesne konabilir.",
       "ItemNeedsEquipmentOrLabel": "Nesne ya bir ekipman olmalı ya da bir adı bulunmalı.",
       "ZoneInvalidShape": "Şekil için en az {{needed}} köşe gerekir.",
-      "AlreadyExists": "Bu işin zaten bir saha planı var."
+      "AlreadyExists": "Bu işin zaten bir saha planı var.",
+      "VenueNotSet": "Önce mekân ölçülerini girin."
     }
   },
   "roles": {
@@ -1861,7 +1862,8 @@
     "stageArea": "SAHNE",
     "audienceArea": "SEYİRCİ",
     "noTradeGroups": "{{trade}} dalında grup yok; tasarım ekranından ekleyin.",
-    "unplacedGroups": "{{count}} grup henüz 3D sahneye yerleştirilmedi; hepsi sahnenin ortasında duruyor."
+    "unplacedGroups": "{{count}} grup henüz 3D sahneye yerleştirilmedi; hepsi sahnenin ortasında duruyor.",
+    "pickJob": "İş seçin"
   },
   "ledTab": {
     "notInLed": "Bu ürün LED modülünde tanımlı değil.",
@@ -1871,5 +1873,36 @@
     "transport": "Taşıma",
     "compatibleProcessors": "Uyumlu işlemci",
     "stockHint": "Stok ve fiyat ürünün özellikler sekmesinden yönetilir."
+  },
+  "venue": {
+    "title": "Mekân",
+    "none": "Bu iş için mekân girilmedi.",
+    "add": "Mekân ekle",
+    "pickJobFirst": "Önce bir iş seçin; mekân işe ait.",
+    "removeConfirm": "Mekân bilgileri silinsin mi?",
+    "width": "Genişlik",
+    "depth": "Derinlik",
+    "clearHeight": "Net yükseklik",
+    "clearHeightHint": "Çatı makası, catwalk, skorbord — rigin altından geçmesi gereken en alçak nokta",
+    "behindStage": "Sahne arkası",
+    "stageOffset": "Sahne kaçıklığı",
+    "rake": "Tribün eğimi",
+    "tooLow": "Rig {{rig}} m’ye çıkıyor, salonun net yüksekliği {{clear}} m.",
+    "uploadPlan": "Mekân planı yükle",
+    "replacePlan": "Planı değiştir",
+    "calibrate": "Ölçekle",
+    "recalibrate": "Yeniden ölçekle",
+    "notScaled": "Plan henüz ölçeklenmedi",
+    "planHint": "Mekânın gönderdiği yerleşim planını yükleyin; üzerinde bildiğiniz bir mesafeyi gösterince kolonlar, kapılar ve tribün ağzı tasarımın altına oturur.",
+    "scaleIs": "Ölçek: 1 m ≈ {{value}} piksel",
+    "calibrateTitle": "Planı ölçekle",
+    "calibrateHint": "Uzunluğunu bildiğiniz bir şeyin iki ucuna tıklayın (sahne açıklığı, bir aks, planda yazan bir ölçü), sonra kaç metre olduğunu yazın.",
+    "knownLength": "Bilinen uzunluk",
+    "clearPoints": "Noktaları temizle",
+    "pointsLeft": "{{count}} nokta daha",
+    "measured": "{{pixels}} piksel · 1 m ≈ {{scale}} piksel",
+    "applyScale": "Ölçeği uygula",
+    "planImage": "Mekân planı",
+    "noPlanImage": "Önce bir plan görseli yükleyin."
   }
 }

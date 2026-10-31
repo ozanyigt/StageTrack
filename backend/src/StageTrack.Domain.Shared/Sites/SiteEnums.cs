@@ -1,4 +1,4 @@
-namespace StageTrack.Sites;
+﻿namespace StageTrack.Sites;
 
 /// <summary>What the map is drawn on. Satellite shows the real ground; the street map is clearer for routes.</summary>
 public enum SiteBaseLayer
@@ -38,6 +38,14 @@ public static class SiteConsts
     /// the rule of thumb for a floodlight on a mast and close enough for spotting dark gaps.
     /// </summary>
     public const decimal LightRadiusPerMetre = 3m;
+
+    /// <summary>A room is at least this and at most this, metres; wide enough for a club and a stadium bowl.</summary>
+    public const double MinVenueM = 1;
+
+    public const double MaxVenueM = 1000;
+
+    /// <summary>Clear height; above this it is open air, and 0 means nobody entered one.</summary>
+    public const double MaxVenueHeightM = 200;
 
     /// <summary>The layers a new plan starts with; the user may add any others.</summary>
     public static readonly IReadOnlyList<string> DefaultLayers =

@@ -65,6 +65,28 @@ public class SitePlanController(ISitePlanAppService appService) : ControllerBase
     public Task<SitePlanDto> RemoveZoneAsync(Guid id, Guid zoneId) => appService.RemoveZoneAsync(id, zoneId);
 }
 
+/// <summary>
+/// The room the job is built in. Outdoors the satellite picture is the ground truth and there is nothing to
+/// clear overhead; indoors these numbers are what the design has to live inside.
+/// </summary>
+[ApiController]
+[Route("api/site-plans/{id:guid}/venue")]
+[Authorize(StageTrackPermissions.Projects.Manage)]
+public class SiteVenueController(ISitePlanAppService appService) : ControllerBase
+{
+    [HttpPut]
+    public Task<SitePlanDto> SetAsync(Guid id, SetSiteVenueInput input) => appService.SetVenueAsync(id, input);
+
+    [HttpPut("plan")]
+    public Task<SitePlanDto> SetPlanAsync(Guid id, SetSiteVenuePlanInput input) => appService.SetVenuePlanAsync(id, input);
+
+    [HttpPut("map")]
+    public Task<SitePlanDto> SetOnMapAsync(Guid id, SetSiteVenueMapInput input) => appService.SetVenueOnMapAsync(id, input);
+
+    [HttpDelete]
+    public Task<SitePlanDto> RemoveAsync(Guid id) => appService.RemoveVenueAsync(id);
+}
+
 /// <summary>The bridge: a site plan becomes planned equipment on its job, and from there the quote and the warehouse.</summary>
 [ApiController]
 [Route("api/site-plans/{planId:guid}/job")]

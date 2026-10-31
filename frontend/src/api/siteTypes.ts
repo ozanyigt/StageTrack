@@ -41,18 +41,67 @@ export interface SitePlanZone {
   lengthM?: number | null;
 }
 
+/**
+ * The room the job is built in. A satellite picture answers everything on a field and nothing inside a hall, so
+ * indoors this is the ground truth: how wide, how deep, and how much clear height there is over the rig.
+ * Scene metres - x across, z towards the audience, screens at z = 0 - the same floor the 3D stage uses.
+ */
+export interface SiteVenue {
+  widthM: number;
+  depthM: number;
+  /** What the rig has to clear; 0 = nobody entered one. */
+  clearHeightM: number;
+  stageOffsetXM: number;
+  behindStageM: number;
+  rakeDeg: number;
+  /** The venue's own layout drawing (an attachment of the job), and what one of its pixels is worth. */
+  planAttachmentId?: Guid | null;
+  planMetresPerPixel?: number | null;
+  planOriginXM: number;
+  planOriginZM: number;
+  planRotationDeg: number;
+  originLat?: number | null;
+  originLng?: number | null;
+  mapRotationDeg: number;
+}
+
+export interface SetSiteVenueInput {
+  widthM: number;
+  depthM: number;
+  clearHeightM: number;
+  stageOffsetXM: number;
+  behindStageM: number;
+  rakeDeg: number;
+}
+
+export interface SetSiteVenuePlanInput {
+  planAttachmentId?: Guid | null;
+  planMetresPerPixel?: number | null;
+  planOriginXM: number;
+  planOriginZM: number;
+  planRotationDeg: number;
+}
+
+export interface SetSiteVenueMapInput {
+  originLat?: number | null;
+  originLng?: number | null;
+  mapRotationDeg: number;
+}
+
 export interface SitePlan {
   id: Guid;
   projectId: Guid;
   projectNumber: number;
   projectName: string;
-  venue?: string | null;
+  venueName?: string | null;
   name: string;
   centreLat: number;
   centreLng: number;
   zoom: number;
   baseLayer: SiteBaseLayer;
   nightMode: boolean;
+  /** The room, when the job is indoors; null on an open field. */
+  venue?: SiteVenue | null;
   items: SitePlanItem[];
   zones: SitePlanZone[];
   layers: string[];
