@@ -18,7 +18,7 @@ const VOLTAGES = [110, 220, 230, 240];
 export function LedDesignPage() {
   const { t } = useTranslation();
   const { can } = useAuth();
-  const { job, panels, panelById, request, evaluation, add, update, remove, setPower, clear } = useLedJob();
+  const { job, walls, nameOf, panels, panelById, request, evaluation, add, update, remove, setPower, clear } = useLedJob();
   const [transferOpen, setTransferOpen] = useState(false);
 
   const result = evaluation.data;
@@ -78,7 +78,7 @@ export function LedDesignPage() {
         <Card><Empty description={t('led.noScreens')} /></Card>
       ) : (
         <Row gutter={[12, 12]}>
-          {job.screens.map((screen) => {
+          {job.screens.map((screen, index) => {
             const evaluated = result?.screens.find((s) => s.id === screen.id);
             const panel = screen.panelId ? panelById.get(screen.panelId) : undefined;
             const option = evaluated?.processor?.options[evaluated.processor.selectedIndex];
@@ -90,8 +90,8 @@ export function LedDesignPage() {
                   title={
                     <Input
                       variant="borderless"
-                      value={screen.name}
-                      onChange={(e) => update(screen.id, { name: e.target.value })}
+                      value={screen.name ?? nameOf(walls[index])}
+                      onChange={(e) => update(screen.id, { name: e.target.value || null })}
                       style={{ fontWeight: 600, paddingInline: 0 }}
                     />
                   }
@@ -113,16 +113,16 @@ export function LedDesignPage() {
                         <InputNumber
                           min={0}
                           max={1000}
-                          value={screen.columns}
-                          onChange={(v) => update(screen.id, { columns: v ?? 0 })}
+                          value={screen.widthPanels}
+                          onChange={(v) => update(screen.id, { widthPanels: v ?? 0 })}
                           addonBefore={t('led.columns')}
                           style={{ width: 150 }}
                         />
                         <InputNumber
                           min={0}
                           max={1000}
-                          value={screen.rows}
-                          onChange={(v) => update(screen.id, { rows: v ?? 0 })}
+                          value={screen.heightPanels}
+                          onChange={(v) => update(screen.id, { heightPanels: v ?? 0 })}
                           addonBefore={t('led.rows')}
                           style={{ width: 150 }}
                         />
@@ -164,7 +164,7 @@ export function LedDesignPage() {
                         <Alert type="error" showIcon style={{ marginTop: 8 }} message={t('led.panelNotFound')} />
                       )}
                     </div>
-                    <LedScreenGrid columns={screen.columns} rows={screen.rows} panel={panel} />
+                    <LedScreenGrid columns={screen.widthPanels} rows={screen.heightPanels} panel={panel} />
                   </Flex>
                 </Card>
               </Col>

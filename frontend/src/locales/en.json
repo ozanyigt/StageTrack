@@ -73,7 +73,8 @@
     "ledPanels": "LED inventory",
     "ledDesign": "Screen design",
     "ledPower": "Power and processors",
-    "ledLogistics": "Loading plan"
+    "ledLogistics": "Loading plan",
+    "ledPixelMap": "Pixel Map"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -1526,7 +1527,32 @@
     "transferEmpty": "Nothing to transfer.",
     "transferProblems": "{{count}} line(s) cannot be transferred.",
     "lineSource": "Source",
-    "quantity": "Qty"
+    "quantity": "Qty",
+    "pixelMapTitle": "Pixel Map",
+    "noScreensForPixelMap": "Add a screen on the design page first.",
+    "canvasSize": "Canvas",
+    "screens": "Screens",
+    "mapView": "View",
+    "selectedScreen": "Selected screen",
+    "pickScreenOnMap": "Pick a screen on the map.",
+    "atPosition": "at {{x}}, {{y}}",
+    "pixel": {
+      "mergedName": "Merged screen",
+      "merge": "Merge",
+      "mergeReady": "{{count}} screens picked",
+      "cutActions": "Picked panels",
+      "cutApply": "Cut",
+      "cutRestore": "Restore",
+      "moduleBorders": "Module borders",
+      "diagonals": "Diagonals",
+      "centerCross": "Centre cross",
+      "labelScale": "Label size",
+      "color": "Colour",
+      "panelNo": "Panel number",
+      "showType": "Panel type",
+      "split": "Split the merge",
+      "resetMap": "Reset the map"
+    }
   },
   "pixel": {
     "label": {
@@ -1534,6 +1560,29 @@
       "size": "{{size}}",
       "sizeUnknown": "Size unknown",
       "area": "{{area}} m²"
+    },
+    "hint": "Drag a screen to place it; use the wheel to zoom.",
+    "fit": "Fit",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "tipHover": "Panel type",
+    "addSideHint": "Add the same screen on this side (Shift: keep the selection)",
+    "cut": {
+      "tool": "Cut",
+      "hint": "Panel cutting mode",
+      "hintOn": "Click panels or drag a box, then press \"Cut\".",
+      "picked": "{{count}} panels picked",
+      "locked": "This feature is off",
+      "all": "The whole screen cannot be cut away.",
+      "tooMany": "That makes too many cut-out areas."
+    },
+    "merge": {
+      "tool": "Merge",
+      "toolCount": "Merge ({{count}})",
+      "hint": "Click the screens to merge.",
+      "picked": "{{count}} picked",
+      "needTwo": "Pick at least two screens.",
+      "cancel": "Cancel"
     }
   },
   "screen": {
@@ -1541,5 +1590,6 @@
       "main": "Main screen",
       "n": "Screen {{n}}"
     }
-  }
+  },
+  "2d": "2D"
 }

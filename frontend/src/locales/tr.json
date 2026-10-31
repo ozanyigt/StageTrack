@@ -73,7 +73,8 @@
     "ledPanels": "LED envanteri",
     "ledDesign": "Ekran tasarımı",
     "ledPower": "Güç ve işlemci",
-    "ledLogistics": "Yükleme planı"
+    "ledLogistics": "Yükleme planı",
+    "ledPixelMap": "Pixel Map"
   },
   "dashboard": {
     "welcome": "Hoş geldiniz, {{name}}",
@@ -1526,7 +1527,32 @@
     "transferEmpty": "Aktarılacak satır yok.",
     "transferProblems": "{{count}} satır aktarılamaz.",
     "lineSource": "Kaynak",
-    "quantity": "Adet"
+    "quantity": "Adet",
+    "pixelMapTitle": "Pixel Map",
+    "noScreensForPixelMap": "Önce ekran tasarımı sayfasında ekran ekleyin.",
+    "canvasSize": "Tuval",
+    "screens": "Ekran",
+    "mapView": "Görünüm",
+    "selectedScreen": "Seçili ekran",
+    "pickScreenOnMap": "Haritadan bir ekran seçin.",
+    "atPosition": "konum {{x}}, {{y}}",
+    "pixel": {
+      "mergedName": "Birleşik ekran",
+      "merge": "Birleştir",
+      "mergeReady": "{{count}} ekran seçili",
+      "cutActions": "Seçilen paneller",
+      "cutApply": "Kırp",
+      "cutRestore": "Geri al",
+      "moduleBorders": "Modül çizgileri",
+      "diagonals": "Köşegenler",
+      "centerCross": "Merkez çizgileri",
+      "labelScale": "Etiket boyutu",
+      "color": "Renk",
+      "panelNo": "Panel numarası",
+      "showType": "Panel tipi",
+      "split": "Birleşimi çöz",
+      "resetMap": "Haritayı sıfırla"
+    }
   },
   "pixel": {
     "label": {
@@ -1534,6 +1560,29 @@
       "size": "{{size}}",
       "sizeUnknown": "Ölçü bilinmiyor",
       "area": "{{area}} m²"
+    },
+    "hint": "Ekranı sürükleyerek yerleştirin; tekerlekle yakınlaştırın.",
+    "fit": "Sığdır",
+    "zoomIn": "Yakınlaştır",
+    "zoomOut": "Uzaklaştır",
+    "tipHover": "Panel tipi",
+    "addSideHint": "Aynı ekranı bu kenara ekle (Shift: seçim kalsın)",
+    "cut": {
+      "tool": "Kırp",
+      "hint": "Panel kırpma modu",
+      "hintOn": "Panelleri tıklayın veya kutu çizin; sonra \"Kırp\"a basın.",
+      "picked": "{{count}} panel seçili",
+      "locked": "Bu özellik kapalı",
+      "all": "Ekranın tamamı kırpılamaz.",
+      "tooMany": "Çok fazla kırpma alanı oluştu."
+    },
+    "merge": {
+      "tool": "Birleştir",
+      "toolCount": "Birleştir ({{count}})",
+      "hint": "Birleştirilecek ekranları tıklayın.",
+      "picked": "{{count}} seçili",
+      "needTwo": "En az iki ekran seçin.",
+      "cancel": "Vazgeç"
     }
   },
   "screen": {
@@ -1541,5 +1590,6 @@
       "main": "Ana ekran",
       "n": "Ekran {{n}}"
     }
-  }
+  },
+  "2d": "2D"
 }

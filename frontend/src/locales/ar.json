@@ -73,7 +73,8 @@
     "ledPanels": "مخزون LED",
     "ledDesign": "تصميم الشاشة",
     "ledPower": "الطاقة والمعالجات",
-    "ledLogistics": "خطة التحميل"
+    "ledLogistics": "خطة التحميل",
+    "ledPixelMap": "خريطة البكسل"
   },
   "dashboard": {
     "welcome": "مرحبًا، {{name}}",
@@ -1526,7 +1527,32 @@
     "transferEmpty": "لا شيء للنقل.",
     "transferProblems": "{{count}} بند لا يمكن نقله.",
     "lineSource": "المصدر",
-    "quantity": "الكمية"
+    "quantity": "الكمية",
+    "pixelMapTitle": "خريطة البكسل",
+    "noScreensForPixelMap": "أضف شاشة في صفحة التصميم أولاً.",
+    "canvasSize": "اللوحة",
+    "screens": "الشاشات",
+    "mapView": "العرض",
+    "selectedScreen": "الشاشة المحددة",
+    "pickScreenOnMap": "اختر شاشة من الخريطة.",
+    "atPosition": "عند {{x}}، {{y}}",
+    "pixel": {
+      "mergedName": "شاشة مدمجة",
+      "merge": "دمج",
+      "mergeReady": "تم تحديد {{count}} شاشة",
+      "cutActions": "اللوحات المحددة",
+      "cutApply": "قص",
+      "cutRestore": "استرجاع",
+      "moduleBorders": "حدود الوحدات",
+      "diagonals": "الأقطار",
+      "centerCross": "خطوط المنتصف",
+      "labelScale": "حجم التسمية",
+      "color": "اللون",
+      "panelNo": "رقم اللوحة",
+      "showType": "نوع اللوحة",
+      "split": "فك الدمج",
+      "resetMap": "إعادة ضبط الخريطة"
+    }
   },
   "pixel": {
     "label": {
@@ -1534,6 +1560,29 @@
       "size": "{{size}}",
       "sizeUnknown": "القياس غير معروف",
       "area": "{{area}} م²"
+    },
+    "hint": "اسحب الشاشة لوضعها؛ استخدم العجلة للتكبير.",
+    "fit": "ملاءمة",
+    "zoomIn": "تكبير",
+    "zoomOut": "تصغير",
+    "tipHover": "نوع اللوحة",
+    "addSideHint": "أضف الشاشة نفسها على هذا الجانب (Shift: يبقى التحديد)",
+    "cut": {
+      "tool": "قص",
+      "hint": "وضع قص اللوحات",
+      "hintOn": "انقر على اللوحات أو ارسم مربعًا ثم اضغط «قص».",
+      "picked": "تم تحديد {{count}} لوحة",
+      "locked": "هذه الميزة مغلقة",
+      "all": "لا يمكن قص الشاشة بالكامل.",
+      "tooMany": "نتج عن ذلك عدد كبير من مناطق القص."
+    },
+    "merge": {
+      "tool": "دمج",
+      "toolCount": "دمج ({{count}})",
+      "hint": "انقر على الشاشات المراد دمجها.",
+      "picked": "{{count}} محدد",
+      "needTwo": "اختر شاشتين على الأقل.",
+      "cancel": "إلغاء"
     }
   },
   "screen": {
@@ -1541,5 +1590,6 @@
       "main": "الشاشة الرئيسية",
       "n": "الشاشة {{n}}"
     }
-  }
+  },
+  "2d": "2D"
 }
