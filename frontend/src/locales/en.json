@@ -641,6 +641,19 @@
     },
     "Firm": {
       "LogoInvalid": "The logo must be an image file of at most 2 MB."
+    },
+    "Led": {
+      "SpecAlreadyExists": "This equipment already has LED data.",
+      "SpecWrongRole": "This equipment is registered as a different LED type.",
+      "InvalidCaseDimensions": "The case size must look like \"72x60x100\".",
+      "InvalidAngleRange": "An angle range needs both a minimum and a maximum; a step only goes with a range.",
+      "AverageOverMaxWatt": "The average watt cannot be higher than the maximum.",
+      "StackTooHigh": "At most {{limit}} may be stacked.",
+      "ExclusiveProcessorsRequired": "Pick at least one processor for a panel with exclusive processors.",
+      "NotAProcessor": "The chosen equipment is not a processor.",
+      "PanelNotFound": "The panel was not found or has no LED data.",
+      "NoVehicles": "Add a vehicle before making a loading plan.",
+      "ScreenTooLarge": "The screen is larger than the chosen processors can drive."
     }
   },
   "roles": {

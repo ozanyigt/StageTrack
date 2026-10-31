@@ -10,7 +10,13 @@ public enum EquipmentRelationKind
     Accessory = 2,
 
     /// <summary>Can replace the item when it is short.</summary>
-    Alternative = 3
+    Alternative = 3,
+
+    /// <summary>
+    /// LED: the processors an exclusive panel works with ("Özel işlemcisi var"). Without any such relation the
+    /// panel may be driven by every processor in the inventory.
+    /// </summary>
+    CompatibleProcessor = 4
 }
 
 public static class EquipmentDetailConsts

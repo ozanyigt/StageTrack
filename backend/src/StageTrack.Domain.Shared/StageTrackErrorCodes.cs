@@ -118,4 +118,16 @@ public static class StageTrackErrorCodes
     public const string ImportInvalidRow = "Import.InvalidRow";
     public const string QuoteCannotDelete = "Quote.CannotDelete";
     public const string QuoteLineDescriptionRequired = "Quote.LineDescriptionRequired";
+
+    public const string LedSpecAlreadyExists = "Led.SpecAlreadyExists";
+    public const string LedSpecWrongRole = "Led.SpecWrongRole";
+    public const string LedInvalidCaseDimensions = "Led.InvalidCaseDimensions";
+    public const string LedInvalidAngleRange = "Led.InvalidAngleRange";
+    public const string LedAverageOverMaxWatt = "Led.AverageOverMaxWatt";
+    public const string LedStackTooHigh = "Led.StackTooHigh";
+    public const string LedExclusiveProcessorsRequired = "Led.ExclusiveProcessorsRequired";
+    public const string LedNotAProcessor = "Led.NotAProcessor";
+    public const string LedPanelNotFound = "Led.PanelNotFound";
+    public const string LedNoVehicles = "Led.NoVehicles";
+    public const string LedScreenTooLarge = "Led.ScreenTooLarge";
 }

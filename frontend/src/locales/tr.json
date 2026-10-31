@@ -641,6 +641,19 @@
     },
     "Firm": {
       "LogoInvalid": "Logo en fazla 2 MB büyüklüğünde bir resim dosyası olmalıdır."
+    },
+    "Led": {
+      "SpecAlreadyExists": "Bu ekipmanın LED kaydı zaten var.",
+      "SpecWrongRole": "Bu ekipman farklı bir LED türü olarak kayıtlı.",
+      "InvalidCaseDimensions": "Case ölçüsü \"72x60x100\" biçiminde olmalı.",
+      "InvalidAngleRange": "Açı aralığı için minimum ve maksimum birlikte girilmeli; adım yalnızca aralıkla birlikte olur.",
+      "AverageOverMaxWatt": "Ortalama watt, maksimum watt'tan büyük olamaz.",
+      "StackTooHigh": "İstif katı en fazla {{limit}} olabilir.",
+      "ExclusiveProcessorsRequired": "Özel işlemcisi olan panel için en az bir işlemci seçin.",
+      "NotAProcessor": "Seçilen ekipman bir işlemci değil.",
+      "PanelNotFound": "Panel bulunamadı veya LED kaydı yok.",
+      "NoVehicles": "Yükleme planı için önce araç tanımlayın.",
+      "ScreenTooLarge": "Ekran, seçilen işlemcilerin kapasitesini aşıyor."
     }
   },
   "roles": {

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 using StageTrack.Collaboration;
@@ -46,6 +46,11 @@ public static class StageTrackEntityFrameworkCoreModule
         services.AddScoped<IAttachmentRepository, AttachmentRepository>();
         services.AddScoped<INoteRepository, NoteRepository>();
         services.AddScoped<ITaskItemRepository, TaskItemRepository>();
+        services.AddScoped<Led.IEquipmentLedSpecRepository, EquipmentLedSpecRepository>();
+        services.AddScoped<Led.ILedStageSettingsRepository, LedStageSettingsRepository>();
+        services.AddScoped<Led.ILedTransportSettingsRepository, LedTransportSettingsRepository>();
+        services.AddScoped<Led.ILedTransportVehicleRepository, LedTransportVehicleRepository>();
+        services.AddScoped<Led.ILedPanelFavoriteRepository, LedPanelFavoriteRepository>();
         return services;
     }
 }
