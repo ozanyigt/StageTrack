@@ -52,6 +52,8 @@ export function AppLayout() {
   const { mode, toggle } = useThemeMode();
   const { token } = theme.useToken();
   const [collapsed, setCollapsed] = useState(false);
+  // null = the user has not touched the groups yet, so the menu follows the page they are on.
+  const [openKeys, setOpenKeys] = useState<string[] | null>(null);
 
   const hostItems: Item[] = [{ key: '/', icon: <ApartmentOutlined />, label: t('nav.tenants') }];
 
@@ -139,6 +141,13 @@ export function AppLayout() {
     ['/warehouse', '/projects', '/quotes', '/equipment', '/customers', '/suppliers', '/crew'].find((p) => path.startsWith(p) && !user?.isHost) ??
     '/';
 
+  // One group open at a time: the groups start closed, except the one holding the current page - landing on
+  // /led/power from a link or a refresh should not hide where the user is. Opening another closes this one.
+  const currentGroup = (visible ?? []).find(
+    (item) => item && 'children' in item && (item.children as { key?: string }[] | undefined)?.some((child) => child?.key === selected),
+  )?.key as string | undefined;
+  const open = openKeys ?? (currentGroup ? [currentGroup] : []);
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Layout.Sider
@@ -161,7 +170,8 @@ export function AppLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={[selected]}
-          defaultOpenKeys={['warehouse', 'equipment', 'settings']}
+          openKeys={open}
+          onOpenChange={(keys) => setOpenKeys(keys.length > 0 ? [String(keys[keys.length - 1])] : [])}
           items={visible}
           onClick={(e) => {
             navigate(e.key);
