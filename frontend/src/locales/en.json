@@ -1957,5 +1957,22 @@
     "noDistrosHint": "Put the boxes on the plan; everything runs to its nearest one and the metres fall out.",
     "noMains": "The mains is not marked, so the feeder length cannot be worked out.",
     "hint": "Everything runs to its nearest box. The run allows {{slack}}% over the straight line (cable never goes straight), and anything hanging counts its drop twice. The circuit counts come from the server calculation."
+  },
+  "plan": {
+    "title": "Plan sheet",
+    "sheet": "Scaled plan",
+    "firm": "Firm",
+    "job": "Job",
+    "noJob": "No job picked",
+    "date": "Date",
+    "scale": "Scale",
+    "revision": "Revision",
+    "note": "Note",
+    "room": "Venue",
+    "roomValue": "{{w}} × {{d}} m · {{h}} m clear",
+    "dimensions": "Dimensions",
+    "grid": "Grid",
+    "panels": "LED panels",
+    "stageUp": "STAGE"
   }
 }

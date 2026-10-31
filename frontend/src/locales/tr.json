@@ -1957,5 +1957,22 @@
     "noDistrosHint": "Kutuları plana koyun; her tüketici en yakın kutuya bağlanır ve metre hesabı çıkar.",
     "noMains": "Enerji girişi işaretlenmedi; besleme hattı metresi hesaplanamıyor.",
     "hint": "Her tüketici en yakın kutuya bağlanır. Mesafeye %{{slack}} pay eklenir (kabloyu düz çekmezsiniz), asılı olanlar iniş-çıkışı iki kez sayar. Devre sayısı sunucunun hesabından gelir."
+  },
+  "plan": {
+    "title": "Plan çıktısı",
+    "sheet": "Ölçekli plan",
+    "firm": "Firma",
+    "job": "İş",
+    "noJob": "İş seçilmedi",
+    "date": "Tarih",
+    "scale": "Ölçek",
+    "revision": "Revizyon",
+    "note": "Not",
+    "room": "Mekân",
+    "roomValue": "{{w}} × {{d}} m · net {{h}} m",
+    "dimensions": "Ölçüler",
+    "grid": "Izgara",
+    "panels": "LED panel",
+    "stageUp": "SAHNE"
   }
 }

@@ -3,6 +3,7 @@ import {
   BgColorsOutlined,
   BorderOuterOutlined,
   BulbOutlined,
+  PrinterOutlined,
   SoundOutlined,
   ColumnHeightOutlined,
   TableOutlined,
@@ -113,6 +114,7 @@ export function AppLayout() {
         { key: '/draft/simulation', icon: <NodeIndexOutlined />, label: t('nav.ledSimulation'), permission: Permissions.LedDesign },
         { key: '/draft/stage', icon: <BuildOutlined />, label: t('nav.ledStage'), permission: Permissions.LedDesign },
         { key: '/draft/power', icon: <ThunderboltOutlined />, label: t('nav.totalPower'), permission: Permissions.LedDesign },
+        { key: '/draft/plan', icon: <PrinterOutlined />, label: t('plan.title'), permission: Permissions.LedDesign },
         { key: '/draft/stock', icon: <InboxOutlined />, label: t('nav.ledStock') },
         { key: '/draft/logistics', icon: <TruckOutlined />, label: t('nav.ledLogistics'), permission: Permissions.LedTransport },
       ].filter((i) => !('permission' in i) || can(i.permission as string)),
@@ -145,7 +147,7 @@ export function AppLayout() {
   const selected =
     ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/site-plan',
       '/draft/design/led', '/draft/design/sound', '/draft/design/light', '/draft/design/truss', '/draft/design/scaff',
-      '/draft/pixel-map', '/draft/simulation', '/draft/stage', '/draft/power', '/draft/stock', '/draft/logistics',
+      '/draft/pixel-map', '/draft/simulation', '/draft/stage', '/draft/power', '/draft/plan', '/draft/stock', '/draft/logistics',
       '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
       .find((p) => path.startsWith(p)) ??
     ['/warehouse', '/projects', '/quotes', '/equipment', '/customers', '/suppliers', '/crew'].find((p) => path.startsWith(p) && !user?.isHost) ??

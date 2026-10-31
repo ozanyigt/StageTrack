@@ -97,6 +97,24 @@ body {
   body {
     background: #fff !important;
   }
+
+  /* A drawing goes on landscape paper with a thin margin; the sheet itself is sized in millimetres. */
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
+  .ant-layout,
+  .ant-layout-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .ant-card {
+    border: none !important;
+    box-shadow: none !important;
+  }
 }
 
 .rich-text p,
