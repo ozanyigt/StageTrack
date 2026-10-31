@@ -76,7 +76,8 @@
     "ledLogistics": "خطة التحميل",
     "ledPixelMap": "خريطة البكسل",
     "ledProcessors": "اختيار المعالج",
-    "ledStock": "حالة المخزون"
+    "ledStock": "حالة المخزون",
+    "ledSimulation": "المحاكاة"
   },
   "dashboard": {
     "welcome": "مرحبًا، {{name}}",
@@ -526,6 +527,16 @@
       "Processor": "معالج",
       "Extender": "موسّع",
       "Equipment": "معدة"
+    },
+    "wiringDirection": {
+      "Columns": "على طول الأعمدة",
+      "Rows": "على طول الصفوف"
+    },
+    "wiringStart": {
+      "BottomLeft": "أسفل اليسار",
+      "BottomRight": "أسفل اليمين",
+      "TopLeft": "أعلى اليسار",
+      "TopRight": "أعلى اليمين"
     }
   },
   "errors": {
@@ -1581,7 +1592,37 @@
     "moveToVehicle": "نقل إلى مركبة",
     "floorFill": "استخدام الأرضية",
     "freeLength": "{{m}} م خالٍ",
-    "planHint": "اسحب الكومة، وانقر نقرًا مزدوجًا لتدويرها؛ مفاتيح الأسهم تحركها 1 سم (10 سم مع Shift)."
+    "planHint": "اسحب الكومة، وانقر نقرًا مزدوجًا لتدويرها؛ مفاتيح الأسهم تحركها 1 سم (10 سم مع Shift).",
+    "simTitle": "المحاكاة",
+    "noScreensForSim": "أضف شاشة في صفحة التصميم أولاً.",
+    "sim": {
+      "power": "توصيل الطاقة",
+      "signal": "سلاسل البيانات",
+      "powerLayout": "ترتيب التوصيل",
+      "keepLinesWhole": "عدم تقسيم الخطوط",
+      "serpentine": "متعرج",
+      "ownSignalLayout": "ترتيب منفصل للبيانات",
+      "curve": "شاشة منحنية",
+      "arc": "القوس",
+      "radius": "نصف القطر",
+      "concave": "مقعّر",
+      "convex": "محدّب",
+      "jointAngle": "زاوية الوصلة {{deg}}°",
+      "achievedArc": "القوس الناتج {{deg}}°",
+      "achievedRadius": "نصف القطر {{m}} م",
+      "noWiring": "لا توجد خريطة دوائر لهذه الشاشة.",
+      "noSignal": "لا توجد سلسلة بيانات لهذه الشاشة.",
+      "tooLarge": "الشاشة أكبر من أن تُرسم لها خريطة.",
+      "circuitNo": "الدائرة {{n}}",
+      "portNo": "المنفذ {{n}}",
+      "portsNeeded": "{{count}} منفذ",
+      "pixelsPerPort": "{{count}} بكسل لكل منفذ",
+      "warning": {
+        "corner_height_mismatch": "ارتفاع لوحة الزاوية لا يطابق الشاشة.",
+        "curve_not_supported": "لا يمكن ثني هذه اللوحة.",
+        "curve_clamped": "تم ضبط الزاوية على ما تسمح به اللوحة."
+      }
+    }
   },
   "pixel": {
     "label": {

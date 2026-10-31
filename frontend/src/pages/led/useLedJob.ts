@@ -6,7 +6,7 @@ import type { EvaluateScreenRequest, LedPanel, PowerMode } from '../../api/ledTy
 import { currentLocation, toInventoryItem } from './core/adapter';
 import { buildEvaluateRequest } from './core/evaluation';
 import { screenDisplayName } from './core/screenName';
-import type { Cutout, ScreenCorner, WallConfig } from './core/types';
+import type { Cutout, PowerLayout, ScreenCorner, ScreenCurve, SignalLayout, WallConfig } from './core/types';
 
 /**
  * One LED job while the user works on it: its screens, the voltage and power mode, and the server's answer.
@@ -26,6 +26,12 @@ export interface StoredScreen {
   cutouts?: Cutout[];
   /** Corner columns, as the corner panel's equipment id. */
   corners?: { afterColumn: number; panelId: string }[];
+  /** How the panels are chained into circuits; missing = the default (columns from the bottom left). */
+  powerLayout?: PowerLayout;
+  /** The order of the data chains; missing = the power wiring's order. */
+  signalLayout?: SignalLayout;
+  /** A curved wall: the server fits the joint angles to the panel. */
+  curve?: ScreenCurve;
   selectedOption: number;
 }
 
@@ -63,7 +69,7 @@ export const newStoredScreen = (): StoredScreen => ({
  * The job and its results. Every screen is sent to the server as a whole, because the maths runs there: the
  * browser never recalculates power or processors on its own, so two screens can never disagree.
  */
-export function useLedJob() {
+export function useLedJob({ wiring = false }: { wiring?: boolean } = {}) {
   const { t } = useTranslation();
   const [job, setJob] = useState<StoredJob>(load);
 
@@ -100,6 +106,9 @@ export function useLedJob() {
           heightPanels: s.heightPanels,
           cutouts: s.cutouts,
           corners: corners.length > 0 ? corners : undefined,
+          powerLayout: s.powerLayout,
+          signalLayout: s.signalLayout,
+          curve: s.curve,
         };
       }),
     [job.screens, panelById, location],
@@ -113,10 +122,15 @@ export function useLedJob() {
   /** Built by the ported helper, so the request the drawing code implies is exactly the one that is sent. */
   const request = useMemo(
     () =>
-      buildEvaluateRequest(walls, job.voltage, job.mode === 'Max' ? 'max' : 'ort', {
-        perScreenRecommendationChoice: Object.fromEntries(job.screens.map((s) => [s.id, s.selectedOption])),
-      }),
-    [walls, job.voltage, job.mode, job.screens],
+      buildEvaluateRequest(
+        walls,
+        job.voltage,
+        job.mode === 'Max' ? 'max' : 'ort',
+        { perScreenRecommendationChoice: Object.fromEntries(job.screens.map((s) => [s.id, s.selectedOption])) },
+        true,
+        { wiring },
+      ),
+    [walls, job.voltage, job.mode, job.screens, wiring],
   );
 
   const evaluation = useQuery({

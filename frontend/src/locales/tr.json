@@ -76,7 +76,8 @@
     "ledLogistics": "Yükleme planı",
     "ledPixelMap": "Pixel Map",
     "ledProcessors": "İşlemci seçimi",
-    "ledStock": "Stok durumu"
+    "ledStock": "Stok durumu",
+    "ledSimulation": "Simülasyon"
   },
   "dashboard": {
     "welcome": "Hoş geldiniz, {{name}}",
@@ -526,6 +527,16 @@
       "Processor": "İşlemci",
       "Extender": "Extender",
       "Equipment": "Ekipman"
+    },
+    "wiringDirection": {
+      "Columns": "Sütun boyunca",
+      "Rows": "Satır boyunca"
+    },
+    "wiringStart": {
+      "BottomLeft": "Sol alt",
+      "BottomRight": "Sağ alt",
+      "TopLeft": "Sol üst",
+      "TopRight": "Sağ üst"
     }
   },
   "errors": {
@@ -1581,7 +1592,37 @@
     "moveToVehicle": "Araca taşı",
     "floorFill": "Taban doluluğu",
     "freeLength": "{{m}} m boş",
-    "planHint": "İstifi sürükleyin, çift tıklayarak çevirin; ok tuşları 1 cm (Shift ile 10 cm) kaydırır."
+    "planHint": "İstifi sürükleyin, çift tıklayarak çevirin; ok tuşları 1 cm (Shift ile 10 cm) kaydırır.",
+    "simTitle": "Simülasyon",
+    "noScreensForSim": "Önce ekran tasarımı sayfasında ekran ekleyin.",
+    "sim": {
+      "power": "Güç kablolama",
+      "signal": "Sinyal zincirleri",
+      "powerLayout": "Kablolama dizilimi",
+      "keepLinesWhole": "Hatları bölme",
+      "serpentine": "Zikzak",
+      "ownSignalLayout": "Sinyal için ayrı dizilim",
+      "curve": "Curve ekran",
+      "arc": "Açı",
+      "radius": "Yarıçap",
+      "concave": "İçbükey",
+      "convex": "Dışbükey",
+      "jointAngle": "Ek açısı {{deg}}°",
+      "achievedArc": "Oluşan açı {{deg}}°",
+      "achievedRadius": "Yarıçap {{m}} m",
+      "noWiring": "Bu ekran için devre haritası yok.",
+      "noSignal": "Bu ekran için sinyal zinciri yok.",
+      "tooLarge": "Ekran harita çizilemeyecek kadar büyük.",
+      "circuitNo": "{{n}}. devre",
+      "portNo": "{{n}}. port",
+      "portsNeeded": "{{count}} port",
+      "pixelsPerPort": "port başı {{count}} px",
+      "warning": {
+        "corner_height_mismatch": "Corner panelin yüksekliği ekranla uyuşmuyor.",
+        "curve_not_supported": "Bu panel curve yapılamıyor.",
+        "curve_clamped": "İstenen açı panelin sınırına çekildi."
+      }
+    }
   },
   "pixel": {
     "label": {

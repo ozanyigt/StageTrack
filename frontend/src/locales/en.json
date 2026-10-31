@@ -76,7 +76,8 @@
     "ledLogistics": "Loading plan",
     "ledPixelMap": "Pixel Map",
     "ledProcessors": "Processor choice",
-    "ledStock": "Stock status"
+    "ledStock": "Stock status",
+    "ledSimulation": "Simulation"
   },
   "dashboard": {
     "welcome": "Welcome, {{name}}",
@@ -526,6 +527,16 @@
       "Processor": "Processor",
       "Extender": "Extender",
       "Equipment": "Equipment"
+    },
+    "wiringDirection": {
+      "Columns": "Along columns",
+      "Rows": "Along rows"
+    },
+    "wiringStart": {
+      "BottomLeft": "Bottom left",
+      "BottomRight": "Bottom right",
+      "TopLeft": "Top left",
+      "TopRight": "Top right"
     }
   },
   "errors": {
@@ -1581,7 +1592,37 @@
     "moveToVehicle": "Move to vehicle",
     "floorFill": "Floor used",
     "freeLength": "{{m}} m free",
-    "planHint": "Drag a stack, double-click to turn it; the arrow keys move it 1 cm (10 cm with Shift)."
+    "planHint": "Drag a stack, double-click to turn it; the arrow keys move it 1 cm (10 cm with Shift).",
+    "simTitle": "Simulation",
+    "noScreensForSim": "Add a screen on the design page first.",
+    "sim": {
+      "power": "Power wiring",
+      "signal": "Data chains",
+      "powerLayout": "Wiring layout",
+      "keepLinesWhole": "Keep lines whole",
+      "serpentine": "Serpentine",
+      "ownSignalLayout": "Separate layout for the data",
+      "curve": "Curved screen",
+      "arc": "Arc",
+      "radius": "Radius",
+      "concave": "Concave",
+      "convex": "Convex",
+      "jointAngle": "Joint angle {{deg}}°",
+      "achievedArc": "Arc achieved {{deg}}°",
+      "achievedRadius": "Radius {{m}} m",
+      "noWiring": "No circuit map for this screen.",
+      "noSignal": "No data chain for this screen.",
+      "tooLarge": "The screen is too large for a map.",
+      "circuitNo": "Circuit {{n}}",
+      "portNo": "Port {{n}}",
+      "portsNeeded": "{{count}} ports",
+      "pixelsPerPort": "{{count}} px per port",
+      "warning": {
+        "corner_height_mismatch": "The corner panel is not as tall as the screen.",
+        "curve_not_supported": "This panel cannot be curved.",
+        "curve_clamped": "The angle was pulled to what the panel allows."
+      }
+    }
   },
   "pixel": {
     "label": {

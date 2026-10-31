@@ -26,6 +26,7 @@ import {
   IdcardOutlined,
   QrcodeOutlined,
   ApartmentOutlined,
+  NodeIndexOutlined,
   ThunderboltOutlined,
   TruckOutlined,
 } from '@ant-design/icons';
@@ -98,6 +99,7 @@ export function AppLayout() {
         { key: '/led/panels', icon: <BorderOuterOutlined />, label: t('nav.ledPanels') },
         { key: '/led/design', icon: <AppstoreOutlined />, label: t('nav.ledDesign'), permission: Permissions.LedDesign },
         { key: '/led/pixel-map', icon: <BorderOuterOutlined />, label: t('nav.ledPixelMap'), permission: Permissions.LedDesign },
+        { key: '/led/simulation', icon: <NodeIndexOutlined />, label: t('nav.ledSimulation'), permission: Permissions.LedDesign },
         { key: '/led/processors', icon: <ApartmentOutlined />, label: t('nav.ledProcessors'), permission: Permissions.LedDesign },
         { key: '/led/power', icon: <ThunderboltOutlined />, label: t('nav.ledPower'), permission: Permissions.LedDesign },
         { key: '/led/stock', icon: <InboxOutlined />, label: t('nav.ledStock') },
@@ -130,7 +132,7 @@ export function AppLayout() {
 
   const path = location.pathname;
   const selected =
-    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/led/panels', '/led/design', '/led/pixel-map', '/led/processors', '/led/power', '/led/stock', '/led/logistics', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
+    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/led/panels', '/led/design', '/led/pixel-map', '/led/simulation', '/led/processors', '/led/power', '/led/stock', '/led/logistics', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
       .find((p) => path.startsWith(p)) ??
     ['/warehouse', '/projects', '/quotes', '/equipment', '/customers', '/suppliers', '/crew'].find((p) => path.startsWith(p) && !user?.isHost) ??
     '/';
