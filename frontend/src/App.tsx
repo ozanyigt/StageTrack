@@ -4,6 +4,8 @@ import enUS from 'antd/locale/en_US';
 import arEG from 'antd/locale/ar_EG';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserRouter, Navigate, Route, RouterProvider, Routes } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { Spin as LoadingSpin } from 'antd';
 import { UnsavedChangesProvider } from './components/UnsavedChanges';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider, Permissions, useAuth } from './auth/AuthContext';
@@ -66,6 +68,22 @@ function Themed({ children }: { children: ReactNode }) {
       <AntApp>{children}</AntApp>
     </ConfigProvider>
   );
+}
+
+const LedInventoryPage = lazy(() => import('./pages/led/LedInventoryPage').then((m) => ({ default: m.LedInventoryPage })));
+const LedDesignPage = lazy(() => import('./pages/led/LedDesignPage').then((m) => ({ default: m.LedDesignPage })));
+const LedPixelMapPage = lazy(() => import('./pages/led/LedPixelMapPage').then((m) => ({ default: m.LedPixelMapPage })));
+const SitePlanPage = lazy(() => import('./pages/sites/SitePlanPage').then((m) => ({ default: m.SitePlanPage })));
+const LedStagePage = lazy(() => import('./pages/led/LedStagePage').then((m) => ({ default: m.LedStagePage })));
+const LedSimulationPage = lazy(() => import('./pages/led/LedSimulationPage').then((m) => ({ default: m.LedSimulationPage })));
+const LedProcessorPage = lazy(() => import('./pages/led/LedProcessorPage').then((m) => ({ default: m.LedProcessorPage })));
+const LedPowerPage = lazy(() => import('./pages/led/LedPowerPage').then((m) => ({ default: m.LedPowerPage })));
+const LedStockStatusPage = lazy(() => import('./pages/led/LedStockStatusPage').then((m) => ({ default: m.LedStockStatusPage })));
+const LedLogisticsPage = lazy(() => import('./pages/led/LedLogisticsPage').then((m) => ({ default: m.LedLogisticsPage })));
+
+/** The LED screens arrive in their own bundle; until it does, the page area shows a spinner. */
+function Led({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<LoadingSpin style={{ display: 'block', margin: '64px auto' }} />}>{children}</Suspense>;
 }
 
 /** Renders the page when the user has the permission (or any of the permissions in the array). */
@@ -142,6 +160,19 @@ function AppRoutes() {
         <Route path="settings/stock-locations" element={<Guard permission={Permissions.StockLocations}><StockLocationsPage /></Guard>} />
         <Route path="settings/label-templates" element={<Guard permission={Permissions.LabelTemplates}><LabelTemplatesPage /></Guard>} />
         <Route path="settings/audit-log" element={<Guard permission={Permissions.AuditLog}><AuditLogPage /></Guard>} />
+        {/* LED module: lazy, because its screens pull in three.js and the canvas drawing nobody else needs. */}
+        {/* The site plan belongs to a job, so it is reachable with and without one. */}
+        <Route path="site-plan" element={<Guard permission={Permissions.Projects}><Led><SitePlanPage /></Led></Guard>} />
+        <Route path="site-plan/:projectId" element={<Guard permission={Permissions.Projects}><Led><SitePlanPage /></Led></Guard>} />
+        <Route path="led/panels" element={<Guard permission={Permissions.Led}><Led><LedInventoryPage /></Led></Guard>} />
+        <Route path="led/design" element={<Guard permission={Permissions.LedDesign}><Led><LedDesignPage /></Led></Guard>} />
+        <Route path="led/pixel-map" element={<Guard permission={Permissions.LedDesign}><Led><LedPixelMapPage /></Led></Guard>} />
+        <Route path="led/stage" element={<Guard permission={Permissions.LedDesign}><Led><LedStagePage /></Led></Guard>} />
+        <Route path="led/simulation" element={<Guard permission={Permissions.LedDesign}><Led><LedSimulationPage /></Led></Guard>} />
+        <Route path="led/processors" element={<Guard permission={Permissions.LedDesign}><Led><LedProcessorPage /></Led></Guard>} />
+        <Route path="led/power" element={<Guard permission={Permissions.LedDesign}><Led><LedPowerPage /></Led></Guard>} />
+        <Route path="led/stock" element={<Guard permission={Permissions.Led}><Led><LedStockStatusPage /></Led></Guard>} />
+        <Route path="led/logistics" element={<Guard permission={Permissions.LedTransport}><Led><LedLogisticsPage /></Led></Guard>} />
         <Route path="settings/firm" element={<Guard permission={Permissions.Firm}><FirmSettingsPage /></Guard>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

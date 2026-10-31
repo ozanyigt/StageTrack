@@ -1,5 +1,7 @@
 import {
   AppstoreOutlined,
+  BgColorsOutlined,
+  BorderOuterOutlined,
   InboxOutlined,
   CalendarOutlined,
   DashboardOutlined,
@@ -24,6 +26,9 @@ import {
   IdcardOutlined,
   QrcodeOutlined,
   ApartmentOutlined,
+  NodeIndexOutlined,
+  ThunderboltOutlined,
+  TruckOutlined,
 } from '@ant-design/icons';
 import { Alert, Avatar, Button, Dropdown, Flex, Layout, Menu, Select, Tag, Typography, theme, type MenuProps } from 'antd';
 import { useState } from 'react';
@@ -47,6 +52,8 @@ export function AppLayout() {
   const { mode, toggle } = useThemeMode();
   const { token } = theme.useToken();
   const [collapsed, setCollapsed] = useState(false);
+  // null = the user has not touched the groups yet, so the menu follows the page they are on.
+  const [openKeys, setOpenKeys] = useState<string[] | null>(null);
 
   const hostItems: Item[] = [{ key: '/', icon: <ApartmentOutlined />, label: t('nav.tenants') }];
 
@@ -71,6 +78,7 @@ export function AppLayout() {
     ...(crewOnly
       ? [{ key: '/projects', icon: <ProjectOutlined />, label: t('nav.myProjects') }]
       : [{ key: '/projects', icon: <ProjectOutlined />, label: t('nav.projects'), permission: Permissions.Projects }]),
+    { key: '/site-plan', icon: <EnvironmentOutlined />, label: t('nav.sitePlan'), permission: Permissions.Projects },
     { key: '/quotes', icon: <FileTextOutlined />, label: t('nav.quotes'), permission: Permissions.Quotes },
     {
       key: 'equipment',
@@ -82,6 +90,25 @@ export function AppLayout() {
         { key: '/equipment/archive', icon: <InboxOutlined />, label: t('archivePage.title') },
         ...(can(Permissions.Maintenance) ? [{ key: '/maintenance/repairs', icon: <BuildOutlined />, label: t('nav.repairs') }] : []),
       ],
+    },
+    // The LED module: the server strips its permissions for a firm that did not buy it, so this group
+    // simply disappears rather than needing a module check of its own.
+    {
+      key: 'led',
+      icon: <BgColorsOutlined />,
+      label: t('nav.led'),
+      permission: Permissions.Led,
+      children: [
+        { key: '/led/panels', icon: <BorderOuterOutlined />, label: t('nav.ledPanels') },
+        { key: '/led/design', icon: <AppstoreOutlined />, label: t('nav.ledDesign'), permission: Permissions.LedDesign },
+        { key: '/led/pixel-map', icon: <BorderOuterOutlined />, label: t('nav.ledPixelMap'), permission: Permissions.LedDesign },
+        { key: '/led/simulation', icon: <NodeIndexOutlined />, label: t('nav.ledSimulation'), permission: Permissions.LedDesign },
+        { key: '/led/stage', icon: <BuildOutlined />, label: t('nav.ledStage'), permission: Permissions.LedDesign },
+        { key: '/led/processors', icon: <ApartmentOutlined />, label: t('nav.ledProcessors'), permission: Permissions.LedDesign },
+        { key: '/led/power', icon: <ThunderboltOutlined />, label: t('nav.ledPower'), permission: Permissions.LedDesign },
+        { key: '/led/stock', icon: <InboxOutlined />, label: t('nav.ledStock') },
+        { key: '/led/logistics', icon: <TruckOutlined />, label: t('nav.ledLogistics'), permission: Permissions.LedTransport },
+      ].filter((i) => !('permission' in i) || can(i.permission as string)),
     },
     { key: '/customers', icon: <TeamOutlined />, label: t('nav.customers'), permission: Permissions.Customers },
     { key: '/suppliers', icon: <ShopOutlined />, label: t('nav.suppliers'), permission: Permissions.Suppliers },
@@ -109,10 +136,17 @@ export function AppLayout() {
 
   const path = location.pathname;
   const selected =
-    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
+    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/site-plan', '/led/panels', '/led/design', '/led/pixel-map', '/led/simulation', '/led/stage', '/led/processors', '/led/power', '/led/stock', '/led/logistics', '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
       .find((p) => path.startsWith(p)) ??
     ['/warehouse', '/projects', '/quotes', '/equipment', '/customers', '/suppliers', '/crew'].find((p) => path.startsWith(p) && !user?.isHost) ??
     '/';
+
+  // One group open at a time: the groups start closed, except the one holding the current page - landing on
+  // /led/power from a link or a refresh should not hide where the user is. Opening another closes this one.
+  const currentGroup = (visible ?? []).find(
+    (item) => item && 'children' in item && (item.children as { key?: string }[] | undefined)?.some((child) => child?.key === selected),
+  )?.key as string | undefined;
+  const open = openKeys ?? (currentGroup ? [currentGroup] : []);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -136,7 +170,8 @@ export function AppLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={[selected]}
-          defaultOpenKeys={['warehouse', 'equipment', 'settings']}
+          openKeys={open}
+          onOpenChange={(keys) => setOpenKeys(keys.length > 0 ? [String(keys[keys.length - 1])] : [])}
           items={visible}
           onClick={(e) => {
             navigate(e.key);

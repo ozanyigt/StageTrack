@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    LED screen wall maths: power and circuits, processor / extender planning, signal chain, screen geometry
+    and the transport load plan. Ported from the Panelyze product; pure calculation, so it references no
+    database, no HTTP and no other StageTrack project and can be unit tested on its own.
+  -->
+
+</Project>

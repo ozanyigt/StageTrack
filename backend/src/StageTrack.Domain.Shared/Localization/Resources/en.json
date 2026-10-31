@@ -102,5 +102,7 @@
   "Equipment.UsedInHistory": "{code} has been used on projects or quotes and cannot be deleted, so the history stays intact. You can archive it.",
   "Project.ContentLineLocked": "Case content lines follow their case; change quantity, move or remove the case line instead.",
   "Quote.AlreadyExistsForJob": "This job already has a quote; open a new revision of it to make changes.",
-  "Firm.LogoInvalid": "The logo must be an image file of at most 2 MB."
+  "Firm.LogoInvalid": "The logo must be an image file of at most 2 MB.",
+  "Led.NoWarehouse": "No warehouse",
+  "Led.JobSection": "LED screens"
 }

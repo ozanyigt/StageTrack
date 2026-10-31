@@ -1003,6 +1003,260 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.ToTable("StockLocations");
                 });
 
+            modelBuilder.Entity("StageTrack.Led.EquipmentLedSpec", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EquipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipmentId");
+
+                    b.HasIndex("CompanyId", "EquipmentId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("CompanyId", "Role");
+
+                    b.ToTable("EquipmentLedSpecs", (string)null);
+
+                    b.HasDiscriminator<int>("Role");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("StageTrack.Led.LedPanelFavorite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EquipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipmentId");
+
+                    b.HasIndex("CompanyId", "UserId", "EquipmentId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("LedPanelFavorites");
+                });
+
+            modelBuilder.Entity("StageTrack.Led.LedStageSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("BottomM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<int>("Carrier")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("FrontGapM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<bool>("GroundSupport")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("GroundSupportHeightM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<decimal>("HangAllowanceM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("LegDepthM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<int>("Mount")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("StageDepthM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<decimal>("StageHeightM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<decimal>("StageWidthM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<decimal>("TrussHeightM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("LedStageSettings");
+                });
+
+            modelBuilder.Entity("StageTrack.Led.LedTransportSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GapMm")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("LedTransportSettings");
+                });
+
+            modelBuilder.Entity("StageTrack.Led.LedTransportVehicle", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CapacityKg")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("HeightMm")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("LengthMm")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WidthMm")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId", "SortOrder");
+
+                    b.ToTable("LedTransportVehicles");
+                });
+
             modelBuilder.Entity("StageTrack.Maintenance.Repair", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1545,6 +1799,156 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.ToTable("QuoteLines", (string)null);
                 });
 
+            modelBuilder.Entity("StageTrack.Sites.SitePlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BaseLayer")
+                        .HasColumnType("int");
+
+                    b.Property<double>("CentreLat")
+                        .HasColumnType("float");
+
+                    b.Property<double>("CentreLng")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<bool>("NightMode")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Zoom")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("CompanyId", "ProjectId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("SitePlans");
+                });
+
+            modelBuilder.Entity("StageTrack.Sites.SitePlanItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("EquipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Label")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<double>("Lat")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Layer")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<decimal?>("LightHeightM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<int?>("LightIntensity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("LightRadiusM")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<double>("Lng")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<double>("RotationDeg")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("SitePlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipmentId");
+
+                    b.HasIndex("SitePlanId");
+
+                    b.ToTable("SitePlanItem");
+                });
+
+            modelBuilder.Entity("StageTrack.Sites.SitePlanZone", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Layer")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Points")
+                        .IsRequired()
+                        .HasMaxLength(16000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SitePlanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SitePlanId");
+
+                    b.ToTable("SitePlanZone");
+                });
+
             modelBuilder.Entity("StageTrack.Suppliers.Supplier", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1672,6 +2076,10 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<int?>("MaxUsers")
                         .HasColumnType("int");
 
+                    b.Property<string>("Modules")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -1751,6 +2159,118 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasIndex("ProjectId", "EquipmentId");
 
                     b.ToTable("WarehouseMovements");
+                });
+
+            modelBuilder.Entity("StageTrack.Led.LedExtenderSpec", b =>
+                {
+                    b.HasBaseType("StageTrack.Led.EquipmentLedSpec");
+
+                    b.Property<int>("EthernetPorts")
+                        .HasColumnType("int")
+                        .HasColumnName("ExtenderEthernetPorts");
+
+                    b.Property<int>("FiberPorts")
+                        .HasColumnType("int");
+
+                    b.Property<long>("MaxPixels")
+                        .HasColumnType("bigint");
+
+                    b.HasDiscriminator().HasValue(3);
+                });
+
+            modelBuilder.Entity("StageTrack.Led.LedPanelSpec", b =>
+                {
+                    b.HasBaseType("StageTrack.Led.EquipmentLedSpec");
+
+                    b.Property<decimal?>("AngleMax")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<decimal?>("AngleMin")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<decimal?>("AngleStep")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<int?>("AvgLink")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CaseDimensionsCm")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("CasePanelCount")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("CaseWeightKg")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<int>("Group")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("HasExclusiveProcessors")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("HeightMm")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxLink")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaxStack")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PanelType")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PitchMm")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<int>("PixelHeight")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PixelWidth")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PwmHz")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReceivingCard")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("TransportKind")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("WattAvg")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<decimal?>("WattMax")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<int>("WidthMm")
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue(1);
+                });
+
+            modelBuilder.Entity("StageTrack.Led.LedProcessorSpec", b =>
+                {
+                    b.HasBaseType("StageTrack.Led.EquipmentLedSpec");
+
+                    b.Property<int>("EthernetPorts")
+                        .HasColumnType("int")
+                        .HasColumnName("ProcessorEthernetPorts");
+
+                    b.Property<int>("OptPorts")
+                        .HasColumnType("int");
+
+                    b.Property<long?>("PixelsPerPort")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TotalPixels")
+                        .HasColumnType("bigint");
+
+                    b.HasDiscriminator().HasValue(2);
                 });
 
             modelBuilder.Entity("StageTrack.Collaboration.TaskItem", b =>
@@ -1906,6 +2426,24 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("StageTrack.Led.EquipmentLedSpec", b =>
+                {
+                    b.HasOne("StageTrack.Inventory.Equipment", null)
+                        .WithMany()
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Led.LedPanelFavorite", b =>
+                {
+                    b.HasOne("StageTrack.Inventory.Equipment", null)
+                        .WithMany()
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("StageTrack.Maintenance.Repair", b =>
                 {
                     b.HasOne("StageTrack.Inventory.Equipment", null)
@@ -2028,6 +2566,38 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("StageTrack.Sites.SitePlan", b =>
+                {
+                    b.HasOne("StageTrack.Projects.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Sites.SitePlanItem", b =>
+                {
+                    b.HasOne("StageTrack.Inventory.Equipment", null)
+                        .WithMany()
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("StageTrack.Sites.SitePlan", null)
+                        .WithMany("Items")
+                        .HasForeignKey("SitePlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Sites.SitePlanZone", b =>
+                {
+                    b.HasOne("StageTrack.Sites.SitePlan", null)
+                        .WithMany("Zones")
+                        .HasForeignKey("SitePlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("StageTrack.Warehouse.WarehouseMovement", b =>
                 {
                     b.HasOne("StageTrack.Inventory.Equipment", null)
@@ -2088,6 +2658,13 @@ namespace StageTrack.EntityFrameworkCore.Migrations
             modelBuilder.Entity("StageTrack.Quotes.Quote", b =>
                 {
                     b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("StageTrack.Sites.SitePlan", b =>
+                {
+                    b.Navigation("Items");
+
+                    b.Navigation("Zones");
                 });
 #pragma warning restore 612, 618
         }

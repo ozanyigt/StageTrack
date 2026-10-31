@@ -1,7 +1,7 @@
 import { AutoComplete, Col, DatePicker, Divider, Form, Input, InputNumber, Row, Select, Tag, Typography } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import type { Tenant, TenantInput, TenantLocationInput, TenantStatus } from '../../api/types';
+import { TENANT_MODULES, type Tenant, type TenantInput, type TenantLocationInput, type TenantStatus } from '../../api/types';
 import { LANGUAGES } from '../../i18n';
 
 export interface TenantFormValues {
@@ -15,6 +15,7 @@ export interface TenantFormValues {
   period: [Dayjs, Dayjs | null];
   maxUsers?: number | null;
   maxLocations?: number | null;
+  modules?: string[];
 }
 
 const statusColor: Record<TenantStatus, string> = { Active: 'green', Suspended: 'red', Expired: 'volcano', NotStarted: 'blue' };
@@ -35,6 +36,7 @@ export const tenantToForm = (x: Tenant): TenantFormValues => ({
   period: [dayjs(x.startDate), x.endDate ? dayjs(x.endDate) : null],
   maxUsers: x.maxUsers ?? null,
   maxLocations: x.maxLocations ?? null,
+  modules: x.modules ?? [],
 });
 
 export const formToTenant = (v: TenantFormValues): TenantInput => ({
@@ -49,6 +51,7 @@ export const formToTenant = (v: TenantFormValues): TenantInput => ({
   endDate: v.period[1] ? v.period[1].format('YYYY-MM-DD') : null,
   maxUsers: v.maxUsers || null,
   maxLocations: v.maxLocations || null,
+  modules: v.modules ?? [],
 });
 
 /** Firm information and subscription (used by "new firm" and "edit firm"). */
@@ -114,6 +117,15 @@ export function TenantFields() {
           </Form.Item>
         </Col>
       </Row>
+      {/* Add-on modules are sold per firm; who may use one inside the firm is then a matter of permissions. */}
+      <Form.Item name="modules" label={t('host.modules')} extra={t('host.modulesHint')}>
+        <Select
+          mode="multiple"
+          allowClear
+          placeholder={t('host.noModules')}
+          options={TENANT_MODULES.map((m) => ({ value: m, label: t(`host.module.${m}`) }))}
+        />
+      </Form.Item>
       <Form.Item name="notes" label={t('host.notes')}>
         <Input.TextArea autoSize={{ minRows: 2, maxRows: 5 }} maxLength={2000} />
       </Form.Item>

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using StageTrack.Collaboration;
 using StageTrack.Companies;
@@ -56,6 +56,7 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenants.Tenant>
     {
         b.Property(x => x.Name).HasMaxLength(Tenants.TenantConsts.MaxNameLength).IsRequired();
         b.Property(x => x.Code).HasMaxLength(Tenants.TenantConsts.MaxCodeLength).IsRequired();
+        b.Property(x => x.Modules).HasMaxLength(Tenants.TenantConsts.MaxModulesLength);
         b.Property(x => x.ContactName).HasMaxLength(Tenants.TenantConsts.MaxContactLength);
         b.Property(x => x.Email).HasMaxLength(Tenants.TenantConsts.MaxEmailLength);
         b.Property(x => x.Phone).HasMaxLength(Tenants.TenantConsts.MaxPhoneLength);

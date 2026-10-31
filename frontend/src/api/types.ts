@@ -47,6 +47,8 @@ export interface CurrentUser {
   subscriptionEndDate?: string | null;
   /** The firm uploaded a logo (GET /firm/logo). */
   hasFirmLogo: boolean;
+  /** Add-on modules the firm bought; permissions of the others are already stripped server-side. */
+  modules: string[];
 }
 
 export interface LoginResult {
@@ -994,6 +996,7 @@ export interface Tenant {
   endDate?: string | null;
   maxUsers?: number | null;
   maxLocations?: number | null;
+  modules: string[];
   userCount: number;
   locationCount: number;
   creationTime: string;
@@ -1027,6 +1030,10 @@ export interface HostSummary {
   expiringSoon: number;
 }
 
+/** Add-on modules a firm can be given; the names the server knows. */
+export const TENANT_MODULES = ['Led'] as const;
+export type TenantModule = (typeof TENANT_MODULES)[number];
+
 export interface TenantInput {
   name: string;
   code: string;
@@ -1039,6 +1046,7 @@ export interface TenantInput {
   endDate?: string | null;
   maxUsers?: number | null;
   maxLocations?: number | null;
+  modules: string[];
 }
 
 export interface TenantLocationInput {

@@ -1,5 +1,7 @@
 import { http, toQuery } from './http';
 import type * as T from './types';
+import type * as L from './ledTypes';
+import type * as S from './siteTypes';
 
 const get = <R>(url: string, params?: object) =>
   http.get<R>(url, { params: params ? toQuery(params as Record<string, unknown>) : undefined }).then((r) => r.data);
@@ -301,4 +303,66 @@ export const firmApi = {
     return http.put('/firm/logo', form).then((r) => r.data);
   },
   removeLogo: () => del('/firm/logo'),
+};
+
+/** LED module (sold separately; the server strips its permissions for firms without it). */
+export const ledApi = {
+  settings: () => get<L.CalcSettings>('/led/calc/settings'),
+  evaluate: (input: L.EvaluateRequest) => post<L.EvaluateResponse>('/led/calc/evaluate', input),
+  equipmentPower: (input: L.EquipmentPowerRequest) => post<L.EquipmentPowerResponse>('/led/calc/equipment-power', input),
+
+  panels: (filter?: L.LedCatalogFilter) => get<L.LedPanel[]>('/led/inventory/panels', filter),
+  processors: (filter?: L.LedCatalogFilter) => get<L.LedProcessor[]>('/led/inventory/processors', filter),
+  extenders: (filter?: L.LedCatalogFilter) => get<L.LedExtender[]>('/led/inventory/extenders', filter),
+  savePanel: (equipmentId: T.Guid, input: L.LedPanelInput) => put<L.LedPanel>(`/led/inventory/panels/${equipmentId}`, input),
+  saveProcessor: (equipmentId: T.Guid, input: L.LedProcessorInput) => put<L.LedProcessor>(`/led/inventory/processors/${equipmentId}`, input),
+  saveExtender: (equipmentId: T.Guid, input: L.LedExtenderInput) => put<L.LedExtender>(`/led/inventory/extenders/${equipmentId}`, input),
+  /** Takes the equipment out of the LED module; the equipment record itself stays. */
+  removeFromLed: (equipmentId: T.Guid) => del(`/led/inventory/${equipmentId}`),
+  setFavorite: (equipmentId: T.Guid, favorite: boolean) => put<void>(`/led/inventory/panels/${equipmentId}/favorite`, { favorite }),
+
+  vehicles: () => get<L.TransportSettings>('/led/transport/vehicles'),
+  saveVehicles: (vehicles: L.SaveTransportVehicle[], gapMm?: number) =>
+    put<L.TransportSettings>('/led/transport/vehicles', { vehicles, gapMm }),
+  plan: (input: L.TransportPlanRequest) => post<L.TransportPlanResponse>('/led/transport/plan', input),
+
+  stage: () => get<L.LedStageSettings>('/led/stage'),
+  saveStage: (input: L.LedStageSettings) => put<L.LedStageSettings>('/led/stage', input),
+
+  stockStatus: (screens: L.LedStockScreenRequest[]) => post<L.LedStockStatusResponse>('/led/stock-status', { screens }),
+
+  previewJob: (projectId: T.Guid, input: L.LedToJobInput) => post<L.LedToJobResult>(`/led/jobs/${projectId}/preview`, input),
+  transferToJob: (projectId: T.Guid, input: L.LedToJobInput) => post<L.LedToJobResult>(`/led/jobs/${projectId}/transfer`, input),
+};
+
+/** A job's site plan: what stands where on the real ground, as inventory rather than a drawing. */
+export const sitePlanApi = {
+  // A job with no plan answers 204, which axios hands back as an empty string rather than null.
+  byProject: (projectId: T.Guid) =>
+    get<S.SitePlan | ''>(`/site-plans/by-project/${projectId}`).then((plan) => plan || null),
+  create: (input: S.CreateSitePlanInput) => post<S.SitePlan>('/site-plans', input),
+  updateView: (id: T.Guid, input: S.SitePlanViewInput) => put<S.SitePlan>(`/site-plans/${id}/view`, input),
+  rename: (id: T.Guid, name: string) => put<S.SitePlan>(`/site-plans/${id}/name`, { name }),
+  remove: (id: T.Guid) => del(`/site-plans/${id}`),
+
+  addItem: (id: T.Guid, input: S.AddSitePlanItemInput) => post<S.SitePlan>(`/site-plans/${id}/items`, input),
+  moveItem: (id: T.Guid, itemId: T.Guid, input: S.MoveSitePlanItemInput) =>
+    put<S.SitePlan>(`/site-plans/${id}/items/${itemId}/position`, input),
+  updateItem: (id: T.Guid, itemId: T.Guid, input: S.UpdateSitePlanItemInput) =>
+    put<S.SitePlan>(`/site-plans/${id}/items/${itemId}`, input),
+  removeItem: (id: T.Guid, itemId: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/items/${itemId}`),
+
+  /** What the equipment on the plan draws, at the given mains voltage. */
+  power: (id: T.Guid, voltage = 220) => get<S.SitePower>(`/site-plans/${id}/power`, { voltage }),
+
+  addZone: (id: T.Guid, input: S.SaveSitePlanZoneInput) => post<S.SitePlan>(`/site-plans/${id}/zones`, input),
+  updateZone: (id: T.Guid, zoneId: T.Guid, input: S.SaveSitePlanZoneInput) =>
+    put<S.SitePlan>(`/site-plans/${id}/zones/${zoneId}`, input),
+  removeZone: (id: T.Guid, zoneId: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/zones/${zoneId}`),
+
+  /** What the job would take from the plan, without touching it. */
+  previewJob: (id: T.Guid, input: Partial<S.SiteToJobInput>) =>
+    post<S.SiteToJobResult>(`/site-plans/${id}/job/preview`, input),
+  transferToJob: (id: T.Guid, input: Partial<S.SiteToJobInput>) =>
+    post<S.SiteToJobResult>(`/site-plans/${id}/job/transfer`, input),
 };

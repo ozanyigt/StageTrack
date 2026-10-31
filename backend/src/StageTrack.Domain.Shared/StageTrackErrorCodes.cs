@@ -1,4 +1,4 @@
-namespace StageTrack;
+﻿namespace StageTrack;
 
 /// <summary>
 /// Error codes thrown by the domain. Every code has a translation in
@@ -118,4 +118,27 @@ public static class StageTrackErrorCodes
     public const string ImportInvalidRow = "Import.InvalidRow";
     public const string QuoteCannotDelete = "Quote.CannotDelete";
     public const string QuoteLineDescriptionRequired = "Quote.LineDescriptionRequired";
+
+    public const string LedSpecAlreadyExists = "Led.SpecAlreadyExists";
+    public const string LedSpecWrongRole = "Led.SpecWrongRole";
+    public const string LedInvalidCaseDimensions = "Led.InvalidCaseDimensions";
+    public const string LedInvalidAngleRange = "Led.InvalidAngleRange";
+    public const string LedAverageOverMaxWatt = "Led.AverageOverMaxWatt";
+    public const string LedStackTooHigh = "Led.StackTooHigh";
+    public const string LedExclusiveProcessorsRequired = "Led.ExclusiveProcessorsRequired";
+    public const string LedNotAProcessor = "Led.NotAProcessor";
+    public const string LedPanelNotFound = "Led.PanelNotFound";
+    public const string LedNoVehicles = "Led.NoVehicles";
+    public const string LedScreenTooLarge = "Led.ScreenTooLarge";
+    public const string LedCutoutOutside = "Led.CutoutOutside";
+    public const string LedCornerPosition = "Led.CornerPosition";
+    public const string LedScreenFullyCut = "Led.ScreenFullyCut";
+    public const string LedCornerPanelInvalid = "Led.CornerPanelInvalid";
+    public const string LedTooManyScreens = "Led.TooManyScreens";
+    public const string LedInvalidRequest = "Led.InvalidRequest";
+
+    public const string SitePlanTooManyItems = "SitePlan.TooManyItems";
+    public const string SiteItemNeedsEquipmentOrLabel = "SitePlan.ItemNeedsEquipmentOrLabel";
+    public const string SiteZoneInvalidShape = "SitePlan.ZoneInvalidShape";
+    public const string SitePlanAlreadyExists = "SitePlan.AlreadyExists";
 }

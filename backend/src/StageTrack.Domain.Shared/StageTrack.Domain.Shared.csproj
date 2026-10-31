@@ -8,4 +8,9 @@
     <EmbeddedResource Include="Localization\Resources\*.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- LED maths and its vocabulary (panel shape, transport kind...); a leaf library with no dependencies. -->
+    <ProjectReference Include="..\StageTrack.Led\StageTrack.Led.csproj" />
+  </ItemGroup>
+
 </Project>

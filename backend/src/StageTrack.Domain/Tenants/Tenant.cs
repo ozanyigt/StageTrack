@@ -1,4 +1,4 @@
-using StageTrack.Entities;
+﻿using StageTrack.Entities;
 using StageTrack.Repositories;
 
 namespace StageTrack.Tenants;
@@ -33,6 +33,12 @@ public class Tenant : AggregateRoot, IAuditedObject
 
     /// <summary>Null = unlimited.</summary>
     public int? MaxLocations { get; private set; }
+
+    /// <summary>
+    /// Add-on modules the firm bought, as a comma-separated list of <see cref="TenantModules"/> names. Permissions
+    /// decide who inside the firm may use a module; this decides whether the firm has it at all.
+    /// </summary>
+    public string? Modules { get; private set; }
 
     /// <summary>Firm logo printed on quotes and packing slips.</summary>
     public byte[]? LogoContent { get; private set; }
@@ -85,6 +91,23 @@ public class Tenant : AggregateRoot, IAuditedObject
     }
 
     public void SetActive(bool isActive) => IsActive = isActive;
+
+    /// <summary>Replaces the firm's modules; unknown names are dropped so a typo cannot unlock anything.</summary>
+    public void SetModules(IEnumerable<string>? modules)
+    {
+        var kept = (modules ?? [])
+            .Select(m => TenantModules.All.FirstOrDefault(known => string.Equals(known, m?.Trim(), StringComparison.OrdinalIgnoreCase)))
+            .Where(m => m is not null)
+            .Distinct()
+            .ToList();
+        Modules = kept.Count == 0 ? null : string.Join(',', kept);
+    }
+
+    public IReadOnlyList<string> GetModules() =>
+        Modules?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries) ?? [];
+
+    public bool HasModule(string module) =>
+        GetModules().Any(m => string.Equals(m, module, StringComparison.OrdinalIgnoreCase));
 
     public void SetLogo(byte[]? content, string? contentType)
     {
