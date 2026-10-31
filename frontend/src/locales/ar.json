@@ -75,7 +75,8 @@
     "ledPower": "الطاقة والمعالجات",
     "ledLogistics": "خطة التحميل",
     "ledPixelMap": "خريطة البكسل",
-    "ledProcessors": "اختيار المعالج"
+    "ledProcessors": "اختيار المعالج",
+    "ledStock": "حالة المخزون"
   },
   "dashboard": {
     "welcome": "مرحبًا، {{name}}",
@@ -1561,7 +1562,17 @@
     "notEnoughStock": "المخزون غير كافٍ",
     "optionCount": "{{count}} خيار",
     "pickPanelFirst": "اختر لوحة لهذه الشاشة أولاً.",
-    "infeasibleHint": "لا يوجد معالج في المخزون يكفي لهذه الشاشات؛ أضف معالجًا أكبر أو صغّر الشاشة."
+    "infeasibleHint": "لا يوجد معالج في المخزون يكفي لهذه الشاشات؛ أضف معالجًا أكبر أو صغّر الشاشة.",
+    "stockTitle": "حالة المخزون",
+    "noScreensForStock": "أضف شاشة في صفحة التصميم أولاً.",
+    "owned": "المتوفر",
+    "usedByJob": "المستخدم",
+    "shortage": "النقص",
+    "remaining": "المتبقي",
+    "areaUsed": "المساحة المستخدمة",
+    "shortageHint": "ينقص {{count}} لوحة؛ أحضرها من مستودع آخر أو صغّر الشاشة.",
+    "resetOverrides": "إعادة ضبط القيم المُدخلة",
+    "noStockLines": "لا توجد بنود مخزون لهذا العمل."
   },
   "pixel": {
     "label": {

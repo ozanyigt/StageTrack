@@ -75,7 +75,8 @@
     "ledPower": "Güç ve işlemci",
     "ledLogistics": "Yükleme planı",
     "ledPixelMap": "Pixel Map",
-    "ledProcessors": "İşlemci seçimi"
+    "ledProcessors": "İşlemci seçimi",
+    "ledStock": "Stok durumu"
   },
   "dashboard": {
     "welcome": "Hoş geldiniz, {{name}}",
@@ -1561,7 +1562,17 @@
     "notEnoughStock": "Stok yetersiz",
     "optionCount": "{{count}} seçenek",
     "pickPanelFirst": "Önce bu ekrana panel seçin.",
-    "infeasibleHint": "Envanterdeki işlemciler bu ekranları sürmeye yetmiyor; daha büyük bir işlemci tanımlayın veya ekranı küçültün."
+    "infeasibleHint": "Envanterdeki işlemciler bu ekranları sürmeye yetmiyor; daha büyük bir işlemci tanımlayın veya ekranı küçültün.",
+    "stockTitle": "Stok durumu",
+    "noScreensForStock": "Önce ekran tasarımı sayfasında ekran ekleyin.",
+    "owned": "Mevcut",
+    "usedByJob": "Kullanılan",
+    "shortage": "Eksik",
+    "remaining": "Kalan",
+    "areaUsed": "Kullanılan alan",
+    "shortageHint": "{{count}} panel eksik; başka depodan getirin veya ekranı küçültün.",
+    "resetOverrides": "Elle girişleri sıfırla",
+    "noStockLines": "Bu iş için stok satırı yok."
   },
   "pixel": {
     "label": {
