@@ -1838,6 +1838,16 @@
     "tradeShare": "Diğer dallar",
     "tradeWeight": "Diğer dalların ağırlığı",
     "perTrade": "Dallara göre",
-    "trade": "Dal"
+    "trade": "Dal",
+    "sceneGroups": "Sahnedeki gruplar",
+    "noSceneGroups": "Diğer dallarda ürün seçilmedi; tasarım ekranlarından ekleyin.",
+    "dragHint": "Sürükleyip bırakın ya da nişanı alıp sahneye tıklayın",
+    "pickUp": "Al ve sahneye tıkla",
+    "rotate": "45° çevir",
+    "unplace": "Yerleştirmeyi kaldır",
+    "flown": "Asılı",
+    "placedAt": "x {{x}} · z {{z}}",
+    "notPlaced": "Henüz yerleştirilmedi",
+    "nothingForStage": "Sahnede gösterilecek bir şey yok; tasarım ekranlarından ekran ya da ürün ekleyin."
   }
 }

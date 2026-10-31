@@ -2,8 +2,10 @@ import { Button, Card, Checkbox, Col, Empty, Flex, InputNumber, Row, Segmented, 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ledApi } from '../../api/endpoints';
+import { equipmentApi, ledApi } from '../../api/endpoints';
 import type { LedStageSettings } from '../../api/ledTypes';
+import { StagePropsPanel } from '../draft/StagePropsPanel';
+import { sanitizePropPlacements, stageProps, type PropPlacements } from '../draft/stageProps';
 import { useErrorToast } from '../../utils/errors';
 import { useBomLines } from './components/CarrierFacts';
 import StageViewport, { type StageView } from './components/StageViewport';
@@ -18,6 +20,7 @@ import { usePixelMap } from './usePixelMap';
 import { useLedJob } from './useLedJob';
 
 const PLACEMENTS_KEY = 'stagetrack-led-stage-placements-v1';
+const PROP_PLACEMENTS_KEY = 'stagetrack-stage-prop-placements-v1';
 const VIEW_KEY = 'stagetrack-led-stage-view-v1';
 
 const DEFAULT_VIEW: StageView = {
@@ -36,6 +39,10 @@ const DEFAULT_VIEW: StageView = {
  *
  * The stage and mounting values live on the server (one row per firm location), because they describe the firm's
  * own rig, not this job; where each screen stands on the floor is per job and stays in this browser.
+ *
+ * The other trades stand here too - the sound groups, the fixtures, the truss and the decking - drawn from each
+ * product's own measurements and put down by hand, because nothing in an inventory knows where a speaker should
+ * go. That is the designer's call, and this is where they make it.
  */
 export function LedStagePage() {
   const { t } = useTranslation();
@@ -58,14 +65,30 @@ export function LedStagePage() {
       return DEFAULT_VIEW;
     }
   });
+  const [propPlacements, setPropPlacements] = useState<PropPlacements>(() => {
+    try {
+      return sanitizePropPlacements(JSON.parse(localStorage.getItem(PROP_PLACEMENTS_KEY) ?? 'null'));
+    } catch {
+      return {};
+    }
+  });
+  const [armedId, setArmedId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [preset, setPreset] = useState<CameraPreset>('perspective');
   const [presetKey, setPresetKey] = useState(0);
 
   useEffect(() => localStorage.setItem(PLACEMENTS_KEY, JSON.stringify(placements)), [placements]);
   useEffect(() => localStorage.setItem(VIEW_KEY, JSON.stringify(view)), [view]);
+  useEffect(() => localStorage.setItem(PROP_PLACEMENTS_KEY, JSON.stringify(propPlacements)), [propPlacements]);
 
   const stored = useQuery({ queryKey: ['led-stage'], queryFn: () => ledApi.stage() });
+
+  /** Every product the other trades picked, for their measurements and names. */
+  const catalogue = useQuery({
+    queryKey: ['equipment', 'for-stage'],
+    queryFn: () => equipmentApi.list({ maxResultCount: 1000, sorting: 'code' }),
+    enabled: job.lines.some((l) => l.equipmentId),
+  });
 
   const save = useMutation({
     mutationFn: (next: LedStageSettings) => ledApi.saveStage(next),
@@ -82,6 +105,28 @@ export function LedStagePage() {
     return built.screens.length > 0 ? sceneLayout(built.screens, settings, placements) : null;
   }, [walls, mapState, evaluation.data, nameOf, settings, placements]);
 
+  const equipmentById = useMemo(
+    () => new Map((catalogue.data?.items ?? []).map((e) => [e.id, e])),
+    [catalogue.data],
+  );
+
+  /** The groups standing on the stage: on the deck, or at the trim height when they hang. */
+  const sceneProps = useMemo(
+    () =>
+      stageProps(
+        job.lines,
+        equipmentById,
+        propPlacements,
+        layout?.podium.height ?? 0,
+        settings?.trussHeightM ?? (layout?.podium.height ?? 0) + 6,
+        (line, item) => (item ? `${line.name} · ${item.code}` : line.name),
+      ),
+    [job.lines, equipmentById, propPlacements, layout, settings],
+  );
+
+  const moveProp = (id: string, at: { x: number; z: number }) =>
+    setPropPlacements((p) => ({ ...p, [id]: { rotationDeg: p[id]?.rotationDeg ?? 0, flown: p[id]?.flown, ...at } }));
+
   const rig = useMemo(() => (layout && settings ? carriers(layout, settings) : []), [layout, settings]);
   const label = useMemo(() => (layout && settings ? carrierLabel(layout, settings, rig) : null), [layout, settings, rig]);
   const bom = useMemo(() => totalBom(rig), [rig]);
@@ -96,11 +141,11 @@ export function LedStagePage() {
     save.mutate({ ...settings, [key]: clampSetting(key, value) } as LedStageSettings);
   };
 
-  if (job.screens.length === 0) {
+  if (job.screens.length === 0 && sceneProps.length === 0) {
     return (
       <>
         <Typography.Title level={3} style={{ marginTop: 0 }}>{t('led.stageTitle')}</Typography.Title>
-        <Card><Empty description={t('led.noScreensForStage')} /></Card>
+        <Card><Empty description={t('draft.nothingForStage')} /></Card>
       </>
     );
   }
@@ -141,11 +186,21 @@ export function LedStagePage() {
             {layout ? (
               <StageViewport
                 layout={layout}
+                props={sceneProps}
                 carriers={rig}
                 carrierLabel={label}
                 selectedId={selectedId}
                 onSelect={setSelectedId}
                 onMove={(id, at) => setPlacements((p) => ({ ...p, [id]: { ...(p[id] ?? { x: 0, z: 0, rotationDeg: 0 }), ...at } }))}
+                onMoveProp={moveProp}
+                onDropAt={(at) => {
+                  // Whatever was picked up - dragged from the list or armed with the crosshair - lands here.
+                  if (armedId) {
+                    moveProp(armedId, at);
+                    setSelectedId(armedId);
+                    setArmedId(null);
+                  }
+                }}
                 preset={preset}
                 presetKey={presetKey}
                 view={view}
@@ -233,6 +288,36 @@ export function LedStagePage() {
               </Space>
             )}
           </Card>
+
+          <div style={{ marginTop: 12 }}>
+            <StagePropsPanel
+              props={sceneProps}
+              placements={propPlacements}
+              selectedId={selectedId}
+              armedId={armedId}
+              onArm={setArmedId}
+              onSelect={setSelectedId}
+              onFlown={(id, flown) =>
+                setPropPlacements((p) => {
+                  const current = p[id] ?? { x: sceneProps.find((x) => x.id === id)?.x ?? 0, z: sceneProps.find((x) => x.id === id)?.z ?? 0, rotationDeg: 0 };
+                  return { ...p, [id]: { ...current, flown } };
+                })
+              }
+              onRotate={(id, degrees) =>
+                setPropPlacements((p) => {
+                  const current = p[id] ?? { x: sceneProps.find((x) => x.id === id)?.x ?? 0, z: sceneProps.find((x) => x.id === id)?.z ?? 0, rotationDeg: 0 };
+                  return { ...p, [id]: { ...current, rotationDeg: (current.rotationDeg + degrees) % 360 } };
+                })
+              }
+              onReset={(id) =>
+                setPropPlacements((p) => {
+                  const next = { ...p };
+                  delete next[id];
+                  return next;
+                })
+              }
+            />
+          </div>
 
           <Card size="small" title={t('led.stage.view')} style={{ marginTop: 12 }}>
             <Space direction="vertical">

@@ -1838,6 +1838,16 @@
     "tradeShare": "Other trades",
     "tradeWeight": "Weight of the other trades",
     "perTrade": "By trade",
-    "trade": "Trade"
+    "trade": "Trade",
+    "sceneGroups": "Groups on the stage",
+    "noSceneGroups": "Nothing picked in the other trades; add it on the design screens.",
+    "dragHint": "Drag one in, or take it and click the stage",
+    "pickUp": "Pick up, then click the stage",
+    "rotate": "Turn 45°",
+    "unplace": "Take off the stage",
+    "flown": "Flown",
+    "placedAt": "x {{x}} · z {{z}}",
+    "notPlaced": "Not placed yet",
+    "nothingForStage": "Nothing to show yet; add a screen or a product on the design screens."
   }
 }
