@@ -1848,6 +1848,18 @@
     "flown": "Asılı",
     "placedAt": "x {{x}} · z {{z}}",
     "notPlaced": "Henüz yerleştirilmedi",
-    "nothingForStage": "Sahnede gösterilecek bir şey yok; tasarım ekranlarından ekran ya da ürün ekleyin."
+    "nothingForStage": "Sahnede gösterilecek bir şey yok; tasarım ekranlarından ekran ya da ürün ekleyin.",
+    "simScreen": "Ekran",
+    "coverage": "Kapsama",
+    "coverageSettings": "Kapsama ayarları",
+    "soundCoverageHint": "Her grubun ne kadar geniş ve ne kadar uzağa bastığı. Envanterde açılım verisi olmadığı için bunu siz söylüyorsunuz; nereye baktıkları 3D sahnedeki yerleşimden geliyor.",
+    "lightCoverageHint": "Açıyı 0 bırakırsanız ışık kendi altında bir havuz çizer; açı verirseniz baktığı yöne doğru bir koni olur. Yerleşim 3D sahneden gelir.",
+    "spread": "Açılım",
+    "beam": "Işın açısı",
+    "throw": "Mesafe",
+    "stageArea": "SAHNE",
+    "audienceArea": "SEYİRCİ",
+    "noTradeGroups": "{{trade}} dalında grup yok; tasarım ekranından ekleyin.",
+    "unplacedGroups": "{{count}} grup henüz 3D sahneye yerleştirilmedi; hepsi sahnenin ortasında duruyor."
   }
 }

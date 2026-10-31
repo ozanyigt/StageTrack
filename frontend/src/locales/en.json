@@ -1848,6 +1848,18 @@
     "flown": "Flown",
     "placedAt": "x {{x}} · z {{z}}",
     "notPlaced": "Not placed yet",
-    "nothingForStage": "Nothing to show yet; add a screen or a product on the design screens."
+    "nothingForStage": "Nothing to show yet; add a screen or a product on the design screens.",
+    "simScreen": "Screens",
+    "coverage": "Coverage",
+    "coverageSettings": "Coverage settings",
+    "soundCoverageHint": "How wide and how far each group throws. There is no dispersion data in an inventory, so you say; where they point comes from the 3D stage.",
+    "lightCoverageHint": "Left at 0 the light draws a pool under itself; give it an angle and it becomes a cone the way it faces. Placement comes from the 3D stage.",
+    "spread": "Spread",
+    "beam": "Beam angle",
+    "throw": "Throw",
+    "stageArea": "STAGE",
+    "audienceArea": "AUDIENCE",
+    "noTradeGroups": "No {{trade}} groups; add them on the design screen.",
+    "unplacedGroups": "{{count}} groups are not placed on the 3D stage yet, so they all sit at its centre."
   }
 }

@@ -75,7 +75,7 @@ const DesignPage = lazy(() => import('./pages/draft/DesignPage').then((m) => ({ 
 const LedPixelMapPage = lazy(() => import('./pages/led/LedPixelMapPage').then((m) => ({ default: m.LedPixelMapPage })));
 const SitePlanPage = lazy(() => import('./pages/sites/SitePlanPage').then((m) => ({ default: m.SitePlanPage })));
 const LedStagePage = lazy(() => import('./pages/led/LedStagePage').then((m) => ({ default: m.LedStagePage })));
-const LedSimulationPage = lazy(() => import('./pages/led/LedSimulationPage').then((m) => ({ default: m.LedSimulationPage })));
+const SimulationPage = lazy(() => import('./pages/draft/SimulationPage').then((m) => ({ default: m.SimulationPage })));
 const LedProcessorPage = lazy(() => import('./pages/led/LedProcessorPage').then((m) => ({ default: m.LedProcessorPage })));
 const LedPowerPage = lazy(() => import('./pages/led/LedPowerPage').then((m) => ({ default: m.LedPowerPage })));
 const StockStatusPage = lazy(() => import('./pages/draft/StockStatusPage').then((m) => ({ default: m.StockStatusPage })));
@@ -168,7 +168,7 @@ function AppRoutes() {
         <Route path="draft/design/:discipline" element={<Guard permission={Permissions.LedDesign}><Led><DesignPage /></Led></Guard>} />
         <Route path="draft/pixel-map" element={<Guard permission={Permissions.LedDesign}><Led><LedPixelMapPage /></Led></Guard>} />
         <Route path="draft/stage" element={<Guard permission={Permissions.LedDesign}><Led><LedStagePage /></Led></Guard>} />
-        <Route path="draft/simulation" element={<Guard permission={Permissions.LedDesign}><Led><LedSimulationPage /></Led></Guard>} />
+        <Route path="draft/simulation" element={<Guard permission={Permissions.LedDesign}><Led><SimulationPage /></Led></Guard>} />
         <Route path="draft/power" element={<Guard permission={Permissions.LedDesign}><Led><LedPowerPage /></Led></Guard>} />
         <Route path="draft/stock" element={<Guard permission={Permissions.Led}><Led><StockStatusPage /></Led></Guard>} />
         <Route path="draft/logistics" element={<Guard permission={Permissions.LedTransport}><Led><LedLogisticsPage /></Led></Guard>} />
