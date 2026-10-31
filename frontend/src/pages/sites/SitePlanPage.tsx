@@ -13,6 +13,9 @@ import { SiteMap, type SiteMapHandle } from './SiteMap';
 import { SitePowerCard } from './SitePowerCard';
 import { SiteToJobModal } from './SiteToJobModal';
 import { SiteZoneTools } from './SiteZoneTools';
+import { useLedJob } from '../led/useLedJob';
+import { venueFootprint } from './venueFootprint';
+import { VenueOnMapCard } from './VenueOnMapCard';
 
 /**
  * A job's site plan. What makes it worth having over a drawing tool: everything placed here is a real equipment
@@ -34,6 +37,15 @@ export function SitePlanPage() {
   const [layerForNew, setLayerForNew] = useState<string>('Structures');
   const [draft, setDraft] = useState<[number, number][]>([]);
   const [drawing, setDrawing] = useState(false);
+  /** Placing the building itself rather than a piece of equipment. */
+  const [placingVenue, setPlacingVenue] = useState(false);
+  const { setProject } = useLedJob();
+
+  /** Stepping inside takes the job with it, so the stage opens on this hall and not the last one. */
+  const enterVenue = useCallback(() => {
+    if (projectId) setProject(projectId);
+    navigate('/draft/stage');
+  }, [projectId, setProject, navigate]);
   const [transferring, setTransferring] = useState(false);
   const mapHandle = useRef<SiteMapHandle | null>(null);
 
@@ -136,6 +148,28 @@ export function SitePlanPage() {
 
     return [...need.values()].filter((r) => r.need > r.stock);
   }, [data]);
+
+  /** The room's outline on the ground, once somebody has said where on earth it stands. */
+  const footprint = useMemo(
+    () => (data?.venue ? venueFootprint(data.venue, -2) : null),
+    [data?.venue],
+  );
+
+  const placeVenue = useMutation({
+    mutationFn: ({ lat, lng }: { lat: number; lng: number }) =>
+      sitePlanApi.setVenueOnMap(data!.id, { originLat: lat, originLng: lng, mapRotationDeg: data!.venue?.mapRotationDeg ?? 0 }),
+    onSuccess: put,
+    onError: showError,
+  });
+
+  const onPlaceVenue = useCallback(
+    (lat: number, lng: number) => {
+      setPlacingVenue(false);
+      placeVenue.mutate({ lat, lng });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data],
+  );
 
   const onDropAt = useCallback(
     (lat: number, lng: number) => {
@@ -327,7 +361,16 @@ export function SitePlanPage() {
                   const item = data.items.find((i) => i.id === id);
                   moveItem.mutate({ id, lat, lng, rotationDeg: item?.rotationDeg ?? 0 });
                 }}
-                onDropAt={arming ? onDropAt : null}
+                venue={
+                  footprint
+                    ? {
+                        corners: footprint,
+                        label: t('venue.enterHint'),
+                        onEnter: enterVenue,
+                      }
+                    : null
+                }
+                onDropAt={placingVenue ? onPlaceVenue : arming ? onDropAt : null}
                 onDrawPoint={drawing ? (lat, lng) => setDraft((d) => [...d, [lat, lng]]) : null}
                 draft={draft}
                 handleRef={(h) => (mapHandle.current = h)}
@@ -449,6 +492,16 @@ export function SitePlanPage() {
                 </Space>
               )}
             </Card>
+
+            <div style={{ marginTop: 12 }}>
+              <VenueOnMapCard
+                plan={data}
+                placing={placingVenue}
+                onPlacing={setPlacingVenue}
+                onSaved={put}
+                onEnter={enterVenue}
+              />
+            </div>
 
             <SiteZoneTools
               plan={data}

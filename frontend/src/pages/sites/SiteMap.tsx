@@ -40,6 +40,8 @@ interface Props {
   onDrawPoint: ((lat: number, lng: number) => void) | null;
   /** The shape being drawn, so the user sees it take form. */
   draft: [number, number][];
+  /** The room's footprint on the ground, when it has been placed; clicking it steps inside. */
+  venue: { corners: [number, number][]; label: string; onEnter: () => void } | null;
   handleRef?: (handle: SiteMapHandle | null) => void;
 }
 
@@ -50,7 +52,7 @@ interface Props {
  * Drawing is imperative because Leaflet owns the DOM; the React side only says what should be on the map.
  */
 export function SiteMap({
-  centre, baseLayer, nightMode, items, zones, hiddenLayers, selectedId, onSelect, onMove, onDropAt, onDrawPoint, draft, handleRef,
+  centre, baseLayer, nightMode, items, zones, hiddenLayers, selectedId, onSelect, onMove, onDropAt, onDrawPoint, draft, venue, handleRef,
 }: Props) {
   const { t } = useTranslation();
   const hostRef = useRef<HTMLDivElement>(null);
@@ -116,6 +118,17 @@ export function SiteMap({
     if (!map || !group) return;
     group.clearLayers();
 
+    // The building first, so everything on the site is drawn over it rather than under it.
+    if (venue) {
+      const shape = L.polygon(venue.corners, { color: '#a78bfa', weight: 3, dashArray: '8 4', fillOpacity: nightMode ? 0.1 : 0.14 });
+      shape.bindTooltip(venue.label, { sticky: true });
+      shape.on('click', (e) => {
+        L.DomEvent.stop(e);
+        venue.onEnter();
+      });
+      group.addLayer(shape);
+    }
+
     for (const zone of visible.zones) {
       if (zone.points.length < 2) continue;
       const shape =
@@ -179,7 +192,7 @@ export function SiteMap({
         group.addLayer(L.circleMarker(point, { radius: 4, color: '#1677ff', fillOpacity: 1 }));
       }
     }
-  }, [visible, selectedId, nightMode, draft, t]);
+  }, [visible, selectedId, nightMode, draft, venue, t]);
 
   // The job changed under us: jump to its ground rather than leaving the map where it was.
   useEffect(() => {

@@ -1923,7 +1923,17 @@
     "measured": "{{pixels}} pixels · 1 m ≈ {{scale}} pixels",
     "applyScale": "Apply the scale",
     "planImage": "Venue plan",
-    "noPlanImage": "Upload a plan image first."
+    "noPlanImage": "Upload a plan image first.",
+    "onMap": "The venue on the map",
+    "noRoomYet": "No room entered for this job.",
+    "noRoomYetHint": "Enter its measurements on the 3D stage, then stand the building on the ground from here.",
+    "roomSize": "{{w}} × {{d}} m",
+    "placeOnMap": "Place on the map",
+    "moveOnMap": "Move on the map",
+    "clickGround": "Click where the middle of the stage goes.",
+    "facing": "Facing {{deg}}° (0 = the audience looks north)",
+    "enter": "Step inside",
+    "enterHint": "The venue — click to step inside"
   },
   "rigging": {
     "title": "Rigging load",

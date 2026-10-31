@@ -1923,7 +1923,17 @@
     "measured": "{{pixels}} piksel · 1 m ≈ {{scale}} piksel",
     "applyScale": "Ölçeği uygula",
     "planImage": "Mekân planı",
-    "noPlanImage": "Önce bir plan görseli yükleyin."
+    "noPlanImage": "Önce bir plan görseli yükleyin.",
+    "onMap": "Mekân haritada",
+    "noRoomYet": "Bu işin mekânı girilmemiş.",
+    "noRoomYetHint": "3D sahnedeki Mekân kartından ölçüleri girin; sonra binayı buradan haritaya oturtabilirsiniz.",
+    "roomSize": "{{w}} × {{d}} m",
+    "placeOnMap": "Haritaya yerleştir",
+    "moveOnMap": "Haritada taşı",
+    "clickGround": "Sahnenin ortasının geleceği yere tıklayın.",
+    "facing": "Yön: {{deg}}° (0 = seyirci kuzeye bakar)",
+    "enter": "İçeri gir",
+    "enterHint": "Mekân — tıklayınca içeri girilir"
   },
   "rigging": {
     "title": "Rigging yükü",
