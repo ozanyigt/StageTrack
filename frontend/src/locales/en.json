@@ -905,7 +905,8 @@
       "repairs": "Repairs",
       "stock": "Stock",
       "history": "History",
-      "manufacturerSerials": "Manufacturer serial numbers"
+      "manufacturerSerials": "Manufacturer serial numbers",
+      "led": "LED"
     },
     "relationHint": {
       "Content": "Default content: items that come along when this equipment is added to a project (e.g. the contents of a case). Listed under the item on the packing slip.",
@@ -1861,5 +1862,14 @@
     "audienceArea": "AUDIENCE",
     "noTradeGroups": "No {{trade}} groups; add them on the design screen.",
     "unplacedGroups": "{{count}} groups are not placed on the 3D stage yet, so they all sit at its centre."
+  },
+  "ledTab": {
+    "notInLed": "This product is not in the LED module.",
+    "addToLed": "Enter its LED data",
+    "hint": "The technical data; name, weight and stock stay on the product’s own tabs.",
+    "panelType": "Type",
+    "transport": "Transport",
+    "compatibleProcessors": "Compatible processors",
+    "stockHint": "Stock and price are managed on the properties tab."
   }
 }

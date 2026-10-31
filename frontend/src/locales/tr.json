@@ -905,7 +905,8 @@
       "repairs": "Tamirler",
       "stock": "Stok",
       "history": "Hareket kaydı",
-      "manufacturerSerials": "Üretici seri numaraları"
+      "manufacturerSerials": "Üretici seri numaraları",
+      "led": "LED"
     },
     "relationHint": {
       "Content": "Varsayılan içerik: bu ekipman projeye eklendiğinde birlikte gelen parçalar (örn. kasanın içindekiler). İrsaliyede ekipmanın altında listelenir.",
@@ -1861,5 +1862,14 @@
     "audienceArea": "SEYİRCİ",
     "noTradeGroups": "{{trade}} dalında grup yok; tasarım ekranından ekleyin.",
     "unplacedGroups": "{{count}} grup henüz 3D sahneye yerleştirilmedi; hepsi sahnenin ortasında duruyor."
+  },
+  "ledTab": {
+    "notInLed": "Bu ürün LED modülünde tanımlı değil.",
+    "addToLed": "LED verilerini gir",
+    "hint": "Teknik veriler; isim, ağırlık ve stok ürünün kendi sekmelerinde.",
+    "panelType": "Tip",
+    "transport": "Taşıma",
+    "compatibleProcessors": "Uyumlu işlemci",
+    "stockHint": "Stok ve fiyat ürünün özellikler sekmesinden yönetilir."
   }
 }

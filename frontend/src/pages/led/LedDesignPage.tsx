@@ -1,9 +1,10 @@
 import { DeleteOutlined, ExportOutlined, PlusOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Empty, Flex, Input, InputNumber, Row, Segmented, Select, Space, Statistic, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Col, Collapse, Empty, Flex, Input, InputNumber, Row, Segmented, Select, Space, Statistic, Tag, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { POWER_MODES, type PowerMode } from '../../api/ledTypes';
 import { Permissions, useAuth } from '../../auth/AuthContext';
+import { LedProcessorPage } from './LedProcessorPage';
 import { LedScreenGrid } from './LedScreenGrid';
 import { LedToJobModal } from './LedToJobModal';
 import { useLedJob } from './useLedJob';
@@ -171,6 +172,19 @@ export function LedDesignPage() {
             );
           })}
         </Row>
+      )}
+
+      {job.screens.length > 0 && (
+        <Collapse
+          style={{ marginTop: 12 }}
+          items={[
+            {
+              key: 'processors',
+              label: t('led.processorTitle'),
+              children: <LedProcessorPage hideTitle />,
+            },
+          ]}
+        />
       )}
 
       <LedToJobModal open={transferOpen} screens={request.screens} evaluation={result} onClose={() => setTransferOpen(false)} />
