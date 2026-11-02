@@ -172,6 +172,7 @@ public class EquipmentConfiguration : IEntityTypeConfiguration<Equipment>
         b.Property(x => x.HeightCm).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.PowerW).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.CapacityKg).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.EmptyWeightKg).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.CurrentA).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.CountryOfOrigin).HasMaxLength(EquipmentDetailConsts.MaxCountryLength);
         b.Property(x => x.InspectionDescription).HasMaxLength(EquipmentDetailConsts.MaxInspectionDescriptionLength);

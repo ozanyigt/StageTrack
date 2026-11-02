@@ -1,4 +1,5 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using StageTrack.Inventory;
 
 namespace StageTrack.Imports;
 
@@ -44,6 +45,31 @@ public class EquipmentImportRow
     public decimal? WidthCm { get; set; }
     public decimal? HeightCm { get; set; }
     public decimal? PowerW { get; set; }
+
+    /// <summary>What it weighs empty (a case, a rack), kilograms.</summary>
+    public decimal? EmptyWeightKg { get; set; }
+
+    /// <summary>How many go in one case; 1 when the sheet says nothing.</summary>
+    public int? PackedPer { get; set; }
+
+    /// <summary>
+    /// What kind of thing it is, as the sheet words it: rental stock, a consumable, or something sold. Text
+    /// rather than an enum because the file usually comes from another system with its own vocabulary.
+    /// </summary>
+    public string? Type { get; set; }
+
+    /// <summary>"Rental" or "Sale" in the exporting system's words; a sale here wins over <see cref="Type"/>.</summary>
+    public string? SaleType { get; set; }
+
+    /// <summary>
+    /// The manufacturer's serial number of one device. A sheet exported per serial number carries one row per
+    /// device, so the row makes the product and then the device on it.
+    /// </summary>
+    [StringLength(EquipmentUnitConsts.MaxSerialNumberLength)]
+    public string? SerialNumber { get; set; }
+
+    /// <summary>An existing QR or RFID code on that device (or on the product, when it is quantity-tracked).</summary>
+    public string? LabelCode { get; set; }
 
     [StringLength(2000)]
     public string? Notes { get; set; }

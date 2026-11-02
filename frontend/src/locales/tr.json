@@ -259,7 +259,10 @@
     "volumeAuto": "Ölçülerden hesaplandı: {{value}} m³",
     "widthCm": "Genişlik (cm)",
     "capacityKg": "Taşıma kapasitesi (kg)",
-    "capacityHint": "Truss kesitinin nokta yükü, motorun kapasitesi"
+    "capacityHint": "Truss kesitinin nokta yükü, motorun kapasitesi",
+    "rentalOrSale": "Kiralık / Satılık",
+    "emptyWeightKg": "Boş ağırlık (kg)",
+    "importLabelCode": "QR / RFID kodu"
   },
   "units": {
     "title": "Cihazlar (seri numaraları)",

@@ -61,6 +61,9 @@ public class EquipmentDto
     /// <summary>What it can carry, kilograms: a truss section's point load, a hoist's rating.</summary>
     public decimal? CapacityKg { get; set; }
 
+    /// <summary>What it weighs empty, kilograms: a case, a rack, a skip.</summary>
+    public decimal? EmptyWeightKg { get; set; }
+
     /// <summary>False: office/internal equipment that cannot be planned on projects or quotes.</summary>
     public bool ShowInQuotes { get; set; }
 
@@ -185,6 +188,9 @@ public class CreateUpdateEquipmentDto
 
     /// <summary>What it can carry, kilograms; left empty for anything that carries nothing.</summary>
     [Range(0, 1_000_000)] public decimal? CapacityKg { get; set; }
+
+    /// <summary>What it weighs empty, kilograms (a case, a rack).</summary>
+    [Range(0, 100_000)] public decimal? EmptyWeightKg { get; set; }
     [Range(1, 10_000)] public int PackedPer { get; set; } = 1;
 
     [Range(1, 120)]

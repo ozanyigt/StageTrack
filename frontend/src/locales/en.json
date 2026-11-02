@@ -259,7 +259,10 @@
     "volumeAuto": "Calculated from dimensions: {{value}} m³",
     "widthCm": "Width (cm)",
     "capacityKg": "Load capacity (kg)",
-    "capacityHint": "A truss section's point load, a hoist's rating"
+    "capacityHint": "A truss section's point load, a hoist's rating",
+    "rentalOrSale": "Rental / sale",
+    "emptyWeightKg": "Empty weight (kg)",
+    "importLabelCode": "QR / RFID code"
   },
   "units": {
     "title": "Devices (serial numbers)",

@@ -259,7 +259,10 @@
     "volumeAuto": "محسوب من الأبعاد: {{value}} م³",
     "widthCm": "العرض (سم)",
     "capacityKg": "سعة الحمل (كغ)",
-    "capacityHint": "الحمل النقطي لمقطع الترس، وتصنيف الرافعة"
+    "capacityHint": "الحمل النقطي لمقطع الترس، وتصنيف الرافعة",
+    "rentalOrSale": "إيجار / بيع",
+    "emptyWeightKg": "الوزن فارغًا (كغ)",
+    "importLabelCode": "رمز QR / RFID"
   },
   "units": {
     "title": "الأجهزة (الأرقام التسلسلية)",
