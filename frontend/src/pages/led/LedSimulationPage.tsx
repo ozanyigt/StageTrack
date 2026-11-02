@@ -11,7 +11,7 @@ import { useLedJob } from './useLedJob';
  * cable that snakes along the rows instead of the columns changes how many CEE circuits a wall needs — so these
  * controls feed the same calculation the power page reports, not a separate drawing.
  */
-export function LedSimulationPage() {
+export function LedSimulationPage({ hideTitle = false }: { hideTitle?: boolean } = {}) {
   const { t } = useTranslation();
   // The wiring map is only asked for on this page; everywhere else the answer would be thrown away.
   const { job, walls, nameOf, evaluation, update } = useLedJob({ wiring: true });
@@ -22,7 +22,7 @@ export function LedSimulationPage() {
   if (job.screens.length === 0) {
     return (
       <>
-        <Typography.Title level={3} style={{ marginTop: 0 }}>{t('led.simTitle')}</Typography.Title>
+        {!hideTitle && <Typography.Title level={3} style={{ marginTop: 0 }}>{t('led.simTitle')}</Typography.Title>}
         <Card><Empty description={t('led.noScreensForSim')} /></Card>
       </>
     );
@@ -31,7 +31,7 @@ export function LedSimulationPage() {
   return (
     <>
       <div className="page-header">
-        <Typography.Title level={3}>{t('led.simTitle')}</Typography.Title>
+        {!hideTitle && <Typography.Title level={3}>{t('led.simTitle')}</Typography.Title>}
         <Segmented
           value={view}
           onChange={(v) => setView(v as 'power' | 'signal')}

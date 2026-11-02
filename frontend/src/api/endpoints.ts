@@ -51,14 +51,16 @@ export const dashboardApi = {
 
 export const folderApi = {
   list: () => get<T.EquipmentFolder[]>('/equipment-folders'),
-  create: (input: { name: string; parentId?: T.Guid | null }) => post<T.EquipmentFolder>('/equipment-folders', input),
-  update: (id: T.Guid, input: { name: string; parentId?: T.Guid | null }) => put<T.EquipmentFolder>(`/equipment-folders/${id}`, input),
+  create: (input: { name: string; parentId?: T.Guid | null; discipline?: T.EquipmentDiscipline | null }) =>
+    post<T.EquipmentFolder>('/equipment-folders', input),
+  update: (id: T.Guid, input: { name: string; parentId?: T.Guid | null; discipline?: T.EquipmentDiscipline | null }) =>
+    put<T.EquipmentFolder>(`/equipment-folders/${id}`, input),
   remove: (id: T.Guid) => del(`/equipment-folders/${id}`),
 };
 
 export const equipmentApi = {
   list: (
-    params: T.PagedRequest & { text?: string; folderId?: T.Guid; includeSubfolders?: boolean; type?: T.EquipmentType; isArchived?: boolean },
+    params: T.PagedRequest & { text?: string; folderId?: T.Guid; includeSubfolders?: boolean; type?: T.EquipmentType; isArchived?: boolean; discipline?: T.EquipmentDiscipline },
   ) => get<T.PagedResult<T.Equipment>>('/equipment', params),
   get: (id: T.Guid) => get<T.EquipmentDetail>(`/equipment/${id}`),
   /** forQuote: projects and quotes — leaves out office equipment and equipment with nothing rentable (e.g. in repair). */
@@ -336,33 +338,20 @@ export const ledApi = {
 };
 
 /** A job's site plan: what stands where on the real ground, as inventory rather than a drawing. */
+/**
+ * The job's venue. It is stored on the job's site-plan record, which is why the paths still say so; the map
+ * screen that record was born for is gone, and what is left is the room - its measurements, its drawing and
+ * where it stands. The first call makes the record if the job has none.
+ */
 export const sitePlanApi = {
-  // A job with no plan answers 204, which axios hands back as an empty string rather than null.
+  // A job with no record answers 204, which axios hands back as an empty string rather than null.
   byProject: (projectId: T.Guid) =>
     get<S.SitePlan | ''>(`/site-plans/by-project/${projectId}`).then((plan) => plan || null),
   create: (input: S.CreateSitePlanInput) => post<S.SitePlan>('/site-plans', input),
-  updateView: (id: T.Guid, input: S.SitePlanViewInput) => put<S.SitePlan>(`/site-plans/${id}/view`, input),
-  rename: (id: T.Guid, name: string) => put<S.SitePlan>(`/site-plans/${id}/name`, { name }),
-  remove: (id: T.Guid) => del(`/site-plans/${id}`),
 
-  addItem: (id: T.Guid, input: S.AddSitePlanItemInput) => post<S.SitePlan>(`/site-plans/${id}/items`, input),
-  moveItem: (id: T.Guid, itemId: T.Guid, input: S.MoveSitePlanItemInput) =>
-    put<S.SitePlan>(`/site-plans/${id}/items/${itemId}/position`, input),
-  updateItem: (id: T.Guid, itemId: T.Guid, input: S.UpdateSitePlanItemInput) =>
-    put<S.SitePlan>(`/site-plans/${id}/items/${itemId}`, input),
-  removeItem: (id: T.Guid, itemId: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/items/${itemId}`),
-
-  /** What the equipment on the plan draws, at the given mains voltage. */
-  power: (id: T.Guid, voltage = 220) => get<S.SitePower>(`/site-plans/${id}/power`, { voltage }),
-
-  addZone: (id: T.Guid, input: S.SaveSitePlanZoneInput) => post<S.SitePlan>(`/site-plans/${id}/zones`, input),
-  updateZone: (id: T.Guid, zoneId: T.Guid, input: S.SaveSitePlanZoneInput) =>
-    put<S.SitePlan>(`/site-plans/${id}/zones/${zoneId}`, input),
-  removeZone: (id: T.Guid, zoneId: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/zones/${zoneId}`),
-
-  /** What the job would take from the plan, without touching it. */
-  previewJob: (id: T.Guid, input: Partial<S.SiteToJobInput>) =>
-    post<S.SiteToJobResult>(`/site-plans/${id}/job/preview`, input),
-  transferToJob: (id: T.Guid, input: Partial<S.SiteToJobInput>) =>
-    post<S.SiteToJobResult>(`/site-plans/${id}/job/transfer`, input),
+  /** The room the job is built in; the first call creates it. */
+  setVenue: (id: T.Guid, input: S.SetSiteVenueInput) => put<S.SitePlan>(`/site-plans/${id}/venue`, input),
+  setVenuePlan: (id: T.Guid, input: S.SetSiteVenuePlanInput) => put<S.SitePlan>(`/site-plans/${id}/venue/plan`, input),
+  setVenueOnMap: (id: T.Guid, input: S.SetSiteVenueMapInput) => put<S.SitePlan>(`/site-plans/${id}/venue/map`, input),
+  removeVenue: (id: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/venue`),
 };

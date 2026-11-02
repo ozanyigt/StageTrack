@@ -1,10 +1,11 @@
-using StageTrack.Repositories;
+﻿using StageTrack.Repositories;
 
 namespace StageTrack.Inventory;
 
 public class EquipmentFilter
 {
     public string? Text { get; set; }
+    /// <summary>null = every folder; a list = only these (an empty one matches nothing).</summary>
     public IReadOnlyCollection<Guid>? FolderIds { get; set; }
     public EquipmentType? Type { get; set; }
     public bool IsArchived { get; set; }

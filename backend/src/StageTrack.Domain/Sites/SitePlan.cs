@@ -1,4 +1,4 @@
-using StageTrack.Entities;
+﻿using StageTrack.Entities;
 using StageTrack.Inventory;
 
 namespace StageTrack.Sites;
@@ -27,6 +27,12 @@ public class SitePlan : CompanyAggregateRoot
     /// <summary>The plan was last looked at after dark; stored so the night view opens as the user left it.</summary>
     public bool NightMode { get; private set; }
 
+    /// <summary>
+    /// The room the job is built in, when it is indoors. Null for an open field, where the satellite picture is
+    /// the ground truth and there is nothing to clear overhead.
+    /// </summary>
+    public SiteVenue? Venue { get; private set; }
+
     public ICollection<SitePlanItem> Items { get; private set; } = new List<SitePlanItem>();
     public ICollection<SitePlanZone> Zones { get; private set; } = new List<SitePlanZone>();
 
@@ -51,6 +57,18 @@ public class SitePlan : CompanyAggregateRoot
         BaseLayer = baseLayer;
         NightMode = nightMode;
     }
+
+    /// <summary>The room's measurements; the first call brings it into being, a null size takes it away again.</summary>
+    public SiteVenue SetVenue(double widthM, double depthM, double clearHeightM, double stageOffsetXM, double behindStageM, double rakeDeg)
+    {
+        Venue ??= new SiteVenue(widthM, depthM, clearHeightM);
+        Venue.SetSize(widthM, depthM, clearHeightM, stageOffsetXM, behindStageM, rakeDeg);
+        return Venue;
+    }
+
+    public void RemoveVenue() => Venue = null;
+
+    public SiteVenue VenueOrThrow() => Venue ?? throw new BusinessException(StageTrackErrorCodes.VenueNotSet);
 
     public SitePlanItem AddItem(Guid? equipmentId, string? label, int quantity, double lat, double lng, string? layer)
     {

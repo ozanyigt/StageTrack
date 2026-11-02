@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using StageTrack.Dtos;
 
 namespace StageTrack.Inventory;
@@ -10,6 +10,12 @@ public class EquipmentFolderDto
     public Guid? ParentId { get; set; }
     public int SortOrder { get; set; }
     public int EquipmentCount { get; set; }
+
+    /// <summary>The folder's own trade, as it was set.</summary>
+    public EquipmentDiscipline? Discipline { get; set; }
+
+    /// <summary>The trade in force here - its own, or the nearest one above it. This is what lists filter on.</summary>
+    public EquipmentDiscipline? EffectiveDiscipline { get; set; }
 }
 
 public class CreateUpdateEquipmentFolderDto
@@ -18,6 +24,9 @@ public class CreateUpdateEquipmentFolderDto
     public string Name { get; set; } = null!;
 
     public Guid? ParentId { get; set; }
+
+    /// <summary>null = the folder takes the trade of the one above it.</summary>
+    public EquipmentDiscipline? Discipline { get; set; }
 }
 
 public class EquipmentDto
@@ -48,6 +57,9 @@ public class EquipmentDto
     public decimal? WidthCm { get; set; }
     public decimal? HeightCm { get; set; }
     public decimal? PowerW { get; set; }
+
+    /// <summary>What it can carry, kilograms: a truss section's point load, a hoist's rating.</summary>
+    public decimal? CapacityKg { get; set; }
 
     /// <summary>False: office/internal equipment that cannot be planned on projects or quotes.</summary>
     public bool ShowInQuotes { get; set; }
@@ -130,6 +142,9 @@ public class GetEquipmentListInput : PagedRequestDto
     public bool IncludeSubfolders { get; set; } = true;
     public EquipmentType? Type { get; set; }
     public bool IsArchived { get; set; }
+
+    /// <summary>Only the trade's own folders (and what they hold); the five design tabs filter on this.</summary>
+    public EquipmentDiscipline? Discipline { get; set; }
 }
 
 public class CreateUpdateEquipmentDto
@@ -167,6 +182,9 @@ public class CreateUpdateEquipmentDto
     [Range(0, 100_000)] public decimal? VolumeM3 { get; set; }
     [Range(0, 1_000_000)] public decimal? PowerW { get; set; }
     [Range(0, 10_000)] public decimal? CurrentA { get; set; }
+
+    /// <summary>What it can carry, kilograms; left empty for anything that carries nothing.</summary>
+    [Range(0, 1_000_000)] public decimal? CapacityKg { get; set; }
     [Range(1, 10_000)] public int PackedPer { get; set; } = 1;
 
     [Range(1, 120)]

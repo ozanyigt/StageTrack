@@ -71,14 +71,14 @@ function Themed({ children }: { children: ReactNode }) {
 }
 
 const LedInventoryPage = lazy(() => import('./pages/led/LedInventoryPage').then((m) => ({ default: m.LedInventoryPage })));
-const LedDesignPage = lazy(() => import('./pages/led/LedDesignPage').then((m) => ({ default: m.LedDesignPage })));
+const DesignPage = lazy(() => import('./pages/draft/DesignPage').then((m) => ({ default: m.DesignPage })));
 const LedPixelMapPage = lazy(() => import('./pages/led/LedPixelMapPage').then((m) => ({ default: m.LedPixelMapPage })));
-const SitePlanPage = lazy(() => import('./pages/sites/SitePlanPage').then((m) => ({ default: m.SitePlanPage })));
 const LedStagePage = lazy(() => import('./pages/led/LedStagePage').then((m) => ({ default: m.LedStagePage })));
-const LedSimulationPage = lazy(() => import('./pages/led/LedSimulationPage').then((m) => ({ default: m.LedSimulationPage })));
+const SimulationPage = lazy(() => import('./pages/draft/SimulationPage').then((m) => ({ default: m.SimulationPage })));
 const LedProcessorPage = lazy(() => import('./pages/led/LedProcessorPage').then((m) => ({ default: m.LedProcessorPage })));
 const LedPowerPage = lazy(() => import('./pages/led/LedPowerPage').then((m) => ({ default: m.LedPowerPage })));
-const LedStockStatusPage = lazy(() => import('./pages/led/LedStockStatusPage').then((m) => ({ default: m.LedStockStatusPage })));
+const StockStatusPage = lazy(() => import('./pages/draft/StockStatusPage').then((m) => ({ default: m.StockStatusPage })));
+const PlanPage = lazy(() => import('./pages/draft/PlanPage').then((m) => ({ default: m.PlanPage })));
 const LedLogisticsPage = lazy(() => import('./pages/led/LedLogisticsPage').then((m) => ({ default: m.LedLogisticsPage })));
 
 /** The LED screens arrive in their own bundle; until it does, the page area shows a spinner. */
@@ -161,18 +161,29 @@ function AppRoutes() {
         <Route path="settings/label-templates" element={<Guard permission={Permissions.LabelTemplates}><LabelTemplatesPage /></Guard>} />
         <Route path="settings/audit-log" element={<Guard permission={Permissions.AuditLog}><AuditLogPage /></Guard>} />
         {/* LED module: lazy, because its screens pull in three.js and the canvas drawing nobody else needs. */}
-        {/* The site plan belongs to a job, so it is reachable with and without one. */}
-        <Route path="site-plan" element={<Guard permission={Permissions.Projects}><Led><SitePlanPage /></Led></Guard>} />
-        <Route path="site-plan/:projectId" element={<Guard permission={Permissions.Projects}><Led><SitePlanPage /></Led></Guard>} />
-        <Route path="led/panels" element={<Guard permission={Permissions.Led}><Led><LedInventoryPage /></Led></Guard>} />
-        <Route path="led/design" element={<Guard permission={Permissions.LedDesign}><Led><LedDesignPage /></Led></Guard>} />
-        <Route path="led/pixel-map" element={<Guard permission={Permissions.LedDesign}><Led><LedPixelMapPage /></Led></Guard>} />
-        <Route path="led/stage" element={<Guard permission={Permissions.LedDesign}><Led><LedStagePage /></Led></Guard>} />
-        <Route path="led/simulation" element={<Guard permission={Permissions.LedDesign}><Led><LedSimulationPage /></Led></Guard>} />
-        <Route path="led/processors" element={<Guard permission={Permissions.LedDesign}><Led><LedProcessorPage /></Led></Guard>} />
-        <Route path="led/power" element={<Guard permission={Permissions.LedDesign}><Led><LedPowerPage /></Led></Guard>} />
-        <Route path="led/stock" element={<Guard permission={Permissions.Led}><Led><LedStockStatusPage /></Led></Guard>} />
-        <Route path="led/logistics" element={<Guard permission={Permissions.LedTransport}><Led><LedLogisticsPage /></Led></Guard>} />
+        {/* The quote-draft workspace: five design doors and the screens they all feed. */}
+        <Route path="draft/design/:discipline" element={<Guard permission={Permissions.LedDesign}><Led><DesignPage /></Led></Guard>} />
+        <Route path="draft/pixel-map" element={<Guard permission={Permissions.LedDesign}><Led><LedPixelMapPage /></Led></Guard>} />
+        <Route path="draft/stage" element={<Guard permission={Permissions.LedDesign}><Led><LedStagePage /></Led></Guard>} />
+        <Route path="draft/simulation" element={<Guard permission={Permissions.LedDesign}><Led><SimulationPage /></Led></Guard>} />
+        <Route path="draft/power" element={<Guard permission={Permissions.LedDesign}><Led><LedPowerPage /></Led></Guard>} />
+        <Route path="draft/plan" element={<Guard permission={Permissions.LedDesign}><Led><PlanPage /></Led></Guard>} />
+        <Route path="draft/stock" element={<Guard permission={Permissions.Led}><Led><StockStatusPage /></Led></Guard>} />
+        <Route path="draft/logistics" element={<Guard permission={Permissions.LedTransport}><Led><LedLogisticsPage /></Led></Guard>} />
+        {/* Off the menu but still reachable until their work moves: panel specs to the equipment card, the
+            processor recommendation into the LED design screen. */}
+        <Route path="draft/panels" element={<Guard permission={Permissions.Led}><Led><LedInventoryPage /></Led></Guard>} />
+        <Route path="draft/processors" element={<Guard permission={Permissions.LedDesign}><Led><LedProcessorPage /></Led></Guard>} />
+        {/* Links kept from when the workspace was LED only. */}
+        <Route path="led/design" element={<Navigate to="/draft/design/led" replace />} />
+        <Route path="led/panels" element={<Navigate to="/draft/panels" replace />} />
+        <Route path="led/pixel-map" element={<Navigate to="/draft/pixel-map" replace />} />
+        <Route path="led/stage" element={<Navigate to="/draft/stage" replace />} />
+        <Route path="led/simulation" element={<Navigate to="/draft/simulation" replace />} />
+        <Route path="led/processors" element={<Navigate to="/draft/processors" replace />} />
+        <Route path="led/power" element={<Navigate to="/draft/power" replace />} />
+        <Route path="led/stock" element={<Navigate to="/draft/stock" replace />} />
+        <Route path="led/logistics" element={<Navigate to="/draft/logistics" replace />} />
         <Route path="settings/firm" element={<Guard permission={Permissions.Firm}><FirmSettingsPage /></Guard>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

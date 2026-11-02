@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ledApi } from '../../api/endpoints';
 import type { EvaluateScreenRequest, LedPanel, PowerMode } from '../../api/ledTypes';
+import type { EquipmentDiscipline } from '../../api/types';
 import { currentLocation, toInventoryItem } from './core/adapter';
 import { buildEvaluateRequest } from './core/evaluation';
 import { screenDisplayName } from './core/screenName';
@@ -35,29 +36,74 @@ export interface StoredScreen {
   selectedOption: number;
 }
 
+/**
+ * What the job takes from a trade that is not LED: a product of that trade and how many. A sound rig is not drawn
+ * to scale the way a LED wall is - it is chosen - so these are lines, not geometry. The total power, the stock
+ * check, the 3D scene and the transfer to a job all read them beside the screens.
+ */
+export interface JobLine {
+  id: string;
+  discipline: EquipmentDiscipline;
+  /** What the user calls this group ("Ses grubu 1"); the product may change under it. */
+  name: string;
+  /** null while nothing is picked yet. */
+  equipmentId: string | null;
+  count: number;
+}
+
 const STORAGE_KEY = 'stagetrack-led-job-v2';
 
 interface StoredJob {
+  /** The job being drafted for; null until the user says. The room and the transfer both need it. */
+  projectId: string | null;
   voltage: number;
   mode: PowerMode;
   screens: StoredScreen[];
+  lines: JobLine[];
 }
 
-const DEFAULT_JOB: StoredJob = { voltage: 220, mode: 'Max', screens: [] };
+const DEFAULT_JOB: StoredJob = { projectId: null, voltage: 220, mode: 'Max', screens: [], lines: [] };
 
 function load(): StoredJob {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_JOB;
     const parsed = JSON.parse(raw) as StoredJob;
-    return { ...DEFAULT_JOB, ...parsed, screens: Array.isArray(parsed.screens) ? parsed.screens : [] };
+    return {
+      ...DEFAULT_JOB,
+      ...parsed,
+      screens: Array.isArray(parsed.screens) ? parsed.screens : [],
+      // Jobs saved before the other trades existed have no lines; they open as a LED-only job rather than break.
+      lines: Array.isArray(parsed.lines) ? parsed.lines : [],
+    };
   } catch {
     return DEFAULT_JOB;
   }
 }
 
+/**
+ * One job, shared by every screen that asks for it. Two components used to keep their own copy of the same
+ * localStorage, so a change made in one - picking the job, adding a line - left the other showing yesterday's
+ * draft until it happened to remount. A single store with subscribers means there is only ever one answer.
+ */
+let current: StoredJob = load();
+const listeners = new Set<() => void>();
+
+function setStored(next: StoredJob) {
+  current = next;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  for (const listener of listeners) listener();
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+const newId = (prefix: string) => `${prefix}${Date.now().toString(36)}${Math.round(Math.random() * 1e6).toString(36)}`;
+
 export const newStoredScreen = (): StoredScreen => ({
-  id: `s${Date.now().toString(36)}${Math.round(Math.random() * 1e6).toString(36)}`,
+  id: newId('s'),
   name: null,
   panelId: null,
   widthPanels: 10,
@@ -71,11 +117,8 @@ export const newStoredScreen = (): StoredScreen => ({
  */
 export function useLedJob({ wiring = false }: { wiring?: boolean } = {}) {
   const { t } = useTranslation();
-  const [job, setJob] = useState<StoredJob>(load);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(job));
-  }, [job]);
+  const job = useSyncExternalStore(subscribe, () => current);
+  const setJob = useCallback((change: (previous: StoredJob) => StoredJob) => setStored(change(current)), []);
 
   const panels = useQuery({ queryKey: ['led-inventory', 'Panel', undefined], queryFn: () => ledApi.panels() });
 
@@ -154,7 +197,28 @@ export function useLedJob({ wiring = false }: { wiring?: boolean } = {}) {
 
   const setPower = useCallback((voltage: number, mode: PowerMode) => setJob((j) => ({ ...j, voltage, mode })), []);
 
-  const clear = useCallback(() => setJob(DEFAULT_JOB), []);
+  const setProject = useCallback((projectId: string | null) => setJob((j) => ({ ...j, projectId })), []);
 
-  return { job, walls, nameOf, panels, panelById, location, request, evaluation, add, update, remove, setPower, clear };
+  /** A new group of the trade, named after the ones already there ("Ses grubu 2"). */
+  const addLine = useCallback(
+    (discipline: EquipmentDiscipline) =>
+      setJob((j) => {
+        const taken = j.lines.filter((l) => l.discipline === discipline).length;
+        const name = String(t('draft.lineName', { trade: t(`enums.equipmentDiscipline.${discipline}`), n: taken + 1 }));
+        return { ...j, lines: [...j.lines, { id: newId('l'), discipline, name, equipmentId: null, count: 1 }] };
+      }),
+    [t],
+  );
+
+  const updateLine = useCallback(
+    (id: string, patch: Partial<JobLine>) =>
+      setJob((j) => ({ ...j, lines: j.lines.map((l) => (l.id === id ? { ...l, ...patch } : l)) })),
+    [],
+  );
+
+  const removeLine = useCallback((id: string) => setJob((j) => ({ ...j, lines: j.lines.filter((l) => l.id !== id) })), []);
+
+  const clear = useCallback(() => setJob((j) => ({ ...DEFAULT_JOB, projectId: j.projectId })), []);
+
+  return { job, walls, nameOf, panels, panelById, location, request, evaluation, add, update, remove, setPower, clear, addLine, updateLine, removeLine, setProject };
 }

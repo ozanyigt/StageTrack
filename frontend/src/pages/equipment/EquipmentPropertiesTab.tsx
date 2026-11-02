@@ -38,6 +38,7 @@ export function toEquipmentInput(e: EquipmentDetail, canSeePrice: boolean): Equi
     weightKg: e.weightKg,
     volumeM3: e.volumeM3,
     powerW: e.powerW,
+    capacityKg: e.capacityKg,
     currentA: e.currentA,
     packedPer: e.packedPer || 1,
     inspectionIntervalMonths: e.inspectionIntervalMonths,
@@ -153,6 +154,7 @@ export function EquipmentPropertiesTab({
         <Descriptions.Item label={t('equipment.volumeM3')}>{dim(equipment.volumeM3)}</Descriptions.Item>
         <Descriptions.Item label={t('equipment.powerW')}>{dim(equipment.powerW)}</Descriptions.Item>
         <Descriptions.Item label={t('equipment.currentA')}>{dim(equipment.currentA)}</Descriptions.Item>
+        <Descriptions.Item label={t('equipment.capacityKg')}>{dim(equipment.capacityKg)}</Descriptions.Item>
         <Descriptions.Item label={t('equipment.packedPer')}>{equipment.packedPer}</Descriptions.Item>
         <Descriptions.Item label={t('common.notes')} span={2}>
           <span style={{ whiteSpace: 'pre-wrap' }}>{equipment.notes ?? '—'}</span>
@@ -299,6 +301,7 @@ export function EquipmentPropertiesTab({
         </Col>
         {num('powerW', t('equipment.powerW'))}
         {num('currentA', t('equipment.currentA'), undefined, 0.1)}
+        {num('capacityKg', t('equipment.capacityKg'), t('equipment.capacityHint'))}
         <Col xs={12} md={6}>
           <Form.Item name="packedPer" label={t('equipment.packedPer')} extra={t('equipment.packedPerHint')}>
             <InputNumber min={1} style={{ width: '100%' }} />

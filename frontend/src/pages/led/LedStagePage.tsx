@@ -2,22 +2,23 @@ import { Button, Card, Checkbox, Col, Empty, Flex, InputNumber, Row, Segmented, 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ledApi } from '../../api/endpoints';
+import { ledApi, projectApi } from '../../api/endpoints';
 import type { LedStageSettings } from '../../api/ledTypes';
+import { StagePropsPanel } from '../draft/StagePropsPanel';
+import { usePlanTexture } from '../draft/usePlanTexture';
+import { usePlanImage } from '../draft/useVenue';
+import { useStageScene } from '../draft/useStageScene';
+import { RiggingCard } from '../draft/RiggingCard';
+import { VenueCard } from '../draft/VenueCard';
 import { useErrorToast } from '../../utils/errors';
 import { useBomLines } from './components/CarrierFacts';
 import StageViewport, { type StageView } from './components/StageViewport';
 import { CAMERA_PRESETS, type CameraPreset } from './core/stage3d/camera';
 import { carrierLabel, carriers, totalBom } from './core/stage3d/carriers';
-import { sanitizePlacements, type Placements } from './core/stage3d/placements';
-import { sceneLayout } from './core/stage3d/scene';
-import { stage3dScreens } from './core/stage3d/screens';
-import { STAGE_LIMITS, STAGE_STEPS, clampSetting, type StageSettings } from './core/stage3d/settings';
+import { STAGE_LIMITS, STAGE_STEPS, clampSetting } from './core/stage3d/settings';
 import { stageTotals } from './core/stage3d/totals';
-import { usePixelMap } from './usePixelMap';
 import { useLedJob } from './useLedJob';
 
-const PLACEMENTS_KEY = 'stagetrack-led-stage-placements-v1';
 const VIEW_KEY = 'stagetrack-led-stage-view-v1';
 
 const DEFAULT_VIEW: StageView = {
@@ -36,21 +37,33 @@ const DEFAULT_VIEW: StageView = {
  *
  * The stage and mounting values live on the server (one row per firm location), because they describe the firm's
  * own rig, not this job; where each screen stands on the floor is per job and stays in this browser.
+ *
+ * The other trades stand here too - the sound groups, the fixtures, the truss and the decking - drawn from each
+ * product's own measurements and put down by hand, because nothing in an inventory knows where a speaker should
+ * go. That is the designer's call, and this is where they make it.
  */
 export function LedStagePage() {
   const { t } = useTranslation();
   const showError = useErrorToast();
   const queryClient = useQueryClient();
-  const { job, walls, nameOf, evaluation } = useLedJob();
-  const { state: mapState } = usePixelMap(walls, nameOf);
+  const {
+    job,
+    settings,
+    loadingSettings,
+    equipmentById,
+    layout,
+    placements,
+    setPlacements,
+    propPlacements,
+    setPropPlacements,
+    sceneProps,
+    venue,
+    room,
+    rigHeightM,
+    evaluation,
+  } = useStageScene();
+  const { setProject } = useLedJob();
 
-  const [placements, setPlacements] = useState<Placements>(() => {
-    try {
-      return sanitizePlacements(JSON.parse(localStorage.getItem(PLACEMENTS_KEY) ?? 'null'));
-    } catch {
-      return {};
-    }
-  });
   const [view, setView] = useState<StageView>(() => {
     try {
       return { ...DEFAULT_VIEW, ...(JSON.parse(localStorage.getItem(VIEW_KEY) ?? 'null') ?? {}) };
@@ -58,14 +71,21 @@ export function LedStagePage() {
       return DEFAULT_VIEW;
     }
   });
+  const [armedId, setArmedId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [preset, setPreset] = useState<CameraPreset>('perspective');
   const [presetKey, setPresetKey] = useState(0);
 
-  useEffect(() => localStorage.setItem(PLACEMENTS_KEY, JSON.stringify(placements)), [placements]);
   useEffect(() => localStorage.setItem(VIEW_KEY, JSON.stringify(view)), [view]);
 
-  const stored = useQuery({ queryKey: ['led-stage'], queryFn: () => ledApi.stage() });
+  /** Which job this draft is for: the room hangs off it, and so will the transfer. */
+  const jobs = useQuery({
+    queryKey: ['projects', 'draft-picker'],
+    queryFn: () => projectApi.list({ statuses: ['Draft', 'Pending', 'Confirmed', 'Prepped', 'OnLocation'], maxResultCount: 300, sorting: 'planStart' }),
+  });
+
+  const planUrl = usePlanImage(venue?.planAttachmentId);
+  const planTexture = usePlanTexture(planUrl, venue?.planMetresPerPixel);
 
   const save = useMutation({
     mutationFn: (next: LedStageSettings) => ledApi.saveStage(next),
@@ -73,14 +93,71 @@ export function LedStagePage() {
     onError: showError,
   });
 
-  /** The server's DTO and the ported library share field names and enum values, so no mapping is needed. */
-  const settings = (stored.data ?? null) as StageSettings | null;
+  const moveProp = (id: string, at: { x: number; z: number }) =>
+    setPropPlacements((p) => ({ ...p, [id]: { rotationDeg: p[id]?.rotationDeg ?? 0, flown: p[id]?.flown, ...at } }));
 
-  const layout = useMemo(() => {
-    if (!settings) return null;
-    const built = stage3dScreens(walls, mapState, evaluation.data?.screens, nameOf, true);
-    return built.screens.length > 0 ? sceneLayout(built.screens, settings, placements) : null;
-  }, [walls, mapState, evaluation.data, nameOf, settings, placements]);
+  /** Where a group is now - its placement, or where it was parked before anyone placed it. */
+  const placementOf = (id: string) => {
+    const existing = propPlacements[id];
+    if (existing) return existing;
+    const parked = sceneProps.find((p) => p.id === id);
+    return { x: parked?.x ?? 0, z: parked?.z ?? 0, rotationDeg: parked?.rotationDeg ?? 0 };
+  };
+
+  const placeProp = (id: string, at: { x?: number; z?: number; rotationDeg?: number }) =>
+    setPropPlacements((p) => ({ ...p, [id]: { ...placementOf(id), ...at } }));
+
+  /** The same distance the other way across the centre line, which is how a second hang is usually described. */
+  const mirrorProp = (id: string) => {
+    const current = placementOf(id);
+    placeProp(id, { x: -current.x, rotationDeg: (360 - current.rotationDeg) % 360 });
+  };
+
+  /** This trade's placed groups, spaced evenly across the stage at the depth they already share. */
+  const spreadTrade = (trade: string) => {
+    const of = sceneProps.filter((p) => p.trade === trade);
+    if (of.length < 2 || !settings) return;
+    const half = settings.stageWidthM / 2;
+    const z = of.reduce((sum, p) => sum + p.z, 0) / of.length;
+    setPropPlacements((p) => {
+      const next = { ...p };
+      of.forEach((prop, index) => {
+        const x = -half + ((index + 0.5) * (half * 2)) / of.length;
+        next[prop.id] = { ...placementOf(prop.id), x: Math.round(x * 100) / 100, z: Math.round(z * 100) / 100 };
+      });
+      return next;
+    });
+  };
+
+  // Arrow keys nudge the selected group: 10 cm, or a metre with Shift. Not while a field has the focus.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!selectedId || !propPlacements[selectedId]) return;
+      const target = e.target as HTMLElement | null;
+      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      const step = e.shiftKey ? 1 : 0.1;
+      const by: Record<string, { x?: number; z?: number }> = {
+        ArrowLeft: { x: -step },
+        ArrowRight: { x: step },
+        ArrowUp: { z: -step },
+        ArrowDown: { z: step },
+      };
+      const delta = by[e.key];
+      if (!delta) return;
+      e.preventDefault();
+      const current = propPlacements[selectedId];
+      setPropPlacements((p) => ({
+        ...p,
+        [selectedId]: {
+          ...current,
+          x: Math.round((current.x + (delta.x ?? 0)) * 100) / 100,
+          z: Math.round((current.z + (delta.z ?? 0)) * 100) / 100,
+        },
+      }));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selectedId, propPlacements]);
 
   const rig = useMemo(() => (layout && settings ? carriers(layout, settings) : []), [layout, settings]);
   const label = useMemo(() => (layout && settings ? carrierLabel(layout, settings, rig) : null), [layout, settings, rig]);
@@ -96,11 +173,32 @@ export function LedStagePage() {
     save.mutate({ ...settings, [key]: clampSetting(key, value) } as LedStageSettings);
   };
 
-  if (job.screens.length === 0) {
+  if (job.screens.length === 0 && sceneProps.length === 0) {
+    // Nothing to stand in the room yet - but the room itself can be entered now, and usually is entered first.
     return (
       <>
-        <Typography.Title level={3} style={{ marginTop: 0 }}>{t('led.stageTitle')}</Typography.Title>
-        <Card><Empty description={t('led.noScreensForStage')} /></Card>
+        <div className="page-header">
+          <Typography.Title level={3} style={{ margin: 0 }}>{t('led.stageTitle')}</Typography.Title>
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            style={{ minWidth: 260 }}
+            placeholder={t('draft.pickJob')}
+            value={job.projectId ?? undefined}
+            loading={jobs.isLoading}
+            onChange={(value) => setProject(value ?? null)}
+            options={(jobs.data?.items ?? []).map((j) => ({ value: j.id, label: `${j.number} · ${j.name}` }))}
+          />
+        </div>
+        <Row gutter={[12, 12]}>
+          <Col xs={24} xl={17}>
+            <Card><Empty description={t('draft.nothingForStage')} /></Card>
+          </Col>
+          <Col xs={24} xl={7}>
+            <VenueCard projectId={job.projectId} rigHeightM={rigHeightM} />
+          </Col>
+        </Row>
       </>
     );
   }
@@ -127,7 +225,20 @@ export function LedStagePage() {
   return (
     <>
       <div className="page-header">
-        <Typography.Title level={3}>{t('led.stageTitle')}</Typography.Title>
+        <Space align="center" wrap>
+          <Typography.Title level={3} style={{ margin: 0 }}>{t('led.stageTitle')}</Typography.Title>
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            style={{ minWidth: 260 }}
+            placeholder={t('draft.pickJob')}
+            value={job.projectId ?? undefined}
+            loading={jobs.isLoading}
+            onChange={(value) => setProject(value ?? null)}
+            options={(jobs.data?.items ?? []).map((j) => ({ value: j.id, label: `${j.number} · ${j.name}` }))}
+          />
+        </Space>
         <Space size="large" wrap>
           <Statistic title={t('led.screens')} value={layout?.screens.length ?? 0} valueStyle={{ fontSize: 18 }} />
           <Statistic title={t('led.weight')} value={Math.round(totals.weightKg)} suffix="kg" valueStyle={{ fontSize: 18 }} />
@@ -141,11 +252,34 @@ export function LedStagePage() {
             {layout ? (
               <StageViewport
                 layout={layout}
+                props={sceneProps}
                 carriers={rig}
                 carrierLabel={label}
                 selectedId={selectedId}
                 onSelect={setSelectedId}
                 onMove={(id, at) => setPlacements((p) => ({ ...p, [id]: { ...(p[id] ?? { x: 0, z: 0, rotationDeg: 0 }), ...at } }))}
+                onMoveProp={moveProp}
+                room={room}
+                roomPlan={
+                  planTexture && venue
+                    ? {
+                        texture: planTexture.texture,
+                        widthM: planTexture.widthM,
+                        depthM: planTexture.depthM,
+                        originXM: venue.planOriginXM,
+                        originZM: venue.planOriginZM,
+                        rotationDeg: venue.planRotationDeg,
+                      }
+                    : null
+                }
+                onDropAt={(at) => {
+                  // Whatever was picked up - dragged from the list or armed with the crosshair - lands here.
+                  if (armedId) {
+                    moveProp(armedId, at);
+                    setSelectedId(armedId);
+                    setArmedId(null);
+                  }
+                }}
                 preset={preset}
                 presetKey={presetKey}
                 view={view}
@@ -174,7 +308,7 @@ export function LedStagePage() {
         </Col>
 
         <Col xs={24} xl={7}>
-          <Card size="small" title={t('led.stage.settings')} loading={stored.isLoading}>
+          <Card size="small" title={t('led.stage.settings')} loading={loadingSettings}>
             {settings && (
               <Space direction="vertical" size={10} style={{ width: '100%' }}>
                 <Segmented
@@ -233,6 +367,53 @@ export function LedStagePage() {
               </Space>
             )}
           </Card>
+
+          <div style={{ marginTop: 12 }}>
+            <VenueCard projectId={job.projectId} rigHeightM={rigHeightM} />
+          </div>
+
+          <div style={{ marginTop: 12 }}>
+            <RiggingCard
+              flownScreenKg={totals.weightKg}
+              flown={settings?.mount === 'Flown'}
+              props={sceneProps}
+              lines={job.lines}
+              equipmentById={equipmentById}
+            />
+          </div>
+
+          <div style={{ marginTop: 12 }}>
+            <StagePropsPanel
+              props={sceneProps}
+              placements={propPlacements}
+              selectedId={selectedId}
+              armedId={armedId}
+              onArm={setArmedId}
+              onSelect={setSelectedId}
+              onFlown={(id, flown) =>
+                setPropPlacements((p) => {
+                  const current = p[id] ?? { x: sceneProps.find((x) => x.id === id)?.x ?? 0, z: sceneProps.find((x) => x.id === id)?.z ?? 0, rotationDeg: 0 };
+                  return { ...p, [id]: { ...current, flown } };
+                })
+              }
+              onRotate={(id, degrees) =>
+                setPropPlacements((p) => {
+                  const current = p[id] ?? { x: sceneProps.find((x) => x.id === id)?.x ?? 0, z: sceneProps.find((x) => x.id === id)?.z ?? 0, rotationDeg: 0 };
+                  return { ...p, [id]: { ...current, rotationDeg: (current.rotationDeg + degrees) % 360 } };
+                })
+              }
+              onReset={(id) =>
+                setPropPlacements((p) => {
+                  const next = { ...p };
+                  delete next[id];
+                  return next;
+                })
+              }
+              onPlaceAt={placeProp}
+              onMirror={mirrorProp}
+              onSpread={spreadTrade}
+            />
+          </div>
 
           <Card size="small" title={t('led.stage.view')} style={{ marginTop: 12 }}>
             <Space direction="vertical">

@@ -1,4 +1,4 @@
-using StageTrack.Account;
+﻿using StageTrack.Account;
 using StageTrack.Companies;
 using StageTrack.Customers;
 using StageTrack.Inventory;
@@ -22,7 +22,7 @@ internal static class ObjectMapping
 
     public static EquipmentFolderDto ToDto(this EquipmentFolder f) => new()
     {
-        Id = f.Id, Name = f.Name, ParentId = f.ParentId, SortOrder = f.SortOrder
+        Id = f.Id, Name = f.Name, ParentId = f.ParentId, SortOrder = f.SortOrder, Discipline = f.Discipline
     };
 
     /// <param name="showPrice">False hides the rental price (users without the price permission).</param>
@@ -47,6 +47,7 @@ internal static class ObjectMapping
         dto.WidthCm = e.WidthCm;
         dto.HeightCm = e.HeightCm;
         dto.PowerW = e.PowerW;
+        dto.CapacityKg = e.CapacityKg;
         dto.ShowInQuotes = e.ShowInQuotes;
         dto.PurchaseDate = e.PurchaseDate;
         dto.WarrantyEndDate = e.WarrantyEndDate;

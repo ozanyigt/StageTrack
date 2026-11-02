@@ -137,6 +137,18 @@ public class SitePlanAppService(
 
     public Task<SitePlanDto> RemoveZoneAsync(Guid id, Guid zoneId) => MutateAsync(id, plan => plan.RemoveZone(zoneId));
 
+    public Task<SitePlanDto> SetVenueAsync(Guid id, SetSiteVenueInput input) =>
+        MutateAsync(id, plan => plan.SetVenue(input.WidthM, input.DepthM, input.ClearHeightM, input.StageOffsetXM, input.BehindStageM, input.RakeDeg));
+
+    public Task<SitePlanDto> SetVenuePlanAsync(Guid id, SetSiteVenuePlanInput input) =>
+        MutateAsync(id, plan => plan.VenueOrThrow()
+            .SetPlan(input.PlanAttachmentId, input.PlanMetresPerPixel, input.PlanOriginXM, input.PlanOriginZM, input.PlanRotationDeg));
+
+    public Task<SitePlanDto> SetVenueOnMapAsync(Guid id, SetSiteVenueMapInput input) =>
+        MutateAsync(id, plan => plan.VenueOrThrow().SetOnMap(input.OriginLat, input.OriginLng, input.MapRotationDeg));
+
+    public Task<SitePlanDto> RemoveVenueAsync(Guid id) => MutateAsync(id, plan => plan.RemoveVenue());
+
     private async Task<SitePlanDto> MutateAsync(Guid id, Action<SitePlan> change)
     {
         var plan = await planRepository.GetAsync(id);
@@ -170,13 +182,32 @@ public class SitePlanAppService(
             ProjectId = plan.ProjectId,
             ProjectNumber = project.Number,
             ProjectName = project.Name,
-            Venue = project.Venue,
+            VenueName = project.Venue,
             Name = plan.Name,
             CentreLat = plan.CentreLat,
             CentreLng = plan.CentreLng,
             Zoom = plan.Zoom,
             BaseLayer = plan.BaseLayer,
             NightMode = plan.NightMode,
+            Venue = plan.Venue is not { } venue
+                ? null
+                : new SiteVenueDto
+                {
+                    WidthM = venue.WidthM,
+                    DepthM = venue.DepthM,
+                    ClearHeightM = venue.ClearHeightM,
+                    StageOffsetXM = venue.StageOffsetXM,
+                    BehindStageM = venue.BehindStageM,
+                    RakeDeg = venue.RakeDeg,
+                    PlanAttachmentId = venue.PlanAttachmentId,
+                    PlanMetresPerPixel = venue.PlanMetresPerPixel,
+                    PlanOriginXM = venue.PlanOriginXM,
+                    PlanOriginZM = venue.PlanOriginZM,
+                    PlanRotationDeg = venue.PlanRotationDeg,
+                    OriginLat = venue.OriginLat,
+                    OriginLng = venue.OriginLng,
+                    MapRotationDeg = venue.MapRotationDeg
+                },
             Layers = layers,
             Items = plan.Items
                 .OrderBy(i => i.Id)

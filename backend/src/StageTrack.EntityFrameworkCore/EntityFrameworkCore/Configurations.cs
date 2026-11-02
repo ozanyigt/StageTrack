@@ -148,6 +148,7 @@ public class EquipmentFolderConfiguration : IEntityTypeConfiguration<EquipmentFo
     {
         b.Property(x => x.Name).HasMaxLength(EquipmentFolderConsts.MaxNameLength).IsRequired();
         b.HasIndex(x => new { x.CompanyId, x.ParentId });
+        b.HasIndex(x => new { x.CompanyId, x.Discipline });
     }
 }
 
@@ -170,6 +171,7 @@ public class EquipmentConfiguration : IEntityTypeConfiguration<Equipment>
         b.Property(x => x.WidthCm).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.HeightCm).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.PowerW).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.CapacityKg).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.CurrentA).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.CountryOfOrigin).HasMaxLength(EquipmentDetailConsts.MaxCountryLength);
         b.Property(x => x.InspectionDescription).HasMaxLength(EquipmentDetailConsts.MaxInspectionDescriptionLength);

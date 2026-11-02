@@ -1,4 +1,4 @@
-using StageTrack.Authorization;
+﻿using StageTrack.Authorization;
 using StageTrack.Collaboration;
 using StageTrack.Common;
 using StageTrack.Dtos;
@@ -18,10 +18,13 @@ public class EquipmentFolderAppService(
     public async Task<List<EquipmentFolderDto>> GetListAsync()
     {
         var counts = await folderRepository.GetEquipmentCountsAsync();
-        return (await folderRepository.GetListAsync()).Select(f =>
+        var folders = await folderRepository.GetListAsync();
+        var byId = folders.ToDictionary(f => f.Id);
+        return folders.Select(f =>
         {
             var dto = f.ToDto();
             dto.EquipmentCount = counts.GetValueOrDefault(f.Id);
+            dto.EffectiveDiscipline = EquipmentDisciplines.Of(byId, f.Id);
             return dto;
         }).ToList();
     }
@@ -29,6 +32,7 @@ public class EquipmentFolderAppService(
     public async Task<EquipmentFolderDto> CreateAsync(CreateUpdateEquipmentFolderDto input)
     {
         var folder = await folderManager.CreateAsync(input.Name, input.ParentId);
+        folder.SetDiscipline(input.Discipline);
         await folderRepository.InsertAsync(folder);
         return folder.ToDto();
     }
@@ -37,6 +41,7 @@ public class EquipmentFolderAppService(
     {
         var folder = await folderRepository.GetAsync(id);
         folder.Rename(input.Name.Trim());
+        folder.SetDiscipline(input.Discipline);
         await folderManager.MoveAsync(folder, input.ParentId);
         return folder.ToDto();
     }
@@ -76,6 +81,13 @@ public class EquipmentAppService(
                 ? null
                 : input.IncludeSubfolders ? await folderManager.GetSubtreeIdsAsync(input.FolderId.Value) : [input.FolderId.Value]
         };
+
+        // A trade narrows the list to its folders; with a folder picked as well, the two meet.
+        if (input.Discipline is { } discipline)
+        {
+            var ofTrade = EquipmentDisciplines.FoldersOf(await folderRepository.GetListAsync(), discipline);
+            filter.FolderIds = filter.FolderIds is null ? ofTrade : [.. filter.FolderIds.Where(ofTrade.Contains)];
+        }
 
         var total = await equipmentRepository.GetCountAsync(filter);
         var items = await equipmentRepository.GetPagedListAsync(filter, input.Sorting, input.SkipCount, input.MaxResultCount);
@@ -297,6 +309,7 @@ public class EquipmentAppService(
     private async Task ApplyAsync(Equipment equipment, CreateUpdateEquipmentDto input)
     {
         equipment.Update(input.Name.Trim(), input.Brand, input.Model, input.FolderId, input.Type, input.CountryOfOrigin, input.Notes);
+        equipment.SetCapacity(input.CapacityKg);
         equipment.UpdatePhysical(input.LengthCm, input.WidthCm, input.HeightCm, input.WeightKg, input.VolumeM3, input.PowerW,
             input.CurrentA, input.PackedPer);
         equipment.SetInspection(input.InspectionIntervalMonths, input.InspectionDescription);

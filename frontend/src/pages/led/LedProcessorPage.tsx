@@ -11,8 +11,12 @@ import { useLedJob } from './useLedJob';
  * Processor and extender choice. The server works out every combination that can drive a screen; this is where
  * the user picks one per screen, and the job total follows that pick — which is also what the transfer to a job
  * plans, so what is chosen here is what gets reserved and quoted.
+ *
+ * It sits inside the LED design screen rather than on a page of its own: picking a processor is part of
+ * designing the wall, and a wall that cannot be driven is something the designer needs to see while changing it,
+ * not on a screen they might never open.
  */
-export function LedProcessorPage() {
+export function LedProcessorPage({ hideTitle = false }: { hideTitle?: boolean } = {}) {
   const { t } = useTranslation();
   const { token } = theme.useToken();
   const { job, walls, nameOf, evaluation, update } = useLedJob();
@@ -34,7 +38,7 @@ export function LedProcessorPage() {
   if (job.screens.length === 0) {
     return (
       <>
-        <Typography.Title level={3} style={{ marginTop: 0 }}>{t('led.processorTitle')}</Typography.Title>
+        {!hideTitle && <Typography.Title level={3} style={{ marginTop: 0 }}>{t('led.processorTitle')}</Typography.Title>}
         <Card><Empty description={t('led.noScreensForProcessor')} /></Card>
       </>
     );

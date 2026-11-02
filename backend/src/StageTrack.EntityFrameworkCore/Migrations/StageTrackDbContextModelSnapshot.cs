@@ -498,6 +498,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
+                    b.Property<decimal?>("CapacityKg")
+                        .HasColumnType("decimal(12,3)");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -642,6 +645,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("Discipline")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -663,6 +669,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId", "Discipline");
 
                     b.HasIndex("CompanyId", "ParentId");
 
@@ -2573,6 +2581,63 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.OwnsOne("StageTrack.Sites.SiteVenue", "Venue", b1 =>
+                        {
+                            b1.Property<Guid>("SitePlanId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<double>("BehindStageM")
+                                .HasColumnType("float");
+
+                            b1.Property<double>("ClearHeightM")
+                                .HasColumnType("float");
+
+                            b1.Property<double>("DepthM")
+                                .HasColumnType("float");
+
+                            b1.Property<double>("MapRotationDeg")
+                                .HasColumnType("float");
+
+                            b1.Property<double?>("OriginLat")
+                                .HasColumnType("float");
+
+                            b1.Property<double?>("OriginLng")
+                                .HasColumnType("float");
+
+                            b1.Property<Guid?>("PlanAttachmentId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<double?>("PlanMetresPerPixel")
+                                .HasColumnType("float");
+
+                            b1.Property<double>("PlanOriginXM")
+                                .HasColumnType("float");
+
+                            b1.Property<double>("PlanOriginZM")
+                                .HasColumnType("float");
+
+                            b1.Property<double>("PlanRotationDeg")
+                                .HasColumnType("float");
+
+                            b1.Property<double>("RakeDeg")
+                                .HasColumnType("float");
+
+                            b1.Property<double>("StageOffsetXM")
+                                .HasColumnType("float");
+
+                            b1.Property<double>("WidthM")
+                                .HasColumnType("float");
+
+                            b1.HasKey("SitePlanId");
+
+                            b1.ToTable("SitePlans", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("SitePlanId");
+                        });
+
+                    b.Navigation("Venue");
                 });
 
             modelBuilder.Entity("StageTrack.Sites.SitePlanItem", b =>

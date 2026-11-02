@@ -1,4 +1,4 @@
-using StageTrack.Entities;
+﻿using StageTrack.Entities;
 
 namespace StageTrack.Inventory;
 
@@ -28,6 +28,12 @@ public class Equipment : CompanyAggregateRoot
     public decimal? HeightCm { get; private set; }
     public decimal? WeightKg { get; private set; }
     public decimal? VolumeM3 { get; private set; }
+    /// <summary>
+    /// What it can carry, kilograms - a truss section's point load, a hoist's rating. The number the venue's
+    /// rigging officer asks for, and the one that decides whether a hang is signed off or refused.
+    /// </summary>
+    public decimal? CapacityKg { get; private set; }
+
     public decimal? PowerW { get; private set; }
     public decimal? CurrentA { get; private set; }
 
@@ -95,6 +101,8 @@ public class Equipment : CompanyAggregateRoot
         CurrentA = currentA;
         PackedPer = Math.Max(1, packedPer);
     }
+
+    public void SetCapacity(decimal? capacityKg) => CapacityKg = capacityKg is > 0 ? capacityKg : null;
 
     public void SetInspection(int? intervalMonths, string? description)
     {

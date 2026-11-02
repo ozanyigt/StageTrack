@@ -6,6 +6,9 @@ import { cameraPosition, lerpView, orbit, pan, presetView, zoom, type CameraPres
 import type { CarrierLabel, CarrierModel } from "../core/stage3d/carriers";
 import { jointMarks, snapPlacement, type SceneLayout, type ScreenPlacement } from "../core/stage3d/scene";
 import { buildCarriers, buildDimensions, buildFloorText, buildPodium, buildScreens, disposeGroup, lines, screenLabelPoint } from "./sceneObjects";
+import { buildProps } from "../../draft/propObjects";
+import type { StageProp } from "../../draft/stageProps";
+import { buildRoom, type RoomBox } from "../../draft/venueObjects";
 
 /**
  * The 3D view of 3D Sahne (three.js, loaded with this page only). Drag: turn, wheel: zoom, Shift + drag: pan, click a
@@ -24,6 +27,16 @@ export interface StageView {
 
 export interface StageViewportProps {
   layout: SceneLayout;
+  /** The other trades' groups standing on the same floor (draft/stageProps.ts); empty for a LED-only job. */
+  props?: StageProp[];
+  /** A group dragged on the floor, or dropped onto the scene from the list beside it. */
+  onMoveProp?: (id: string, at: { x: number; z: number }) => void;
+  /** Something dropped from the list at this floor point. */
+  onDropAt?: (at: { x: number; z: number }) => void;
+  /** The room the job is built in (draft/venueObjects.ts); absent outdoors, where there is nothing to clear. */
+  room?: RoomBox | null;
+  /** The venue's own layout drawing, already scaled, laid on the floor. */
+  roomPlan?: { texture: THREE.Texture; widthM: number; depthM: number; originXM: number; originZM: number; rotationDeg: number } | null;
   /** The carriers (lib/stage3d/carriers.ts) and their label. */
   carriers: CarrierModel[];
   carrierLabel: CarrierLabel | null;
@@ -59,6 +72,10 @@ interface Scene3D {
   floorText: THREE.Group;
   /** The snapping lines while a screen is dragged. */
   guides: THREE.Group;
+  /** The other trades' groups. */
+  props: THREE.Group;
+  /** The room: floor, walls, ceiling grid and the venue's drawing. */
+  room: THREE.Group;
 }
 
 /** A label written over the picture at a 3D point (follows the camera). */
@@ -72,7 +89,7 @@ interface Label {
   highlighted?: boolean;
 }
 
-export default function StageViewport({ layout, carriers, carrierLabel, selectedId, onSelect, onMove, preset, presetKey, view }: StageViewportProps) {
+export default function StageViewport({ layout, props = [], carriers, carrierLabel, selectedId, onSelect, onMove, onMoveProp, onDropAt, room = null, roomPlan = null, preset, presetKey, view }: StageViewportProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language === "en" ? "en" : "tr";
   const hostRef = useRef<HTMLDivElement>(null);
@@ -205,7 +222,7 @@ export default function StageViewport({ layout, carriers, carrierLabel, selected
     scene.add(floor);
     const grid = new THREE.GridHelper(200, 200, 0x3f3f46, 0x232326);
     scene.add(grid);
-    const groups = { screens: new THREE.Group(), podium: new THREE.Group(), rig: new THREE.Group(), dimensions: new THREE.Group(), floorText: new THREE.Group(), guides: new THREE.Group() };
+    const groups = { screens: new THREE.Group(), props: new THREE.Group(), room: new THREE.Group(), podium: new THREE.Group(), rig: new THREE.Group(), dimensions: new THREE.Group(), floorText: new THREE.Group(), guides: new THREE.Group() };
     // Measurements over everything else (they are drawn without depth test).
     groups.dimensions.renderOrder = 10;
     for (const g of Object.values(groups)) scene.add(g);
@@ -274,6 +291,24 @@ export default function StageViewport({ layout, carriers, carrierLabel, selected
   useEffect(() => {
     const s = sceneRef.current;
     if (!s) return;
+    disposeGroup(s.props);
+    s.props.add(buildProps(props, selectedId));
+    requestDraw();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props, selectedId]);
+
+  useEffect(() => {
+    const s = sceneRef.current;
+    if (!s) return;
+    disposeGroup(s.room);
+    if (room) s.room.add(buildRoom(room, roomPlan?.texture ?? null, roomPlan ?? null));
+    requestDraw();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, roomPlan]);
+
+  useEffect(() => {
+    const s = sceneRef.current;
+    if (!s) return;
     s.grid.visible = view.showGrid;
     s.podium.visible = view.showPodium;
     s.rig.visible = view.showRig;
@@ -314,6 +349,8 @@ export default function StageViewport({ layout, carriers, carrierLabel, selected
   // turns the view, Shift + drag pans, a click deselects. The wheel zooms.
   const layoutRef = useRef(layout);
   layoutRef.current = layout;
+  const propsRef = useRef(props);
+  propsRef.current = props;
   const drag = useRef<{
     id: number;
     x: number;
@@ -323,14 +360,18 @@ export default function StageViewport({ layout, carriers, carrierLabel, selected
     moved: boolean;
     /** Moving a screen: which, the floor height grabbed at, and how far its place is from the point grabbed. */
     screen: { id: string; planeY: number; dx: number; dz: number } | null;
+    /** Moving a group of another trade; the same idea, without the screen-to-screen snapping. */
+    prop: { id: string; planeY: number; dx: number; dz: number } | null;
   } | null>(null);
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (e.button !== 0 || failed) return;
     e.currentTarget.setPointerCapture?.(e.pointerId);
     const hit = pickHit(e.clientX, e.clientY);
-    const placed = hit && layoutRef.current.screens.find((p) => p.screen.id === hit.id);
+    const placed = hit?.kind === "screen" && layoutRef.current.screens.find((p) => p.screen.id === hit.id);
     const screen = hit && placed ? { id: hit.id, planeY: hit.point.y, dx: placed.x - hit.point.x, dz: placed.z - hit.point.z } : null;
-    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY, moved: false, screen };
+    const propped = hit?.kind === "prop" ? propsRef.current.find((p) => p.id === hit.id) : undefined;
+    const prop = hit && propped ? { id: hit.id, planeY: hit.point.y, dx: propped.x - hit.point.x, dz: propped.z - hit.point.z } : null;
+    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY, moved: false, screen, prop };
   }
   function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
     const d = drag.current;
@@ -344,6 +385,17 @@ export default function StageViewport({ layout, carriers, carrierLabel, selected
     d.moved = true;
     userMoved.current = true;
     animRef.current = null;
+    if (d.prop) {
+      const floor = floorPoint(e.clientX, e.clientY, d.prop.planeY);
+      if (!floor) return;
+      const host = hostRef.current!;
+      const metresPerPixel = (2 * v.distance * Math.tan(((FOV / 2) * Math.PI) / 180)) / Math.max(1, host.clientHeight);
+      const snapped = snapProp(d.prop.id, floor.x + d.prop.dx, floor.z + d.prop.dz, SNAP_PX * metresPerPixel, e.shiftKey);
+      const round = (n: number) => Math.round(n * 100) / 100;
+      onMoveProp?.(d.prop.id, { x: round(snapped.x), z: round(snapped.z) });
+      showGuides(snapped.guideX, snapped.guideZ);
+      return;
+    }
     if (d.screen) {
       const floor = floorPoint(e.clientX, e.clientY, d.screen.planeY);
       const placed = layoutRef.current.screens.find((p) => p.screen.id === d.screen!.id);
@@ -364,9 +416,34 @@ export default function StageViewport({ layout, carriers, carrierLabel, selected
     if (!d || d.id !== e.pointerId) return;
     drag.current = null;
     showGuides(null, null);
-    if (d.screen && d.moved) onSelect(d.screen.id);
-    else if (!d.moved && e.type === "pointerup") onSelect(d.screen?.id ?? null);
+    const moving = d.screen ?? d.prop;
+    if (moving && d.moved) onSelect(moving.id);
+    else if (!d.moved && e.type === "pointerup") onSelect(moving?.id ?? null);
   }
+  /**
+   * A dragged group lines itself up with what is already there: the centre line, the podium's edges, and the
+   * other groups' and screens' own x and z. Holding Shift turns it off, which is the convention everywhere else
+   * in this viewport.
+   */
+  function snapProp(id: string, x: number, z: number, tolerance: number, off: boolean) {
+    if (off) return { x, z, guideX: null as number | null, guideZ: null as number | null };
+    const layout = layoutRef.current;
+    const xs = [0, ...propsRef.current.filter((p) => p.id !== id).map((p) => p.x), ...layout.screens.map((p) => p.x)];
+    const zs = [layout.podium.front, layout.podium.back, ...propsRef.current.filter((p) => p.id !== id).map((p) => p.z), ...layout.screens.map((p) => p.z)];
+    const nearest = (value: number, candidates: number[]) => {
+      let best: number | null = null;
+      for (const candidate of candidates) {
+        if (Math.abs(candidate - value) <= tolerance && (best === null || Math.abs(candidate - value) < Math.abs(best - value))) {
+          best = candidate;
+        }
+      }
+      return best;
+    };
+    const guideX = nearest(x, xs);
+    const guideZ = nearest(z, zs);
+    return { x: guideX ?? x, z: guideZ ?? z, guideX, guideZ };
+  }
+
   /** The snapping lines across the stage while a screen is dragged (none: hidden). */
   function showGuides(x: number | null, z: number | null) {
     const s = sceneRef.current;
@@ -396,18 +473,23 @@ export default function StageViewport({ layout, carriers, carrierLabel, selected
     ray.setFromCamera(new THREE.Vector2(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1), s.camera);
     return ray;
   }
-  /** The screen under the pointer and the point hit on it. */
-  function pickHit(clientX: number, clientY: number): { id: string; point: THREE.Vector3 } | null {
+  /** What is under the pointer - a screen or a group of another trade - and the point hit on it. */
+  function pickHit(clientX: number, clientY: number): { id: string; kind: "screen" | "prop"; point: THREE.Vector3 } | null {
     const s = sceneRef.current;
     const ray = rayAt(clientX, clientY);
     if (!s || !ray) return null;
     const meshes: THREE.Object3D[] = [];
-    s.screens.traverse((o) => {
-      if (o instanceof THREE.InstancedMesh) meshes.push(o);
-    });
+    for (const root of [s.screens, s.props]) {
+      root.traverse((o) => {
+        if (o instanceof THREE.InstancedMesh) meshes.push(o);
+      });
+    }
     const hit = ray.intersectObjects(meshes, false)[0];
-    const id = hit?.object.userData.screenId as string | undefined;
-    return id && hit ? { id, point: hit.point.clone() } : null;
+    if (!hit) return null;
+    const screenId = hit.object.userData.screenId as string | undefined;
+    if (screenId) return { id: screenId, kind: "screen", point: hit.point.clone() };
+    const propId = hit.object.userData.propId as string | undefined;
+    return propId ? { id: propId, kind: "prop", point: hit.point.clone() } : null;
   }
   useEffect(() => {
     const host = hostRef.current;
@@ -436,6 +518,17 @@ export default function StageViewport({ layout, carriers, carrierLabel, selected
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      onDragOver={onDropAt ? (e) => e.preventDefault() : undefined}
+      onDrop={
+        onDropAt
+          ? (e) => {
+              // Dropped from the list beside the scene: it lands where it was let go, on the deck.
+              e.preventDefault();
+              const floor = floorPoint(e.clientX, e.clientY, layoutRef.current.podium.height);
+              if (floor) onDropAt({ x: Math.round(floor.x * 100) / 100, z: Math.round(floor.z * 100) / 100 });
+            }
+          : undefined
+      }
     >
       {failed && <p className="absolute inset-0 flex items-center justify-center text-sm text-neutral-400 p-6 text-center">{t("stage3d.noWebgl")}</p>}
       <div ref={labelsRef} className="absolute inset-0 pointer-events-none" aria-hidden>

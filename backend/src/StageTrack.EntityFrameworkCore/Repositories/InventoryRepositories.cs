@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using StageTrack.EntityFrameworkCore;
 using StageTrack.Inventory;
 
@@ -100,7 +100,8 @@ public class EquipmentRepository(StageTrackDbContext dbContext) : EfRepository<E
                                      (e.Brand != null && e.Brand.Contains(text)) || (e.Model != null && e.Model.Contains(text)));
         }
 
-        if (filter.FolderIds is { Count: > 0 })
+        // null = every folder; a list = these and no others, empty included - a trade with no folders owns nothing.
+        if (filter.FolderIds is not null)
         {
             var folderIds = filter.FolderIds.ToList();
             query = query.Where(e => e.FolderId != null && folderIds.Contains(e.FolderId.Value));

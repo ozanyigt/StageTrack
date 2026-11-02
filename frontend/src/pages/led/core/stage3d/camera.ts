@@ -18,8 +18,12 @@ export interface OrbitView {
   polar: number;
 }
 
-export type CameraPreset = "perspective" | "front" | "top" | "side";
-export const CAMERA_PRESETS: readonly CameraPreset[] = ["perspective", "front", "top", "side"];
+/** "audience" is the one view a client recognises: standing in the crowd, eyes level, looking at the stage. */
+export type CameraPreset = "perspective" | "front" | "top" | "side" | "audience";
+export const CAMERA_PRESETS: readonly CameraPreset[] = ["perspective", "front", "top", "side", "audience"];
+
+/** Where a pair of eyes is, metres off the floor. */
+export const EYE_HEIGHT_M = 1.6;
 
 /** Not quite straight above / level: the camera's "up" stays defined. */
 const POLAR_MIN = 0.01;
@@ -81,8 +85,19 @@ export function presetView(preset: CameraPreset, bounds: SceneBounds, fovDeg: nu
     front: [0, POLAR_MAX],
     top: [0, POLAR_MIN],
     side: [Math.PI / 2, POLAR_MAX],
+    audience: [0, POLAR_MAX],
   };
   const [azimuth, polar] = angles[preset];
+  if (preset === "audience") {
+    // Standing in the crowd rather than floating over it: the eye and what it looks at are both at eye height,
+    // so the camera is level and the stage is seen the way the people paying for it will see it.
+    return {
+      target: { x: bounds.center.x, y: EYE_HEIGHT_M, z: bounds.center.z },
+      distance: clamp(bounds.radius * 1.6, DISTANCE_MIN, DISTANCE_MAX),
+      azimuth,
+      polar,
+    };
+  }
   return { target: { ...bounds.center }, distance, azimuth, polar };
 }
 

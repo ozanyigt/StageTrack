@@ -14,6 +14,7 @@ import { useLabelGenerator } from '../../components/LabelGenerator';
 import { useErrorToast } from '../../utils/errors';
 import { useFormat } from '../../utils/format';
 import { EquipmentInspectionTab, EquipmentRepairsTab } from './EquipmentMaintenanceTabs';
+import { EquipmentLedTab } from './EquipmentLedTab';
 import { EquipmentPropertiesTab } from './EquipmentPropertiesTab';
 import { EquipmentRelationsTab, EquipmentSuppliersTab } from './EquipmentRelationsTab';
 import { UnitGrid } from './UnitGrid';
@@ -82,6 +83,8 @@ export function EquipmentDetailPage() {
       children: <EquipmentRelationsTab equipment={e} kind="Alternative" />,
     },
     { key: 'suppliers', label: `${t('equipmentDetail.tabs.suppliers')} (${e.suppliers.length})`, children: <EquipmentSuppliersTab equipment={e} /> },
+    // Only for a firm that bought the LED module: the server strips the permission otherwise and the tab goes with it.
+    ...(can(Permissions.Led) ? [{ key: 'led', label: t('equipmentDetail.tabs.led'), children: <EquipmentLedTab equipment={e} /> }] : []),
     { key: 'inspection', label: t('equipmentDetail.tabs.inspection'), children: <EquipmentInspectionTab equipment={e} /> },
     ...(can(Permissions.Maintenance) ? [{ key: 'repairs', label: t('equipmentDetail.tabs.repairs'), children: <EquipmentRepairsTab equipment={e} /> }] : []),
     { key: 'history', label: t('equipmentDetail.tabs.history'), children: <HistoryTab equipmentId={e.id} /> },
