@@ -1938,7 +1938,9 @@
     "sheetX": "Sayfa X",
     "sheetZ": "Sayfa Z",
     "sheetTurn": "Sayfa açısı",
-    "centreSheet": "Sayfayı sahneye ortala"
+    "centreSheet": "Sayfayı sahneye ortala",
+    "fullSize": "Gerçek boyut",
+    "fitImage": "Ekrana sığdır"
   },
   "rigging": {
     "title": "Rigging yükü",

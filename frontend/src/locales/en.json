@@ -1938,7 +1938,9 @@
     "sheetX": "Sheet X",
     "sheetZ": "Sheet Z",
     "sheetTurn": "Sheet angle",
-    "centreSheet": "Centre the sheet on the stage"
+    "centreSheet": "Centre the sheet on the stage",
+    "fullSize": "Full size",
+    "fitImage": "Fit to view"
   },
   "rigging": {
     "title": "Rigging load",

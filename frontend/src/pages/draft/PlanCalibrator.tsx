@@ -26,6 +26,8 @@ export function PlanCalibrator({ open, projectId, imageUrl, onClose }: Props) {
   const imageRef = useRef<HTMLImageElement | null>(null);
   const [points, setPoints] = useState<Point[]>([]);
   const [metres, setMetres] = useState<number>(20);
+  /** Shown at its own pixel size: a dimension tick is three pixels wide once a big sheet is squeezed into a modal. */
+  const [full, setFull] = useState(false);
 
   useEffect(() => {
     if (open) setPoints([]);
@@ -84,6 +86,9 @@ export function PlanCalibrator({ open, projectId, imageUrl, onClose }: Props) {
         <Button size="small" onClick={() => setPoints([])} disabled={points.length === 0}>
           {t('venue.clearPoints')}
         </Button>
+        <Button size="small" type={full ? 'primary' : 'default'} onClick={() => setFull(!full)}>
+          {full ? t('venue.fitImage') : t('venue.fullSize')}
+        </Button>
         <Typography.Text type="secondary">
           {points.length < 2
             ? t('venue.pointsLeft', { count: 2 - points.length })
@@ -91,15 +96,15 @@ export function PlanCalibrator({ open, projectId, imageUrl, onClose }: Props) {
         </Typography.Text>
       </Flex>
 
-      <div style={{ position: 'relative', maxHeight: 520, overflow: 'auto', background: '#111' }}>
+      <div style={{ maxHeight: 520, overflow: 'auto', background: '#111' }}>
         {imageUrl ? (
-          <>
+          <div style={{ position: 'relative', width: full ? 'max-content' : '100%' }}>
             <img
               ref={imageRef}
               src={imageUrl}
               alt={t('venue.planImage')}
               onClick={onClick}
-              style={{ width: '100%', display: 'block', cursor: 'crosshair' }}
+              style={{ width: full ? 'auto' : '100%', maxWidth: full ? 'none' : '100%', display: 'block', cursor: 'crosshair' }}
             />
             {points.map((point, index) => (
               <span
@@ -130,7 +135,7 @@ export function PlanCalibrator({ open, projectId, imageUrl, onClose }: Props) {
                 />
               </svg>
             )}
-          </>
+          </div>
         ) : (
           <Typography.Text type="secondary" style={{ display: 'block', padding: 24 }}>{t('venue.noPlanImage')}</Typography.Text>
         )}
