@@ -1933,7 +1933,12 @@
     "clickGround": "Click where the middle of the stage goes.",
     "facing": "Facing {{deg}}° (0 = the audience looks north)",
     "enter": "Step inside",
-    "enterHint": "The venue — click to step inside"
+    "enterHint": "The venue — click to step inside",
+    "sheetSize": "sheet {{w}} × {{d}} m",
+    "sheetX": "Sheet X",
+    "sheetZ": "Sheet Z",
+    "sheetTurn": "Sheet angle",
+    "centreSheet": "Centre the sheet on the stage"
   },
   "rigging": {
     "title": "Rigging load",

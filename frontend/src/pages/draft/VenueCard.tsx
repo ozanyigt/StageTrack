@@ -3,6 +3,7 @@ import { Alert, Button, Card, Col, Empty, Flex, InputNumber, Popconfirm, Row, Sp
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PlanCalibrator } from './PlanCalibrator';
+import { usePlanTexture } from './usePlanTexture';
 import { usePlanImage, useVenue } from './useVenue';
 
 interface Props {
@@ -20,8 +21,9 @@ const DEFAULT_VENUE = { widthM: 30, depthM: 40, clearHeightM: 9, stageOffsetXM: 
  */
 export function VenueCard({ projectId, rigHeightM }: Props) {
   const { t } = useTranslation();
-  const { venue, loading, setVenue, upload, remove } = useVenue(projectId);
+  const { venue, loading, setVenue, setPlanImage, upload, remove } = useVenue(projectId);
   const planUrl = usePlanImage(venue?.planAttachmentId);
+  const sheet = usePlanTexture(planUrl, venue?.planMetresPerPixel);
   const [calibrating, setCalibrating] = useState(false);
 
   if (!projectId) {
@@ -53,6 +55,19 @@ export function VenueCard({ projectId, rigHeightM }: Props) {
   );
 
   const tooLow = venue && venue.clearHeightM > 0 && rigHeightM > venue.clearHeightM;
+
+  /** Where the scaled sheet lies; the scale itself is not touched by moving it. */
+  const movePlan = (patch: { planOriginXM?: number; planOriginZM?: number; planRotationDeg?: number }) => {
+    if (!venue) return;
+    setPlanImage.mutate({
+      planAttachmentId: venue.planAttachmentId ?? null,
+      planMetresPerPixel: venue.planMetresPerPixel ?? null,
+      planOriginXM: venue.planOriginXM,
+      planOriginZM: venue.planOriginZM,
+      planRotationDeg: venue.planRotationDeg,
+      ...patch,
+    });
+  };
 
   return (
     <Card
@@ -118,9 +133,58 @@ export function VenueCard({ projectId, rigHeightM }: Props) {
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('venue.planHint')}</Typography.Text>
 
           {planUrl && venue.planMetresPerPixel && (
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              {t('venue.scaleIs', { value: (1 / venue.planMetresPerPixel).toFixed(1) })}
-            </Typography.Text>
+            <>
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                {t('venue.scaleIs', { value: (1 / venue.planMetresPerPixel).toFixed(1) })}
+                {sheet && ` · ${t('venue.sheetSize', { w: sheet.widthM.toFixed(1), d: sheet.depthM.toFixed(1) })}`}
+              </Typography.Text>
+
+              {/* A scaled sheet is the right size but not yet in the right place; this is where it is moved under
+                  the room. The stage is at x 0, z 0, so centring it is arithmetic the user should not have to do. */}
+              <Row gutter={[8, 8]}>
+                <Col xs={8}>
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('venue.sheetX')}</Typography.Text>
+                  <InputNumber
+                    size="small"
+                    style={{ width: '100%' }}
+                    step={0.5}
+                    addonAfter="m"
+                    value={venue.planOriginXM}
+                    onChange={(value) => value != null && movePlan({ planOriginXM: value })}
+                  />
+                </Col>
+                <Col xs={8}>
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('venue.sheetZ')}</Typography.Text>
+                  <InputNumber
+                    size="small"
+                    style={{ width: '100%' }}
+                    step={0.5}
+                    addonAfter="m"
+                    value={venue.planOriginZM}
+                    onChange={(value) => value != null && movePlan({ planOriginZM: value })}
+                  />
+                </Col>
+                <Col xs={8}>
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('venue.sheetTurn')}</Typography.Text>
+                  <InputNumber
+                    size="small"
+                    style={{ width: '100%' }}
+                    step={5}
+                    min={-360}
+                    max={360}
+                    addonAfter="°"
+                    value={venue.planRotationDeg}
+                    onChange={(value) => value != null && movePlan({ planRotationDeg: value })}
+                  />
+                </Col>
+              </Row>
+
+              {sheet && (
+                <Button size="small" onClick={() => movePlan({ planOriginXM: -sheet.widthM / 2, planOriginZM: -venue.behindStageM - 2 })}>
+                  {t('venue.centreSheet')}
+                </Button>
+              )}
+            </>
           )}
         </Space>
       )}

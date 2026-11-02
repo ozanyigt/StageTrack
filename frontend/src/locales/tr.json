@@ -1933,7 +1933,12 @@
     "clickGround": "Sahnenin ortasının geleceği yere tıklayın.",
     "facing": "Yön: {{deg}}° (0 = seyirci kuzeye bakar)",
     "enter": "İçeri gir",
-    "enterHint": "Mekân — tıklayınca içeri girilir"
+    "enterHint": "Mekân — tıklayınca içeri girilir",
+    "sheetSize": "sayfa {{w}} × {{d}} m",
+    "sheetX": "Sayfa X",
+    "sheetZ": "Sayfa Z",
+    "sheetTurn": "Sayfa açısı",
+    "centreSheet": "Sayfayı sahneye ortala"
   },
   "rigging": {
     "title": "Rigging yükü",
