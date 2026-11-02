@@ -83,7 +83,6 @@ export function AppLayout() {
     ...(crewOnly
       ? [{ key: '/projects', icon: <ProjectOutlined />, label: t('nav.myProjects') }]
       : [{ key: '/projects', icon: <ProjectOutlined />, label: t('nav.projects'), permission: Permissions.Projects }]),
-    { key: '/site-plan', icon: <EnvironmentOutlined />, label: t('nav.sitePlan'), permission: Permissions.Projects },
     { key: '/quotes', icon: <FileTextOutlined />, label: t('nav.quotes'), permission: Permissions.Quotes },
     {
       key: 'equipment',
@@ -145,7 +144,7 @@ export function AppLayout() {
 
   const path = location.pathname;
   const selected =
-    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive', '/site-plan',
+    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive',
       '/draft/design/led', '/draft/design/sound', '/draft/design/light', '/draft/design/truss', '/draft/design/scaff',
       '/draft/pixel-map', '/draft/simulation', '/draft/stage', '/draft/power', '/draft/plan', '/draft/stock', '/draft/logistics',
       '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
