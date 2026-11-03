@@ -29,6 +29,12 @@ public class Equipment : CompanyAggregateRoot
     public decimal? WeightKg { get; private set; }
     public decimal? VolumeM3 { get; private set; }
     /// <summary>
+    /// What the thing weighs with nothing in it, kilograms - a case, a rack, a skip. The loading plan wants the
+    /// full weight; the crew lifting an empty case before it is packed wants this one.
+    /// </summary>
+    public decimal? EmptyWeightKg { get; private set; }
+
+    /// <summary>
     /// What it can carry, kilograms - a truss section's point load, a hoist's rating. The number the venue's
     /// rigging officer asks for, and the one that decides whether a hang is signed off or refused.
     /// </summary>
@@ -103,6 +109,8 @@ public class Equipment : CompanyAggregateRoot
     }
 
     public void SetCapacity(decimal? capacityKg) => CapacityKg = capacityKg is > 0 ? capacityKg : null;
+
+    public void SetEmptyWeight(decimal? emptyWeightKg) => EmptyWeightKg = emptyWeightKg is > 0 ? emptyWeightKg : null;
 
     public void SetInspection(int? intervalMonths, string? description)
     {

@@ -64,6 +64,8 @@ public class EquipmentAppService(
     IAttachmentRepository attachmentRepository,
     EquipmentManager equipmentManager,
     EquipmentFolderManager folderManager,
+    EquipmentUnitManager unitManager,
+    LabelManager labelManager,
     AttachmentManager attachmentManager,
     AvailabilityManager availabilityManager,
     PriceVisibility prices,
@@ -250,7 +252,7 @@ public class EquipmentAppService(
             var created = equipment is null;
             if (equipment is null)
             {
-                equipment = await equipmentManager.CreateAsync(code, ImportRunner.Required(row.Name, "name"), EquipmentType.Physical, row.IsSerialized ?? true);
+                equipment = await equipmentManager.CreateAsync(code, ImportRunner.Required(row.Name, "name"), TypeOf(row, EquipmentType.Physical), row.IsSerialized ?? true);
                 await equipmentRepository.InsertAsync(equipment);
             }
             else if (row.IsSerialized.HasValue)
@@ -260,9 +262,15 @@ public class EquipmentAppService(
 
             var folderId = string.IsNullOrWhiteSpace(row.Folder) ? equipment.FolderId : await EnsureFolderPathAsync(folders, row.Folder);
             equipment.Update(string.IsNullOrWhiteSpace(row.Name) ? equipment.Name : row.Name.Trim(), row.Brand ?? equipment.Brand,
-                row.Model ?? equipment.Model, folderId, equipment.Type, equipment.CountryOfOrigin, row.Notes ?? equipment.Notes);
+                row.Model ?? equipment.Model, folderId, TypeOf(row, equipment.Type), equipment.CountryOfOrigin, row.Notes ?? equipment.Notes);
             equipment.UpdatePhysical(row.LengthCm ?? equipment.LengthCm, row.WidthCm ?? equipment.WidthCm, row.HeightCm ?? equipment.HeightCm,
-                row.WeightKg ?? equipment.WeightKg, equipment.VolumeM3, row.PowerW ?? equipment.PowerW, equipment.CurrentA, equipment.PackedPer);
+                row.WeightKg ?? equipment.WeightKg, equipment.VolumeM3, row.PowerW ?? equipment.PowerW, equipment.CurrentA,
+                row.PackedPer ?? equipment.PackedPer);
+            if (row.EmptyWeightKg.HasValue)
+            {
+                equipment.SetEmptyWeight(row.EmptyWeightKg.Value);
+            }
+
             if (row.StockQuantity.HasValue)
             {
                 equipment.SetStockQuantity(row.StockQuantity.Value);
@@ -274,8 +282,92 @@ public class EquipmentAppService(
             }
 
             await unitOfWork.SaveChangesAsync();
+            await ImportDeviceAsync(equipment, row);
             return created;
         });
+    }
+
+    /// <summary>
+    /// What the sheet calls this product, in our terms. Another system's vocabulary is read loosely - anything
+    /// that says sale is a sale, anything that says consumable is one - and whatever is not recognised is left
+    /// as it was, because a word nobody understands is not a reason to change a product's kind.
+    /// </summary>
+    private static EquipmentType TypeOf(EquipmentImportRow row, EquipmentType fallback)
+    {
+        var words = $"{row.SaleType} {row.Type}".ToLowerInvariant();
+        if (words.Contains("satı") || words.Contains("sale") || words.Contains("sell") || words.Contains("sales"))
+        {
+            return EquipmentType.Sale;
+        }
+
+        if (words.Contains("sarf") || words.Contains("consumable") || words.Contains("verbruik"))
+        {
+            return EquipmentType.Consumable;
+        }
+
+        if (words.Contains("kirala") || words.Contains("rental") || words.Contains("rent") || words.Contains("verhuur"))
+        {
+            return EquipmentType.Physical;
+        }
+
+        return fallback;
+    }
+
+    /// <summary>
+    /// A sheet exported per serial number carries one row per device. The product is made (or found) from the
+    /// row, and then the device on it: the serial as it was given, the internal reference numbered by us, and
+    /// any QR or RFID code the old system had already stuck on the case. A device already carrying that serial
+    /// is left alone rather than duplicated, which is what makes re-importing the same file safe.
+    ///
+    /// A quantity-tracked product has no devices, so its code goes on the product itself - which is exactly how
+    /// a label on a box of cables works here.
+    /// </summary>
+    private async Task ImportDeviceAsync(Equipment equipment, EquipmentImportRow row)
+    {
+        var serial = row.SerialNumber?.Trim();
+        var label = row.LabelCode?.Trim();
+        if (string.IsNullOrWhiteSpace(serial) && string.IsNullOrWhiteSpace(label))
+        {
+            return;
+        }
+
+        if (!equipment.IsSerialized)
+        {
+            await AttachLabelAsync(label, equipment.Id, null);
+            return;
+        }
+
+        EquipmentUnit? unit = null;
+        if (!string.IsNullOrWhiteSpace(serial))
+        {
+            unit = (await unitRepository.GetListByEquipmentAsync(equipment.Id, false))
+                .FirstOrDefault(u => string.Equals(u.SerialNumber?.Trim(), serial, StringComparison.CurrentCultureIgnoreCase));
+            if (unit is null)
+            {
+                unit = await unitManager.CreateAsync(equipment, null, serial, null);
+                await unitRepository.InsertAsync(unit);
+                await unitOfWork.SaveChangesAsync();
+            }
+        }
+
+        await AttachLabelAsync(label, unit is null ? equipment.Id : null, unit?.Id);
+    }
+
+    private async Task AttachLabelAsync(string? code, Guid? equipmentId, Guid? unitId)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return;
+        }
+
+        var existing = await labelManager.ResolveAsync(code);
+        if (existing is not null && (existing.Unit?.Id == unitId || existing.Equipment?.Id == equipmentId))
+        {
+            return;
+        }
+
+        await labelRepository.InsertAsync(await labelManager.AssignAsync(code, LabelType.RentmanQr, equipmentId, unitId));
+        await unitOfWork.SaveChangesAsync();
     }
 
     private async Task<Guid?> EnsureFolderPathAsync(List<EquipmentFolder> folders, string path)
@@ -310,6 +402,7 @@ public class EquipmentAppService(
     {
         equipment.Update(input.Name.Trim(), input.Brand, input.Model, input.FolderId, input.Type, input.CountryOfOrigin, input.Notes);
         equipment.SetCapacity(input.CapacityKg);
+        equipment.SetEmptyWeight(input.EmptyWeightKg);
         equipment.UpdatePhysical(input.LengthCm, input.WidthCm, input.HeightCm, input.WeightKg, input.VolumeM3, input.PowerW,
             input.CurrentA, input.PackedPer);
         equipment.SetInspection(input.InspectionIntervalMonths, input.InspectionDescription);

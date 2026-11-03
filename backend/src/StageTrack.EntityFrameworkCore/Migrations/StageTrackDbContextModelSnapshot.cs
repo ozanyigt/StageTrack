@@ -525,6 +525,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal?>("EmptyWeightKg")
+                        .HasColumnType("decimal(12,3)");
+
                     b.Property<Guid?>("FolderId")
                         .HasColumnType("uniqueidentifier");
 

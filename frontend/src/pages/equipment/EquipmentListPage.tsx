@@ -242,21 +242,34 @@ export function EquipmentListPage() {
       },
     });
 
+  /**
+   * The import sheet, in the order a Rentman equipment export has its columns, and answering to that export's
+   * own headers as well as ours - so the file a firm already has can be imported without renaming anything.
+   * A sheet exported per serial number carries one row per device: the row makes the product and then the
+   * device on it, with whatever QR or RFID code was already stuck on the case.
+   */
   const importFields: ImportField[] = [
-    { key: 'code', header: t('equipment.code'), required: true },
-    { key: 'name', header: t('equipment.name'), required: true },
-    { key: 'brand', header: t('equipment.brand') },
-    { key: 'model', header: t('equipment.model') },
-    { key: 'folder', header: t('equipment.importFolder') },
-    { key: 'isSerialized', header: t('equipment.isSerialized'), type: 'boolean' },
-    { key: 'stockQuantity', header: t('equipment.stockQuantity'), type: 'number' },
+    { key: 'code', header: t('equipment.code'), required: true, aliases: ['Code'] },
+    { key: 'name', header: t('equipment.name'), required: true, aliases: ['Serial number / Equipment / Name (in database)', 'Name (in database)', 'Equipment'] },
+    { key: 'brand', header: t('equipment.brand'), aliases: ['Brand'] },
+    { key: 'model', header: t('equipment.model'), aliases: ['Model'] },
+    { key: 'folder', header: t('equipment.importFolder'), aliases: ['Folder / Name', 'Folder'] },
+    { key: 'serialNumber', header: t('units.serialNumber'), aliases: ['Serial number / Manufacturer serial number', 'Manufacturer serial number'] },
+    { key: 'stockQuantity', header: t('equipment.stockQuantity'), type: 'number', aliases: ['Current quantity all locations', 'Current quantity'] },
+    { key: 'notes', header: t('common.notes'), aliases: ['Internal remark', 'Remark'] },
+    { key: 'isSerialized', header: t('equipment.isSerialized'), type: 'boolean', aliases: ['Stock calculation method'] },
+    { key: 'weightKg', header: t('equipment.weightKg'), type: 'number', aliases: ['Weight'] },
+    { key: 'heightCm', header: t('equipment.heightCm'), type: 'number', aliases: ['Height'] },
+    { key: 'widthCm', header: t('equipment.widthCm'), type: 'number', aliases: ['Width'] },
+    { key: 'lengthCm', header: t('equipment.lengthCm'), type: 'number', aliases: ['Length'] },
+    { key: 'powerW', header: t('equipment.powerW'), type: 'number', aliases: ['Power'] },
+    { key: 'type', header: t('equipment.type'), aliases: ['Type of equipment'] },
+    { key: 'saleType', header: t('equipment.rentalOrSale'), aliases: ['Rental/sales', 'Rental / sales'] },
+    { key: 'packedPer', header: t('equipment.packedPer'), type: 'number', aliases: ['Packed per'] },
+    { key: 'emptyWeightKg', header: t('equipment.emptyWeightKg'), type: 'number', aliases: ['Empty weight'] },
+    { key: 'labelCode', header: t('equipment.importLabelCode'), aliases: ['QR codes / RFID serial numbers', 'QR codes', 'RFID serial numbers'] },
+    // Not in that export, but the only way to bring prices in at all; left last so the sheet still matches.
     ...(showPrice ? [{ key: 'rentalPrice', header: t('equipment.dailyPrice'), type: 'number' as const }] : []),
-    { key: 'weightKg', header: t('equipment.weightKg'), type: 'number' },
-    { key: 'lengthCm', header: t('equipment.lengthCm'), type: 'number' },
-    { key: 'widthCm', header: t('equipment.widthCm'), type: 'number' },
-    { key: 'heightCm', header: t('equipment.heightCm'), type: 'number' },
-    { key: 'powerW', header: t('equipment.powerW'), type: 'number' },
-    { key: 'notes', header: t('common.notes') },
   ];
 
   const columnChooser = (

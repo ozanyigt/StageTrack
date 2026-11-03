@@ -36,6 +36,11 @@ export interface ImportField {
   key: string;
   /** Translated header written into the template and matched when reading. */
   header: string;
+  /**
+   * Other headers this column answers to - the wording another system exports. A firm leaving Rentman should be
+   * able to import the file it already has rather than rename nineteen columns by hand.
+   */
+  aliases?: string[];
   type?: 'string' | 'number' | 'boolean' | 'date';
   required?: boolean;
 }
@@ -50,7 +55,7 @@ export async function downloadImportTemplate(fileName: string, fields: ImportFie
  * required marker) or by the API key, so templates downloaded in any UI language can be imported.
  * Each row gets its Excel row number in `row`.
  */
-export async function readExcelRows(file: File, fields: ImportField[], allHeaders: string[][] = []): Promise<Record<string, unknown>[]> {
+export async function readExcelRows(file: File, fields: ImportField[]): Promise<Record<string, unknown>[]> {
   const { default: ExcelJS } = await import('exceljs');
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(await file.arrayBuffer());
@@ -62,7 +67,7 @@ export async function readExcelRows(file: File, fields: ImportField[], allHeader
   sheet.getRow(1).eachCell((cell, col) => {
     const text = normalize(cellText(cell.value));
     const field = fields.find(
-      (f, i) => normalize(f.header) === text || f.key.toLowerCase() === text || (allHeaders[i] ?? []).some((h) => normalize(h) === text),
+      (f) => normalize(f.header) === text || f.key.toLowerCase() === text || (f.aliases ?? []).some((h) => normalize(h) === text),
     );
     if (field) columnOf.set(col, field);
   });
@@ -103,7 +108,12 @@ function convert(value: unknown, type: NonNullable<ImportField['type']>): unknow
     case 'boolean': {
       if (typeof value === 'boolean') return value;
       const t = cellText(value).trim().toLocaleLowerCase('tr');
-      return ['1', 'true', 'evet', 'yes', 'e', 'y', 'نعم'].includes(t);
+      if (['1', 'true', 'evet', 'yes', 'e', 'y', 'نعم'].includes(t)) return true;
+      if (['0', 'false', 'hayır', 'hayir', 'no', 'h', 'n', 'لا'].includes(t)) return false;
+      // A stock method written out: anything about serial numbers is serial tracking, a quantity is not.
+      if (t.includes('seri') || t.includes('serial')) return true;
+      if (t.includes('adet') || t.includes('quantity') || t.includes('bulk') || t.includes('aantal')) return false;
+      return false;
     }
     case 'date': {
       if (value instanceof Date) return value.toISOString();
