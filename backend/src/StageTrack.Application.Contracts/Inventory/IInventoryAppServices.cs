@@ -1,4 +1,4 @@
-using StageTrack.Dtos;
+﻿using StageTrack.Dtos;
 using StageTrack.Imports;
 
 namespace StageTrack.Inventory;
@@ -26,6 +26,9 @@ public interface IEquipmentAppService
     Task<EquipmentDto> CreateAsync(CreateUpdateEquipmentDto input);
 
     Task<EquipmentDetailDto> UpdateAsync(Guid id, CreateUpdateEquipmentDto input);
+
+    /// <summary>Several products into one folder; nothing else about them changes.</summary>
+    Task<int> MoveAsync(MoveEquipmentInput input);
 
     Task ArchiveAsync(Guid id);
 

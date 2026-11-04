@@ -1,11 +1,11 @@
-import { DeleteOutlined, DownOutlined, FileExcelOutlined, InboxOutlined, MoreOutlined, PlusOutlined, PrinterOutlined, UploadOutlined } from '@ant-design/icons';
-import { App, Button, Card, Checkbox, Dropdown, Flex, Input, Popover, Space, Table, Tag, Typography, theme, type TableColumnsType } from 'antd';
+import { BorderOuterOutlined, DeleteOutlined, DownOutlined, FileExcelOutlined, FolderOutlined, InboxOutlined, MoreOutlined, PlusOutlined, PrinterOutlined, UploadOutlined } from '@ant-design/icons';
+import { App, Button, Card, Checkbox, Dropdown, Flex, Input, Popover, Select, Space, Table, Tag, Typography, theme, type TableColumnsType } from 'antd';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { equipmentApi, folderApi, unitApi } from '../../api/endpoints';
-import type { Equipment, EquipmentImportRow } from '../../api/types';
+import { EQUIPMENT_DISCIPLINES, type Equipment, type EquipmentDiscipline, type EquipmentImportRow } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { ImportButton } from '../../components/ExcelButtons';
 import { useLabelGenerator } from '../../components/LabelGenerator';
@@ -14,13 +14,15 @@ import { useErrorToast } from '../../utils/errors';
 import { exportToExcel, fetchAllPages, type ExcelColumn, type ImportField } from '../../utils/excel';
 import { formatDate, useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
+import { TRADE_COLOR } from '../draft/stageProps';
+import { BulkLedRoleModal, MoveToFolderModal } from './BulkClassifyModals';
 import { EquipmentFormDrawer } from './EquipmentFormDrawer';
 
 const PAGE_SIZE = 25;
 const COLUMNS_KEY = 'stagetrack.equipmentColumns';
 
 const ALL_COLUMNS = [
-  'code', 'name', 'brand', 'model', 'folder', 'type', 'tracking', 'stock', 'price', 'weight', 'volume', 'dimensions', 'power',
+  'code', 'name', 'brand', 'model', 'folder', 'discipline', 'type', 'tracking', 'stock', 'price', 'weight', 'volume', 'dimensions', 'power',
   'country', 'showInQuotes', 'purchaseDate', 'warrantyEndDate', 'supplier', 'notes', 'containedIn',
 ] as const;
 type ColumnKey = (typeof ALL_COLUMNS)[number];
@@ -73,6 +75,9 @@ export function EquipmentListPage() {
   const [visible, setVisible] = useState<ColumnKey[]>(readColumns);
   const [selected, setSelected] = useState<Map<string, Equipment>>(new Map());
   const [exporting, setExporting] = useState(false);
+  const [trade, setTrade] = useState<EquipmentDiscipline | undefined>();
+  const [moveOpen, setMoveOpen] = useState(false);
+  const [roleOpen, setRoleOpen] = useState(false);
   const search = useDebounced(text, 300);
   if (pageFolder !== folderId) {
     setPageFolder(folderId);
@@ -81,7 +86,7 @@ export function EquipmentListPage() {
 
   const folders = useQuery({ queryKey: ['folders'], queryFn: folderApi.list });
   const folderName = folders.data?.find((x) => x.id === folderId)?.name;
-  const filter = { folderId: folderId ?? undefined, includeSubfolders: true, text: search, isArchived: false };
+  const filter = { folderId: folderId ?? undefined, includeSubfolders: true, text: search, isArchived: false, discipline: trade };
   const list = useQuery({
     queryKey: ['equipment', 'list', filter, page],
     queryFn: () => equipmentApi.list({ ...filter, skipCount: (page - 1) * PAGE_SIZE, maxResultCount: PAGE_SIZE }),
@@ -94,6 +99,17 @@ export function EquipmentListPage() {
   const yesNo = (v: boolean) => (v ? t('common.yes') : t('common.no'));
   const dims = (e: Equipment) =>
     e.lengthCm != null || e.widthCm != null || e.heightCm != null ? `${e.lengthCm ?? '–'} × ${e.widthCm ?? '–'} × ${e.heightCm ?? '–'}` : null;
+
+  /** A folder's trade: its own, or the nearest one above it - the same walk the server does. */
+  const tradeOfFolder = (id: string | null | undefined): EquipmentDiscipline | null => {
+    let current = id ?? null;
+    for (let guard = 0; current && guard < 64; guard++) {
+      const folder = folders.data?.find((x) => x.id === current);
+      if (folder?.discipline) return folder.discipline;
+      current = folder?.parentId ?? null;
+    }
+    return null;
+  };
 
   const defs: Record<ColumnKey, ColumnDef> = {
     code: { title: t('equipment.code'), width: 110, render: (e) => e.code, excel: (e) => e.code },
@@ -110,6 +126,18 @@ export function EquipmentListPage() {
     brand: { title: t('equipment.brand'), width: 120, render: (e) => e.brand, excel: (e) => e.brand },
     model: { title: t('equipment.model'), width: 140, render: (e) => e.model, excel: (e) => e.model },
     folder: { title: t('equipment.folder'), width: 140, render: (e) => e.folderName, excel: (e) => e.folderName },
+    discipline: {
+      title: t('equipment.discipline'),
+      width: 110,
+      render: (e) => {
+        const value = tradeOfFolder(e.folderId);
+        return value ? <Tag color={TRADE_COLOR[value]}>{t(`enums.equipmentDiscipline.${value}`)}</Tag> : <Typography.Text type="secondary">—</Typography.Text>;
+      },
+      excel: (e) => {
+        const value = tradeOfFolder(e.folderId);
+        return value ? t(`enums.equipmentDiscipline.${value}`) : null;
+      },
+    },
     type: { title: t('equipment.type'), width: 130, render: (e) => t(`enums.equipmentType.${e.type}`), excel: (e) => t(`enums.equipmentType.${e.type}`) },
     tracking: {
       title: t('equipment.tracking'),
@@ -349,6 +377,17 @@ export function EquipmentListPage() {
             }}
             style={{ maxWidth: 360 }}
           />
+          <Select
+            allowClear
+            style={{ minWidth: 150 }}
+            placeholder={t('equipment.discipline')}
+            value={trade}
+            onChange={(value) => {
+              setTrade(value);
+              setPage(1);
+            }}
+            options={EQUIPMENT_DISCIPLINES.map((d) => ({ value: d, label: t(`enums.equipmentDiscipline.${d}`) }))}
+          />
           <Popover trigger="click" placement="bottomRight" title={t('equipmentList.columns')} content={columnChooser}>
             <Button type="text" icon={<MoreOutlined />} aria-label={t('equipmentList.columns')} title={t('equipmentList.columns')} />
           </Popover>
@@ -365,9 +404,19 @@ export function EquipmentListPage() {
                 {t('equipmentList.createLabels')}
               </Button>
               {manage && (
-                <Button size="small" danger icon={<InboxOutlined />} onClick={archiveSelected}>
-                  {t('equipment.archive')}
-                </Button>
+                <>
+                  <Button size="small" icon={<FolderOutlined />} onClick={() => setMoveOpen(true)}>
+                    {t('bulk.move')}
+                  </Button>
+                  {can(Permissions.LedManage) && (
+                    <Button size="small" icon={<BorderOuterOutlined />} onClick={() => setRoleOpen(true)}>
+                      {t('bulk.role')}
+                    </Button>
+                  )}
+                  <Button size="small" danger icon={<InboxOutlined />} onClick={archiveSelected}>
+                    {t('equipment.archive')}
+                  </Button>
+                </>
               )}
               {can(Permissions.EquipmentDelete) && (
                 <Button size="small" danger icon={<DeleteOutlined />} onClick={deleteSelected}>
@@ -414,6 +463,19 @@ export function EquipmentListPage() {
           columns={columns}
         />
       </Card>
+
+      <MoveToFolderModal
+        open={moveOpen}
+        ids={[...selected.keys()]}
+        onClose={() => setMoveOpen(false)}
+        onDone={() => setSelected(new Map())}
+      />
+      <BulkLedRoleModal
+        open={roleOpen}
+        ids={[...selected.keys()]}
+        onClose={() => setRoleOpen(false)}
+        onDone={() => setSelected(new Map())}
+      />
 
       <EquipmentFormDrawer
         open={drawerOpen}

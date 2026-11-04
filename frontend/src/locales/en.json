@@ -262,7 +262,8 @@
     "capacityHint": "A truss section's point load, a hoist's rating",
     "rentalOrSale": "Rental / sale",
     "emptyWeightKg": "Empty weight (kg)",
-    "importLabelCode": "QR / RFID code"
+    "importLabelCode": "QR / RFID code",
+    "discipline": "Trade"
   },
   "units": {
     "title": "Devices (serial numbers)",
@@ -1923,5 +1924,22 @@
     "grid": "Grid",
     "panels": "LED panels",
     "stageUp": "STAGE"
+  },
+  "bulk": {
+    "move": "Move to folder",
+    "moveTitle": "Move {{count}} products",
+    "moveHint": "The products move to the folder you pick; their name, data and devices do not change. The trade comes from the folder, so this sets that too.",
+    "pickFolder": "Pick a folder",
+    "moved": "{{count}} products moved.",
+    "willBeTrade": "Products in this folder belong to: {{trade}}",
+    "folderHasNoTrade": "This folder has no trade.",
+    "folderHasNoTradeHint": "The products will move but will not appear on any design screen. Give the folder a trade under Equipment → folder manager.",
+    "role": "LED role",
+    "roleTitle": "Give {{count}} products a LED role",
+    "applyRole": "Apply",
+    "roleApplied": "{{count}} products saved as {{role}}.",
+    "sameValuesWarning": "The values below are written to every selected product.",
+    "sameValuesHint": "So use it only when several records are the same model. Marking cabinets of different pitch together makes every calculation quietly wrong.",
+    "roleAfterHint": "The rest of the technical data (watts, case, angles, compatible processors) is entered on each product’s LED tab."
   }
 }

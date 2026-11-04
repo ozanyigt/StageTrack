@@ -150,6 +150,19 @@ public class GetEquipmentListInput : PagedRequestDto
     public EquipmentDiscipline? Discipline { get; set; }
 }
 
+/// <summary>
+/// Moving several products into one folder at once. The folder is also what gives a product its trade, so this
+/// is how a firm classifies forty products in one go instead of opening forty cards.
+/// </summary>
+public class MoveEquipmentInput
+{
+    [Required]
+    public List<Guid> Ids { get; set; } = [];
+
+    /// <summary>null puts them at the root, outside every folder.</summary>
+    public Guid? FolderId { get; set; }
+}
+
 public class CreateUpdateEquipmentDto
 {
     [Required, StringLength(EquipmentConsts.MaxCodeLength)]

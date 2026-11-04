@@ -262,7 +262,8 @@
     "capacityHint": "Truss kesitinin nokta yükü, motorun kapasitesi",
     "rentalOrSale": "Kiralık / Satılık",
     "emptyWeightKg": "Boş ağırlık (kg)",
-    "importLabelCode": "QR / RFID kodu"
+    "importLabelCode": "QR / RFID kodu",
+    "discipline": "Dal"
   },
   "units": {
     "title": "Cihazlar (seri numaraları)",
@@ -1923,5 +1924,22 @@
     "grid": "Izgara",
     "panels": "LED panel",
     "stageUp": "SAHNE"
+  },
+  "bulk": {
+    "move": "Klasöre taşı",
+    "moveTitle": "{{count}} ürünü klasöre taşı",
+    "moveHint": "Ürünler seçtiğiniz klasöre taşınır; adı, verisi ve cihazları değişmez. Dal klasörden geldiği için bu aynı zamanda dalı da belirler.",
+    "pickFolder": "Klasör seçin",
+    "moved": "{{count}} ürün taşındı.",
+    "willBeTrade": "Bu klasördeki ürünlerin dalı: {{trade}}",
+    "folderHasNoTrade": "Bu klasörün dalı yok.",
+    "folderHasNoTradeHint": "Ürünler taşınır ama hiçbir tasarım ekranında görünmez. Klasöre dal vermek için: Ekipman → klasör yöneticisi.",
+    "role": "LED rolü",
+    "roleTitle": "{{count}} ürüne LED rolü ata",
+    "applyRole": "Uygula",
+    "roleApplied": "{{count}} ürün {{role}} olarak kaydedildi.",
+    "sameValuesWarning": "Aşağıdaki değerler seçili ürünlerin hepsine aynı yazılır.",
+    "sameValuesHint": "Bu yüzden yalnız aynı modelden birden fazla kaydınız varsa kullanın. Farklı pitch’teki kabinleri birlikte işaretlerseniz hesaplar sessizce yanlış çıkar.",
+    "roleAfterHint": "Kalan teknik veriler (watt, kasa, açı, uyumlu işlemci) her ürünün kartındaki LED sekmesinden girilir."
   }
 }

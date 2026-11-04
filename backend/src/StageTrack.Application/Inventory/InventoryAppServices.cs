@@ -240,6 +240,28 @@ public class EquipmentAppService(
     }
 
     /// <summary>Upsert by code; the folder path ("VIDEO/Display") is created when missing.</summary>
+    /// <summary>
+    /// Several products into one folder. Only the folder moves: the name, the data and the devices stay as they
+    /// are, which is what makes this safe to use on a selection of forty.
+    /// </summary>
+    public async Task<int> MoveAsync(MoveEquipmentInput input)
+    {
+        if (input.FolderId is { } folderId)
+        {
+            await folderRepository.GetAsync(folderId, includeDetails: false);
+        }
+
+        var items = await equipmentRepository.GetListByIdsAsync(input.Ids.Distinct().ToList());
+        foreach (var equipment in items)
+        {
+            equipment.Update(equipment.Name, equipment.Brand, equipment.Model, input.FolderId, equipment.Type,
+                equipment.CountryOfOrigin, equipment.Notes);
+        }
+
+        await unitOfWork.SaveChangesAsync();
+        return items.Count;
+    }
+
     public async Task<ImportResultDto> ImportAsync(List<EquipmentImportRow> rows)
     {
         var folders = await folderRepository.GetListAsync();

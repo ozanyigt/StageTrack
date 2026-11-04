@@ -74,6 +74,8 @@ export const equipmentApi = {
     }),
   create: (input: T.EquipmentInput) => post<T.Equipment>('/equipment', input),
   update: (id: T.Guid, input: T.EquipmentInput) => put<T.EquipmentDetail>(`/equipment/${id}`, input),
+  /** Several products into one folder at once; the folder is also what gives them their trade. */
+  move: (ids: T.Guid[], folderId: T.Guid | null) => post<number>('/equipment/move', { ids, folderId }),
   archive: (id: T.Guid) => post(`/equipment/${id}/archive`),
   restore: (id: T.Guid) => post(`/equipment/${id}/restore`),
   /** Deletes equipment entered by mistake (never on a project/quote) with its devices and labels; logged. */

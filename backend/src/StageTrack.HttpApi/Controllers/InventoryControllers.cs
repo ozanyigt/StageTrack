@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StageTrack.Collaboration;
@@ -90,6 +90,10 @@ public class EquipmentController(IEquipmentAppService appService) : ControllerBa
     [HttpDelete("{id:guid}/image")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
     public Task<EquipmentDetailDto> RemoveImageAsync(Guid id) => appService.RemoveImageAsync(id);
+
+    [HttpPost("move")]
+    [Authorize(StageTrackPermissions.Equipment.Manage)]
+    public Task<int> MoveAsync(MoveEquipmentInput input) => appService.MoveAsync(input);
 
     [HttpPost("import")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
