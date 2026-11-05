@@ -114,8 +114,10 @@ app.MapGet("/api/health", () => Results.Ok(new { status = "ok" })).ExcludeFromDe
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<StageTrackDbContext>();
+    var databaseLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("StageTrack.Database");
+    await CreateDatabaseIfMissingAsync(db, databaseLogger);
     await db.Database.MigrateAsync();
-    await WarnIfCollationIsUnexpectedAsync(db, app.Services.GetRequiredService<ILoggerFactory>());
+    await WarnIfCollationIsUnexpectedAsync(db, databaseLogger);
 
     // An empty database only gets the platform administrator; customer firms are created from the admin panel.
     var hostAdmin = app.Configuration.GetSection(HostAdminOptions.Section).Get<HostAdminOptions>() ?? new HostAdminOptions();
@@ -139,10 +141,43 @@ app.Run();
 /// The production database should be created as:
 ///     CREATE DATABASE [StageTrack] COLLATE Turkish_CI_AS;
 /// </summary>
-static async Task WarnIfCollationIsUnexpectedAsync(StageTrackDbContext db, ILoggerFactory loggerFactory)
+/// <summary>
+/// Creates the database before the migrations run, with the collation the application expects. Migrations cannot
+/// do this - a collation is fixed when the database comes into being, and afterwards it can only be changed by
+/// rebuilding every index and statistic that depends on it - so the one moment to get it right is this one. A
+/// database somebody else already created is left alone; <see cref="WarnIfCollationIsUnexpectedAsync"/> then says
+/// what it got instead.
+/// </summary>
+static async Task CreateDatabaseIfMissingAsync(StageTrackDbContext db, ILogger logger)
 {
-    const string Expected = "Turkish_CI_AS";
-    var logger = loggerFactory.CreateLogger("StageTrack.Database");
+    var builder = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(db.Database.GetConnectionString());
+    var database = builder.InitialCatalog;
+    if (string.IsNullOrWhiteSpace(database) || database.Contains('[') || database.Contains(']'))
+    {
+        return;
+    }
+
+    try
+    {
+        builder.InitialCatalog = "master";
+        await using var connection = new Microsoft.Data.SqlClient.SqlConnection(builder.ConnectionString);
+        await connection.OpenAsync();
+        await using var command = connection.CreateCommand();
+        command.CommandText = $"IF DB_ID(@name) IS NULL CREATE DATABASE [{database}] COLLATE {DatabaseDefaults.Collation}";
+        command.Parameters.AddWithValue("@name", database);
+        await command.ExecuteNonQueryAsync();
+    }
+    catch (Exception e)
+    {
+        // Not fatal: the database may already exist, or this login may not be allowed to create one. If it is
+        // genuinely missing, the migration below fails next with a clearer message than anything written here.
+        logger.LogInformation(e, "Could not create the database {Database}; carrying on with the migrations.", database);
+    }
+}
+
+static async Task WarnIfCollationIsUnexpectedAsync(StageTrackDbContext db, ILogger logger)
+{
+    const string Expected = DatabaseDefaults.Collation;
     try
     {
         var connection = db.Database.GetDbConnection();
@@ -169,4 +204,13 @@ static async Task WarnIfCollationIsUnexpectedAsync(StageTrackDbContext db, ILogg
     {
         logger.LogWarning(e, "Could not read the database collation.");
     }
+}
+
+/// <summary>
+/// What the database is expected to be. Turkish collation, because equipment codes and names are compared and
+/// searched as Turkish text: i/I and ı/I are different letters, and a case-insensitive comparison has to know it.
+/// </summary>
+static class DatabaseDefaults
+{
+    public const string Collation = "Turkish_CI_AS";
 }
