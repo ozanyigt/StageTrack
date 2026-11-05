@@ -93,6 +93,10 @@ public class DemoDataSeeder(
         var tenant = await tenantManager.CreateAsync("Staras (demo)", "STARAS");
         tenant.Update(tenant.Name, "Demo Yönetici", "admin@demo.local", null, null);
         tenant.SetSubscription("Kurumsal", DateTime.Today.AddMonths(-1), null, null, null);
+
+        // The demo firm bought the add-on modules; without this the quote-draft screens are hidden from it and
+        // the demo looks like half a product.
+        tenant.SetModules(TenantModules.All);
         await tenantRepository.InsertAsync(tenant);
         await unitOfWork.SaveChangesAsync();
         _tenantId = tenant.Id;

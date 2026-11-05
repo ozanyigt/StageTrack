@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using StageTrack.Inventory;
 using StageTrack.Led;
@@ -22,7 +22,9 @@ public class EquipmentLedSpecConfiguration : IEntityTypeConfiguration<EquipmentL
 
         b.HasIndex(x => new { x.CompanyId, x.EquipmentId }).IsUnique().HasFilter("[IsDeleted] = 0");
         b.HasIndex(x => new { x.CompanyId, x.Role });
-        b.HasOne<Equipment>().WithMany().HasForeignKey(x => x.EquipmentId).OnDelete(DeleteBehavior.Cascade);
+        // Restrict, like the rest of the inventory: a hard delete of equipment that carries LED data should
+        // be refused rather than erase the panel's pitch and pixel map along with it.
+        b.HasOne<Equipment>().WithMany().HasForeignKey(x => x.EquipmentId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -30,7 +32,7 @@ public class LedPanelSpecConfiguration : IEntityTypeConfiguration<LedPanelSpec>
 {
     public void Configure(EntityTypeBuilder<LedPanelSpec> b)
     {
-        b.Property(x => x.PitchMm).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.PitchMm).HasColumnType(ColumnTypes.Pitch);
         b.Property(x => x.WattMax).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.WattAvg).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.AngleMin).HasColumnType(ColumnTypes.Measure);

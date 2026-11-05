@@ -22,6 +22,19 @@ internal static class ColumnTypes
 
     /// <summary>Type size on a label, points.</summary>
     public const string Points = "decimal(5,2)";
+
+    /// <summary>
+    /// Cubic metres. Six decimals because the unit is large and the things measured are not: a 5 cm cube is
+    /// 0.000125 m3, and at three decimals it would be stored as nothing at all - silently, since SQL Server
+    /// rounds rather than refuses. Transport and loading totals are only as honest as this column.
+    /// </summary>
+    public const string Volume = "decimal(12,6)";
+
+    /// <summary>
+    /// Pixel pitch, millimetres. Four decimals because real pitches have them - P1.5625, P1.953125 - and a
+    /// firm that types the manufacturer's figure should read back the same figure.
+    /// </summary>
+    public const string Pitch = "decimal(9,4)";
     public const string Quantity = "decimal(18,2)";
     public const string Measure = "decimal(12,3)";
 }
@@ -169,7 +182,7 @@ public class EquipmentConfiguration : IEntityTypeConfiguration<Equipment>
         b.Property(x => x.ShowInQuotes).HasDefaultValue(true);
         b.HasOne<Suppliers.Supplier>().WithMany().HasForeignKey(x => x.PurchaseSupplierId).OnDelete(DeleteBehavior.Restrict);
         b.Property(x => x.WeightKg).HasColumnType(ColumnTypes.Measure);
-        b.Property(x => x.VolumeM3).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.VolumeM3).HasColumnType(ColumnTypes.Volume);
         b.Property(x => x.LengthCm).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.WidthCm).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.HeightCm).HasColumnType(ColumnTypes.Measure);
@@ -315,6 +328,8 @@ public class EquipmentUnitConfiguration : IEntityTypeConfiguration<EquipmentUnit
         b.HasIndex(x => new { x.CompanyId, x.InternalRef });
         b.HasOne<Supplier>().WithMany().HasForeignKey(x => x.SupplierId).OnDelete(DeleteBehavior.Restrict);
         b.HasIndex(x => new { x.EquipmentId, x.Status });
+        // The dashboard counts a firm's devices by status, with no equipment to narrow it.
+        b.HasIndex(x => new { x.CompanyId, x.IsArchived, x.Status });
         b.HasIndex(x => x.CurrentProjectId);
         b.HasOne<Equipment>().WithMany().HasForeignKey(x => x.EquipmentId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<StockLocation>().WithMany().HasForeignKey(x => x.StockLocationId).OnDelete(DeleteBehavior.Restrict);
@@ -465,6 +480,8 @@ public class QuoteConfiguration : IEntityTypeConfiguration<Quote>
         b.Property(x => x.VatAmount).HasColumnType(ColumnTypes.Money);
         b.Property(x => x.GrandTotal).HasColumnType(ColumnTypes.Money);
         b.HasIndex(x => new { x.CompanyId, x.Number, x.Revision }).IsUnique().HasFilter("[IsDeleted] = 0");
+        // The quote list opens sorted by issue date; without this every page is a full company sort.
+        b.HasIndex(x => new { x.CompanyId, x.IssueDate });
         b.HasIndex(x => x.ProjectId);
         b.HasOne<Project>().WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Restrict);
         b.HasOne<RentalFactorProfile>().WithMany().HasForeignKey(x => x.RentalFactorProfileId).OnDelete(DeleteBehavior.Restrict);

@@ -613,7 +613,7 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("VolumeM3")
-                        .HasColumnType("decimal(12,3)");
+                        .HasColumnType("decimal(12,6)");
 
                     b.Property<DateTime?>("WarrantyEndDate")
                         .HasColumnType("datetime2");
@@ -896,6 +896,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasIndex("CompanyId", "EquipmentId", "InternalRef")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("CompanyId", "IsArchived", "Status");
 
                     b.ToTable("EquipmentUnits");
                 });
@@ -1766,6 +1768,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
                     b.HasIndex("RentalFactorProfileId");
 
+                    b.HasIndex("CompanyId", "IssueDate");
+
                     b.HasIndex("CompanyId", "Number", "Revision")
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
@@ -1872,7 +1876,10 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .IsUnique()
                         .HasFilter("[IsDeleted] = 0");
 
-                    b.ToTable("SitePlans");
+                    b.ToTable("SitePlans", t =>
+                        {
+                            t.HasCheckConstraint("CK_SitePlans_Venue_AllOrNothing", "([Venue_WidthM] IS NULL AND [Venue_DepthM] IS NULL AND [Venue_ClearHeightM] IS NULL AND [Venue_StageOffsetXM] IS NULL AND [Venue_BehindStageM] IS NULL AND [Venue_RakeDeg] IS NULL AND [Venue_PlanOriginXM] IS NULL AND [Venue_PlanOriginZM] IS NULL AND [Venue_PlanRotationDeg] IS NULL) OR ([Venue_WidthM] IS NOT NULL AND [Venue_DepthM] IS NOT NULL AND [Venue_ClearHeightM] IS NOT NULL AND [Venue_StageOffsetXM] IS NOT NULL AND [Venue_BehindStageM] IS NOT NULL AND [Venue_RakeDeg] IS NOT NULL AND [Venue_PlanOriginXM] IS NOT NULL AND [Venue_PlanOriginZM] IS NOT NULL AND [Venue_PlanRotationDeg] IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("StageTrack.Suppliers.Supplier", b =>
@@ -2151,7 +2158,7 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("PitchMm")
-                        .HasColumnType("decimal(12,3)");
+                        .HasColumnType("decimal(9,4)");
 
                     b.Property<int>("PixelHeight")
                         .HasColumnType("int");
@@ -2452,7 +2459,7 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasOne("StageTrack.Inventory.Equipment", null)
                         .WithMany()
                         .HasForeignKey("EquipmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
