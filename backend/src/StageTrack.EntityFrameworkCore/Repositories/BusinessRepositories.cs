@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using StageTrack.Customers;
 using StageTrack.EntityFrameworkCore;
 using StageTrack.Pricing;
@@ -92,9 +92,20 @@ public class ProjectRepository(StageTrackDbContext dbContext) : EfRepository<Pro
     public Task<long> GetCountAsync(ProjectFilter filter, CancellationToken cancellationToken = default) =>
         ApplyFilter(DbSet, filter).LongCountAsync(cancellationToken);
 
-    public async Task<bool> IsEquipmentUsedInHistoryAsync(Guid equipmentId, CancellationToken cancellationToken = default) =>
-        await DbContext.Projects.IgnoreQueryFilters().AnyAsync(p => p.Equipment.Any(e => e.EquipmentId == equipmentId), cancellationToken) ||
-        await DbContext.Quotes.IgnoreQueryFilters().AnyAsync(q => q.Lines.Any(l => l.EquipmentId == equipmentId), cancellationToken);
+    /// <summary>
+    /// Has this equipment ever been planned or quoted - including on jobs since deleted? That is the question a
+    /// hard delete has to ask, so the soft-delete filter is bypassed on purpose. The company filter is not: the
+    /// equipment belongs to one firm, and scanning every other firm's history to answer about it is both
+    /// needless and a full scan of the two largest tables.
+    /// </summary>
+    public async Task<bool> IsEquipmentUsedInHistoryAsync(Guid equipmentId, CancellationToken cancellationToken = default)
+    {
+        var companyId = DbContext.CurrentCompanyId;
+        return await DbContext.Projects.IgnoreQueryFilters()
+                   .AnyAsync(p => p.CompanyId == companyId && p.Equipment.Any(e => e.EquipmentId == equipmentId), cancellationToken)
+               || await DbContext.Quotes.IgnoreQueryFilters()
+                   .AnyAsync(q => q.CompanyId == companyId && q.Lines.Any(l => l.EquipmentId == equipmentId), cancellationToken);
+    }
 
     public Task<bool> IsEquipmentPlannedOnActiveProjectsAsync(Guid equipmentId, CancellationToken cancellationToken = default)
     {

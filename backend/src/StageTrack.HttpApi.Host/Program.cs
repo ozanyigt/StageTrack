@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -115,6 +115,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<StageTrackDbContext>();
     await db.Database.MigrateAsync();
+    await WarnIfCollationIsUnexpectedAsync(db, app.Services.GetRequiredService<ILoggerFactory>());
 
     // An empty database only gets the platform administrator; customer firms are created from the admin panel.
     var hostAdmin = app.Configuration.GetSection(HostAdminOptions.Section).Get<HostAdminOptions>() ?? new HostAdminOptions();
@@ -127,3 +128,45 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+/// <summary>
+/// Whether the database compares text the way this product assumes. Case and Turkish i/I decide whether "SM58"
+/// and "sm58" are one equipment code or two, and whether a search for "isik" finds "IŞIK" - and the answer comes
+/// from the collation the database was CREATED with. It cannot be changed afterwards: filtered indexes depend on
+/// it, and SQL Server refuses. So this does not try to fix anything; it says plainly, once, at startup, when the
+/// database was created with something else, while there is still time to recreate it.
+///
+/// The production database should be created as:
+///     CREATE DATABASE [StageTrack] COLLATE Turkish_CI_AS;
+/// </summary>
+static async Task WarnIfCollationIsUnexpectedAsync(StageTrackDbContext db, ILoggerFactory loggerFactory)
+{
+    const string Expected = "Turkish_CI_AS";
+    var logger = loggerFactory.CreateLogger("StageTrack.Database");
+    try
+    {
+        var connection = db.Database.GetDbConnection();
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT CONVERT(nvarchar(128), DATABASEPROPERTYEX(DB_NAME(), 'Collation'))";
+        if (connection.State != System.Data.ConnectionState.Open)
+        {
+            await connection.OpenAsync();
+        }
+
+        var collation = (await command.ExecuteScalarAsync())?.ToString();
+        if (string.Equals(collation, Expected, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        logger.LogWarning(
+            "Database collation is {Collation}, not {Expected}. Equipment codes and searches will compare text " +
+            "differently than intended (case sensitivity, Turkish i/I). A collation can only be set when the " +
+            "database is created: CREATE DATABASE [...] COLLATE {Expected}.",
+            collation, Expected, Expected);
+    }
+    catch (Exception e)
+    {
+        logger.LogWarning(e, "Could not read the database collation.");
+    }
+}

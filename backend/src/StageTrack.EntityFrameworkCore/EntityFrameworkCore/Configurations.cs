@@ -19,6 +19,9 @@ internal static class ColumnTypes
     public const string Money = "decimal(18,2)";
     public const string Factor = "decimal(9,4)";
     public const string Percent = "decimal(5,2)";
+
+    /// <summary>Type size on a label, points.</summary>
+    public const string Points = "decimal(5,2)";
     public const string Quantity = "decimal(18,2)";
     public const string Measure = "decimal(12,3)";
 }
@@ -178,6 +181,8 @@ public class EquipmentConfiguration : IEntityTypeConfiguration<Equipment>
         b.Property(x => x.InspectionDescription).HasMaxLength(EquipmentDetailConsts.MaxInspectionDescriptionLength);
         b.HasIndex(x => new { x.CompanyId, x.Code }).IsUnique().HasFilter("[IsDeleted] = 0");
         b.HasIndex(x => new { x.CompanyId, x.FolderId });
+        // The equipment list sorts by name as often as it filters by folder.
+        b.HasIndex(x => new { x.CompanyId, x.Name });
         b.HasOne<EquipmentFolder>().WithMany().HasForeignKey(x => x.FolderId).OnDelete(DeleteBehavior.Restrict);
         b.HasMany(x => x.Relations).WithOne().HasForeignKey(x => x.EquipmentId).OnDelete(DeleteBehavior.Cascade);
         b.HasMany(x => x.Suppliers).WithOne().HasForeignKey(x => x.EquipmentId).OnDelete(DeleteBehavior.Cascade);
@@ -222,7 +227,8 @@ public class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
         b.Property(x => x.Country).HasMaxLength(128);
         b.Property(x => x.Website).HasMaxLength(256);
         b.Property(x => x.Notes).HasMaxLength(2000);
-        b.HasIndex(x => new { x.CompanyId, x.Name });
+        // Checked in the domain before insert; the index is what makes two concurrent creates impossible.
+        b.HasIndex(x => new { x.CompanyId, x.Name }).IsUnique().HasFilter("[IsDeleted] = 0");
     }
 }
 
@@ -257,7 +263,12 @@ public class LabelTemplateConfiguration : IEntityTypeConfiguration<LabelTemplate
     public void Configure(EntityTypeBuilder<LabelTemplate> b)
     {
         b.Property(x => x.Name).HasMaxLength(LabelTemplateConsts.MaxNameLength).IsRequired();
-        b.Property(x => x.FontSizePt).HasColumnType(ColumnTypes.Percent);
+        b.Property(x => x.FontSizePt).HasColumnType(ColumnTypes.Points);
+        b.HasIndex(x => x.CompanyId);
+
+        // "The default one" has to be one: the code clears the old default before setting a new one, and this
+        // index is what stops a half-finished save from leaving two.
+        b.HasIndex(x => x.CompanyId).IsUnique().HasFilter("[IsDeleted] = 0 AND [IsDefault] = 1");
     }
 }
 
@@ -339,7 +350,10 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         b.Property(x => x.City).HasMaxLength(128);
         b.Property(x => x.Country).HasMaxLength(128);
         b.Property(x => x.Notes).HasMaxLength(2000);
-        b.HasIndex(x => new { x.CompanyId, x.TaxNumber });
+        // The code checks these before inserting; without the index two concurrent creates both pass the
+        // check and both commit. A tax number nobody entered is not a duplicate, hence the NULL clause.
+        b.HasIndex(x => new { x.CompanyId, x.TaxNumber }).IsUnique()
+            .HasFilter("[IsDeleted] = 0 AND [TaxNumber] IS NOT NULL");
         b.HasIndex(x => new { x.CompanyId, x.Name });
     }
 }
@@ -419,6 +433,8 @@ public class RentalFactorProfileConfiguration : IEntityTypeConfiguration<RentalF
     {
         b.Property(x => x.Name).HasMaxLength(RentalFactorConsts.MaxNameLength).IsRequired();
         b.Property(x => x.ExtraDayFactor).HasColumnType(ColumnTypes.Factor);
+        b.HasIndex(x => x.CompanyId);
+        b.HasIndex(x => x.CompanyId).IsUnique().HasFilter("[IsDeleted] = 0 AND [IsDefault] = 1");
         b.HasMany(x => x.Steps).WithOne().HasForeignKey(x => x.ProfileId).OnDelete(DeleteBehavior.Cascade);
     }
 }

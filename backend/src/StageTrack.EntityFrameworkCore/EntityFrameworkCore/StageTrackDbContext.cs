@@ -54,11 +54,13 @@ public class StageTrackDbContext(
     public DbSet<Sites.SitePlan> SitePlans => Set<Sites.SitePlan>();
 
     /// <summary>Read by the global query filter on every query, so switching company needs no new context.</summary>
-    protected Guid? CurrentCompanyId => currentCompany.Id;
+    /// <summary>The firm whose rows this context sees; repositories need it when they bypass the filters.</summary>
+    public Guid? CurrentCompanyId => currentCompany.Id;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(StageTrackDbContext).Assembly);
 
         var configureFilters = typeof(StageTrackDbContext).GetMethod(nameof(ConfigureGlobalFilters), BindingFlags.Instance | BindingFlags.NonPublic)!;
@@ -71,6 +73,19 @@ public class StageTrackDbContext(
             if (typeof(Entity).IsAssignableFrom(entityType.ClrType))
             {
                 modelBuilder.Entity(entityType.ClrType).Property(nameof(Entity.Id)).ValueGeneratedNever();
+            }
+
+            // The company a row belongs to is what every query filters on, and it had no referential integrity:
+            // a wrong id was accepted and the row then belonged to nobody - invisible to every tenant, with no
+            // error and no way to find it again. Restrict, because a firm with data is not something to delete
+            // by cascade.
+            if (typeof(IMultiCompany).IsAssignableFrom(entityType.ClrType) && entityType.ClrType != typeof(UserCompany))
+            {
+                modelBuilder.Entity(entityType.ClrType)
+                    .HasOne(typeof(Company))
+                    .WithMany()
+                    .HasForeignKey(nameof(IMultiCompany.CompanyId))
+                    .OnDelete(DeleteBehavior.Restrict);
             }
         }
     }

@@ -119,6 +119,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CompanyId");
+
                     b.HasIndex("OwnerType", "OwnerId");
 
                     b.ToTable("Attachments");
@@ -162,6 +164,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasColumnType("nvarchar(4000)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
 
                     b.HasIndex("OwnerType", "OwnerId");
 
@@ -224,6 +228,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AssignedUserId");
+
+                    b.HasIndex("CompanyId");
 
                     b.HasIndex("OwnerType", "OwnerId");
 
@@ -345,7 +351,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
                     b.HasIndex("CompanyId", "Name");
 
-                    b.HasIndex("CompanyId", "TaxNumber");
+                    b.HasIndex("CompanyId", "TaxNumber")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0 AND [TaxNumber] IS NOT NULL");
 
                     b.ToTable("Customers");
                 });
@@ -627,6 +635,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasFilter("[IsDeleted] = 0");
 
                     b.HasIndex("CompanyId", "FolderId");
+
+                    b.HasIndex("CompanyId", "Name");
 
                     b.ToTable("Equipment", (string)null);
                 });
@@ -958,6 +968,10 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0 AND [IsDefault] = 1");
 
                     b.ToTable("LabelTemplates");
                 });
@@ -1389,6 +1403,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CompanyId");
+
                     b.HasIndex("EquipmentId");
 
                     b.HasIndex("UnitId", "Date");
@@ -1434,6 +1450,10 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasColumnType("nvarchar(128)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0 AND [IsDefault] = 1");
 
                     b.ToTable("RentalFactorProfiles");
                 });
@@ -1928,7 +1948,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId", "Name");
+                    b.HasIndex("CompanyId", "Name")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Suppliers");
                 });
@@ -2179,12 +2201,45 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasDiscriminator().HasValue(2);
                 });
 
+            modelBuilder.Entity("StageTrack.Auditing.AuditLog", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Collaboration.Attachment", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Collaboration.Note", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("StageTrack.Collaboration.TaskItem", b =>
                 {
                     b.HasOne("StageTrack.Identity.AppUser", null)
                         .WithMany()
                         .HasForeignKey("AssignedUserId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("StageTrack.Companies.Company", b =>
@@ -2192,6 +2247,15 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasOne("StageTrack.Tenants.Tenant", null)
                         .WithMany()
                         .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Customers.Customer", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -2253,6 +2317,12 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
             modelBuilder.Entity("StageTrack.Inventory.Equipment", b =>
                 {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("StageTrack.Inventory.EquipmentFolder", null)
                         .WithMany()
                         .HasForeignKey("FolderId")
@@ -2264,8 +2334,23 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("StageTrack.Inventory.EquipmentFolder", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("StageTrack.Inventory.EquipmentLabel", b =>
                 {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("StageTrack.Inventory.Equipment", null)
                         .WithMany()
                         .HasForeignKey("EquipmentId")
@@ -2310,6 +2395,12 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
             modelBuilder.Entity("StageTrack.Inventory.EquipmentUnit", b =>
                 {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("StageTrack.Projects.Project", null)
                         .WithMany()
                         .HasForeignKey("CurrentProjectId")
@@ -2332,8 +2423,32 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("StageTrack.Inventory.LabelTemplate", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Inventory.StockLocation", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("StageTrack.Led.EquipmentLedSpec", b =>
                 {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("StageTrack.Inventory.Equipment", null)
                         .WithMany()
                         .HasForeignKey("EquipmentId")
@@ -2343,6 +2458,12 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
             modelBuilder.Entity("StageTrack.Led.LedPanelFavorite", b =>
                 {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("StageTrack.Inventory.Equipment", null)
                         .WithMany()
                         .HasForeignKey("EquipmentId")
@@ -2350,8 +2471,41 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("StageTrack.Led.LedStageSettings", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Led.LedTransportSettings", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Led.LedTransportVehicle", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("StageTrack.Maintenance.Repair", b =>
                 {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("StageTrack.Inventory.Equipment", null)
                         .WithMany()
                         .HasForeignKey("EquipmentId")
@@ -2371,9 +2525,24 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
             modelBuilder.Entity("StageTrack.Maintenance.UnitInspection", b =>
                 {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("StageTrack.Inventory.EquipmentUnit", null)
                         .WithMany()
                         .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Pricing.RentalFactorProfile", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -2393,6 +2562,12 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .WithMany()
                         .HasForeignKey("AccountManagerId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("StageTrack.Customers.Customer", null)
                         .WithMany()
@@ -2446,6 +2621,12 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
             modelBuilder.Entity("StageTrack.Quotes.Quote", b =>
                 {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("StageTrack.Projects.Project", null)
                         .WithMany()
                         .HasForeignKey("ProjectId")
@@ -2474,6 +2655,12 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
             modelBuilder.Entity("StageTrack.Sites.SitePlan", b =>
                 {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("StageTrack.Projects.Project", null)
                         .WithMany()
                         .HasForeignKey("ProjectId")
@@ -2529,8 +2716,23 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Navigation("Venue");
                 });
 
+            modelBuilder.Entity("StageTrack.Suppliers.Supplier", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("StageTrack.Warehouse.WarehouseMovement", b =>
                 {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("StageTrack.Inventory.Equipment", null)
                         .WithMany()
                         .HasForeignKey("EquipmentId")

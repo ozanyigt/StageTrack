@@ -21,7 +21,13 @@ public static class StageTrackEntityFrameworkCoreModule
 {
     public static IServiceCollection AddStageTrackEntityFrameworkCore(this IServiceCollection services, string connectionString)
     {
-        services.AddDbContext<StageTrackDbContext>(options => options.UseSqlServer(connectionString));
+        // LocalDB never produces a transient failure, so none of this was needed in development; a real or
+        // hosted SQL Server does, and without a retry every one of them reaches the user as a 500.
+        services.AddDbContext<StageTrackDbContext>(options => options.UseSqlServer(connectionString, sql =>
+        {
+            sql.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
+            sql.CommandTimeout(60);
+        }));
 
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddScoped<ICompanyRepository, CompanyRepository>();

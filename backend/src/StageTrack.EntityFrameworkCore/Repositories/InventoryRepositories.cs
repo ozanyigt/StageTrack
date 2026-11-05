@@ -289,7 +289,10 @@ public class EquipmentLabelRepository(StageTrackDbContext dbContext) : EfReposit
         DbSet.Where(l => l.UnitId == unitId).OrderBy(l => l.Code).ToListAsync(cancellationToken);
 
     public Task<List<string>> GetCodesByTypeAsync(LabelType type, CancellationToken cancellationToken = default) =>
-        DbSet.IgnoreQueryFilters().Where(l => l.Type == type).Select(l => l.Code).ToListAsync(cancellationToken);
+        // Was IgnoreQueryFilters: every tenant's codes, materialised on every label creation, to compute one
+        // number. The codes carry the firm's workspace id and the unique index is per company, so the firm's own
+        // codes are the only ones that can collide - and that is what the company filter already gives.
+        DbSet.Where(l => l.Type == type).Select(l => l.Code).ToListAsync(cancellationToken);
 
     public Task<List<EquipmentLabel>> GetListByUnitsAsync(IReadOnlyCollection<Guid> unitIds, CancellationToken cancellationToken = default)
     {

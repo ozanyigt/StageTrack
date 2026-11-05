@@ -124,6 +124,7 @@ public interface IEquipmentLabelRepository : IRepository<EquipmentLabel>
 
     Task<List<EquipmentLabel>> GetListByUnitAsync(Guid unitId, CancellationToken cancellationToken = default);
 
+    /// <summary>The firm's own codes of that kind; used to continue its label numbering.</summary>
     Task<List<string>> GetCodesByTypeAsync(LabelType type, CancellationToken cancellationToken = default);
 
     /// <summary>Labels of many devices at once, for printing.</summary>
