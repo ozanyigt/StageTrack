@@ -2,10 +2,10 @@ import { Alert, Card, Col, Empty, InputNumber, Row, Segmented, Slider, Table, Ty
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { equipmentApi, ledApi } from '../../api/endpoints';
+import { equipmentApi, draftApi } from '../../api/endpoints';
 import type { EquipmentDiscipline } from '../../api/types';
 import { LedSimulationPage } from '../led/LedSimulationPage';
-import { useLedJob, type JobLine } from '../led/useLedJob';
+import { useDraftJob, type JobLine } from './useDraftJob';
 import { CoverageView, type CoverageItem } from './CoverageView';
 import { CablingPanel } from './CablingPanel';
 import { SightlinePanel } from './SightlinePanel';
@@ -66,7 +66,7 @@ export function SimulationPage() {
 
 function CoverageSimulation({ trade }: { trade: Extract<EquipmentDiscipline, 'Sound' | 'Light'> }) {
   const { t } = useTranslation();
-  const { job } = useLedJob();
+  const { job } = useDraftJob();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const [coverage, setCoverage] = useState<Record<string, Coverage>>(() => {
@@ -87,7 +87,7 @@ function CoverageSimulation({ trade }: { trade: Extract<EquipmentDiscipline, 'So
     }
   }, []);
 
-  const stage = useQuery({ queryKey: ['led-stage'], queryFn: () => ledApi.stage() });
+  const stage = useQuery({ queryKey: ['led-stage'], queryFn: () => draftApi.stage() });
   const catalogue = useQuery({
     queryKey: ['equipment', 'for-coverage'],
     queryFn: () => equipmentApi.list({ maxResultCount: 1000, sorting: 'code' }),

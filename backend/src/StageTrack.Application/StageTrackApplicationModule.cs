@@ -44,15 +44,15 @@ public static class StageTrackApplicationModule
         services.AddScoped<IProjectAppService, ProjectAppService>();
         services.AddScoped<IWarehouseAppService, WarehouseAppService>();
 
-        // LED module (Panelyze): the calculation constants are fixed configuration, the rest is per request.
-        services.AddSingleton(Led.Calculation.CalcSettings.Default);
-        services.AddScoped<Led.LedCatalogLoader>();
-        services.AddScoped<Led.ILedCalculationAppService, Led.LedCalculationAppService>();
-        services.AddScoped<Led.ILedInventoryAppService, Led.LedInventoryAppService>();
-        services.AddScoped<Led.ILedTransportAppService, Led.LedTransportAppService>();
-        services.AddScoped<Led.ILedStageAppService, Led.LedStageAppService>();
-        services.AddScoped<Led.ILedStockStatusAppService, Led.LedStockStatusAppService>();
-        services.AddScoped<Led.ILedJobAppService, Led.LedJobAppService>();
+        // Design module (Panelyze was its ancestor): the calculation constants are fixed configuration, the rest is per request.
+        services.AddSingleton(Design.Calculation.CalcSettings.Default);
+        services.AddScoped<Design.LedCatalogLoader>();
+        services.AddScoped<Design.ILedCalculationAppService, Design.LedCalculationAppService>();
+        services.AddScoped<Design.ILedInventoryAppService, Design.LedInventoryAppService>();
+        services.AddScoped<Design.ITransportAppService, Design.TransportAppService>();
+        services.AddScoped<Design.IStageAppService, Design.StageAppService>();
+        services.AddScoped<Design.ILedStockStatusAppService, Design.LedStockStatusAppService>();
+        services.AddScoped<Design.IDraftToJobAppService, Design.DraftToJobAppService>();
 
         // The job's venue: the room the design stands in, and the venue's own drawing on its floor.
         services.AddScoped<Venues.IProjectVenueAppService, Venues.ProjectVenueAppService>();

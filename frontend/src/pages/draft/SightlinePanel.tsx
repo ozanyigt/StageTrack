@@ -1,7 +1,7 @@
 import { Alert, Card, Col, Empty, Flex, Progress, Row, Slider, Statistic, Tag, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLedJob } from '../led/useLedJob';
+import { useDraftJob } from './useDraftJob';
 import { analyseSightlines, EYE_HEIGHT_M, MAX_OFF_AXIS_DEG, MAX_SCREEN_HEIGHTS, type SightObstacle, type SightScreen, type SightVerdict } from './sightlines';
 import { SightlineView, VERDICT_COLOUR } from './SightlineView';
 import { useStageScene } from './useStageScene';
@@ -17,7 +17,7 @@ const VERDICTS: SightVerdict[] = ['Good', 'TooClose', 'TooSteep', 'TooFar', 'Blo
 export function SightlinePanel() {
   const { t } = useTranslation();
   const { job, layout, sceneProps, venue, room } = useStageScene();
-  const { panelById } = useLedJob();
+  const { panelById } = useDraftJob();
   const [eyeHeight, setEyeHeight] = useState(EYE_HEIGHT_M);
 
   const screens: SightScreen[] = useMemo(

@@ -7,7 +7,7 @@ namespace StageTrack.Authorization;
 /// <summary>
 /// An add-on module is sold to a firm, then handed out inside it with permissions. This is the first half:
 /// permissions of a module the firm never bought are dropped before anything is checked, so one filter covers
-/// the API, the menu and every button — a role granted "Led.Design" by mistake simply has no effect.
+/// the API, the menu and every button — a role granted "Design.Draft" by mistake simply has no effect.
 /// </summary>
 public interface IModuleAccess
 {
@@ -19,7 +19,7 @@ public class ModuleAccess(ITenantRepository tenantRepository) : IModuleAccess
     /// <summary>Permissions under a prefix belong to a module and need it; everything else is always available.</summary>
     private static readonly (string Prefix, string Module)[] Gated =
     [
-        (StageTrackPermissions.Led.Default, TenantModules.Led)
+        (StageTrackPermissions.Design.Default, TenantModules.Design)
     ];
 
     public async Task<List<string>> FilterPermissionsAsync(AppUser user, IEnumerable<string> permissions)

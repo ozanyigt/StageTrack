@@ -1,5 +1,5 @@
 import type { Equipment, EquipmentDiscipline } from '../../api/types';
-import type { JobLine } from '../led/useLedJob';
+import type { JobLine } from './useDraftJob';
 
 /**
  * What a group of a non-LED trade looks like on the stage. A LED wall has a shape the calculation knows - so many

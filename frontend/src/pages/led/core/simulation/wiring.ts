@@ -1,4 +1,4 @@
-import type { WiredCircuitDto } from "../../../../api/ledTypes";
+import type { WiredCircuitDto } from "../../../../api/designTypes";
 import type { PowerLayout, SignalLayout, WallConfig } from "../types";
 import { facePoints } from "./curve";
 import { SCREEN_DEPTH_M, type FeedPoint, type StageScreen } from "./stage";

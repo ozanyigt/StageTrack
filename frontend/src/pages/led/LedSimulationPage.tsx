@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { LedSimulationScreen } from './LedSimulationScreen';
 import { DIRECTIONS, STARTS, powerLayoutOf, signalLayoutOf } from './core/simulation/wiring';
 import type { PowerLayout } from './core/types';
-import { useLedJob } from './useLedJob';
+import { useDraftJob } from '../draft/useDraftJob';
 
 /**
  * Simulation: how the panels are chained into power circuits and data chains. The layout is a real decision — a
@@ -14,7 +14,7 @@ import { useLedJob } from './useLedJob';
 export function LedSimulationPage({ hideTitle = false }: { hideTitle?: boolean } = {}) {
   const { t } = useTranslation();
   // The wiring map is only asked for on this page; everywhere else the answer would be thrown away.
-  const { job, walls, nameOf, evaluation, update } = useLedJob({ wiring: true });
+  const { job, walls, nameOf, evaluation, update } = useDraftJob({ wiring: true });
   const [view, setView] = useState<'power' | 'signal'>('power');
 
   const result = evaluation.data;

@@ -3,7 +3,7 @@ import { Alert, Button, Card, Col, Empty, Flex, Row, Segmented, Space, Statistic
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ledApi } from '../../api/endpoints';
+import { draftApi } from '../../api/endpoints';
 import { planCabling, SLACK, type CableConsumer, type Distro } from './cabling';
 import { TRADE_COLOR } from './stageProps';
 import { useStageScene } from './useStageScene';
@@ -37,7 +37,7 @@ export function CablingPanel() {
   const equipmentPower = useQuery({
     queryKey: ['equipment-power', job.voltage, job.mode, lines],
     queryFn: () =>
-      ledApi.equipmentPower({
+      draftApi.equipmentPower({
         voltage: job.voltage,
         mode: job.mode,
         lines: lines.map((l) => ({ id: l.id, equipmentId: l.equipmentId, count: l.count })),

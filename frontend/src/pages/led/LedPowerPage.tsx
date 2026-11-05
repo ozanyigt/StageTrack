@@ -1,11 +1,11 @@
 import { Alert, Card, Col, Empty, Flex, Row, Statistic, Table, Tag, Typography } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ledApi } from '../../api/endpoints';
-import type { DistributionDto, PhaseDto } from '../../api/ledTypes';
+import { draftApi } from '../../api/endpoints';
+import type { DistributionDto, PhaseDto } from '../../api/designTypes';
 import { equipmentApi } from '../../api/endpoints';
 import type { EquipmentDiscipline } from '../../api/types';
-import { useLedJob, type JobLine } from './useLedJob';
+import { useDraftJob, type JobLine } from '../draft/useDraftJob';
 
 /** What one trade comes to once its lines are added up. */
 interface TradeRow {
@@ -25,10 +25,10 @@ interface TradeRow {
  */
 export function LedPowerPage() {
   const { t } = useTranslation();
-  const { job, evaluation, panelById } = useLedJob();
-  const settings = useQuery({ queryKey: ['led-settings'], queryFn: () => ledApi.settings() });
-  const processors = useQuery({ queryKey: ['led-inventory', 'Processor', undefined], queryFn: () => ledApi.processors() });
-  const extenders = useQuery({ queryKey: ['led-inventory', 'Extender', undefined], queryFn: () => ledApi.extenders() });
+  const { job, evaluation, panelById } = useDraftJob();
+  const settings = useQuery({ queryKey: ['led-settings'], queryFn: () => draftApi.settings() });
+  const processors = useQuery({ queryKey: ['led-inventory', 'Processor', undefined], queryFn: () => draftApi.processors() });
+  const extenders = useQuery({ queryKey: ['led-inventory', 'Extender', undefined], queryFn: () => draftApi.extenders() });
 
   const result = evaluation.data;
   const power = result?.job.power;
@@ -38,7 +38,7 @@ export function LedPowerPage() {
   const equipmentPower = useQuery({
     queryKey: ['equipment-power', job.voltage, job.mode, lines],
     queryFn: () =>
-      ledApi.equipmentPower({
+      draftApi.equipmentPower({
         voltage: job.voltage,
         mode: job.mode,
         lines: lines.map((l) => ({ id: l.id, equipmentId: l.equipmentId, count: l.count })),

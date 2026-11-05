@@ -2,7 +2,7 @@ import { Alert, Card, Flex, InputNumber, Space, Statistic, Table, Tag, Typograph
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Equipment } from '../../api/types';
-import type { JobLine } from '../led/useLedJob';
+import type { JobLine } from './useDraftJob';
 import type { StageProp } from './stageProps';
 
 interface Props {

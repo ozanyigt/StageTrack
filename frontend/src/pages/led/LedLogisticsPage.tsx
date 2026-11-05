@@ -3,8 +3,8 @@ import { Alert, Button, Card, Checkbox, Col, Empty, Flex, InputNumber, Progress,
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ledApi } from '../../api/endpoints';
-import type { LedTransportKind, TransportGroupDto } from '../../api/ledTypes';
+import { draftApi } from '../../api/endpoints';
+import type { LedTransportKind, TransportGroupDto } from '../../api/designTypes';
 import { useErrorToast } from '../../utils/errors';
 import {
   AUTO_MODE,
@@ -31,7 +31,7 @@ import {
   type LogisticsState,
 } from './core/logistics/load';
 import { transportKinds } from './core/transportKinds';
-import { useLedJob } from './useLedJob';
+import { useDraftJob } from '../draft/useDraftJob';
 
 const STORAGE_KEY = 'stagetrack-led-logistics-v1';
 
@@ -49,7 +49,7 @@ export function LedLogisticsPage() {
   const { token } = theme.useToken();
   const showError = useErrorToast();
   const queryClient = useQueryClient();
-  const { job, request } = useLedJob();
+  const { job, request } = useDraftJob();
 
   const [state, setState] = useState<LogisticsState>(() => {
     try {
@@ -66,16 +66,16 @@ export function LedLogisticsPage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
-  const vehicles = useQuery({ queryKey: ['led-vehicles'], queryFn: () => ledApi.vehicles() });
+  const vehicles = useQuery({ queryKey: ['led-vehicles'], queryFn: () => draftApi.vehicles() });
 
   const plan = useQuery({
     queryKey: ['led-plan', request.screens, state.vehicleMode],
-    queryFn: () => ledApi.plan({ screens: request.screens, vehicleId: state.vehicleMode === AUTO_MODE ? null : state.vehicleMode }),
+    queryFn: () => draftApi.plan({ screens: request.screens, vehicleId: state.vehicleMode === AUTO_MODE ? null : state.vehicleMode }),
     enabled: job.screens.length > 0,
   });
 
   const saveGap = useMutation({
-    mutationFn: (gapMm: number) => ledApi.saveVehicles(vehicles.data?.vehicles ?? [], gapMm),
+    mutationFn: (gapMm: number) => draftApi.saveVehicles(vehicles.data?.vehicles ?? [], gapMm),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['led-vehicles'] });
       queryClient.invalidateQueries({ queryKey: ['led-plan'] });

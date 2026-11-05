@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { theme } from 'antd';
-import type { LedPanel } from '../../api/ledTypes';
+import type { LedPanel } from '../../api/designTypes';
 
 /**
  * A screen drawn to scale: every cell is one panel, so the proportions on screen are the panel's own.

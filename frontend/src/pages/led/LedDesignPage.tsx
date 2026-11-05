@@ -2,12 +2,12 @@ import { DeleteOutlined, ExportOutlined, PlusOutlined } from '@ant-design/icons'
 import { Alert, Button, Card, Col, Collapse, Empty, Flex, Input, InputNumber, Row, Segmented, Select, Space, Statistic, Tag, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { POWER_MODES, type PowerMode } from '../../api/ledTypes';
+import { POWER_MODES, type PowerMode } from '../../api/designTypes';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { LedProcessorPage } from './LedProcessorPage';
 import { LedScreenGrid } from './LedScreenGrid';
-import { LedToJobModal } from './LedToJobModal';
-import { useLedJob } from './useLedJob';
+import { DraftToJobModal } from '../draft/DraftToJobModal';
+import { useDraftJob } from '../draft/useDraftJob';
 
 const VOLTAGES = [110, 220, 230, 240];
 
@@ -19,7 +19,7 @@ const VOLTAGES = [110, 220, 230, 240];
 export function LedDesignPage() {
   const { t } = useTranslation();
   const { can } = useAuth();
-  const { job, walls, nameOf, panels, panelById, request, evaluation, add, update, remove, setPower, clear } = useLedJob();
+  const { job, walls, nameOf, panels, panelById, request, evaluation, add, update, remove, setPower, clear } = useDraftJob();
   const [transferOpen, setTransferOpen] = useState(false);
 
   const result = evaluation.data;
@@ -33,7 +33,7 @@ export function LedDesignPage() {
           {job.screens.length > 0 && (
             <Button onClick={clear}>{t('led.clearJob')}</Button>
           )}
-          {can(Permissions.LedQuote) && (
+          {can(Permissions.DesignQuote) && (
             <Button icon={<ExportOutlined />} disabled={job.screens.length === 0} onClick={() => setTransferOpen(true)}>
               {t('led.transferToJob')}
             </Button>
@@ -187,7 +187,7 @@ export function LedDesignPage() {
         />
       )}
 
-      <LedToJobModal open={transferOpen} screens={request.screens} evaluation={result} onClose={() => setTransferOpen(false)} />
+      <DraftToJobModal open={transferOpen} screens={request.screens} evaluation={result} onClose={() => setTransferOpen(false)} />
     </>
   );
 }

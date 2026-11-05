@@ -159,12 +159,12 @@ export const Permissions = {
   AuditLog: 'StageTrack.Settings.AuditLog',
   Firm: 'StageTrack.Settings.Firm',
   LabelsAssign: 'StageTrack.Labels.Assign',
-  /** LED module (sold separately); the server already strips these when the firm has no such module. */
-  Led: 'StageTrack.Led',
-  LedManage: 'StageTrack.Led.Manage',
-  LedDesign: 'StageTrack.Led.Design',
-  LedTransport: 'StageTrack.Led.Transport',
-  LedQuote: 'StageTrack.Led.Quote',
+  /** Design module (sold separately); the server already strips these when the firm has no such module. */
+  Design: 'StageTrack.Design',
+  DesignManage: 'StageTrack.Design.Manage',
+  DesignDraft: 'StageTrack.Design.Draft',
+  DesignTransport: 'StageTrack.Design.Transport',
+  DesignQuote: 'StageTrack.Design.Quote',
   Maintenance: 'StageTrack.Maintenance',
   MaintenanceManage: 'StageTrack.Maintenance.Manage',
   Suppliers: 'StageTrack.Suppliers',

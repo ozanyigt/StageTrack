@@ -8,7 +8,7 @@ import { cutoutsFromCells, cutCells } from './core/cutCells';
 import { groupLabelInfo, mergeScreens, splitGroup } from './core/pixelGroups';
 import { totalArea } from './core/pixelMap';
 import { usePixelMap } from './usePixelMap';
-import { useLedJob } from './useLedJob';
+import { useDraftJob } from '../draft/useDraftJob';
 
 /**
  * Pixel Map: where each screen sits in the media server's composition. Panelyze's canvas, cut tool and merge tool
@@ -21,7 +21,7 @@ import { useLedJob } from './useLedJob';
 export function LedPixelMapPage() {
   const { t } = useTranslation();
   const { token } = theme.useToken();
-  const { job, walls, nameOf, update } = useLedJob();
+  const { job, walls, nameOf, update } = useDraftJob();
   const { state, setState, screens, groups, move, setView, setLayout, reset } = usePixelMap(walls, nameOf);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);

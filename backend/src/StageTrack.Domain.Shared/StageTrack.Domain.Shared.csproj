@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <!-- LED maths and its vocabulary (panel shape, transport kind...); a leaf library with no dependencies. -->
-    <ProjectReference Include="..\StageTrack.Led\StageTrack.Led.csproj" />
+    <ProjectReference Include="..\StageTrack.Design\StageTrack.Design.csproj" />
   </ItemGroup>
 
 </Project>

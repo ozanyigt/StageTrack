@@ -4,8 +4,8 @@ import type { ColumnsType } from 'antd/es/table';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ledApi } from '../../api/endpoints';
-import type { LedExtender, LedPanel, LedProcessor, LedRole } from '../../api/ledTypes';
+import { draftApi } from '../../api/endpoints';
+import type { LedExtender, LedPanel, LedProcessor, LedRole } from '../../api/designTypes';
 
 /** The three roles share the equipment fields and differ after that; the table takes the union. */
 type LedRow = LedPanel | LedProcessor | LedExtender;
@@ -23,7 +23,7 @@ export function LedInventoryPage() {
   const { can } = useAuth();
   const showError = useErrorToast();
   const queryClient = useQueryClient();
-  const manage = can(Permissions.LedManage);
+  const manage = can(Permissions.DesignManage);
 
   const [role, setRole] = useState<LedRole>('Panel');
   const [text, setText] = useState('');
@@ -33,7 +33,7 @@ export function LedInventoryPage() {
   const { data, isFetching } = useQuery<LedRow[]>({
     queryKey: ['led-inventory', role, filter.text],
     queryFn: () =>
-      role === 'Panel' ? ledApi.panels(filter) : role === 'Processor' ? ledApi.processors(filter) : ledApi.extenders(filter),
+      role === 'Panel' ? draftApi.panels(filter) : role === 'Processor' ? draftApi.processors(filter) : draftApi.extenders(filter),
     placeholderData: keepPreviousData,
   });
   const rows = data ?? [];
@@ -41,13 +41,13 @@ export function LedInventoryPage() {
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['led-inventory'] });
 
   const favorite = useMutation({
-    mutationFn: ({ id, value }: { id: string; value: boolean }) => ledApi.setFavorite(id, value),
+    mutationFn: ({ id, value }: { id: string; value: boolean }) => draftApi.setFavorite(id, value),
     onSuccess: refresh,
     onError: showError,
   });
 
   const remove = useMutation({
-    mutationFn: (id: string) => ledApi.removeFromLed(id),
+    mutationFn: (id: string) => draftApi.removeFromLed(id),
     onSuccess: refresh,
     onError: showError,
   });

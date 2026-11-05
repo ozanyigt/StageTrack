@@ -3,10 +3,10 @@ import { Alert, Button, Card, Empty, Flex, InputNumber, Space, Statistic, Table,
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ledApi } from '../../api/endpoints';
-import type { LedStockLine, LedStockScreenRequest } from '../../api/ledTypes';
+import { draftApi } from '../../api/endpoints';
+import type { LedStockLine, LedStockScreenRequest } from '../../api/designTypes';
 import { fitShape } from './core/simulation/shape';
-import { useLedJob } from './useLedJob';
+import { useDraftJob } from '../draft/useDraftJob';
 
 const OVERRIDES_KEY = 'stagetrack-led-stock-overrides-v1';
 
@@ -20,7 +20,7 @@ const OVERRIDES_KEY = 'stagetrack-led-stock-overrides-v1';
  */
 export function LedStockBody() {
   const { t } = useTranslation();
-  const { job, walls } = useLedJob();
+  const { job, walls } = useDraftJob();
   const [overrides, setOverrides] = useState<Record<string, number>>(() => {
     try {
       return JSON.parse(localStorage.getItem(OVERRIDES_KEY) ?? '{}') as Record<string, number>;
@@ -56,7 +56,7 @@ export function LedStockBody() {
 
   const status = useQuery({
     queryKey: ['led-stock-status', screens],
-    queryFn: () => ledApi.stockStatus(screens),
+    queryFn: () => draftApi.stockStatus(screens),
     enabled: job.screens.length > 0,
   });
 

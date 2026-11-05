@@ -1050,7 +1050,7 @@ export interface HostSummary {
 }
 
 /** Add-on modules a firm can be given; the names the server knows. */
-export const TENANT_MODULES = ['Led'] as const;
+export const TENANT_MODULES = ['Design'] as const;
 export type TenantModule = (typeof TENANT_MODULES)[number];
 
 export interface TenantInput {

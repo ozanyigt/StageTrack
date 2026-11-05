@@ -1,4 +1,4 @@
-import type { ScreenEvaluationDto, ScreenPowerDto } from "../../../../api/ledTypes";
+import type { ScreenEvaluationDto, ScreenPowerDto } from "../../../../api/designTypes";
 
 /**
  * 3D Sahne's counters and the selected screen's figures: read from the server's calculation (the same one every page

@@ -2,8 +2,8 @@ import { Button, Card, Checkbox, Col, Empty, Flex, InputNumber, Row, Segmented, 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ledApi, projectApi } from '../../api/endpoints';
-import type { LedStageSettings } from '../../api/ledTypes';
+import { draftApi, projectApi } from '../../api/endpoints';
+import type { StageSettings } from '../../api/designTypes';
 import { StagePropsPanel } from '../draft/StagePropsPanel';
 import { usePlanTexture } from '../draft/usePlanTexture';
 import { usePlanImage } from '../draft/useVenue';
@@ -17,7 +17,7 @@ import { CAMERA_PRESETS, type CameraPreset } from './core/stage3d/camera';
 import { carrierLabel, carriers, totalBom } from './core/stage3d/carriers';
 import { STAGE_LIMITS, STAGE_STEPS, clampSetting } from './core/stage3d/settings';
 import { stageTotals } from './core/stage3d/totals';
-import { useLedJob } from './useLedJob';
+import { useDraftJob } from '../draft/useDraftJob';
 
 const VIEW_KEY = 'stagetrack-led-stage-view-v1';
 
@@ -62,7 +62,7 @@ export function LedStagePage() {
     rigHeightM,
     evaluation,
   } = useStageScene();
-  const { setProject } = useLedJob();
+  const { setProject } = useDraftJob();
 
   const [view, setView] = useState<StageView>(() => {
     try {
@@ -88,7 +88,7 @@ export function LedStagePage() {
   const planTexture = usePlanTexture(planUrl, venue?.planMetresPerPixel);
 
   const save = useMutation({
-    mutationFn: (next: LedStageSettings) => ledApi.saveStage(next),
+    mutationFn: (next: StageSettings) => draftApi.saveStage(next),
     onSuccess: (next) => queryClient.setQueryData(['led-stage'], next),
     onError: showError,
   });
@@ -170,7 +170,7 @@ export function LedStagePage() {
 
   const setNumber = (key: keyof typeof STAGE_LIMITS, value: number | null) => {
     if (!settings || value == null) return;
-    save.mutate({ ...settings, [key]: clampSetting(key, value) } as LedStageSettings);
+    save.mutate({ ...settings, [key]: clampSetting(key, value) } as StageSettings);
   };
 
   if (job.screens.length === 0 && sceneProps.length === 0) {
@@ -314,7 +314,7 @@ export function LedStagePage() {
                 <Segmented
                   block
                   value={settings.mount}
-                  onChange={(v) => save.mutate({ ...settings, mount: v as 'Ground' | 'Flown' } as LedStageSettings)}
+                  onChange={(v) => save.mutate({ ...settings, mount: v as 'Ground' | 'Flown' } as StageSettings)}
                   options={[
                     { value: 'Ground', label: t('enums.ledStageMount.Ground') },
                     { value: 'Flown', label: t('enums.ledStageMount.Flown') },
@@ -325,7 +325,7 @@ export function LedStagePage() {
                     size="small"
                     style={{ width: '100%' }}
                     value={settings.carrier}
-                    onChange={(carrier) => save.mutate({ ...settings, carrier } as LedStageSettings)}
+                    onChange={(carrier) => save.mutate({ ...settings, carrier } as StageSettings)}
                     options={[
                       { value: 'Scaff', label: t('enums.ledStageCarrier.Scaff') },
                       { value: 'LedFrame', label: t('enums.ledStageCarrier.LedFrame') },
@@ -355,7 +355,7 @@ export function LedStagePage() {
                   <>
                     <Checkbox
                       checked={settings.groundSupport}
-                      onChange={(e) => save.mutate({ ...settings, groundSupport: e.target.checked } as LedStageSettings)}
+                      onChange={(e) => save.mutate({ ...settings, groundSupport: e.target.checked } as StageSettings)}
                     >
                       {t('led.stage.groundSupport')}
                     </Checkbox>

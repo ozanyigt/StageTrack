@@ -408,7 +408,7 @@ export function EquipmentListPage() {
                   <Button size="small" icon={<FolderOutlined />} onClick={() => setMoveOpen(true)}>
                     {t('bulk.move')}
                   </Button>
-                  {can(Permissions.LedManage) && (
+                  {can(Permissions.DesignManage) && (
                     <Button size="small" icon={<BorderOuterOutlined />} onClick={() => setRoleOpen(true)}>
                       {t('bulk.role')}
                     </Button>

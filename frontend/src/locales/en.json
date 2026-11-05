@@ -812,7 +812,7 @@
     "Identity": "User management",
     "Maintenance": "Maintenance",
     "Suppliers": "Suppliers",
-    "Led": "LED"
+    "Design": "Design"
   },
   "permissions": {
     "Equipment": "View equipment",
@@ -842,11 +842,11 @@
     "Settings_LabelTemplates": "Manage label templates",
     "Equipment_Delete": "Delete equipment (written to the audit log)",
     "Settings_AuditLog": "View the audit log",
-    "Led": "LED module",
-    "Led_Manage": "Edit LED technical data",
-    "Led_Design": "Pixel Map, simulation and 3D stage",
-    "Led_Transport": "Loading plan and vehicles",
-    "Led_Quote": "Turn a calculation into quote lines"
+    "Design": "Design module",
+    "Design_Manage": "Edit technical data",
+    "Design_Draft": "Draft screens: Pixel Map, simulation and 3D stage",
+    "Design_Transport": "Loading plan and vehicles",
+    "Design_Quote": "Transfer the calculation to a quote"
   },
   "excel": {
     "export": "Excel",
@@ -1286,7 +1286,7 @@
     "modulesHint": "Add-on modules the firm bought. Who uses them inside the firm is a matter of roles.",
     "noModules": "No add-on modules",
     "module": {
-      "Led": "LED (screen design and calculation)"
+      "Design": "Design (quote draft and calculation)"
     }
   },
   "subscriptionWarning": "Your subscription ends on {{date}} ({{count}} days left). Please contact us to renew.",

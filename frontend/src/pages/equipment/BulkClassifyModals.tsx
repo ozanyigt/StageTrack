@@ -2,8 +2,8 @@ import { Alert, App, Form, InputNumber, Modal, Segmented, Select, Space, Typogra
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { equipmentApi, folderApi, ledApi } from '../../api/endpoints';
-import type { LedRole } from '../../api/ledTypes';
+import { equipmentApi, folderApi, draftApi } from '../../api/endpoints';
+import type { LedRole } from '../../api/designTypes';
 import type { EquipmentDiscipline } from '../../api/types';
 import { TRADE_COLOR } from '../draft/stageProps';
 import { useErrorToast } from '../../utils/errors';
@@ -138,7 +138,7 @@ export function BulkLedRoleModal({ open, ids, onClose, onDone }: CommonProps) {
       const v = await form.validateFields();
       for (const id of ids) {
         if (role === 'Panel') {
-          await ledApi.savePanel(id, {
+          await draftApi.savePanel(id, {
             pitchMm: v.pitchMm,
             widthMm: v.widthMm,
             heightMm: v.heightMm,
@@ -151,9 +151,9 @@ export function BulkLedRoleModal({ open, ids, onClose, onDone }: CommonProps) {
             compatibleProcessorIds: [],
           } as never);
         } else if (role === 'Processor') {
-          await ledApi.saveProcessor(id, { totalPixels: v.totalPixels, ethernetPorts: v.ethernetPorts, optPorts: v.optPorts } as never);
+          await draftApi.saveProcessor(id, { totalPixels: v.totalPixels, ethernetPorts: v.ethernetPorts, optPorts: v.optPorts } as never);
         } else {
-          await ledApi.saveExtender(id, { ethernetPorts: v.ethernetPorts, fiberPorts: v.fiberPorts, maxPixels: v.maxPixels } as never);
+          await draftApi.saveExtender(id, { ethernetPorts: v.ethernetPorts, fiberPorts: v.fiberPorts, maxPixels: v.maxPixels } as never);
         }
       }
       return ids.length;

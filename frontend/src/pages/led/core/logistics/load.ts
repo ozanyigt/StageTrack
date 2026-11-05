@@ -1,4 +1,4 @@
-import type { LedTransportKind, PlanStackDto, TransportGroupDto, TransportPlanResponse, TransportVehicle as TransportVehicleDto } from "../../../../api/ledTypes";
+import type { LedTransportKind, PlanStackDto, TransportGroupDto, TransportPlanResponse, TransportVehicle as TransportVehicleDto } from "../../../../api/designTypes";
 import { FALLBACK_KIND_COLOR, kindById, type TransportKindInfo } from "../transportKinds";
 
 /**

@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { equipmentApi } from '../../api/endpoints';
 import type { EquipmentDiscipline } from '../../api/types';
-import type { JobLine } from '../led/useLedJob';
+import type { JobLine } from './useDraftJob';
 
 interface Props {
   discipline: EquipmentDiscipline;

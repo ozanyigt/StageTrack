@@ -1,4 +1,4 @@
-import type { LedExtender, LedPanel, LedProcessor } from '../../../api/ledTypes';
+import type { LedExtender, LedPanel, LedProcessor } from '../../../api/designTypes';
 import type { ExtenderRow, InventoryItem, IslemciRow, Konum, PanelTipi } from './types';
 
 /**

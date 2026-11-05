@@ -1,4 +1,4 @@
-import type { EvaluateResponse } from "../../../../api/ledTypes";
+import type { EvaluateResponse } from "../../../../api/designTypes";
 import { deviceId } from "../evaluation";
 import type { ExtenderRow, IslemciRow } from "../types";
 

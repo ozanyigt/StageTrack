@@ -1,6 +1,6 @@
 import { http, toQuery } from './http';
 import type * as T from './types';
-import type * as L from './ledTypes';
+import type * as L from './designTypes';
 import type * as S from './venueTypes';
 
 const get = <R>(url: string, params?: object) =>
@@ -309,34 +309,38 @@ export const firmApi = {
   removeLogo: () => del('/firm/logo'),
 };
 
-/** LED module (sold separately; the server strips its permissions for firms without it). */
-export const ledApi = {
-  settings: () => get<L.CalcSettings>('/led/calc/settings'),
-  evaluate: (input: L.EvaluateRequest) => post<L.EvaluateResponse>('/led/calc/evaluate', input),
-  equipmentPower: (input: L.EquipmentPowerRequest) => post<L.EquipmentPowerResponse>('/led/calc/equipment-power', input),
+/**
+ * The design module (sold separately; the server strips its permissions for firms without it): the quote draft
+ * of a job across the five trades. The paths that say `led` are the LED-only parts - the screen maths and the
+ * panel catalogue; the rest serves whatever the draft holds.
+ */
+export const draftApi = {
+  settings: () => get<L.CalcSettings>('/draft/led/calc/settings'),
+  evaluate: (input: L.EvaluateRequest) => post<L.EvaluateResponse>('/draft/led/calc/evaluate', input),
+  equipmentPower: (input: L.EquipmentPowerRequest) => post<L.EquipmentPowerResponse>('/draft/led/calc/equipment-power', input),
 
-  panels: (filter?: L.LedCatalogFilter) => get<L.LedPanel[]>('/led/inventory/panels', filter),
-  processors: (filter?: L.LedCatalogFilter) => get<L.LedProcessor[]>('/led/inventory/processors', filter),
-  extenders: (filter?: L.LedCatalogFilter) => get<L.LedExtender[]>('/led/inventory/extenders', filter),
-  savePanel: (equipmentId: T.Guid, input: L.LedPanelInput) => put<L.LedPanel>(`/led/inventory/panels/${equipmentId}`, input),
-  saveProcessor: (equipmentId: T.Guid, input: L.LedProcessorInput) => put<L.LedProcessor>(`/led/inventory/processors/${equipmentId}`, input),
-  saveExtender: (equipmentId: T.Guid, input: L.LedExtenderInput) => put<L.LedExtender>(`/led/inventory/extenders/${equipmentId}`, input),
+  panels: (filter?: L.LedCatalogFilter) => get<L.LedPanel[]>('/draft/led/inventory/panels', filter),
+  processors: (filter?: L.LedCatalogFilter) => get<L.LedProcessor[]>('/draft/led/inventory/processors', filter),
+  extenders: (filter?: L.LedCatalogFilter) => get<L.LedExtender[]>('/draft/led/inventory/extenders', filter),
+  savePanel: (equipmentId: T.Guid, input: L.LedPanelInput) => put<L.LedPanel>(`/draft/led/inventory/panels/${equipmentId}`, input),
+  saveProcessor: (equipmentId: T.Guid, input: L.LedProcessorInput) => put<L.LedProcessor>(`/draft/led/inventory/processors/${equipmentId}`, input),
+  saveExtender: (equipmentId: T.Guid, input: L.LedExtenderInput) => put<L.LedExtender>(`/draft/led/inventory/extenders/${equipmentId}`, input),
   /** Takes the equipment out of the LED module; the equipment record itself stays. */
-  removeFromLed: (equipmentId: T.Guid) => del(`/led/inventory/${equipmentId}`),
-  setFavorite: (equipmentId: T.Guid, favorite: boolean) => put<void>(`/led/inventory/panels/${equipmentId}/favorite`, { favorite }),
+  removeFromLed: (equipmentId: T.Guid) => del(`/draft/led/inventory/${equipmentId}`),
+  setFavorite: (equipmentId: T.Guid, favorite: boolean) => put<void>(`/draft/led/inventory/panels/${equipmentId}/favorite`, { favorite }),
 
-  vehicles: () => get<L.TransportSettings>('/led/transport/vehicles'),
+  vehicles: () => get<L.TransportSettings>('/draft/transport/vehicles'),
   saveVehicles: (vehicles: L.SaveTransportVehicle[], gapMm?: number) =>
-    put<L.TransportSettings>('/led/transport/vehicles', { vehicles, gapMm }),
-  plan: (input: L.TransportPlanRequest) => post<L.TransportPlanResponse>('/led/transport/plan', input),
+    put<L.TransportSettings>('/draft/transport/vehicles', { vehicles, gapMm }),
+  plan: (input: L.TransportPlanRequest) => post<L.TransportPlanResponse>('/draft/transport/plan', input),
 
-  stage: () => get<L.LedStageSettings>('/led/stage'),
-  saveStage: (input: L.LedStageSettings) => put<L.LedStageSettings>('/led/stage', input),
+  stage: () => get<L.StageSettings>('/draft/stage'),
+  saveStage: (input: L.StageSettings) => put<L.StageSettings>('/draft/stage', input),
 
-  stockStatus: (screens: L.LedStockScreenRequest[]) => post<L.LedStockStatusResponse>('/led/stock-status', { screens }),
+  stockStatus: (screens: L.LedStockScreenRequest[]) => post<L.LedStockStatusResponse>('/draft/led/stock-status', { screens }),
 
-  previewJob: (projectId: T.Guid, input: L.LedToJobInput) => post<L.LedToJobResult>(`/led/jobs/${projectId}/preview`, input),
-  transferToJob: (projectId: T.Guid, input: L.LedToJobInput) => post<L.LedToJobResult>(`/led/jobs/${projectId}/transfer`, input),
+  previewJob: (projectId: T.Guid, input: L.DraftToJobInput) => post<L.DraftToJobResult>(`/draft/jobs/${projectId}/preview`, input),
+  transferToJob: (projectId: T.Guid, input: L.DraftToJobInput) => post<L.DraftToJobResult>(`/draft/jobs/${projectId}/transfer`, input),
 };
 
 /**

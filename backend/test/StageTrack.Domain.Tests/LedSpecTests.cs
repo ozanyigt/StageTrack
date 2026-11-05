@@ -1,6 +1,6 @@
 using StageTrack.Inventory;
-using StageTrack.Led;
-using StageTrack.Led.Transport;
+using StageTrack.Design;
+using StageTrack.Design.Transport;
 using Xunit;
 
 namespace StageTrack.Domain.Tests;
@@ -119,7 +119,7 @@ public class LedSpecTests
         var spec = Spec(Guid.CreateVersion7());
 
         var error = Assert.Throws<BusinessException>(() =>
-            spec.SetTransport(TransportKind.Case, 6, "72x60x100", 45, LedConsts.MaxStackLimit + 1));
+            spec.SetTransport(TransportKind.Case, 6, "72x60x100", 45, DesignConsts.MaxStackLimit + 1));
         Assert.Equal(StageTrackErrorCodes.LedStackTooHigh, error.Code);
     }
 
@@ -174,7 +174,7 @@ public class LedSpecTests
     [Fact]
     public void A_vehicle_is_kept_in_millimetres_and_handed_to_the_maths_in_centimetres()
     {
-        var vehicle = new LedTransportVehicle(Guid.CreateVersion7(), "Kamyonet", 4200, 2000, 2100, 1500, 1);
+        var vehicle = new TransportVehicle(Guid.CreateVersion7(), "Kamyonet", 4200, 2000, 2100, 1500, 1);
 
         var spec = LedSpecMapper.ToVehicleSpec(vehicle);
 
@@ -187,10 +187,10 @@ public class LedSpecTests
     [Fact]
     public void Stage_settings_start_from_the_shared_defaults_and_never_go_negative()
     {
-        var settings = new LedStageSettings(Guid.CreateVersion7());
-        Assert.Equal(LedStageSettings.Defaults, settings.Values);
+        var settings = new StageSettings(Guid.CreateVersion7());
+        Assert.Equal(StageSettings.Defaults, settings.Values);
 
-        settings.Apply(LedStageSettings.Defaults with { StageWidthM = -5, TrussHeightM = 10 });
+        settings.Apply(StageSettings.Defaults with { StageWidthM = -5, TrussHeightM = 10 });
 
         Assert.Equal(0, settings.StageWidthM);
         Assert.Equal(10, settings.TrussHeightM);

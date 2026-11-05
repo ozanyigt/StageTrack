@@ -56,7 +56,7 @@ public class CurrentUserDto
     /// <summary>
     /// Add-on modules the firm bought. Permissions of a module it does not have are already stripped from
     /// <see cref="Permissions"/>, so screens normally need only the permission; this is for wording like
-    /// "the LED module is not part of your subscription".
+    /// "the design module is not part of your subscription".
     /// </summary>
     public List<string> Modules { get; set; } = [];
 }

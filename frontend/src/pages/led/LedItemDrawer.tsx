@@ -2,7 +2,7 @@ import { Alert, Button, Col, Drawer, Form, Input, InputNumber, Row, Select, Spac
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ledApi } from '../../api/endpoints';
+import { draftApi } from '../../api/endpoints';
 import {
   LED_PANEL_GROUPS,
   LED_PANEL_TYPES,
@@ -11,7 +11,7 @@ import {
   type LedPanelInput,
   type LedProcessorInput,
   type LedRole,
-} from '../../api/ledTypes';
+} from '../../api/designTypes';
 import { EquipmentSelect } from '../../components/Selects';
 import { useGuardedForm } from '../../components/useGuardedModal';
 import { useErrorToast } from '../../utils/errors';
@@ -50,16 +50,16 @@ export function LedItemDrawer({ open, role, equipmentId, onClose, onSaved }: Pro
 
   const processors = useQuery({
     queryKey: ['led-inventory', 'Processor', undefined],
-    queryFn: () => ledApi.processors(),
+    queryFn: () => draftApi.processors(),
     enabled: open && role === 'Panel',
   });
 
   const existing = useQuery({
     queryKey: ['led-item', role, equipmentId],
     queryFn: async () => {
-      const list = role === 'Panel' ? await ledApi.panels({ includeArchived: true })
-        : role === 'Processor' ? await ledApi.processors({ includeArchived: true })
-        : await ledApi.extenders({ includeArchived: true });
+      const list = role === 'Panel' ? await draftApi.panels({ includeArchived: true })
+        : role === 'Processor' ? await draftApi.processors({ includeArchived: true })
+        : await draftApi.extenders({ includeArchived: true });
       return list.find((i) => i.equipmentId === equipmentId) ?? null;
     },
     enabled: open && editing,
@@ -83,9 +83,9 @@ export function LedItemDrawer({ open, role, equipmentId, onClose, onSaved }: Pro
   const save = useMutation({
     mutationFn: async (values: Record<string, unknown>) => {
       const id = (equipmentId ?? values.equipmentId) as string;
-      if (role === 'Panel') return ledApi.savePanel(id, values as unknown as LedPanelInput);
-      if (role === 'Processor') return ledApi.saveProcessor(id, values as unknown as LedProcessorInput);
-      return ledApi.saveExtender(id, values as unknown as LedExtenderInput);
+      if (role === 'Panel') return draftApi.savePanel(id, values as unknown as LedPanelInput);
+      if (role === 'Processor') return draftApi.saveProcessor(id, values as unknown as LedProcessorInput);
+      return draftApi.saveExtender(id, values as unknown as LedExtenderInput);
     },
     onSuccess: () => {
       guard.markSaved();

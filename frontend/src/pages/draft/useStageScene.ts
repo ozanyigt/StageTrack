@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { equipmentApi, ledApi } from '../../api/endpoints';
+import { equipmentApi, draftApi } from '../../api/endpoints';
 import { usePixelMap } from '../led/usePixelMap';
-import { useLedJob } from '../led/useLedJob';
+import { useDraftJob } from './useDraftJob';
 import { sceneLayout } from '../led/core/stage3d/scene';
 import { stage3dScreens } from '../led/core/stage3d/screens';
 import { sanitizePlacements, type Placements } from '../led/core/stage3d/placements';
@@ -22,7 +22,7 @@ export const PROP_PLACEMENTS_KEY = 'stagetrack-stage-prop-placements-v1';
  */
 export function useStageScene() {
   const { t } = useTranslation();
-  const { job, walls, nameOf, evaluation } = useLedJob();
+  const { job, walls, nameOf, evaluation } = useDraftJob();
   const { state: mapState } = usePixelMap(walls, nameOf);
 
   const [placements, setPlacements] = useState<Placements>(() => {
@@ -44,7 +44,7 @@ export function useStageScene() {
   useEffect(() => localStorage.setItem(PLACEMENTS_KEY, JSON.stringify(placements)), [placements]);
   useEffect(() => localStorage.setItem(PROP_PLACEMENTS_KEY, JSON.stringify(propPlacements)), [propPlacements]);
 
-  const stored = useQuery({ queryKey: ['led-stage'], queryFn: () => ledApi.stage() });
+  const stored = useQuery({ queryKey: ['led-stage'], queryFn: () => draftApi.stage() });
 
   /** The server's DTO and the ported library share field names and enum values, so no mapping is needed. */
   const settings = (stored.data ?? null) as StageSettings | null;

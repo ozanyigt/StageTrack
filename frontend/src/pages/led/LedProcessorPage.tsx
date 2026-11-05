@@ -3,9 +3,9 @@ import { Alert, Badge, Card, Col, Empty, Flex, Progress, Row, Space, Statistic, 
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { ledApi } from '../../api/endpoints';
-import type { ProcessorOptionDto } from '../../api/ledTypes';
-import { useLedJob } from './useLedJob';
+import { draftApi } from '../../api/endpoints';
+import type { ProcessorOptionDto } from '../../api/designTypes';
+import { useDraftJob } from '../draft/useDraftJob';
 
 /**
  * Processor and extender choice. The server works out every combination that can drive a screen; this is where
@@ -19,10 +19,10 @@ import { useLedJob } from './useLedJob';
 export function LedProcessorPage({ hideTitle = false }: { hideTitle?: boolean } = {}) {
   const { t } = useTranslation();
   const { token } = theme.useToken();
-  const { job, walls, nameOf, evaluation, update } = useLedJob();
+  const { job, walls, nameOf, evaluation, update } = useDraftJob();
 
-  const processors = useQuery({ queryKey: ['led-inventory', 'Processor', undefined], queryFn: () => ledApi.processors() });
-  const extenders = useQuery({ queryKey: ['led-inventory', 'Extender', undefined], queryFn: () => ledApi.extenders() });
+  const processors = useQuery({ queryKey: ['led-inventory', 'Processor', undefined], queryFn: () => draftApi.processors() });
+  const extenders = useQuery({ queryKey: ['led-inventory', 'Extender', undefined], queryFn: () => draftApi.extenders() });
 
   const deviceById = useMemo(() => {
     const map = new Map<string, { code: string; name: string; stock: number }>();

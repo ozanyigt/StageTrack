@@ -812,7 +812,7 @@
     "Identity": "Kullanıcı yönetimi",
     "Maintenance": "Bakım",
     "Suppliers": "Tedarikçiler",
-    "Led": "LED"
+    "Design": "Tasarım"
   },
   "permissions": {
     "Equipment": "Ekipmanı görüntüleme",
@@ -842,11 +842,11 @@
     "Settings_LabelTemplates": "Etiket şablonlarını yönetme",
     "Equipment_Delete": "Ekipman silme (işlem kaydına yazılır)",
     "Settings_AuditLog": "İşlem kaydını görüntüleme",
-    "Led": "LED modülü",
-    "Led_Manage": "LED teknik verisini düzenle",
-    "Led_Design": "Pixel Map, simülasyon ve 3D sahne",
-    "Led_Transport": "Yükleme planı ve araçlar",
-    "Led_Quote": "Hesabı teklife aktar"
+    "Design": "Tasarım modülü",
+    "Design_Manage": "Teknik veriyi düzenle",
+    "Design_Draft": "Taslak ekranları: Pixel Map, simülasyon ve 3D sahne",
+    "Design_Transport": "Yükleme planı ve araçlar",
+    "Design_Quote": "Hesabı teklife aktar"
   },
   "excel": {
     "export": "Excel",
@@ -1286,7 +1286,7 @@
     "modulesHint": "Firmanın satın aldığı ek modüller. Firma içinde kimin kullanacağı rollerle belirlenir.",
     "noModules": "Ek modül yok",
     "module": {
-      "Led": "LED (ekran tasarımı ve hesap)"
+      "Design": "Tasarım (teklif taslağı ve hesap)"
     }
   },
   "subscriptionWarning": "Aboneliğiniz {{date}} tarihinde sona eriyor ({{count}} gün kaldı). Yenilemek için bizimle iletişime geçin.",

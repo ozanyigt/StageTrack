@@ -46,11 +46,11 @@ public class StageTrackDbContext(
     public DbSet<Attachment> Attachments => Set<Attachment>();
     public DbSet<Note> Notes => Set<Note>();
     public DbSet<TaskItem> Tasks => Set<TaskItem>();
-    public DbSet<Led.EquipmentLedSpec> EquipmentLedSpecs => Set<Led.EquipmentLedSpec>();
-    public DbSet<Led.LedStageSettings> LedStageSettings => Set<Led.LedStageSettings>();
-    public DbSet<Led.LedTransportSettings> LedTransportSettings => Set<Led.LedTransportSettings>();
-    public DbSet<Led.LedTransportVehicle> LedTransportVehicles => Set<Led.LedTransportVehicle>();
-    public DbSet<Led.LedPanelFavorite> LedPanelFavorites => Set<Led.LedPanelFavorite>();
+    public DbSet<Design.EquipmentLedSpec> EquipmentLedSpecs => Set<Design.EquipmentLedSpec>();
+    public DbSet<Design.StageSettings> StageSettings => Set<Design.StageSettings>();
+    public DbSet<Design.TransportSettings> TransportSettings => Set<Design.TransportSettings>();
+    public DbSet<Design.TransportVehicle> TransportVehicles => Set<Design.TransportVehicle>();
+    public DbSet<Design.LedPanelFavorite> LedPanelFavorites => Set<Design.LedPanelFavorite>();
     public DbSet<Venues.ProjectVenue> ProjectVenues => Set<Venues.ProjectVenue>();
 
     /// <summary>Read by the global query filter on every query, so switching company needs no new context.</summary>

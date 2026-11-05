@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { equipmentApi } from '../../api/endpoints';
 import { EQUIPMENT_DISCIPLINES, type Equipment, type EquipmentDiscipline } from '../../api/types';
 import { LedStockBody } from '../led/LedStockStatusPage';
-import { useLedJob, type JobLine } from '../led/useLedJob';
+import { useDraftJob, type JobLine } from './useDraftJob';
 
 /**
  * What the firm owns against what this job takes, one trade at a time. Mixing five trades in one list is how a
@@ -14,7 +14,7 @@ import { useLedJob, type JobLine } from '../led/useLedJob';
  */
 export function StockStatusPage() {
   const { t } = useTranslation();
-  const { job } = useLedJob();
+  const { job } = useDraftJob();
   const [trade, setTrade] = useState<EquipmentDiscipline>('Led');
 
   return (

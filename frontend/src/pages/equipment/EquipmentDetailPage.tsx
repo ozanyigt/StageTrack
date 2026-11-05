@@ -84,7 +84,7 @@ export function EquipmentDetailPage() {
     },
     { key: 'suppliers', label: `${t('equipmentDetail.tabs.suppliers')} (${e.suppliers.length})`, children: <EquipmentSuppliersTab equipment={e} /> },
     // Only for a firm that bought the LED module: the server strips the permission otherwise and the tab goes with it.
-    ...(can(Permissions.Led) ? [{ key: 'led', label: t('equipmentDetail.tabs.led'), children: <EquipmentLedTab equipment={e} /> }] : []),
+    ...(can(Permissions.Design) ? [{ key: 'led', label: t('equipmentDetail.tabs.led'), children: <EquipmentLedTab equipment={e} /> }] : []),
     { key: 'inspection', label: t('equipmentDetail.tabs.inspection'), children: <EquipmentInspectionTab equipment={e} /> },
     ...(can(Permissions.Maintenance) ? [{ key: 'repairs', label: t('equipmentDetail.tabs.repairs'), children: <EquipmentRepairsTab equipment={e} /> }] : []),
     { key: 'history', label: t('equipmentDetail.tabs.history'), children: <HistoryTab equipmentId={e.id} /> },

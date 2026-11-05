@@ -18,10 +18,10 @@ public enum TenantStatus
 /// <summary>Add-on modules a firm can be given. Kept as names so a new module needs no migration.</summary>
 public static class TenantModules
 {
-    /// <summary>LED screen design and calculation (Panelyze): Pixel Map, power, processors, 3D stage, logistics.</summary>
-    public const string Led = "Led";
+    /// <summary>The design workspace: Pixel Map, power, processors, simulation, 3D stage, logistics.</summary>
+    public const string Design = "Design";
 
-    public static readonly IReadOnlyList<string> All = [Led];
+    public static readonly IReadOnlyList<string> All = [Design];
 }
 
 public static class TenantConsts

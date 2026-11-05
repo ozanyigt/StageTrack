@@ -19,23 +19,24 @@ public static class StageTrackPermissions
     }
 
     /// <summary>
-    /// The LED module (Panelyze): screen layout, power and circuits, processor planning, 3D stage and the
-    /// loading plan. A firm sees it only when the platform admin switched the module on for it.
+    /// The design module: the quote draft of a job across the five trades - screen layout, power and circuits,
+    /// processor planning, sound and light simulation, the 3D stage and the loading plan. A firm sees it only
+    /// when the platform admin switched the module on for it.
     /// </summary>
-    public static class Led
+    public static class Design
     {
-        public const string Default = Prefix + ".Led";
+        public const string Default = Prefix + ".Design";
 
-        /// <summary>Enter and change the technical LED data of equipment (pitch, pixels, ports, case).</summary>
+        /// <summary>Enter and change the technical data of equipment (pitch, pixels, ports, case).</summary>
         public const string Manage = Default + ".Manage";
 
-        /// <summary>Pixel Map, simulation and 3D stage.</summary>
-        public const string Design = Default + ".Design";
+        /// <summary>The draft screens: Pixel Map, simulation and 3D stage.</summary>
+        public const string Draft = Default + ".Draft";
 
         /// <summary>The loading plan and its vehicles.</summary>
         public const string Transport = Default + ".Transport";
 
-        /// <summary>Turn a calculated screen into quote lines on a job.</summary>
+        /// <summary>Turn a calculated draft into quote lines on a job.</summary>
         public const string Quote = Default + ".Quote";
     }
 
@@ -133,13 +134,13 @@ public static class StageTrackPermissions
             new(Equipment.Delete, Equipment.Manage),
             new(Labels.Assign, Equipment.Default)
         ]),
-        new("Led",
+        new("Design",
         [
-            new(Led.Default),
-            new(Led.Manage, Led.Default),
-            new(Led.Design, Led.Default),
-            new(Led.Transport, Led.Default),
-            new(Led.Quote, Led.Default)
+            new(Design.Default),
+            new(Design.Manage, Design.Default),
+            new(Design.Draft, Design.Default),
+            new(Design.Transport, Design.Default),
+            new(Design.Quote, Design.Default)
         ]),
         new("Maintenance",
         [

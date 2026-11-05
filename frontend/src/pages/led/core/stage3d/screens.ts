@@ -1,4 +1,4 @@
-import type { ScreenEvaluationDto } from "../../../../api/ledTypes";
+import type { ScreenEvaluationDto } from "../../../../api/designTypes";
 import { cutCells } from "../cutCells";
 import { parsePanelBoyut } from "../panel";
 import type { PixelMapState } from "../pixelMap";

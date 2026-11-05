@@ -1,7 +1,7 @@
 import { Empty, Flex, Space, Tag, Tooltip, Typography, theme } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { ScreenEvaluationDto } from '../../api/ledTypes';
+import type { ScreenEvaluationDto } from '../../api/designTypes';
 import { CHAIN_INK, chainColor, chainPattern, contrast, dashArray } from './core/simulation/chainStyle';
 import { cutCells } from './core/cutCells';
 import type { WallConfig } from './core/types';

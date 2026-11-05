@@ -6,8 +6,8 @@ import { Navigate, useParams } from 'react-router-dom';
 import type { EquipmentDiscipline } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { LedDesignPage } from '../led/LedDesignPage';
-import { LedToJobModal } from '../led/LedToJobModal';
-import { useLedJob } from '../led/useLedJob';
+import { DraftToJobModal } from './DraftToJobModal';
+import { useDraftJob } from './useDraftJob';
 import { DisciplineDesign } from './DisciplineDesign';
 
 /** The URL says the trade, so every door is a link a user can keep, and the back button works between them. */
@@ -31,7 +31,7 @@ export function DesignPage() {
   const { can } = useAuth();
   const { discipline: path } = useParams<{ discipline?: string }>();
   const discipline = path ? BY_PATH[path] : undefined;
-  const { job, addLine, updateLine, removeLine } = useLedJob();
+  const { job, addLine, updateLine, removeLine } = useDraftJob();
   const [transferOpen, setTransferOpen] = useState(false);
 
   if (!discipline) {
@@ -49,7 +49,7 @@ export function DesignPage() {
           {t('draft.designTitle', { trade: t(`enums.equipmentDiscipline.${discipline}`) })}
         </Typography.Title>
         {/* The draft goes over as a whole - screens and every trade's groups - from whichever door it is sent. */}
-        {can(Permissions.LedQuote) && (
+        {can(Permissions.DesignQuote) && (
           <Space>
             <Button
               icon={<ExportOutlined />}
@@ -62,7 +62,7 @@ export function DesignPage() {
         )}
       </div>
 
-      <LedToJobModal open={transferOpen} screens={[]} onClose={() => setTransferOpen(false)} />
+      <DraftToJobModal open={transferOpen} screens={[]} onClose={() => setTransferOpen(false)} />
 
       <DisciplineDesign
         discipline={discipline}

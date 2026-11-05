@@ -3,8 +3,8 @@ import { Button, Card, Descriptions, Empty, Flex, Segmented, Space, Tag, Typogra
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ledApi } from '../../api/endpoints';
-import type { LedRole } from '../../api/ledTypes';
+import { draftApi } from '../../api/endpoints';
+import type { LedRole } from '../../api/designTypes';
 import type { EquipmentDetail } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { LedItemDrawer } from '../led/LedItemDrawer';
@@ -22,16 +22,16 @@ export function EquipmentLedTab({ equipment }: { equipment: EquipmentDetail }) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<LedRole | null>(null);
   const [adding, setAdding] = useState<LedRole>('Panel');
-  const manage = can(Permissions.LedManage);
+  const manage = can(Permissions.DesignManage);
 
   /** One equipment is at most one of the three, so the first list it turns up in is its role. */
   const spec = useQuery({
     queryKey: ['led-spec', equipment.id],
     queryFn: async () => {
       const [panels, processors, extenders] = await Promise.all([
-        ledApi.panels({ includeArchived: true }),
-        ledApi.processors({ includeArchived: true }),
-        ledApi.extenders({ includeArchived: true }),
+        draftApi.panels({ includeArchived: true }),
+        draftApi.processors({ includeArchived: true }),
+        draftApi.extenders({ includeArchived: true }),
       ]);
       const panel = panels.find((p) => p.equipmentId === equipment.id);
       if (panel) return { role: 'Panel' as LedRole, panel };
@@ -84,9 +84,9 @@ export function EquipmentLedTab({ equipment }: { equipment: EquipmentDetail }) {
 
   const { role, panel, processor, extender } = spec.data as {
     role: LedRole;
-    panel?: Awaited<ReturnType<typeof ledApi.panels>>[number];
-    processor?: Awaited<ReturnType<typeof ledApi.processors>>[number];
-    extender?: Awaited<ReturnType<typeof ledApi.extenders>>[number];
+    panel?: Awaited<ReturnType<typeof draftApi.panels>>[number];
+    processor?: Awaited<ReturnType<typeof draftApi.processors>>[number];
+    extender?: Awaited<ReturnType<typeof draftApi.extenders>>[number];
   };
 
   return (

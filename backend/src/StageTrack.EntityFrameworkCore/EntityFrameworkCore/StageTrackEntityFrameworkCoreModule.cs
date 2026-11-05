@@ -52,11 +52,11 @@ public static class StageTrackEntityFrameworkCoreModule
         services.AddScoped<IAttachmentRepository, AttachmentRepository>();
         services.AddScoped<INoteRepository, NoteRepository>();
         services.AddScoped<ITaskItemRepository, TaskItemRepository>();
-        services.AddScoped<Led.IEquipmentLedSpecRepository, EquipmentLedSpecRepository>();
-        services.AddScoped<Led.ILedStageSettingsRepository, LedStageSettingsRepository>();
-        services.AddScoped<Led.ILedTransportSettingsRepository, LedTransportSettingsRepository>();
-        services.AddScoped<Led.ILedTransportVehicleRepository, LedTransportVehicleRepository>();
-        services.AddScoped<Led.ILedPanelFavoriteRepository, LedPanelFavoriteRepository>();
+        services.AddScoped<Design.IEquipmentLedSpecRepository, EquipmentLedSpecRepository>();
+        services.AddScoped<Design.IStageSettingsRepository, StageSettingsRepository>();
+        services.AddScoped<Design.ITransportSettingsRepository, TransportSettingsRepository>();
+        services.AddScoped<Design.ITransportVehicleRepository, TransportVehicleRepository>();
+        services.AddScoped<Design.ILedPanelFavoriteRepository, LedPanelFavoriteRepository>();
         services.AddScoped<Venues.IProjectVenueRepository, ProjectVenueRepository>();
         return services;
     }

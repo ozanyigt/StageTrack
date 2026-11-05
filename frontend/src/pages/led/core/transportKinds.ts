@@ -1,4 +1,4 @@
-import type { LedTransportKind } from '../../../api/ledTypes';
+import type { LedTransportKind } from '../../../api/designTypes';
 
 /**
  * The loading plan groups and colours its cases. Panelyze grouped by the workspace's own kinds of equipment

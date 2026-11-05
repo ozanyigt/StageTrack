@@ -8,7 +8,7 @@ import type {
   PhaseDto,
   ProcessorOptionDto,
   ScreenPowerDto,
-} from "../../../api/ledTypes";
+} from "../../../api/designTypes";
 import type {
   CircuitInfo,
   DistributionRecommendation,
