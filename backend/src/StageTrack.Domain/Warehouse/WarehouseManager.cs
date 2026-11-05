@@ -106,7 +106,7 @@ public class WarehouseManager(
 
         var movement = new WarehouseMovement(
             Guid.CreateVersion7(),
-            direction == ScanDirection.Out ? MovementAction.CheckOut : MovementAction.CheckIn,
+            direction == ScanDirection.Out ? MovementAction.CheckedOut : MovementAction.CheckedIn,
             equipment.Id, unit?.Id, project.Id, 1, target.Label.Code, userId);
 
         var outAfter = outBefore + (direction == ScanDirection.Out ? 1 : -1);

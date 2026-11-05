@@ -30,7 +30,7 @@ public class StageSettings : CompanyAggregateRoot
     /// <summary>What a firm sees before it saves its own values.</summary>
     public static StageValues Defaults { get; } = new(
         StageWidthM: 12, StageDepthM: 8, StageHeightM: 1.2m, FrontGapM: 0.5m,
-        Mount: LedStageMount.Ground, Carrier: LedStageCarrier.Scaff,
+        Mount: LedStageMount.Ground, Carrier: LedStageCarrier.Scaffold,
         LegDepthM: 1, BottomM: 0, GroundSupport: false, GroundSupportHeightM: 1,
         TrussHeightM: 8, HangAllowanceM: 0.5m);
 
@@ -77,11 +77,15 @@ public class TransportSettings : CompanyAggregateRoot
 /// <summary>A vehicle of the loading plan: its load space in millimetres and how much it may carry.</summary>
 public class TransportVehicle : CompanyAggregateRoot
 {
-    /// <summary>The vehicles a firm starts with: Kamyon 10,00 × 2,45 × 2,70 m / 25.000 kg and Tır 20,00 × 2,40 × 2,70 m / 35.500 kg.</summary>
+    /// <summary>
+    /// The vehicles a firm starts with: a 10,00 × 2,45 × 2,70 m rigid truck carrying 25.000 kg and a
+    /// 20,00 × 2,40 × 2,70 m semi-trailer carrying 35.500 kg. English like every other name in here; a firm
+    /// renames them to whatever its drivers call them.
+    /// </summary>
     public static readonly IReadOnlyList<(string Name, int LengthMm, int WidthMm, int HeightMm, int CapacityKg)> Defaults =
     [
-        ("Kamyon", 10_000, 2_450, 2_700, 25_000),
-        ("Tır", 20_000, 2_400, 2_700, 35_500)
+        ("Truck", 10_000, 2_450, 2_700, 25_000),
+        ("Semi-trailer", 20_000, 2_400, 2_700, 35_500)
     ];
 
     public string Name { get; private set; } = null!;

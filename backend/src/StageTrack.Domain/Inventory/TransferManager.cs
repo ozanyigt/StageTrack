@@ -99,9 +99,9 @@ public class TransferManager(
             var sourceEquipmentId = unit.EquipmentId;
             var newEquipmentId = targetEquipment[sourceEquipmentId];
 
-            await movementRepository.InsertAsync(WarehouseMovement.CreateTransfer(MovementAction.TransferOut, sourceCompanyId,
+            await movementRepository.InsertAsync(WarehouseMovement.CreateTransfer(MovementAction.TransferredOut, sourceCompanyId,
                 sourceEquipmentId, unit.Id, userId, $"{unit.InternalRef} → {target.Name}"));
-            await movementRepository.InsertAsync(WarehouseMovement.CreateTransfer(MovementAction.TransferIn, targetCompanyId,
+            await movementRepository.InsertAsync(WarehouseMovement.CreateTransfer(MovementAction.TransferredIn, targetCompanyId,
                 newEquipmentId, unit.Id, userId, $"{unit.InternalRef} ← {source.Name}"));
 
             unit.MoveToCompany(targetCompanyId, newEquipmentId, warehouse.Id);

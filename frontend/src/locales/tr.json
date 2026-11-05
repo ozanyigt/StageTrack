@@ -462,7 +462,7 @@
     "equipmentType": {
       "Physical": "Kiralık ekipman",
       "Consumable": "Sarf malzeme",
-      "Sale": "Satış ürünü"
+      "ForSale": "Satış ürünü"
     },
     "labelType": {
       "RentmanQr": "QR etiketi",
@@ -472,15 +472,15 @@
     },
     "stockLocationType": {
       "Warehouse": "Depo",
-      "StorageLocation": "Ara depo"
+      "Storage": "Ara depo"
     },
     "movementAction": {
-      "CheckOut": "Çıkış",
-      "CheckIn": "Dönüş",
+      "CheckedOut": "Çıkış",
+      "CheckedIn": "Dönüş",
       "LabelAssigned": "Etiket bağlandı",
       "ProjectStatusChanged": "Durum değişti",
-      "TransferOut": "Transfer (çıkış)",
-      "TransferIn": "Transfer (giriş)"
+      "TransferredOut": "Transfer (çıkış)",
+      "TransferredIn": "Transfer (giriş)"
     },
     "quoteLineType": {
       "Equipment": "Ekipman",
@@ -552,7 +552,7 @@
       "Flown": "Asılı"
     },
     "ledStageCarrier": {
-      "Scaff": "Scaff kule",
+      "Scaffold": "Scaff kule",
       "LedFrame": "LED demiri"
     },
     "equipmentDiscipline": {
@@ -560,7 +560,7 @@
       "Sound": "Ses",
       "Light": "Işık",
       "Truss": "Truss",
-      "Scaff": "Scaff"
+      "Scaffold": "Scaff"
     }
   },
   "errors": {

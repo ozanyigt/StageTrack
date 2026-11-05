@@ -58,7 +58,7 @@ export interface LoginResult {
 }
 
 // Inventory
-export const EQUIPMENT_TYPES = ['Physical', 'Consumable', 'Sale'] as const;
+export const EQUIPMENT_TYPES = ['Physical', 'Consumable', 'ForSale'] as const;
 export type EquipmentType = (typeof EQUIPMENT_TYPES)[number];
 
 export const UNIT_STATUSES = ['InStock', 'OnProject', 'InRepair', 'Lost'] as const;
@@ -67,16 +67,16 @@ export type UnitStatus = (typeof UNIT_STATUSES)[number];
 export const LABEL_TYPES = ['ImportedQr', 'Qr', 'Barcode', 'Rfid'] as const;
 export type LabelType = (typeof LABEL_TYPES)[number];
 
-export const STOCK_LOCATION_TYPES = ['Warehouse', 'StorageLocation'] as const;
+export const STOCK_LOCATION_TYPES = ['Warehouse', 'Storage'] as const;
 export type StockLocationType = (typeof STOCK_LOCATION_TYPES)[number];
 
 export const RELATION_KINDS = ['Content', 'Accessory', 'Alternative'] as const;
 export type RelationKind = (typeof RELATION_KINDS)[number];
 
 /** The trade a product belongs to; the firm tags folders, not products. */
-export type EquipmentDiscipline = 'Led' | 'Sound' | 'Light' | 'Truss' | 'Scaff';
+export type EquipmentDiscipline = 'Led' | 'Sound' | 'Light' | 'Truss' | 'Scaffold';
 
-export const EQUIPMENT_DISCIPLINES: EquipmentDiscipline[] = ['Led', 'Sound', 'Light', 'Truss', 'Scaff'];
+export const EQUIPMENT_DISCIPLINES: EquipmentDiscipline[] = ['Led', 'Sound', 'Light', 'Truss', 'Scaffold'];
 
 export interface EquipmentFolder {
   id: Guid;
@@ -509,7 +509,7 @@ export interface ProjectInput {
 // Warehouse
 export type ScanDirection = 'Out' | 'In';
 export type ScanWarning = 'NotPlanned' | 'OverPlanned';
-export const MOVEMENT_ACTIONS = ['CheckOut', 'CheckIn', 'LabelAssigned', 'ProjectStatusChanged', 'TransferOut', 'TransferIn'] as const;
+export const MOVEMENT_ACTIONS = ['CheckedOut', 'CheckedIn', 'LabelAssigned', 'ProjectStatusChanged', 'TransferredOut', 'TransferredIn'] as const;
 export type MovementAction = (typeof MOVEMENT_ACTIONS)[number];
 
 export interface ScanResult {
@@ -903,7 +903,7 @@ export interface Inspection {
 }
 
 // Collaboration (notes, tasks, files of equipment, devices and projects)
-export type OwnerType = 'Equipment' | 'Unit' | 'Project';
+export type OwnerType = 'Equipment' | 'EquipmentUnit' | 'Project';
 
 export interface Note {
   id: Guid;

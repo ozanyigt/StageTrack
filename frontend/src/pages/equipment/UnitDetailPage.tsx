@@ -196,7 +196,7 @@ export function UnitDetailPage() {
         </Col>
         <Col xs={24} xl={8}>
           <Card size="small">
-            <CollaborationPanel ownerType="Unit" ownerId={id} />
+            <CollaborationPanel ownerType="EquipmentUnit" ownerId={id} />
           </Card>
         </Col>
       </Row>

@@ -4,7 +4,7 @@ public enum EquipmentType
 {
     Physical = 1,
     Consumable = 2,
-    Sale = 3
+    ForSale = 3
 }
 
 /// <summary>
@@ -18,7 +18,7 @@ public enum EquipmentDiscipline
     Sound = 2,
     Light = 3,
     Truss = 4,
-    Scaff = 5
+    Scaffold = 5
 }
 
 public enum UnitStatus
@@ -44,5 +44,5 @@ public enum LabelType
 public enum StockLocationType
 {
     Warehouse = 1,
-    StorageLocation = 2
+    Storage = 2
 }

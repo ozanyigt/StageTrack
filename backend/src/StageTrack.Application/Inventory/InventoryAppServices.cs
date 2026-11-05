@@ -319,7 +319,7 @@ public class EquipmentAppService(
         var words = $"{row.SaleType} {row.Type}".ToLowerInvariant();
         if (words.Contains("satı") || words.Contains("sale") || words.Contains("sell") || words.Contains("sales"))
         {
-            return EquipmentType.Sale;
+            return EquipmentType.ForSale;
         }
 
         if (words.Contains("sarf") || words.Contains("consumable") || words.Contains("verbruik"))
@@ -600,7 +600,7 @@ public class EquipmentUnitAppService(
     public async Task<EquipmentUnitDetailDto> SetImageAsync(Guid id, UploadFileInput file)
     {
         var unit = await unitRepository.GetAsync(id);
-        var attachment = attachmentManager.Create(OwnerType.Unit, id, file.FileName, file.ContentType, file.Content, imageOnly: true);
+        var attachment = attachmentManager.Create(OwnerType.EquipmentUnit, id, file.FileName, file.ContentType, file.Content, imageOnly: true);
         await attachmentRepository.InsertAsync(attachment);
         if (unit.ImageAttachmentId.HasValue && await attachmentRepository.FindAsync(unit.ImageAttachmentId.Value) is { } old)
         {

@@ -199,7 +199,7 @@ public class DemoDataSeeder(
         var gunesli = await stockLocationRepository.InsertAsync(new StockLocation(Guid.CreateVersion7(), "GÜNEŞLİ",
             StockLocationType.Warehouse, "Bağlar Mah. 63. Sok 7Z1 Bağcılar", "İstanbul"));
         await stockLocationRepository.InsertAsync(new StockLocation(Guid.CreateVersion7(), "KARS DEPO",
-            StockLocationType.StorageLocation, "Merkez", "Kars"));
+            StockLocationType.Storage, "Merkez", "Kars"));
 
         var suppliers = await SeedSuppliersAsync(
             ("audio", "Pro Audio Dağıtım A.Ş.", "Satış Ekibi", "satis@proaudio.example", "+90 212 000 10 10", "İstanbul"),
@@ -221,7 +221,7 @@ public class DemoDataSeeder(
         // The trades, tagged once at the top: everything below follows, so the design tabs know a speaker from a fixture.
         await TagDisciplinesAsync(folders,
             ("audio", EquipmentDiscipline.Sound), ("light", EquipmentDiscipline.Light),
-            ("led", EquipmentDiscipline.Led), ("truss", EquipmentDiscipline.Truss), ("scaff", EquipmentDiscipline.Scaff));
+            ("led", EquipmentDiscipline.Led), ("truss", EquipmentDiscipline.Truss), ("scaff", EquipmentDiscipline.Scaffold));
 
         // key, code, name, brand, model, folder, units (0 = quantity tracked), stock, daily price (TRY), unit ref prefix
         await SeedEquipmentAsync(folders, gunesli.Id, suppliers,

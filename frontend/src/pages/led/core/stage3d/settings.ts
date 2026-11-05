@@ -5,7 +5,7 @@
 
 export type MountType = "Ground" | "Flown";
 /** Yerden montajın taşıyıcısı: scaff kuleleri ya da LED demiri. */
-export type CarrierType = "Scaff" | "LedFrame";
+export type CarrierType = "Scaffold" | "LedFrame";
 
 export interface StageSettings {
   /** Podium. */
@@ -16,7 +16,7 @@ export interface StageSettings {
   frontGapM: number;
   mount: MountType;
   carrier: CarrierType;
-  /** Scaff only: how deep the towers behind the screen are. */
+  /** Scaffold only: how deep the towers behind the screen are. */
   legDepthM: number;
   /** Ground: the screen's bottom edge above the podium (without the ground support). */
   bottomM: number;
@@ -86,7 +86,7 @@ export function sanitizeStageSettings(raw: unknown): StageSettings {
     if (typeof v === "number") out[key] = clampSetting(key, v);
   }
   if (r.mount === "Ground" || r.mount === "Flown") out.mount = r.mount;
-  if (r.carrier === "Scaff" || r.carrier === "LedFrame") out.carrier = r.carrier;
+  if (r.carrier === "Scaffold" || r.carrier === "LedFrame") out.carrier = r.carrier;
   if (typeof r.groundSupport === "boolean") out.groundSupport = r.groundSupport;
   return out;
 }

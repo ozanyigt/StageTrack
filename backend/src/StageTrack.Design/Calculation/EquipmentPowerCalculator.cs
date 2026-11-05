@@ -28,7 +28,7 @@ public static class EquipmentPowerCalculator
     /// </summary>
     public static EquipmentPowerLine Line(EquipmentPowerSpec spec, int count, PowerMode mode, double voltage, CalcSettings settings)
     {
-        if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Adet negatif olamaz.");
+        if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "A count cannot be negative.");
         var unitWatt = UnitWatt(spec, mode);
         var unitCurrent = unitWatt > 0 ? PowerCalculator.WattToCurrent(unitWatt, voltage, settings.PowerFactor) : 0;
         var usable = settings.FuseA * (settings.DeratingPercent / 100);

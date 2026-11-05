@@ -4,7 +4,7 @@ namespace StageTrack.Collaboration;
 public enum OwnerType
 {
     Equipment = 1,
-    Unit = 2,
+    EquipmentUnit = 2,
     Project = 3
 }
 

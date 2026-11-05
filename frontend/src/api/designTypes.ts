@@ -16,7 +16,7 @@ export type LedTransportKind = (typeof LED_TRANSPORT_KINDS)[number];
 export const LED_STAGE_MOUNTS = ['Ground', 'Flown'] as const;
 export type LedStageMount = (typeof LED_STAGE_MOUNTS)[number];
 
-export const LED_STAGE_CARRIERS = ['Scaff', 'LedFrame'] as const;
+export const LED_STAGE_CARRIERS = ['Scaffold', 'LedFrame'] as const;
 export type LedStageCarrier = (typeof LED_STAGE_CARRIERS)[number];
 
 /** Max power uses the panels' maximum watt, Average the average one. */

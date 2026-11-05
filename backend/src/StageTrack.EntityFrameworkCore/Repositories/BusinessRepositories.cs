@@ -186,13 +186,13 @@ public class WarehouseMovementRepository(StageTrackDbContext dbContext) : EfRepo
     public async Task<List<ProjectEquipmentBalance>> GetBalancesAsync(Guid projectId, CancellationToken cancellationToken = default)
     {
         var rows = await DbSet
-            .Where(m => m.ProjectId == projectId && (m.Action == MovementAction.CheckOut || m.Action == MovementAction.CheckIn))
+            .Where(m => m.ProjectId == projectId && (m.Action == MovementAction.CheckedOut || m.Action == MovementAction.CheckedIn))
             .GroupBy(m => m.EquipmentId)
             .Select(g => new
             {
                 EquipmentId = g.Key,
-                Out = g.Sum(m => m.Action == MovementAction.CheckOut ? m.Quantity : 0),
-                In = g.Sum(m => m.Action == MovementAction.CheckIn ? m.Quantity : 0)
+                Out = g.Sum(m => m.Action == MovementAction.CheckedOut ? m.Quantity : 0),
+                In = g.Sum(m => m.Action == MovementAction.CheckedIn ? m.Quantity : 0)
             })
             .ToListAsync(cancellationToken);
 

@@ -47,7 +47,7 @@ const DEFAULT_SIZE: Record<EquipmentDiscipline, { w: number; h: number; d: numbe
   Sound: { w: 0.6, h: 0.9, d: 0.5 },
   Light: { w: 0.3, h: 0.5, d: 0.3 },
   Truss: { w: 0.3, h: 0.3, d: 3 },
-  Scaff: { w: 1, h: 0.2, d: 2 },
+  Scaffold: { w: 1, h: 0.2, d: 2 },
 };
 
 /** The colours of the trade tabs, so a layer list and the scene agree at a glance. */
@@ -56,7 +56,7 @@ export const TRADE_COLOR: Record<EquipmentDiscipline, string> = {
   Sound: '#38bdf8',
   Light: '#f59e0b',
   Truss: '#a1a1aa',
-  Scaff: '#84cc16',
+  Scaffold: '#84cc16',
 };
 
 const cm = (value: number | null | undefined) => (value == null || value <= 0 ? null : Number(value) / 100);

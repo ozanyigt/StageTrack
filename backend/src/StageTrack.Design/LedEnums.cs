@@ -37,6 +37,6 @@ public enum LedStageMount
 /// <summary>3D stage, ground mounted: what holds the screens — scaff towers or an LED frame.</summary>
 public enum LedStageCarrier
 {
-    Scaff = 1,
+    Scaffold = 1,
     LedFrame = 2
 }

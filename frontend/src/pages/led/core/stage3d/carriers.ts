@@ -30,7 +30,7 @@ export interface Block {
 /** What a ground carrier is made of, to order: LED demiri posts with their 2 m and 1 m pieces, or scaff parts. */
 export type CarrierBom =
   | { kind: "LedFrame"; posts: number; twoM: number; oneM: number }
-  | { kind: "Scaff"; uprights: number; ledgers: number; diagonals: number; basePlates: number };
+  | { kind: "Scaffold"; uprights: number; ledgers: number; diagonals: number; basePlates: number };
 
 export interface CarrierModel {
   screenId: string;
@@ -45,7 +45,7 @@ export const LED_FRAME_DEPTH_M = 1;
 /** LED demiri: the first (bottom) tier's height, then 1 m tiers. */
 const LED_FRAME_FIRST_TIER_M = 2;
 const LED_FRAME_TIER_M = 1;
-/** Scaff: uprights at most this far apart along the screen; a ledger every 2 m up. */
+/** Scaffold: uprights at most this far apart along the screen; a ledger every 2 m up. */
 const SCAFF_BAY_M = 2.4;
 const SCAFF_LIFT_M = 2;
 /** The carrier stands this far behind the screen's face (the cabinets' depth and a little air). */
@@ -81,13 +81,13 @@ export function ledFrameModules(heightM: number): number[] {
   return [LED_FRAME_FIRST_TIER_M, ...Array<number>(ones).fill(LED_FRAME_TIER_M)];
 }
 
-/** Scaff uprights along a screen: both ends and evenly between them, at most 2.4 m apart. */
+/** Scaffold uprights along a screen: both ends and evenly between them, at most 2.4 m apart. */
 export function scaffColumns(widthM: number): number[] {
   const bays = Math.max(1, Math.ceil(widthM / SCAFF_BAY_M - 1e-9));
   return Array.from({ length: bays + 1 }, (_, i) => round((widthM * i) / bays));
 }
 
-/** Scaff ledger heights above the base: every 2 m, and the top. */
+/** Scaffold ledger heights above the base: every 2 m, and the top. */
 export function scaffLevels(heightM: number): number[] {
   const levels = [0];
   while (levels[levels.length - 1] + SCAFF_LIFT_M < heightM - 1e-9) levels.push(levels[levels.length - 1] + SCAFF_LIFT_M);
@@ -159,7 +159,7 @@ export function ledFrame(placed: PlacedScreen, floorY: number): CarrierModel {
 }
 
 /**
- * Scaff towers behind one screen: uprights at most 2.4 m apart along it, a second row `legDepthM` behind, base plates
+ * Scaffold towers behind one screen: uprights at most 2.4 m apart along it, a second row `legDepthM` behind, base plates
  * under each; ledgers every 2 m along both rows and across; a cross brace in every bay of both rows. From the podium
  * up to the screen's top.
  */
@@ -198,7 +198,7 @@ export function scaff(placed: PlacedScreen, floorY: number, legDepthM: number): 
   const bays = columns.length - 1;
   const lifts = levels.length - 1;
   const bom: CarrierBom = {
-    kind: "Scaff",
+    kind: "Scaffold",
     uprights: columns.length * 2,
     // Across every column at every level, along both rows in every bay at every level.
     ledgers: columns.length * levels.length + bays * 2 * levels.length,
@@ -353,15 +353,15 @@ export function totalBom(models: CarrierModel[]): CarrierBom | null {
   if (boms.length === 0) return null;
   if (boms.every((b) => b.kind === "LedFrame"))
     return boms.reduce((a, b) => ({ kind: "LedFrame", posts: a.posts + b.posts, twoM: a.twoM + b.twoM, oneM: a.oneM + b.oneM }));
-  if (boms.every((b) => b.kind === "Scaff"))
-    return boms.reduce((a, b) => ({ kind: "Scaff", uprights: a.uprights + b.uprights, ledgers: a.ledgers + b.ledgers, diagonals: a.diagonals + b.diagonals, basePlates: a.basePlates + b.basePlates }));
+  if (boms.every((b) => b.kind === "Scaffold"))
+    return boms.reduce((a, b) => ({ kind: "Scaffold", uprights: a.uprights + b.uprights, ledgers: a.ledgers + b.ledgers, diagonals: a.diagonals + b.diagonals, basePlates: a.basePlates + b.basePlates }));
   return null;
 }
 
 /** What the carrier label says, and where it goes: on the main screen's carrier, at its back left. */
 export interface CarrierLabel {
   point: Vec3;
-  kind: "LedFrame" | "Scaff" | "Flown";
+  kind: "LedFrame" | "Scaffold" | "Flown";
   /** Depth (ground mounted) or the truss's height (flown), metres. */
   valueM: number;
 }

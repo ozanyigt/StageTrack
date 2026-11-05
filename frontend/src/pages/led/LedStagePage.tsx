@@ -327,7 +327,7 @@ export function LedStagePage() {
                     value={settings.carrier}
                     onChange={(carrier) => save.mutate({ ...settings, carrier } as StageSettings)}
                     options={[
-                      { value: 'Scaff', label: t('enums.ledStageCarrier.Scaff') },
+                      { value: 'Scaffold', label: t('enums.ledStageCarrier.Scaffold') },
                       { value: 'LedFrame', label: t('enums.ledStageCarrier.LedFrame') },
                     ]}
                   />
@@ -341,7 +341,7 @@ export function LedStagePage() {
                   {settings.mount === 'Ground' ? (
                     <>
                       {numberField('bottomM', 'led.stage.bottom')}
-                      {settings.carrier === 'Scaff' && numberField('legDepthM', 'led.stage.legDepth')}
+                      {settings.carrier === 'Scaffold' && numberField('legDepthM', 'led.stage.legDepth')}
                     </>
                   ) : (
                     <>

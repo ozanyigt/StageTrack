@@ -462,7 +462,7 @@
     "equipmentType": {
       "Physical": "معدات للإيجار",
       "Consumable": "مواد مستهلكة",
-      "Sale": "منتج للبيع"
+      "ForSale": "منتج للبيع"
     },
     "labelType": {
       "RentmanQr": "ملصق QR",
@@ -472,15 +472,15 @@
     },
     "stockLocationType": {
       "Warehouse": "مستودع",
-      "StorageLocation": "مخزن فرعي"
+      "Storage": "مخزن فرعي"
     },
     "movementAction": {
-      "CheckOut": "إخراج",
-      "CheckIn": "إرجاع",
+      "CheckedOut": "إخراج",
+      "CheckedIn": "إرجاع",
       "LabelAssigned": "ربط ملصق",
       "ProjectStatusChanged": "تغيير الحالة",
-      "TransferOut": "نقل (صادر)",
-      "TransferIn": "نقل (وارد)"
+      "TransferredOut": "نقل (صادر)",
+      "TransferredIn": "نقل (وارد)"
     },
     "quoteLineType": {
       "Equipment": "معدات",
@@ -552,7 +552,7 @@
       "Flown": "معلّق"
     },
     "ledStageCarrier": {
-      "Scaff": "برج سقالة",
+      "Scaffold": "برج سقالة",
       "LedFrame": "إطار LED"
     },
     "equipmentDiscipline": {
@@ -560,7 +560,7 @@
       "Sound": "الصوت",
       "Light": "الإضاءة",
       "Truss": "الترس",
-      "Scaff": "السقالة"
+      "Scaffold": "السقالة"
     }
   },
   "errors": {

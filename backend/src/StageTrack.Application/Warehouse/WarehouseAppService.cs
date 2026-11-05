@@ -93,7 +93,7 @@ public class WarehouseAppService(
         var balances = (await movementRepository.GetBalancesAsync(projectId)).ToDictionary(b => b.EquipmentId);
         var unitsOut = (await unitRepository.GetListOutOnProjectAsync(projectId)).ToLookup(u => u.EquipmentId);
         var returnedUnits = (await movementRepository.GetPagedListAsync(new MovementFilter { ProjectId = projectId }, 0, 5000))
-            .Where(m => m.Movement.Action == MovementAction.CheckIn && m.Movement.UnitId.HasValue)
+            .Where(m => m.Movement.Action == MovementAction.CheckedIn && m.Movement.UnitId.HasValue)
             .GroupBy(m => m.Movement.EquipmentId)
             .ToDictionary(g => g.Key, g => g.GroupBy(m => m.Movement.UnitId!.Value).Select(x => x.First()).ToList());
         var equipment = (await equipmentRepository.GetListByIdsAsync(project.Equipment.Select(e => e.EquipmentId).Distinct())).ToDictionary(e => e.Id);

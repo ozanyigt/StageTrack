@@ -462,7 +462,7 @@
     "equipmentType": {
       "Physical": "Rental equipment",
       "Consumable": "Consumable",
-      "Sale": "Sale item"
+      "ForSale": "Sale item"
     },
     "labelType": {
       "RentmanQr": "QR label",
@@ -472,15 +472,15 @@
     },
     "stockLocationType": {
       "Warehouse": "Warehouse",
-      "StorageLocation": "Storage location"
+      "Storage": "Storage location"
     },
     "movementAction": {
-      "CheckOut": "Checked out",
-      "CheckIn": "Checked in",
+      "CheckedOut": "Checked out",
+      "CheckedIn": "Checked in",
       "LabelAssigned": "Label linked",
       "ProjectStatusChanged": "Status changed",
-      "TransferOut": "Transfer (out)",
-      "TransferIn": "Transfer (in)"
+      "TransferredOut": "Transfer (out)",
+      "TransferredIn": "Transfer (in)"
     },
     "quoteLineType": {
       "Equipment": "Equipment",
@@ -552,7 +552,7 @@
       "Flown": "Flown"
     },
     "ledStageCarrier": {
-      "Scaff": "Scaff tower",
+      "Scaffold": "Scaff tower",
       "LedFrame": "LED frame"
     },
     "equipmentDiscipline": {
@@ -560,7 +560,7 @@
       "Sound": "Sound",
       "Light": "Light",
       "Truss": "Truss",
-      "Scaff": "Scaff"
+      "Scaffold": "Scaff"
     }
   },
   "errors": {

@@ -16,7 +16,7 @@ const BY_PATH: Record<string, EquipmentDiscipline> = {
   sound: 'Sound',
   light: 'Light',
   truss: 'Truss',
-  scaff: 'Scaff',
+  scaff: 'Scaffold',
 };
 
 export const DESIGN_PATHS = Object.keys(BY_PATH);
