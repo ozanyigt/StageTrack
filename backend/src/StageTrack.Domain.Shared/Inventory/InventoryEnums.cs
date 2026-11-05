@@ -30,12 +30,12 @@ public enum UnitStatus
 }
 
 /// <summary>
-/// Origin of a physical label. Existing Rentman QR codes are kept as <see cref="RentmanQr"/>;
+/// Origin of a physical label. Existing Rentman QR codes are kept as <see cref="ImportedQr"/>;
 /// labels printed by this system are <see cref="Qr"/>. RFID tags can be added later without schema changes.
 /// </summary>
 public enum LabelType
 {
-    RentmanQr = 1,
+    ImportedQr = 1,
     Qr = 2,
     Barcode = 3,
     Rfid = 4

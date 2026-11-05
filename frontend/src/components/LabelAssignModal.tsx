@@ -22,13 +22,13 @@ export function LabelAssignModal({ code, onClose, onAssigned }: Props) {
   const showError = useErrorToast();
   const [equipment, setEquipment] = useState<EquipmentLookup>();
   const [unitId, setUnitId] = useState<string>();
-  const [type, setType] = useState<LabelType>('RentmanQr');
+  const [type, setType] = useState<LabelType>('ImportedQr');
 
   useEffect(() => {
     if (code) {
       setEquipment(undefined);
       setUnitId(undefined);
-      setType('RentmanQr');
+      setType('ImportedQr');
     }
   }, [code]);
 

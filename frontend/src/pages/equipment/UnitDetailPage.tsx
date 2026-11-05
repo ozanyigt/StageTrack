@@ -354,7 +354,7 @@ function LabelsBox({ unit, onChanged }: { unit: EquipmentUnitDetail; onChanged: 
   const showError = useErrorToast();
   const canAssign = can(Permissions.LabelsAssign) && !unit.isArchived;
   const [scanOpen, setScanOpen] = useState(false);
-  const [type, setType] = useState<LabelType>('RentmanQr');
+  const [type, setType] = useState<LabelType>('ImportedQr');
   const [problem, setProblem] = useState<string | null>(null);
 
   const link = async (raw: string) => {

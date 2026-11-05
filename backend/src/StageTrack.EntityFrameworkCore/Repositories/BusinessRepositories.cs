@@ -143,7 +143,7 @@ public class ProjectRepository(StageTrackDbContext dbContext) : EfRepository<Pro
         {
             var text = filter.Text.Trim();
             var isNumber = int.TryParse(text, out var number);
-            query = query.Where(p => p.Name.Contains(text) || (p.Venue != null && p.Venue.Contains(text)) || (isNumber && p.Number == number));
+            query = query.Where(p => p.Name.Contains(text) || (p.VenueName != null && p.VenueName.Contains(text)) || (isNumber && p.Number == number));
         }
 
         if (filter.Statuses is { Count: > 0 })

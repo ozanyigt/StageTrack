@@ -114,7 +114,7 @@ public class QuoteDto : QuoteListItemDto
     public bool IsEditable { get; set; }
     public List<QuoteLineDto> Lines { get; set; } = [];
 
-    public string? Venue { get; set; }
+    public string? VenueName { get; set; }
     public DateTime? UseStart { get; set; }
     public DateTime? UseEnd { get; set; }
     public CustomerDto? Customer { get; set; }

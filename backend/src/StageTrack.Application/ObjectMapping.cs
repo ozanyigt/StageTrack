@@ -167,7 +167,7 @@ internal static class ObjectMapping
         dto.Name = p.Name;
         dto.CustomerId = p.CustomerId;
         dto.CustomerName = customerName;
-        dto.Venue = p.Venue;
+        dto.VenueName = p.VenueName;
         dto.PlanStart = p.PlanStart;
         dto.PlanEnd = p.PlanEnd;
         dto.UseStart = p.UseStart;

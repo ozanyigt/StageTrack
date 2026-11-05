@@ -14,7 +14,7 @@ public class Project : CompanyAggregateRoot
     public int Number { get; private set; }
     public string Name { get; private set; } = null!;
     public Guid? CustomerId { get; private set; }
-    public string? Venue { get; private set; }
+    public string? VenueName { get; private set; }
     public DateTime PlanStart { get; private set; }
     public DateTime PlanEnd { get; private set; }
     public DateTime? UseStart { get; private set; }
@@ -65,7 +65,7 @@ public class Project : CompanyAggregateRoot
         EnsureEditable();
         Name = name;
         CustomerId = customerId;
-        Venue = venue;
+        VenueName = venue;
         Color = color;
         ProjectType = projectType;
         StockLocationId = stockLocationId;

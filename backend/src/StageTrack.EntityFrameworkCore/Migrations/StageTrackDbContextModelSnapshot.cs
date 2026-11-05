@@ -1556,7 +1556,7 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<DateTime?>("UseStart")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Venue")
+                    b.Property<string>("VenueName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -1599,7 +1599,7 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.HasIndex("ProjectId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("ProjectCrew", (string)null);
+                    b.ToTable("ProjectCrewMembers", (string)null);
                 });
 
             modelBuilder.Entity("StageTrack.Projects.ProjectEquipment", b =>
@@ -1641,7 +1641,7 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("ProjectEquipment", (string)null);
+                    b.ToTable("ProjectEquipmentLines", (string)null);
                 });
 
             modelBuilder.Entity("StageTrack.Projects.ProjectSection", b =>
@@ -1834,54 +1834,6 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.ToTable("QuoteLines", (string)null);
                 });
 
-            modelBuilder.Entity("StageTrack.Sites.SitePlan", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CompanyId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("LastModifierId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("CompanyId", "ProjectId")
-                        .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
-
-                    b.ToTable("SitePlans", t =>
-                        {
-                            t.HasCheckConstraint("CK_SitePlans_Venue_AllOrNothing", "([Venue_WidthM] IS NULL AND [Venue_DepthM] IS NULL AND [Venue_ClearHeightM] IS NULL AND [Venue_StageOffsetXM] IS NULL AND [Venue_BehindStageM] IS NULL AND [Venue_RakeDeg] IS NULL AND [Venue_PlanOriginXM] IS NULL AND [Venue_PlanOriginZM] IS NULL AND [Venue_PlanRotationDeg] IS NULL) OR ([Venue_WidthM] IS NOT NULL AND [Venue_DepthM] IS NOT NULL AND [Venue_ClearHeightM] IS NOT NULL AND [Venue_StageOffsetXM] IS NOT NULL AND [Venue_BehindStageM] IS NOT NULL AND [Venue_RakeDeg] IS NOT NULL AND [Venue_PlanOriginXM] IS NOT NULL AND [Venue_PlanOriginZM] IS NOT NULL AND [Venue_PlanRotationDeg] IS NOT NULL)");
-                        });
-                });
-
             modelBuilder.Entity("StageTrack.Suppliers.Supplier", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2042,6 +1994,54 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .IsUnique();
 
                     b.ToTable("Tenants");
+                });
+
+            modelBuilder.Entity("StageTrack.Venues.ProjectVenue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("CompanyId", "ProjectId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("ProjectVenues", t =>
+                        {
+                            t.HasCheckConstraint("CK_ProjectVenues_Room_AllOrNothing", "([Room_WidthM] IS NULL AND [Room_DepthM] IS NULL AND [Room_ClearHeightM] IS NULL AND [Room_StageOffsetXM] IS NULL AND [Room_BehindStageM] IS NULL AND [Room_RakeDeg] IS NULL AND [Room_PlanOriginXM] IS NULL AND [Room_PlanOriginZM] IS NULL AND [Room_PlanRotationDeg] IS NULL) OR ([Room_WidthM] IS NOT NULL AND [Room_DepthM] IS NOT NULL AND [Room_ClearHeightM] IS NOT NULL AND [Room_StageOffsetXM] IS NOT NULL AND [Room_BehindStageM] IS NOT NULL AND [Room_RakeDeg] IS NOT NULL AND [Room_PlanOriginXM] IS NOT NULL AND [Room_PlanOriginZM] IS NOT NULL AND [Room_PlanRotationDeg] IS NOT NULL)");
+                        });
                 });
 
             modelBuilder.Entity("StageTrack.Warehouse.WarehouseMovement", b =>
@@ -2660,7 +2660,16 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StageTrack.Sites.SitePlan", b =>
+            modelBuilder.Entity("StageTrack.Suppliers.Supplier", b =>
+                {
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Venues.ProjectVenue", b =>
                 {
                     b.HasOne("StageTrack.Companies.Company", null)
                         .WithMany()
@@ -2674,9 +2683,9 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("StageTrack.Sites.SiteVenue", "Venue", b1 =>
+                    b.OwnsOne("StageTrack.Venues.VenueRoom", "Room", b1 =>
                         {
-                            b1.Property<Guid>("SitePlanId")
+                            b1.Property<Guid>("ProjectVenueId")
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<double>("BehindStageM")
@@ -2712,24 +2721,15 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                             b1.Property<double>("WidthM")
                                 .HasColumnType("float");
 
-                            b1.HasKey("SitePlanId");
+                            b1.HasKey("ProjectVenueId");
 
-                            b1.ToTable("SitePlans", (string)null);
+                            b1.ToTable("ProjectVenues", (string)null);
 
                             b1.WithOwner()
-                                .HasForeignKey("SitePlanId");
+                                .HasForeignKey("ProjectVenueId");
                         });
 
-                    b.Navigation("Venue");
-                });
-
-            modelBuilder.Entity("StageTrack.Suppliers.Supplier", b =>
-                {
-                    b.HasOne("StageTrack.Companies.Company", null)
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("StageTrack.Warehouse.WarehouseMovement", b =>

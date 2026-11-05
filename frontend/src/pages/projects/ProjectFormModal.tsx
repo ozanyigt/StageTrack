@@ -16,7 +16,7 @@ export const PAYMENT_TERM_KEYS = ['afterJob', 'cash', 'halfAdvance', 'net30'] as
 interface FormValues {
   name: string;
   customerId?: string;
-  venue?: string;
+  venueName?: string;
   plan: [Dayjs, Dayjs];
   use?: [Dayjs, Dayjs] | null;
   color: string | { toHexString: () => string };
@@ -51,7 +51,7 @@ export function ProjectFormModal({ open, project, onClose, onSaved, onJobCreated
       form.setFieldsValue({
         name: project.name,
         customerId: project.customerId ?? undefined,
-        venue: project.venue ?? undefined,
+        venueName: project.venueName ?? undefined,
         plan: [dayjs(project.planStart), dayjs(project.planEnd)],
         use: project.useStart && project.useEnd ? [dayjs(project.useStart), dayjs(project.useEnd)] : undefined,
         color: project.color,
@@ -78,7 +78,7 @@ export function ProjectFormModal({ open, project, onClose, onSaved, onJobCreated
       const input: ProjectInput = {
         name: v.name,
         customerId: v.customerId ?? null,
-        venue: v.venue ?? null,
+        venueName: v.venueName ?? null,
         planStart: toApiDateTime(v.plan[0])!,
         planEnd: toApiDateTime(v.plan[1])!,
         useStart: toApiDateTime(v.use?.[0]),
@@ -128,7 +128,7 @@ export function ProjectFormModal({ open, project, onClose, onSaved, onJobCreated
         <Form.Item name="customerId" label={t('projects.customer')}>
           <CustomerSelect />
         </Form.Item>
-        <Form.Item name="venue" label={t('projects.venue')}>
+        <Form.Item name="venueName" label={t('projects.venue')}>
           <Input />
         </Form.Item>
         <Form.Item name="plan" label={t('projects.planPeriod')} extra={t('projects.planPeriodHint')} rules={[{ required: true, message: t('validation.required') }]}>

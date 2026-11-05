@@ -484,7 +484,7 @@ export function ProjectDetailPage() {
       <Card size="small">
         <Descriptions size="small" column={{ xs: 1, sm: 2, lg: 3 }}>
           <Descriptions.Item label={t('projects.customer')}>{p.customerName ?? '—'}</Descriptions.Item>
-          <Descriptions.Item label={t('projects.venue')}>{p.venue ?? '—'}</Descriptions.Item>
+          <Descriptions.Item label={t('projects.venue')}>{p.venueName ?? '—'}</Descriptions.Item>
           <Descriptions.Item label={t('projects.warehouse')}>{p.stockLocationName ?? '—'}</Descriptions.Item>
           <Descriptions.Item label={t('projects.planPeriod')}>{f.dateTime(p.planStart)} – {f.dateTime(p.planEnd)}</Descriptions.Item>
           <Descriptions.Item label={t('projects.usePeriod')}>{p.useStart ? `${f.dateTime(p.useStart)} – ${f.dateTime(p.useEnd)}` : '—'}</Descriptions.Item>

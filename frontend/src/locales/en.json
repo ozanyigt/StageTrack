@@ -744,12 +744,8 @@
       "JobSection": "LED screens",
       "NoWarehouse": "No warehouse"
     },
-    "SitePlan": {
-      "TooManyItems": "A plan holds at most {{limit}} items.",
-      "ItemNeedsEquipmentOrLabel": "An item must be equipment or at least have a name.",
-      "ZoneInvalidShape": "The shape needs at least {{needed}} corners.",
-      "AlreadyExists": "This job already has a site plan.",
-      "VenueNotSet": "Enter the room’s measurements first."
+    "ProjectVenue": {
+      "RoomNotSet": "Enter the room’s measurements first."
     }
   },
   "roles": {

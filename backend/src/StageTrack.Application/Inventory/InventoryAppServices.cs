@@ -388,7 +388,7 @@ public class EquipmentAppService(
             return;
         }
 
-        await labelRepository.InsertAsync(await labelManager.AssignAsync(code, LabelType.RentmanQr, equipmentId, unitId));
+        await labelRepository.InsertAsync(await labelManager.AssignAsync(code, LabelType.ImportedQr, equipmentId, unitId));
         await unitOfWork.SaveChangesAsync();
     }
 
@@ -571,7 +571,7 @@ public class EquipmentUnitAppService(
         if (!string.IsNullOrWhiteSpace(input.LabelCode))
         {
             await unitOfWork.SaveChangesAsync();
-            await labelRepository.InsertAsync(await labelManager.AssignAsync(input.LabelCode, LabelType.RentmanQr, null, unit.Id));
+            await labelRepository.InsertAsync(await labelManager.AssignAsync(input.LabelCode, LabelType.ImportedQr, null, unit.Id));
         }
 
         return unit.ToDto(equipment);
@@ -674,7 +674,7 @@ public class EquipmentUnitAppService(
                 var target = await labelManager.ResolveAsync(row.LabelCode);
                 if (target?.Unit?.Id != unit.Id)
                 {
-                    await labelRepository.InsertAsync(await labelManager.AssignAsync(row.LabelCode, LabelType.RentmanQr, null, unit.Id));
+                    await labelRepository.InsertAsync(await labelManager.AssignAsync(row.LabelCode, LabelType.ImportedQr, null, unit.Id));
                     await unitOfWork.SaveChangesAsync();
                 }
             }
@@ -777,7 +777,7 @@ public class LabelAppService(
 
     /// <summary>The label to print: an existing Rentman label first (it is already on the device), then our own.</summary>
     private static EquipmentLabel? PickLabel(IEnumerable<EquipmentLabel> labels) =>
-        labels.OrderBy(l => l.Type == LabelType.RentmanQr ? 0 : l.Type == LabelType.Qr ? 1 : 2).ThenBy(l => l.CreationTime).FirstOrDefault();
+        labels.OrderBy(l => l.Type == LabelType.ImportedQr ? 0 : l.Type == LabelType.Qr ? 1 : 2).ThenBy(l => l.CreationTime).FirstOrDefault();
 
     private async Task<(EquipmentLabel? Label, bool IsNew)> GetOrCreateAsync(EquipmentLabel? existing, Equipment equipment, EquipmentUnit? unit, bool create)
     {

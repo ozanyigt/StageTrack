@@ -46,7 +46,7 @@ public class ScanSheetDto
     public string Name { get; set; } = null!;
     public Projects.ProjectStatus Status { get; set; }
     public string? CustomerName { get; set; }
-    public string? Venue { get; set; }
+    public string? VenueName { get; set; }
     public DateTime PlanStart { get; set; }
     public DateTime PlanEnd { get; set; }
 
@@ -108,7 +108,7 @@ public class PackingListDto
     public string Name { get; set; } = null!;
     public ProjectStatus Status { get; set; }
     public string? CustomerName { get; set; }
-    public string? Venue { get; set; }
+    public string? VenueName { get; set; }
     public DateTime PlanStart { get; set; }
     public DateTime PlanEnd { get; set; }
     public List<PackingLineDto> Lines { get; set; } = [];

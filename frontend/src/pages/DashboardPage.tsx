@@ -49,9 +49,9 @@ export function DashboardPage() {
                     <Typography.Text type="secondary" style={{ display: 'block', marginTop: 6 }}>
                       <CalendarOutlined /> {f.period(p.useStart ?? p.planStart, p.useEnd ?? p.planEnd)}
                     </Typography.Text>
-                    {p.venue && (
+                    {p.venueName && (
                       <Typography.Text type="secondary" style={{ display: 'block' }}>
-                        <EnvironmentOutlined /> {p.venue}
+                        <EnvironmentOutlined /> {p.venueName}
                       </Typography.Text>
                     )}
                   </Card>

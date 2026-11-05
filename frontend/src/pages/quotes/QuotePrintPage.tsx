@@ -44,7 +44,7 @@ export function QuotePrintPage() {
     [t('projectExtra.projectNumber'), q.projectNumber],
     [t('quotes.issueDate'), f.date(q.issueDate)],
     [t('quotes.validUntil'), q.validUntil ? f.date(q.validUntil) : '—'],
-    [t('projects.venue'), q.venue ?? '—'],
+    [t('projects.venue'), q.venueName ?? '—'],
     [t('projectExtra.paymentTerms'), q.paymentTerms ?? '—'],
     [t('quotePrint.contactPerson'), q.customer?.contactPerson ?? '—'],
     [t('quotePrint.preparedBy'), q.preparedByName ?? '—'],

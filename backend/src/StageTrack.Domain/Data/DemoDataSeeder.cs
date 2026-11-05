@@ -371,7 +371,7 @@ public class DemoDataSeeder(
             if (item.Units == 0)
             {
                 await unitOfWork.SaveChangesAsync();
-                var bulkLabel = await labelManager.AssignAsync(NextLabel(), LabelType.RentmanQr, equipment.Id, null);
+                var bulkLabel = await labelManager.AssignAsync(NextLabel(), LabelType.ImportedQr, equipment.Id, null);
                 await labelRepository.InsertAsync(bulkLabel);
                 _bulkLabels[item.Key] = bulkLabel.Code;
                 continue;
@@ -405,7 +405,7 @@ public class DemoDataSeeder(
             };
             foreach (var unit in labeled)
             {
-                var label = await labelManager.AssignAsync(NextLabel(), LabelType.RentmanQr, null, unit.Id);
+                var label = await labelManager.AssignAsync(NextLabel(), LabelType.ImportedQr, null, unit.Id);
                 await labelRepository.InsertAsync(label);
                 _unitLabels[unit.Id] = label.Code;
             }

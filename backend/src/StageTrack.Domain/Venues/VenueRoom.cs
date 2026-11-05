@@ -1,4 +1,4 @@
-﻿namespace StageTrack.Sites;
+﻿namespace StageTrack.Venues;
 
 /// <summary>
 /// The room the job is built in. A satellite picture answers everything on an open field and nothing inside a
@@ -13,7 +13,7 @@
 /// Scene coordinates: x runs across the stage, z towards the audience, and the screens stand at z = 0 - the same
 /// floor the 3D stage uses, so a venue entered here is the venue the design stands in.
 /// </summary>
-public class SiteVenue
+public class VenueRoom
 {
     /// <summary>Across, metres.</summary>
     public double WidthM { get; private set; }
@@ -49,22 +49,22 @@ public class SiteVenue
 
     public double PlanRotationDeg { get; private set; }
 
-    private SiteVenue()
+    private VenueRoom()
     {
     }
 
-    public SiteVenue(double widthM, double depthM, double clearHeightM)
+    public VenueRoom(double widthM, double depthM, double clearHeightM)
     {
         SetSize(widthM, depthM, clearHeightM, 0, 2, 0);
     }
 
     public void SetSize(double widthM, double depthM, double clearHeightM, double stageOffsetXM, double behindStageM, double rakeDeg)
     {
-        WidthM = Clamp(widthM, SiteConsts.MinVenueM, SiteConsts.MaxVenueM);
-        DepthM = Clamp(depthM, SiteConsts.MinVenueM, SiteConsts.MaxVenueM);
-        ClearHeightM = Clamp(clearHeightM, 0, SiteConsts.MaxVenueHeightM);
-        StageOffsetXM = Clamp(stageOffsetXM, -SiteConsts.MaxVenueM, SiteConsts.MaxVenueM);
-        BehindStageM = Clamp(behindStageM, 0, SiteConsts.MaxVenueM);
+        WidthM = Clamp(widthM, VenueConsts.MinRoomM, VenueConsts.MaxRoomM);
+        DepthM = Clamp(depthM, VenueConsts.MinRoomM, VenueConsts.MaxRoomM);
+        ClearHeightM = Clamp(clearHeightM, 0, VenueConsts.MaxHeightM);
+        StageOffsetXM = Clamp(stageOffsetXM, -VenueConsts.MaxRoomM, VenueConsts.MaxRoomM);
+        BehindStageM = Clamp(behindStageM, 0, VenueConsts.MaxRoomM);
         RakeDeg = Clamp(rakeDeg, 0, 45);
     }
 
@@ -73,8 +73,8 @@ public class SiteVenue
     {
         PlanAttachmentId = attachmentId;
         PlanMetresPerPixel = metresPerPixel is > 0 and < 10 ? metresPerPixel : null;
-        PlanOriginXM = Clamp(originXM, -SiteConsts.MaxVenueM, SiteConsts.MaxVenueM);
-        PlanOriginZM = Clamp(originZM, -SiteConsts.MaxVenueM, SiteConsts.MaxVenueM);
+        PlanOriginXM = Clamp(originXM, -VenueConsts.MaxRoomM, VenueConsts.MaxRoomM);
+        PlanOriginZM = Clamp(originZM, -VenueConsts.MaxRoomM, VenueConsts.MaxRoomM);
         PlanRotationDeg = Clamp(rotationDeg, -360, 360);
     }
 

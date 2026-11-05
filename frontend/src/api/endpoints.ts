@@ -1,7 +1,7 @@
 import { http, toQuery } from './http';
 import type * as T from './types';
 import type * as L from './ledTypes';
-import type * as S from './siteTypes';
+import type * as S from './venueTypes';
 
 const get = <R>(url: string, params?: object) =>
   http.get<R>(url, { params: params ? toQuery(params as Record<string, unknown>) : undefined }).then((r) => r.data);
@@ -339,20 +339,17 @@ export const ledApi = {
   transferToJob: (projectId: T.Guid, input: L.LedToJobInput) => post<L.LedToJobResult>(`/led/jobs/${projectId}/transfer`, input),
 };
 
-/** A job's site plan: what stands where on the real ground, as inventory rather than a drawing. */
 /**
- * The job's venue. It is stored on the job's site-plan record, which is why the paths still say so; the map
- * screen that record was born for is gone, and what is left is the room - its measurements, its drawing and
- * where it stands. The first call makes the record if the job has none.
+ * The job's venue: the room the design stands in, its drawing and where that drawing lies. One per job and
+ * addressed through the job, so nothing has to create it first - the first measurement brings it into being.
  */
-export const sitePlanApi = {
+export const projectVenueApi = {
   // A job with no record answers 204, which axios hands back as an empty string rather than null.
   byProject: (projectId: T.Guid) =>
-    get<S.SitePlan | ''>(`/site-plans/by-project/${projectId}`).then((plan) => plan || null),
-  create: (input: S.CreateSitePlanInput) => post<S.SitePlan>('/site-plans', input),
+    get<S.ProjectVenue | ''>(`/projects/${projectId}/venue`).then((venue) => venue || null),
 
-  /** The room the job is built in; the first call creates it. */
-  setVenue: (id: T.Guid, input: S.SetSiteVenueInput) => put<S.SitePlan>(`/site-plans/${id}/venue`, input),
-  setVenuePlan: (id: T.Guid, input: S.SetSiteVenuePlanInput) => put<S.SitePlan>(`/site-plans/${id}/venue/plan`, input),
-  removeVenue: (id: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/venue`),
+  /** The room the job is built in; the first call creates the record. */
+  setRoom: (projectId: T.Guid, input: S.SetVenueRoomInput) => put<S.ProjectVenue>(`/projects/${projectId}/venue/room`, input),
+  setPlan: (projectId: T.Guid, input: S.SetVenuePlanInput) => put<S.ProjectVenue>(`/projects/${projectId}/venue/plan`, input),
+  removeRoom: (projectId: T.Guid) => del<S.ProjectVenue>(`/projects/${projectId}/venue/room`),
 };

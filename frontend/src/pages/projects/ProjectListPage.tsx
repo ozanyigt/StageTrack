@@ -48,7 +48,7 @@ export function ProjectListPage() {
               { header: t('projects.name'), value: (p) => p.name, width: 40 },
               { header: t('projects.status'), value: (p) => t(`enums.projectStatus.${p.status}`), width: 16 },
               { header: t('projects.customer'), value: (p) => p.customerName, width: 30 },
-              { header: t('projects.venue'), value: (p) => p.venue, width: 24 },
+              { header: t('projects.venue'), value: (p) => p.venueName, width: 24 },
               { header: t('projects.type'), value: (p) => p.projectType, width: 16 },
               { header: t('projects.warehouse'), value: (p) => p.stockLocationName, width: 16 },
               { header: t('projects.planStart'), value: (p) => new Date(p.planStart), width: 18 },

@@ -64,7 +64,7 @@ export type EquipmentType = (typeof EQUIPMENT_TYPES)[number];
 export const UNIT_STATUSES = ['InStock', 'OnProject', 'InRepair', 'Lost'] as const;
 export type UnitStatus = (typeof UNIT_STATUSES)[number];
 
-export const LABEL_TYPES = ['RentmanQr', 'Qr', 'Barcode', 'Rfid'] as const;
+export const LABEL_TYPES = ['ImportedQr', 'Qr', 'Barcode', 'Rfid'] as const;
 export type LabelType = (typeof LABEL_TYPES)[number];
 
 export const STOCK_LOCATION_TYPES = ['Warehouse', 'StorageLocation'] as const;
@@ -365,7 +365,7 @@ export interface ProjectListItem {
   name: string;
   customerId?: Guid | null;
   customerName?: string | null;
-  venue?: string | null;
+  venueName?: string | null;
   planStart: string;
   planEnd: string;
   useStart?: string | null;
@@ -468,7 +468,7 @@ export interface PackingSlip {
   projectNumber: number;
   projectName: string;
   customerName?: string | null;
-  venue?: string | null;
+  venueName?: string | null;
   accountManagerName?: string | null;
   paymentTerms?: string | null;
   planStart: string;
@@ -493,7 +493,7 @@ export interface CrewDirectoryEntry {
 export interface ProjectInput {
   name: string;
   customerId?: Guid | null;
-  venue?: string | null;
+  venueName?: string | null;
   planStart: string;
   planEnd: string;
   useStart?: string | null;
@@ -567,7 +567,7 @@ export interface ScanSheet {
   name: string;
   status: ProjectStatus;
   customerName?: string | null;
-  venue?: string | null;
+  venueName?: string | null;
   planStart: string;
   planEnd: string;
   /** Statuses the warehouse may set: Prepped, OnLocation, Returned. */
@@ -593,7 +593,7 @@ export interface PackingList {
   name: string;
   status: ProjectStatus;
   customerName?: string | null;
-  venue?: string | null;
+  venueName?: string | null;
   planStart: string;
   planEnd: string;
   lines: PackingLine[];
@@ -713,7 +713,7 @@ export interface Quote extends QuoteListItem {
   vatAmount: number;
   isEditable: boolean;
   lines: QuoteLine[];
-  venue?: string | null;
+  venueName?: string | null;
   useStart?: string | null;
   useEnd?: string | null;
   customer?: Customer | null;

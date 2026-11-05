@@ -86,7 +86,7 @@ export function PlanPage() {
           items={[
             { key: 'firm', label: t('plan.firm'), children: company?.name ?? '—' },
             { key: 'job', label: t('plan.job'), children: project ? `${project.number} · ${project.name}` : t('plan.noJob') },
-            { key: 'venue', label: t('venue.title'), children: project?.venue ?? '—' },
+            { key: 'venue', label: t('venue.title'), children: project?.venueName ?? '—' },
             { key: 'date', label: t('plan.date'), children: formatDate(new Date().toISOString()) },
             { key: 'scale', label: t('plan.scale'), children: `1:${scale}` },
             { key: 'revision', label: t('plan.revision'), children: revision || '—' },

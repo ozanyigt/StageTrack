@@ -744,12 +744,8 @@
       "JobSection": "شاشات LED",
       "NoWarehouse": "بدون مستودع"
     },
-    "SitePlan": {
-      "TooManyItems": "يتسع المخطط لـ {{limit}} عنصر كحد أقصى.",
-      "ItemNeedsEquipmentOrLabel": "يجب أن يكون العنصر معدة أو أن يحمل اسمًا على الأقل.",
-      "ZoneInvalidShape": "يحتاج الشكل إلى {{needed}} زوايا على الأقل.",
-      "AlreadyExists": "هذا العمل لديه مخطط موقع بالفعل.",
-      "VenueNotSet": "أدخل قياسات القاعة أولاً."
+    "ProjectVenue": {
+      "RoomNotSet": "أدخل قياسات القاعة أولاً."
     }
   },
   "roles": {

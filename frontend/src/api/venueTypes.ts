@@ -5,7 +5,7 @@ import type { Guid } from './types';
  * indoors this is the ground truth: how wide, how deep, and how much clear height there is over the rig.
  * Scene metres - x across, z towards the audience, screens at z = 0 - the same floor the 3D stage uses.
  */
-export interface SiteVenue {
+export interface VenueRoom {
   widthM: number;
   depthM: number;
   /** What the rig has to clear; 0 = nobody entered one. */
@@ -21,7 +21,7 @@ export interface SiteVenue {
   planRotationDeg: number;
 }
 
-export interface SetSiteVenueInput {
+export interface SetVenueRoomInput {
   widthM: number;
   depthM: number;
   clearHeightM: number;
@@ -30,7 +30,7 @@ export interface SetSiteVenueInput {
   rakeDeg: number;
 }
 
-export interface SetSiteVenuePlanInput {
+export interface SetVenuePlanInput {
   planAttachmentId?: Guid | null;
   planMetresPerPixel?: number | null;
   planOriginXM: number;
@@ -38,20 +38,15 @@ export interface SetSiteVenuePlanInput {
   planRotationDeg: number;
 }
 
-/** The job's room record: one per job, carrying the venue above. */
-export interface SitePlan {
+/** The job's venue record: one per job, carrying the room above. */
+export interface ProjectVenue {
   id: Guid;
   projectId: Guid;
   projectNumber: number;
   projectName: string;
-  /** The job's venue as text ("Ankara Congresium"); the room itself is `venue`. */
+  /** The job's venue as text ("Ankara Congresium"); the room itself is `room`. */
   venueName?: string | null;
   name: string;
   /** The room, when the job is indoors; null on an open field. */
-  venue?: SiteVenue | null;
-}
-
-export interface CreateSitePlanInput {
-  projectId: Guid;
-  name?: string | null;
+  room?: VenueRoom | null;
 }

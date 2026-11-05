@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { SiteVenue } from '../../api/siteTypes';
+import type { VenueRoom } from '../../api/venueTypes';
 
 /**
  * The room in three.js: a floor, four walls and the ceiling the rig has to clear. Drawn as an open shell - the
@@ -23,7 +23,7 @@ export interface RoomBox {
  * Where the room's walls fall around the stage. The back wall is a set distance behind the podium and the room
  * runs forward from there, so moving the stage inside the hall is one number, not a coordinate system.
  */
-export function roomBox(venue: SiteVenue, podiumBack: number): RoomBox {
+export function roomBox(venue: VenueRoom, podiumBack: number): RoomBox {
   const minZ = podiumBack - venue.behindStageM;
   return {
     minX: venue.stageOffsetXM - venue.widthM / 2,

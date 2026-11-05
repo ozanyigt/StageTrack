@@ -130,7 +130,7 @@ export function PackingSlipPrintPage() {
               <tbody>
                 <tr><td className="label">{t('projects.customer')}:</td><td style={{ fontWeight: 600 }}>{s.customerName ?? '—'}</td></tr>
                 <tr><td className="label">{t('projectExtra.projectNumber')}:</td><td>{s.projectNumber}</td></tr>
-                <tr><td className="label">{t('projects.venue')}:</td><td>{s.venue ?? '—'}</td></tr>
+                <tr><td className="label">{t('projects.venue')}:</td><td>{s.venueName ?? '—'}</td></tr>
               </tbody>
             </table>
           </div>

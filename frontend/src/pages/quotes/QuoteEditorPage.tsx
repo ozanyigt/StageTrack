@@ -239,7 +239,7 @@ export function QuoteEditorPage() {
             <Descriptions size="small" column={{ xs: 1, sm: 2 }}>
               <Descriptions.Item label={t('quotes.project')}><Link to={`/projects/${q.projectId}`}>{q.projectNumber} · {q.projectName}</Link></Descriptions.Item>
               <Descriptions.Item label={t('quotes.customer')}>{q.customer?.name ?? '—'}</Descriptions.Item>
-              <Descriptions.Item label={t('projects.venue')}>{q.venue ?? '—'}</Descriptions.Item>
+              <Descriptions.Item label={t('projects.venue')}>{q.venueName ?? '—'}</Descriptions.Item>
               <Descriptions.Item label={t('projects.usePeriod')}>{f.period(q.useStart, q.useEnd)}</Descriptions.Item>
             </Descriptions>
           </Card>

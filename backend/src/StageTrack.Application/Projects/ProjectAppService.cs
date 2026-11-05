@@ -148,7 +148,7 @@ public class ProjectAppService(
             ProjectNumber = project.Number,
             ProjectName = project.Name,
             CustomerName = customer?.Name,
-            Venue = project.Venue,
+            VenueName = project.VenueName,
             AccountManagerName = manager?.FullName,
             PaymentTerms = project.PaymentTerms,
             PlanStart = project.PlanStart,
@@ -260,7 +260,7 @@ public class ProjectAppService(
 
     internal static void Apply(Project project, CreateUpdateProjectDto input)
     {
-        project.Update(input.Name.Trim(), input.CustomerId, input.Venue, input.Color, input.ProjectType, input.StockLocationId, input.Notes);
+        project.Update(input.Name.Trim(), input.CustomerId, input.VenueName, input.Color, input.ProjectType, input.StockLocationId, input.Notes);
         project.SetPlanPeriod(input.PlanStart, input.PlanEnd);
         project.SetUsePeriod(input.UseStart, input.UseEnd);
         project.SetDocumentInfo(input.AccountManagerId, input.PaymentTerms);

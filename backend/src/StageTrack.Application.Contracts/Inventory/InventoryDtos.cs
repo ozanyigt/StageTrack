@@ -405,7 +405,7 @@ public class AssignLabelInput
     [Required, StringLength(EquipmentLabelConsts.MaxCodeLength)]
     public string Code { get; set; } = null!;
 
-    public LabelType Type { get; set; } = LabelType.RentmanQr;
+    public LabelType Type { get; set; } = LabelType.ImportedQr;
     public Guid? EquipmentId { get; set; }
     public Guid? UnitId { get; set; }
 }

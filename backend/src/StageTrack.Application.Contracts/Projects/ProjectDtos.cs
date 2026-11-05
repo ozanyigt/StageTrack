@@ -10,7 +10,7 @@ public class ProjectListItemDto
     public string Name { get; set; } = null!;
     public Guid? CustomerId { get; set; }
     public string? CustomerName { get; set; }
-    public string? Venue { get; set; }
+    public string? VenueName { get; set; }
     public DateTime PlanStart { get; set; }
     public DateTime PlanEnd { get; set; }
     public DateTime? UseStart { get; set; }
@@ -125,8 +125,8 @@ public class CreateUpdateProjectDto
 
     public Guid? CustomerId { get; set; }
 
-    [StringLength(ProjectConsts.MaxVenueLength)]
-    public string? Venue { get; set; }
+    [StringLength(ProjectConsts.MaxVenueNameLength)]
+    public string? VenueName { get; set; }
 
     public DateTime PlanStart { get; set; }
     public DateTime PlanEnd { get; set; }
@@ -222,7 +222,7 @@ public class PackingSlipDto
     public int ProjectNumber { get; set; }
     public string ProjectName { get; set; } = null!;
     public string? CustomerName { get; set; }
-    public string? Venue { get; set; }
+    public string? VenueName { get; set; }
     public string? AccountManagerName { get; set; }
     public string? PaymentTerms { get; set; }
     public DateTime PlanStart { get; set; }

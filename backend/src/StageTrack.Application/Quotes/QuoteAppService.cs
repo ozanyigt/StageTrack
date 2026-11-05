@@ -217,7 +217,7 @@ public class QuoteAppService(
         dto.VatAmount = quote.VatAmount;
         dto.IsEditable = quote.IsEditable;
         dto.AllowedStatuses = QuoteManager.GetAllowedTargets(quote.Status).ToList();
-        dto.Venue = project.Venue;
+        dto.VenueName = project.VenueName;
         dto.UseStart = project.UseStart ?? project.PlanStart;
         dto.UseEnd = project.UseEnd ?? project.PlanEnd;
         dto.Customer = customer?.ToDto();

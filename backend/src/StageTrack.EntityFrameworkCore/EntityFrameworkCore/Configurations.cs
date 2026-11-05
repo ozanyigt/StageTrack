@@ -378,7 +378,7 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
     public void Configure(EntityTypeBuilder<Project> b)
     {
         b.Property(x => x.Name).HasMaxLength(ProjectConsts.MaxNameLength).IsRequired();
-        b.Property(x => x.Venue).HasMaxLength(ProjectConsts.MaxVenueLength);
+        b.Property(x => x.VenueName).HasMaxLength(ProjectConsts.MaxVenueNameLength);
         b.Property(x => x.Color).HasMaxLength(ProjectConsts.MaxColorLength).IsRequired();
         b.Property(x => x.ProjectType).HasMaxLength(ProjectConsts.MaxProjectTypeLength);
         b.Property(x => x.Notes).HasMaxLength(ProjectConsts.MaxNotesLength);
@@ -407,7 +407,7 @@ public class ProjectCrewMemberConfiguration : IEntityTypeConfiguration<ProjectCr
 {
     public void Configure(EntityTypeBuilder<ProjectCrewMember> b)
     {
-        b.ToTable("ProjectCrew");
+        b.ToTable("ProjectCrewMembers");
         b.Property(x => x.Function).HasMaxLength(128);
         b.HasIndex(x => new { x.ProjectId, x.UserId }).IsUnique();
         b.HasIndex(x => x.UserId);
@@ -419,7 +419,7 @@ public class ProjectEquipmentConfiguration : IEntityTypeConfiguration<ProjectEqu
 {
     public void Configure(EntityTypeBuilder<ProjectEquipment> b)
     {
-        b.ToTable("ProjectEquipment");
+        b.ToTable("ProjectEquipmentLines");
         b.Property(x => x.Notes).HasMaxLength(1000);
         b.HasIndex(x => x.EquipmentId);
         b.HasOne<Equipment>().WithMany().HasForeignKey(x => x.EquipmentId).OnDelete(DeleteBehavior.Restrict);

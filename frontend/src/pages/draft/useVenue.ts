@@ -1,38 +1,35 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { collaborationApi, sitePlanApi } from '../../api/endpoints';
-import type { SetSiteVenueInput, SetSiteVenuePlanInput, SitePlan } from '../../api/siteTypes';
+import { collaborationApi, projectVenueApi } from '../../api/endpoints';
+import type { SetVenueRoomInput, SetVenuePlanInput, ProjectVenue } from '../../api/venueTypes';
 import { useErrorToast } from '../../utils/errors';
 
 /**
- * The job's room, and the drawing under it. It hangs off the job's site plan rather than off the draft in this
- * browser, because the room is a fact about the job - everyone who opens it should see the same hall - while the
- * draft is one person's work in progress. A job with no site plan yet gets one the moment a room is entered.
+ * The job's room, and the drawing under it. It hangs off the job rather than off the draft in this browser,
+ * because the room is a fact about the job - everyone who opens it should see the same hall - while the draft is
+ * one person's work in progress. The record is made by the first measurement, so nothing here has to create it.
  */
 export function useVenue(projectId: string | null) {
   const queryClient = useQueryClient();
   const showError = useErrorToast();
-  const key = ['site-plan', projectId];
+  const key = ['project-venue', projectId];
 
-  const plan = useQuery({
+  const venue = useQuery({
     queryKey: key,
-    queryFn: () => sitePlanApi.byProject(projectId!),
+    queryFn: () => projectVenueApi.byProject(projectId!),
     enabled: !!projectId,
   });
 
-  const put = (next: SitePlan) => queryClient.setQueryData(key, next);
-
-  /** Entering a room on a job that has no record yet makes one. */
-  const planOf = async () => plan.data ?? (await sitePlanApi.create({ projectId: projectId! }));
+  const put = (next: ProjectVenue) => queryClient.setQueryData(key, next);
 
   const setVenue = useMutation({
-    mutationFn: async (input: SetSiteVenueInput) => sitePlanApi.setVenue((await planOf()).id, input),
+    mutationFn: (input: SetVenueRoomInput) => projectVenueApi.setRoom(projectId!, input),
     onSuccess: put,
     onError: showError,
   });
 
   const setPlanImage = useMutation({
-    mutationFn: async (input: SetSiteVenuePlanInput) => sitePlanApi.setVenuePlan((await planOf()).id, input),
+    mutationFn: (input: SetVenuePlanInput) => projectVenueApi.setPlan(projectId!, input),
     onSuccess: put,
     onError: showError,
   });
@@ -40,14 +37,14 @@ export function useVenue(projectId: string | null) {
   const upload = useMutation({
     mutationFn: async (file: File) => {
       const attachment = await collaborationApi.uploadFile('Project', projectId!, file);
-      const current = await planOf();
+      const room = venue.data?.room;
       // A new drawing starts unscaled: whatever the last one was worth says nothing about this one.
-      return sitePlanApi.setVenuePlan(current.id, {
+      return projectVenueApi.setPlan(projectId!, {
         planAttachmentId: attachment.id,
         planMetresPerPixel: null,
-        planOriginXM: current.venue?.planOriginXM ?? 0,
-        planOriginZM: current.venue?.planOriginZM ?? 0,
-        planRotationDeg: current.venue?.planRotationDeg ?? 0,
+        planOriginXM: room?.planOriginXM ?? 0,
+        planOriginZM: room?.planOriginZM ?? 0,
+        planRotationDeg: room?.planRotationDeg ?? 0,
       });
     },
     onSuccess: put,
@@ -55,12 +52,12 @@ export function useVenue(projectId: string | null) {
   });
 
   const remove = useMutation({
-    mutationFn: async () => sitePlanApi.removeVenue((await planOf()).id),
+    mutationFn: () => projectVenueApi.removeRoom(projectId!),
     onSuccess: put,
     onError: showError,
   });
 
-  return { plan: plan.data ?? null, loading: plan.isLoading, venue: plan.data?.venue ?? null, setVenue, setPlanImage, upload, remove };
+  return { loading: venue.isLoading, venue: venue.data?.room ?? null, setVenue, setPlanImage, upload, remove };
 }
 
 /**

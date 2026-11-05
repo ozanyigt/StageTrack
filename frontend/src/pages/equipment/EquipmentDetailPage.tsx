@@ -233,7 +233,7 @@ function EquipmentLabels({ equipment }: { equipment: EquipmentDetail }) {
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['equipment', equipment.id] });
 
   const assign = useMutation({
-    mutationFn: (code: string) => labelApi.assign({ code, type: 'RentmanQr', equipmentId: equipment.id, unitId: null }),
+    mutationFn: (code: string) => labelApi.assign({ code, type: 'ImportedQr', equipmentId: equipment.id, unitId: null }),
     onSuccess: (label) => {
       message.success(t('labels.assigned', { code: label.code }));
       setScanOpen(false);
