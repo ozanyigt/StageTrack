@@ -24,7 +24,7 @@ public class GetCustomerListInput : PagedRequestDto
     public string? Text { get; set; }
 }
 
-public class CreateUpdateCustomerDto
+public class CreateUpdateCustomerInput
 {
     [Required, StringLength(256)]
     public string Name { get; set; } = null!;
@@ -65,11 +65,11 @@ public interface ICustomerAppService
 
     Task<List<LookupDto>> GetLookupAsync(string? text);
 
-    Task<CustomerDto> CreateAsync(CreateUpdateCustomerDto input);
+    Task<CustomerDto> CreateAsync(CreateUpdateCustomerInput input);
 
-    Task<CustomerDto> UpdateAsync(Guid id, CreateUpdateCustomerDto input);
+    Task<CustomerDto> UpdateAsync(Guid id, CreateUpdateCustomerInput input);
 
     Task DeleteAsync(Guid id);
 
-    Task<ImportResultDto> ImportAsync(List<CustomerImportRow> rows);
+    Task<ImportResultDto> ImportAsync(List<CustomerImportInput> rows);
 }

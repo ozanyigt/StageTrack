@@ -24,13 +24,13 @@ public class RoleDto
     public List<string> Permissions { get; set; } = [];
 }
 
-public class CreateUpdateRoleDto
+public class CreateUpdateRoleInput
 {
     [Required, StringLength(64, MinimumLength = 2)]
     public string Name { get; set; } = null!;
 }
 
-public class UpdateRolePermissionsDto
+public class UpdateRolePermissionsInput
 {
     [Required]
     public List<string> Permissions { get; set; } = [];
@@ -56,7 +56,7 @@ public class GetUserListInput : PagedRequestDto
     public string? Text { get; set; }
 }
 
-public class CreateUserDto
+public class CreateUserInput
 {
     [Required, StringLength(64, MinimumLength = 3), RegularExpression("^[A-Za-z0-9._@-]+$")]
     public string UserName { get; set; } = null!;
@@ -83,7 +83,7 @@ public class CreateUserDto
     public List<Guid> CompanyIds { get; set; } = [];
 }
 
-public class UpdateUserDto
+public class UpdateUserInput
 {
     [Required, StringLength(128)]
     public string FullName { get; set; } = null!;
@@ -101,7 +101,7 @@ public class UpdateUserDto
     public List<Guid> CompanyIds { get; set; } = [];
 }
 
-public class SetUserActiveDto
+public class SetUserActiveInput
 {
     public bool IsActive { get; set; }
 }
@@ -118,11 +118,11 @@ public interface IRoleAppService
 
     Task<List<RoleDto>> GetListAsync();
 
-    Task<RoleDto> CreateAsync(CreateUpdateRoleDto input);
+    Task<RoleDto> CreateAsync(CreateUpdateRoleInput input);
 
-    Task<RoleDto> UpdateAsync(Guid id, CreateUpdateRoleDto input);
+    Task<RoleDto> UpdateAsync(Guid id, CreateUpdateRoleInput input);
 
-    Task<RoleDto> UpdatePermissionsAsync(Guid id, UpdateRolePermissionsDto input);
+    Task<RoleDto> UpdatePermissionsAsync(Guid id, UpdateRolePermissionsInput input);
 
     Task DeleteAsync(Guid id);
 }
@@ -131,11 +131,11 @@ public interface IUserAppService
 {
     Task<PagedResultDto<UserDto>> GetListAsync(GetUserListInput input);
 
-    Task<UserDto> CreateAsync(CreateUserDto input);
+    Task<UserDto> CreateAsync(CreateUserInput input);
 
-    Task<UserDto> UpdateAsync(Guid id, UpdateUserDto input);
+    Task<UserDto> UpdateAsync(Guid id, UpdateUserInput input);
 
-    Task SetActiveAsync(Guid id, SetUserActiveDto input);
+    Task SetActiveAsync(Guid id, SetUserActiveInput input);
 
     Task ResetPasswordAsync(Guid id, ResetPasswordDto input);
 }

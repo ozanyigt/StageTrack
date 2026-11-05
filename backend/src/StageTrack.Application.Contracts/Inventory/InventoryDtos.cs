@@ -18,7 +18,7 @@ public class EquipmentFolderDto
     public EquipmentDiscipline? EffectiveDiscipline { get; set; }
 }
 
-public class CreateUpdateEquipmentFolderDto
+public class CreateUpdateEquipmentFolderInput
 {
     [Required, StringLength(EquipmentFolderConsts.MaxNameLength)]
     public string Name { get; set; } = null!;
@@ -163,7 +163,7 @@ public class MoveEquipmentInput
     public Guid? FolderId { get; set; }
 }
 
-public class CreateUpdateEquipmentDto
+public class CreateUpdateEquipmentInput
 {
     [Required, StringLength(EquipmentConsts.MaxCodeLength)]
     public string Code { get; set; } = null!;
@@ -323,7 +323,7 @@ public class GetEquipmentUnitListInput : PagedRequestDto
     public bool IncludeArchived { get; set; }
 }
 
-public class CreateEquipmentUnitDto
+public class CreateEquipmentUnitInput
 {
     [Required]
     public Guid EquipmentId { get; set; }
@@ -348,7 +348,7 @@ public class CreateEquipmentUnitDto
     public string? LabelCode { get; set; }
 }
 
-public class UpdateEquipmentUnitDto
+public class UpdateEquipmentUnitInput
 {
     [Required, StringLength(EquipmentUnitConsts.MaxInternalRefLength)]
     public string InternalRef { get; set; } = null!;
@@ -470,7 +470,7 @@ public class LabelTemplateDto
     public bool IsDefault { get; set; }
 }
 
-public class CreateUpdateLabelTemplateDto
+public class CreateUpdateLabelTemplateInput
 {
     [Required, StringLength(128)]
     public string Name { get; set; } = null!;
@@ -499,7 +499,7 @@ public class StockLocationDto
     public bool IsActive { get; set; }
 }
 
-public class CreateUpdateStockLocationDto
+public class CreateUpdateStockLocationInput
 {
     [Required, StringLength(StockLocationConsts.MaxNameLength)]
     public string Name { get; set; } = null!;

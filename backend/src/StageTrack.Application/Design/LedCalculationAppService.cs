@@ -15,7 +15,7 @@ public class LedCalculationAppService(
 {
     public CalcSettingsDto GetSettings() => CalcSettingsDto.From(settings);
 
-    public async Task<EvaluateResponse> EvaluateAsync(EvaluateRequest request)
+    public async Task<EvaluateResultDto> EvaluateAsync(EvaluateInput request)
     {
         LedRequestGuard.Validate(request);
         return LedCalculationEvaluator.Evaluate(request, await catalog.LoadAsync(), settings);
@@ -25,7 +25,7 @@ public class LedCalculationAppService(
     /// The non-LED lines of the same job (fixtures, speakers, truss): weight, watt, current and circuits with the
     /// LED constants, so one job's power is added up the same way everywhere.
     /// </summary>
-    public async Task<EquipmentPowerResponse> CalculateEquipmentPowerAsync(EquipmentPowerRequest request)
+    public async Task<EquipmentPowerResultDto> CalculateEquipmentPowerAsync(EquipmentPowerInput request)
     {
         LedRequestGuard.Validate(request);
 
@@ -47,7 +47,7 @@ public class LedCalculationAppService(
         }).ToList();
 
         var found = lines.Where(l => l.Found).ToList();
-        return new EquipmentPowerResponse(
+        return new EquipmentPowerResultDto(
             lines,
             new EquipmentTotalsDto(found.Sum(l => l.Count), found.Sum(l => l.WeightKg), found.Sum(l => l.PowerW),
                 found.Sum(l => l.CurrentA), found.Sum(l => l.Circuits)));
@@ -67,7 +67,7 @@ internal static class LedRequestGuard
     public const int MaxEquipmentLines = 500;
     public const double MaxCurveRadiusM = 10_000;
 
-    public static void Validate(EvaluateRequest request)
+    public static void Validate(EvaluateInput request)
     {
         Require(request.Voltage is > 0 and <= 1000);
         Require(Enum.IsDefined(request.Mode));
@@ -98,7 +98,7 @@ internal static class LedRequestGuard
         }
     }
 
-    public static void Validate(EquipmentPowerRequest request)
+    public static void Validate(EquipmentPowerInput request)
     {
         Require(request.Voltage is > 0 and <= 1000);
         Require(Enum.IsDefined(request.Mode));

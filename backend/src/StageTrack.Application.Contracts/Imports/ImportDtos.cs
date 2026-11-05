@@ -24,7 +24,7 @@ public class ImportErrorDto
     public Dictionary<string, object?>? Details { get; set; }
 }
 
-public class EquipmentImportRow
+public class EquipmentImportInput
 {
     public int Row { get; set; }
     public string? Code { get; set; }
@@ -75,7 +75,7 @@ public class EquipmentImportRow
     public string? Notes { get; set; }
 }
 
-public class UnitImportRow
+public class UnitImportInput
 {
     public int Row { get; set; }
     public string? EquipmentCode { get; set; }
@@ -91,7 +91,7 @@ public class UnitImportRow
     public string? LabelCode { get; set; }
 }
 
-public class CustomerImportRow
+public class CustomerImportInput
 {
     public int Row { get; set; }
     public string? Name { get; set; }

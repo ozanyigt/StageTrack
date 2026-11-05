@@ -955,7 +955,7 @@ export interface ImportResult {
   errors: ImportError[];
 }
 
-export interface EquipmentImportRow {
+export interface EquipmentImportInput {
   row: number;
   code?: string | null;
   name?: string | null;
@@ -973,7 +973,7 @@ export interface EquipmentImportRow {
   notes?: string | null;
 }
 
-export interface UnitImportRow {
+export interface UnitImportInput {
   row: number;
   equipmentCode?: string | null;
   internalRef?: string | null;
@@ -983,7 +983,7 @@ export interface UnitImportRow {
   labelCode?: string | null;
 }
 
-export interface CustomerImportRow {
+export interface CustomerImportInput {
   row: number;
   name?: string | null;
   taxNumber?: string | null;

@@ -39,11 +39,11 @@ public class SuppliersController(ISupplierAppService appService) : ControllerBas
 
     [HttpPost]
     [Authorize(StageTrackPermissions.Suppliers.Manage)]
-    public Task<SupplierDto> CreateAsync(CreateUpdateSupplierDto input) => appService.CreateAsync(input);
+    public Task<SupplierDto> CreateAsync(CreateUpdateSupplierInput input) => appService.CreateAsync(input);
 
     [HttpPut("{id:guid}")]
     [Authorize(StageTrackPermissions.Suppliers.Manage)]
-    public Task<SupplierDto> UpdateAsync(Guid id, CreateUpdateSupplierDto input) => appService.UpdateAsync(id, input);
+    public Task<SupplierDto> UpdateAsync(Guid id, CreateUpdateSupplierInput input) => appService.UpdateAsync(id, input);
 
     [HttpDelete("{id:guid}")]
     [Authorize(StageTrackPermissions.Suppliers.Manage)]

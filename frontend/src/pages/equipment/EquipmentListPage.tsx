@@ -5,7 +5,7 @@ import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { equipmentApi, folderApi, unitApi } from '../../api/endpoints';
-import { EQUIPMENT_DISCIPLINES, type Equipment, type EquipmentDiscipline, type EquipmentImportRow } from '../../api/types';
+import { EQUIPMENT_DISCIPLINES, type Equipment, type EquipmentDiscipline, type EquipmentImportInput } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { ImportButton } from '../../components/ExcelButtons';
 import { useLabelGenerator } from '../../components/LabelGenerator';
@@ -350,7 +350,7 @@ export function EquipmentListPage() {
                 title={t('equipment.importTitle')}
                 templateName={t('equipment.importTemplate')}
                 fields={importFields}
-                onImport={(rows) => equipmentApi.import(rows as unknown as EquipmentImportRow[])}
+                onImport={(rows) => equipmentApi.import(rows as unknown as EquipmentImportInput[])}
                 onDone={() => {
                   queryClient.invalidateQueries({ queryKey: ['equipment'] });
                   queryClient.invalidateQueries({ queryKey: ['folders'] });

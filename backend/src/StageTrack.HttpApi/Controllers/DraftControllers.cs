@@ -19,11 +19,11 @@ public class LedCalculationController(ILedCalculationAppService appService) : Co
 
     [HttpPost("evaluate")]
     [Authorize(StageTrackPermissions.Design.Draft)]
-    public Task<EvaluateResponse> EvaluateAsync(EvaluateRequest request) => appService.EvaluateAsync(request);
+    public Task<EvaluateResultDto> EvaluateAsync(EvaluateInput request) => appService.EvaluateAsync(request);
 
     [HttpPost("equipment-power")]
     [Authorize(StageTrackPermissions.Design.Draft)]
-    public Task<EquipmentPowerResponse> EquipmentPowerAsync(EquipmentPowerRequest request) =>
+    public Task<EquipmentPowerResultDto> EquipmentPowerAsync(EquipmentPowerInput request) =>
         appService.CalculateEquipmentPowerAsync(request);
 }
 
@@ -76,10 +76,10 @@ public class TransportController(ITransportAppService appService) : ControllerBa
     public Task<TransportSettingsDto> GetVehiclesAsync() => appService.GetVehiclesAsync();
 
     [HttpPut("vehicles")]
-    public Task<TransportSettingsDto> SaveVehiclesAsync(SaveTransportVehiclesRequest request) => appService.SaveVehiclesAsync(request);
+    public Task<TransportSettingsDto> SaveVehiclesAsync(SaveTransportVehiclesInput request) => appService.SaveVehiclesAsync(request);
 
     [HttpPost("plan")]
-    public Task<TransportPlanResponse> PlanAsync(TransportPlanRequest request) => appService.PlanAsync(request);
+    public Task<TransportPlanResultDto> PlanAsync(TransportPlanInput request) => appService.PlanAsync(request);
 }
 
 [ApiController]
@@ -100,7 +100,7 @@ public class StageController(IStageAppService appService) : ControllerBase
 public class LedStockStatusController(ILedStockStatusAppService appService) : ControllerBase
 {
     [HttpPost]
-    public Task<LedStockStatusResponse> GetAsync(LedStockStatusRequest request) => appService.GetAsync(request);
+    public Task<LedStockStatusResultDto> GetAsync(LedStockStatusInput request) => appService.GetAsync(request);
 }
 
 /// <summary>

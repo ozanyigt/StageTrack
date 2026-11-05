@@ -24,7 +24,7 @@ public class RentalFactorProfileDto
     public List<RentalFactorStepDto> Steps { get; set; } = [];
 }
 
-public class CreateUpdateRentalFactorProfileDto
+public class CreateUpdateRentalFactorProfileInput
 {
     [Required, StringLength(RentalFactorConsts.MaxNameLength)]
     public string Name { get; set; } = null!;
@@ -49,9 +49,9 @@ public interface IRentalFactorProfileAppService
 {
     Task<List<RentalFactorProfileDto>> GetListAsync();
 
-    Task<RentalFactorProfileDto> CreateAsync(CreateUpdateRentalFactorProfileDto input);
+    Task<RentalFactorProfileDto> CreateAsync(CreateUpdateRentalFactorProfileInput input);
 
-    Task<RentalFactorProfileDto> UpdateAsync(Guid id, CreateUpdateRentalFactorProfileDto input);
+    Task<RentalFactorProfileDto> UpdateAsync(Guid id, CreateUpdateRentalFactorProfileInput input);
 
     Task DeleteAsync(Guid id);
 
@@ -159,7 +159,7 @@ public class QuoteJobDto
     public List<QuoteListItemDto> Quotes { get; set; } = [];
 }
 
-public class CreateQuoteJobInput : CreateUpdateProjectDto
+public class CreateQuoteJobInput : CreateUpdateProjectInput
 {
     public Guid? RentalFactorProfileId { get; set; }
 }

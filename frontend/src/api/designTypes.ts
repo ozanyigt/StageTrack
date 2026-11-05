@@ -131,7 +131,7 @@ export interface CurveDto {
 }
 
 /** One screen of the job; `panelModelId` is a StageTrack equipment id. */
-export interface EvaluateScreenRequest {
+export interface EvaluateScreenInput {
   id: string;
   panelModelId?: Guid | null;
   columns: number;
@@ -144,10 +144,10 @@ export interface EvaluateScreenRequest {
   signalLayout?: SignalLayoutDto | null;
 }
 
-export interface EvaluateRequest {
+export interface EvaluateInput {
   voltage: number;
   mode: PowerMode;
-  screens: EvaluateScreenRequest[];
+  screens: EvaluateScreenInput[];
   wiring?: boolean;
 }
 
@@ -285,7 +285,7 @@ export interface JobProcessorDto {
   infeasibleScreenCount: number;
 }
 
-export interface EvaluateResponse {
+export interface EvaluateResultDto {
   screens: ScreenEvaluationDto[];
   job: { power?: JobPowerDto | null; processor: JobProcessorDto };
 }
@@ -300,16 +300,16 @@ export interface CalcSettings {
 
 // ---------------------------------------------------------------- Non-LED power
 
-export interface EquipmentLineRequest {
+export interface EquipmentLineInput {
   id: string;
   equipmentId?: Guid | null;
   count: number;
 }
 
-export interface EquipmentPowerRequest {
+export interface EquipmentPowerInput {
   voltage: number;
   mode: PowerMode;
-  lines: EquipmentLineRequest[];
+  lines: EquipmentLineInput[];
 }
 
 export interface EquipmentLineDto {
@@ -324,7 +324,7 @@ export interface EquipmentLineDto {
   circuits: number;
 }
 
-export interface EquipmentPowerResponse {
+export interface EquipmentPowerResultDto {
   lines: EquipmentLineDto[];
   total: { count: number; weightKg: number; watt: number; currentA: number; circuits: number };
 }
@@ -347,8 +347,8 @@ export interface TransportSettings {
   gapMm: number;
 }
 
-export interface TransportPlanRequest {
-  screens: EvaluateScreenRequest[];
+export interface TransportPlanInput {
+  screens: EvaluateScreenInput[];
   vehicleId?: Guid | null;
   equipment?: { equipmentId: Guid; count: number }[] | null;
 }
@@ -387,7 +387,7 @@ export interface PlanStackDto {
   rotated: boolean;
 }
 
-export interface TransportPlanResponse {
+export interface TransportPlanResultDto {
   vehicleTypes: TransportVehicle[];
   gapMm: number;
   groups: TransportGroupDto[];
@@ -415,7 +415,7 @@ export interface StageSettings {
 
 // ---------------------------------------------------------------- Stock status
 
-export interface LedStockScreenRequest {
+export interface LedStockScreenInput {
   id: string;
   equipmentId?: Guid | null;
   stockLocationId?: Guid | null;
@@ -439,7 +439,7 @@ export interface LedStockLine {
   used: number;
 }
 
-export interface LedStockStatusResponse {
+export interface LedStockStatusResultDto {
   locations: { id?: Guid | null; name: string; lines: LedStockLine[] }[];
 }
 
@@ -448,7 +448,7 @@ export interface LedStockStatusResponse {
 export type DraftToJobLineSource = 'Panel' | 'Processor' | 'Extender' | 'Equipment';
 
 export interface DraftToJobInput {
-  screens: LedStockScreenRequest[];
+  screens: LedStockScreenInput[];
   processors?: { equipmentId: Guid; count: number }[];
   extenders?: { equipmentId: Guid; count: number }[];
   equipment?: { equipmentId: Guid; count: number }[];

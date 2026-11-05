@@ -1,4 +1,4 @@
-import type { EvaluateResponse } from "../../../../api/designTypes";
+import type { EvaluateResultDto } from "../../../../api/designTypes";
 import { deviceId } from "../evaluation";
 import type { ExtenderRow, IslemciRow } from "../types";
 
@@ -35,7 +35,7 @@ export interface SignalDevice {
   extender: string | null;
 }
 
-export function signalDevices(evaluation: EvaluateResponse | undefined, islemciler: IslemciRow[], extenderlar: ExtenderRow[]): SignalDevice[] {
+export function signalDevices(evaluation: EvaluateResultDto | undefined, islemciler: IslemciRow[], extenderlar: ExtenderRow[]): SignalDevice[] {
   const counts = evaluation?.job.processor.processors ?? [];
   const signals = (evaluation?.screens ?? []).flatMap((s) => (s.signal && !s.signal.locked && s.signal.processorId ? [s.signal] : []));
   return counts.flatMap(({ id, count }) => {

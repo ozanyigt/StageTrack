@@ -162,7 +162,7 @@ public class DraftToJobAppService(
             input.SectionId is { } id ? project.Sections.FirstOrDefault(s => s.Id == id)?.Name ?? string.Empty : input.SectionName ?? string.Empty,
             lines);
 
-    private static Dictionary<Guid, int> Totals(IEnumerable<DraftToJobItemRequest>? items) =>
+    private static Dictionary<Guid, int> Totals(IEnumerable<DraftToJobItemInput>? items) =>
         (items ?? []).Where(i => i.Count > 0).GroupBy(i => i.EquipmentId).ToDictionary(g => g.Key, g => g.Sum(i => i.Count));
 
     private static void Validate(DraftToJobInput input)

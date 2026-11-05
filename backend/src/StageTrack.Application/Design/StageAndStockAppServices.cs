@@ -35,7 +35,7 @@ public class LedStockStatusAppService(
     IStockLocationRepository locationRepository,
     IStringLocalizer<StageTrackResource> localizer) : ILedStockStatusAppService
 {
-    public async Task<LedStockStatusResponse> GetAsync(LedStockStatusRequest request)
+    public async Task<LedStockStatusResultDto> GetAsync(LedStockStatusInput request)
     {
         Validate(request);
 
@@ -56,7 +56,7 @@ public class LedStockStatusAppService(
         var places = new List<(Guid? Id, string Name)> { (null, localizer["Led.NoWarehouse"].Value) };
         places.AddRange(warehouses.Select(w => ((Guid?)w.Id, w.Name)));
 
-        return new LedStockStatusResponse(places.Select(place => new LedStockLocationDto(
+        return new LedStockStatusResultDto(places.Select(place => new LedStockLocationDto(
             place.Id,
             place.Name,
             panels
@@ -82,7 +82,7 @@ public class LedStockStatusAppService(
     /// <summary>StockUsage keys on two Guids; "no warehouse" is Guid.Empty there and null everywhere else.</summary>
     private static StockKey Key(Guid equipmentId, Guid? stockLocationId) => new(equipmentId, stockLocationId ?? Guid.Empty);
 
-    private static void Validate(LedStockStatusRequest request)
+    private static void Validate(LedStockStatusInput request)
     {
         var ok = request.Screens is { } screens
                  && screens.Count <= LedRequestGuard.MaxScreens

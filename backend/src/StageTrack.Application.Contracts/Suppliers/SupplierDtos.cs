@@ -24,7 +24,7 @@ public class GetSupplierListInput : PagedRequestDto
     public string? Text { get; set; }
 }
 
-public class CreateUpdateSupplierDto
+public class CreateUpdateSupplierInput
 {
     [Required, StringLength(256)] public string Name { get; set; } = null!;
     [StringLength(128)] public string? ContactPerson { get; set; }
@@ -45,9 +45,9 @@ public interface ISupplierAppService
 
     Task<List<LookupDto>> GetLookupAsync(string? text);
 
-    Task<SupplierDto> CreateAsync(CreateUpdateSupplierDto input);
+    Task<SupplierDto> CreateAsync(CreateUpdateSupplierInput input);
 
-    Task<SupplierDto> UpdateAsync(Guid id, CreateUpdateSupplierDto input);
+    Task<SupplierDto> UpdateAsync(Guid id, CreateUpdateSupplierInput input);
 
     Task DeleteAsync(Guid id);
 }

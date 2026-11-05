@@ -162,7 +162,7 @@ public class ProjectAppService(
         };
     }
 
-    public async Task<ProjectDto> CreateAsync(CreateUpdateProjectDto input)
+    public async Task<ProjectDto> CreateAsync(CreateUpdateProjectInput input)
     {
         var project = await projectManager.CreateAsync(input.Name, input.PlanStart, input.PlanEnd);
         Apply(project, input);
@@ -171,7 +171,7 @@ public class ProjectAppService(
         return await BuildDtoAsync(project);
     }
 
-    public Task<ProjectDto> UpdateAsync(Guid id, CreateUpdateProjectDto input) => MutateAsync(id, p =>
+    public Task<ProjectDto> UpdateAsync(Guid id, CreateUpdateProjectInput input) => MutateAsync(id, p =>
     {
         Apply(p, input);
         return Task.CompletedTask;
@@ -258,7 +258,7 @@ public class ProjectAppService(
         return Task.CompletedTask;
     }
 
-    internal static void Apply(Project project, CreateUpdateProjectDto input)
+    internal static void Apply(Project project, CreateUpdateProjectInput input)
     {
         project.Update(input.Name.Trim(), input.CustomerId, input.VenueName, input.Color, input.ProjectType, input.StockLocationId, input.Notes);
         project.SetPlanPeriod(input.PlanStart, input.PlanEnd);

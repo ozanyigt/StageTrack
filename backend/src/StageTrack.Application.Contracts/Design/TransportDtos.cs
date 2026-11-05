@@ -8,7 +8,7 @@ namespace StageTrack.Design;
 public sealed record TransportVehicleDto(Guid Id, string Name, int LengthMm, int WidthMm, int HeightMm, int CapacityKg);
 
 /// <param name="Id">An existing type to update; null (or unknown) = a new one.</param>
-public sealed record SaveTransportVehicleRequest(Guid? Id, string Name, int LengthMm, int WidthMm, int HeightMm, int CapacityKg);
+public sealed record SaveTransportVehicleInput(Guid? Id, string Name, int LengthMm, int WidthMm, int HeightMm, int CapacityKg);
 
 /// <summary>
 /// The firm's Lojistik settings: its vehicle types and the space left between the cases and to the vehicle walls
@@ -17,25 +17,25 @@ public sealed record SaveTransportVehicleRequest(Guid? Id, string Name, int Leng
 public sealed record TransportSettingsDto(IReadOnlyList<TransportVehicleDto> Vehicles, int GapMm);
 
 /// <summary>The whole list, in display order: types left out are deleted. <paramref name="GapMm"/> null = unchanged.</summary>
-public sealed record SaveTransportVehiclesRequest(IReadOnlyList<SaveTransportVehicleRequest> Vehicles, int? GapMm = null);
+public sealed record SaveTransportVehiclesInput(IReadOnlyList<SaveTransportVehicleInput> Vehicles, int? GapMm = null);
 
 // ---------------------------------------------------------------- Loading plan
 
 /// <summary>One non-LED line of the job to load: an equipment model and how many (lines of the same model add up).</summary>
-public sealed record TransportEquipmentRequest(Guid EquipmentId, int Count);
+public sealed record TransportEquipmentInput(Guid EquipmentId, int Count);
 
 /// <summary>
 /// The job's screens (as for the calculation), its non-LED lines (light, sound, truss, scaff) and the vehicle type to
 /// use; null = automatic (fewest vehicles).
 /// </summary>
-public sealed record TransportPlanRequest(IReadOnlyList<EvaluateScreenRequest> Screens, Guid? VehicleId = null, IReadOnlyList<TransportEquipmentRequest>? Equipment = null);
+public sealed record TransportPlanInput(IReadOnlyList<EvaluateScreenInput> Screens, Guid? VehicleId = null, IReadOnlyList<TransportEquipmentInput>? Equipment = null);
 
 /// <summary>
 /// The automatic loading plan: the firm's vehicle types, the cases of every panel model in the job, the vehicles
 /// with their stacks (positions in cm) and what fits no vehicle. Models without case data are listed in
 /// <paramref name="Missing"/> and left out. <paramref name="GapMm"/> = the space left between the stacks and to the walls.
 /// </summary>
-public sealed record TransportPlanResponse(
+public sealed record TransportPlanResultDto(
     IReadOnlyList<TransportVehicleDto> VehicleTypes,
     int GapMm,
     IReadOnlyList<TransportGroupDto> Groups,
@@ -68,7 +68,7 @@ public interface ITransportAppService
     Task<TransportSettingsDto> GetVehiclesAsync();
 
     /// <summary>The whole list in display order; vehicles left out are deleted. GapMm null = unchanged.</summary>
-    Task<TransportSettingsDto> SaveVehiclesAsync(SaveTransportVehiclesRequest request);
+    Task<TransportSettingsDto> SaveVehiclesAsync(SaveTransportVehiclesInput request);
 
-    Task<TransportPlanResponse> PlanAsync(TransportPlanRequest request);
+    Task<TransportPlanResultDto> PlanAsync(TransportPlanInput request);
 }

@@ -10,7 +10,7 @@ public sealed class CurveSolverTests
     private static readonly PanelSpec Flat = Curve with { Id = Guid.NewGuid(), Angles = null };
 
     private static CurveResult Solve(PanelSpec panel, int columns, CurveMode mode, double value, CurveDirection direction = CurveDirection.Concave, params int[] corners) =>
-        CurveSolver.Solve(panel, columns, corners, new CurveRequest(mode, value, direction));
+        CurveSolver.Solve(panel, columns, corners, new CurveInput(mode, value, direction));
 
     [Fact]
     public void AnArc_IsSpreadEvenlyOverTheJoints()

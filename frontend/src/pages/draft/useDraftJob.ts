@@ -2,10 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { draftApi } from '../../api/endpoints';
-import type { EvaluateScreenRequest, LedPanel, PowerMode } from '../../api/designTypes';
+import type { EvaluateScreenInput, LedPanel, PowerMode } from '../../api/designTypes';
 import type { EquipmentDiscipline } from '../../api/types';
 import { currentLocation, toInventoryItem } from '../led/core/adapter';
-import { buildEvaluateRequest } from '../led/core/evaluation';
+import { buildEvaluateInput } from '../led/core/evaluation';
 import { screenDisplayName } from '../led/core/screenName';
 import type { Cutout, PowerLayout, ScreenCorner, ScreenCurve, SignalLayout, WallConfig } from '../led/core/types';
 
@@ -165,7 +165,7 @@ export function useDraftJob({ wiring = false }: { wiring?: boolean } = {}) {
   /** Built by the ported helper, so the request the drawing code implies is exactly the one that is sent. */
   const request = useMemo(
     () =>
-      buildEvaluateRequest(
+      buildEvaluateInput(
         walls,
         job.voltage,
         job.mode === 'Max' ? 'max' : 'ort',
@@ -178,7 +178,7 @@ export function useDraftJob({ wiring = false }: { wiring?: boolean } = {}) {
 
   const evaluation = useQuery({
     queryKey: ['led-evaluate', request],
-    queryFn: () => draftApi.evaluate(request as unknown as { voltage: number; mode: PowerMode; screens: EvaluateScreenRequest[] }),
+    queryFn: () => draftApi.evaluate(request as unknown as { voltage: number; mode: PowerMode; screens: EvaluateScreenInput[] }),
     enabled: job.screens.length > 0,
   });
 

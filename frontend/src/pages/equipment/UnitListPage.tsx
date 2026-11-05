@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useLabelGenerator } from '../../components/LabelGenerator';
 import { Link } from 'react-router-dom';
 import { unitApi } from '../../api/endpoints';
-import { UNIT_STATUSES, type UnitImportRow, type UnitStatus } from '../../api/types';
+import { UNIT_STATUSES, type UnitImportInput, type UnitStatus } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { ExportButton, ImportButton } from '../../components/ExcelButtons';
 import { StockLocationSelect } from '../../components/Selects';
@@ -55,7 +55,7 @@ export function UnitListPage() {
               title={t('unitGrid.importTitle')}
               templateName="serial-numbers-template"
               fields={unitImportFields(t)}
-              onImport={(rows) => unitApi.import(rows as unknown as UnitImportRow[])}
+              onImport={(rows) => unitApi.import(rows as unknown as UnitImportInput[])}
               onDone={() => qc.invalidateQueries({ queryKey: ['units'] })}
             />
           )}

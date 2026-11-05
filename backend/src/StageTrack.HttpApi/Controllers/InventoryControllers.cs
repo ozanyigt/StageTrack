@@ -19,11 +19,11 @@ public class EquipmentFoldersController(IEquipmentFolderAppService appService) :
 
     [HttpPost]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
-    public Task<EquipmentFolderDto> CreateAsync(CreateUpdateEquipmentFolderDto input) => appService.CreateAsync(input);
+    public Task<EquipmentFolderDto> CreateAsync(CreateUpdateEquipmentFolderInput input) => appService.CreateAsync(input);
 
     [HttpPut("{id:guid}")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
-    public Task<EquipmentFolderDto> UpdateAsync(Guid id, CreateUpdateEquipmentFolderDto input) => appService.UpdateAsync(id, input);
+    public Task<EquipmentFolderDto> UpdateAsync(Guid id, CreateUpdateEquipmentFolderInput input) => appService.UpdateAsync(id, input);
 
     [HttpDelete("{id:guid}")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
@@ -50,11 +50,11 @@ public class EquipmentController(IEquipmentAppService appService) : ControllerBa
 
     [HttpPost]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
-    public Task<EquipmentDto> CreateAsync(CreateUpdateEquipmentDto input) => appService.CreateAsync(input);
+    public Task<EquipmentDto> CreateAsync(CreateUpdateEquipmentInput input) => appService.CreateAsync(input);
 
     [HttpPut("{id:guid}")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
-    public Task<EquipmentDetailDto> UpdateAsync(Guid id, CreateUpdateEquipmentDto input) => appService.UpdateAsync(id, input);
+    public Task<EquipmentDetailDto> UpdateAsync(Guid id, CreateUpdateEquipmentInput input) => appService.UpdateAsync(id, input);
 
     [HttpPost("{id:guid}/relations")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
@@ -97,7 +97,7 @@ public class EquipmentController(IEquipmentAppService appService) : ControllerBa
 
     [HttpPost("import")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
-    public Task<ImportResultDto> ImportAsync(List<EquipmentImportRow> rows) => appService.ImportAsync(rows);
+    public Task<ImportResultDto> ImportAsync(List<EquipmentImportInput> rows) => appService.ImportAsync(rows);
 
     [HttpPost("{id:guid}/archive")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
@@ -132,11 +132,11 @@ public class EquipmentUnitsController(IEquipmentUnitAppService appService) : Con
 
     [HttpPost]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
-    public Task<EquipmentUnitDto> CreateAsync(CreateEquipmentUnitDto input) => appService.CreateAsync(input);
+    public Task<EquipmentUnitDto> CreateAsync(CreateEquipmentUnitInput input) => appService.CreateAsync(input);
 
     [HttpPut("{id:guid}")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
-    public Task<EquipmentUnitDetailDto> UpdateAsync(Guid id, UpdateEquipmentUnitDto input) => appService.UpdateAsync(id, input);
+    public Task<EquipmentUnitDetailDto> UpdateAsync(Guid id, UpdateEquipmentUnitInput input) => appService.UpdateAsync(id, input);
 
     [HttpPost("{id:guid}/status")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
@@ -168,7 +168,7 @@ public class EquipmentUnitsController(IEquipmentUnitAppService appService) : Con
 
     [HttpPost("import")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
-    public Task<ImportResultDto> ImportAsync(List<UnitImportRow> rows) => appService.ImportAsync(rows);
+    public Task<ImportResultDto> ImportAsync(List<UnitImportInput> rows) => appService.ImportAsync(rows);
 }
 
 [ApiController]
@@ -201,11 +201,11 @@ public class LabelTemplatesController(ILabelTemplateAppService appService) : Con
 
     [HttpPost]
     [Authorize(StageTrackPermissions.Settings.LabelTemplates)]
-    public Task<LabelTemplateDto> CreateAsync(CreateUpdateLabelTemplateDto input) => appService.CreateAsync(input);
+    public Task<LabelTemplateDto> CreateAsync(CreateUpdateLabelTemplateInput input) => appService.CreateAsync(input);
 
     [HttpPut("{id:guid}")]
     [Authorize(StageTrackPermissions.Settings.LabelTemplates)]
-    public Task<LabelTemplateDto> UpdateAsync(Guid id, CreateUpdateLabelTemplateDto input) => appService.UpdateAsync(id, input);
+    public Task<LabelTemplateDto> UpdateAsync(Guid id, CreateUpdateLabelTemplateInput input) => appService.UpdateAsync(id, input);
 
     [HttpDelete("{id:guid}")]
     [Authorize(StageTrackPermissions.Settings.LabelTemplates)]
@@ -222,11 +222,11 @@ public class StockLocationsController(IStockLocationAppService appService) : Con
 
     [HttpPost]
     [Authorize(StageTrackPermissions.Settings.StockLocations)]
-    public Task<StockLocationDto> CreateAsync(CreateUpdateStockLocationDto input) => appService.CreateAsync(input);
+    public Task<StockLocationDto> CreateAsync(CreateUpdateStockLocationInput input) => appService.CreateAsync(input);
 
     [HttpPut("{id:guid}")]
     [Authorize(StageTrackPermissions.Settings.StockLocations)]
-    public Task<StockLocationDto> UpdateAsync(Guid id, CreateUpdateStockLocationDto input) => appService.UpdateAsync(id, input);
+    public Task<StockLocationDto> UpdateAsync(Guid id, CreateUpdateStockLocationInput input) => appService.UpdateAsync(id, input);
 
     [HttpDelete("{id:guid}")]
     [Authorize(StageTrackPermissions.Settings.StockLocations)]

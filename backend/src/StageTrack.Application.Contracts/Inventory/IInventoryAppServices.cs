@@ -7,9 +7,9 @@ public interface IEquipmentFolderAppService
 {
     Task<List<EquipmentFolderDto>> GetListAsync();
 
-    Task<EquipmentFolderDto> CreateAsync(CreateUpdateEquipmentFolderDto input);
+    Task<EquipmentFolderDto> CreateAsync(CreateUpdateEquipmentFolderInput input);
 
-    Task<EquipmentFolderDto> UpdateAsync(Guid id, CreateUpdateEquipmentFolderDto input);
+    Task<EquipmentFolderDto> UpdateAsync(Guid id, CreateUpdateEquipmentFolderInput input);
 
     Task DeleteAsync(Guid id);
 }
@@ -23,9 +23,9 @@ public interface IEquipmentAppService
     /// <param name="forQuote">Projects and quotes: leaves out office equipment and equipment with nothing rentable (e.g. all in repair).</param>
     Task<List<EquipmentLookupDto>> GetLookupAsync(string? text, bool forQuote = false);
 
-    Task<EquipmentDto> CreateAsync(CreateUpdateEquipmentDto input);
+    Task<EquipmentDto> CreateAsync(CreateUpdateEquipmentInput input);
 
-    Task<EquipmentDetailDto> UpdateAsync(Guid id, CreateUpdateEquipmentDto input);
+    Task<EquipmentDetailDto> UpdateAsync(Guid id, CreateUpdateEquipmentInput input);
 
     /// <summary>Several products into one folder; nothing else about them changes.</summary>
     Task<int> MoveAsync(MoveEquipmentInput input);
@@ -58,7 +58,7 @@ public interface IEquipmentAppService
 
     Task<EquipmentDetailDto> RemoveImageAsync(Guid id);
 
-    Task<ImportResultDto> ImportAsync(List<EquipmentImportRow> rows);
+    Task<ImportResultDto> ImportAsync(List<EquipmentImportInput> rows);
 }
 
 public interface IEquipmentUnitAppService
@@ -67,9 +67,9 @@ public interface IEquipmentUnitAppService
 
     Task<EquipmentUnitDetailDto> GetAsync(Guid id);
 
-    Task<EquipmentUnitDto> CreateAsync(CreateEquipmentUnitDto input);
+    Task<EquipmentUnitDto> CreateAsync(CreateEquipmentUnitInput input);
 
-    Task<EquipmentUnitDetailDto> UpdateAsync(Guid id, UpdateEquipmentUnitDto input);
+    Task<EquipmentUnitDetailDto> UpdateAsync(Guid id, UpdateEquipmentUnitInput input);
 
     Task ChangeStatusAsync(Guid id, ChangeUnitStatusInput input);
 
@@ -88,7 +88,7 @@ public interface IEquipmentUnitAppService
     /// <summary>Internal reference proposed for the next device of the equipment.</summary>
     Task<string> SuggestInternalRefAsync(Guid equipmentId);
 
-    Task<ImportResultDto> ImportAsync(List<UnitImportRow> rows);
+    Task<ImportResultDto> ImportAsync(List<UnitImportInput> rows);
 }
 
 public interface ILabelAppService
@@ -107,9 +107,9 @@ public interface ILabelTemplateAppService
 {
     Task<List<LabelTemplateDto>> GetListAsync();
 
-    Task<LabelTemplateDto> CreateAsync(CreateUpdateLabelTemplateDto input);
+    Task<LabelTemplateDto> CreateAsync(CreateUpdateLabelTemplateInput input);
 
-    Task<LabelTemplateDto> UpdateAsync(Guid id, CreateUpdateLabelTemplateDto input);
+    Task<LabelTemplateDto> UpdateAsync(Guid id, CreateUpdateLabelTemplateInput input);
 
     Task DeleteAsync(Guid id);
 }
@@ -118,9 +118,9 @@ public interface IStockLocationAppService
 {
     Task<List<StockLocationDto>> GetListAsync();
 
-    Task<StockLocationDto> CreateAsync(CreateUpdateStockLocationDto input);
+    Task<StockLocationDto> CreateAsync(CreateUpdateStockLocationInput input);
 
-    Task<StockLocationDto> UpdateAsync(Guid id, CreateUpdateStockLocationDto input);
+    Task<StockLocationDto> UpdateAsync(Guid id, CreateUpdateStockLocationInput input);
 
     Task DeleteAsync(Guid id);
 }

@@ -29,7 +29,7 @@ public class EquipmentFolderAppService(
         }).ToList();
     }
 
-    public async Task<EquipmentFolderDto> CreateAsync(CreateUpdateEquipmentFolderDto input)
+    public async Task<EquipmentFolderDto> CreateAsync(CreateUpdateEquipmentFolderInput input)
     {
         var folder = await folderManager.CreateAsync(input.Name, input.ParentId);
         folder.SetDiscipline(input.Discipline);
@@ -37,7 +37,7 @@ public class EquipmentFolderAppService(
         return folder.ToDto();
     }
 
-    public async Task<EquipmentFolderDto> UpdateAsync(Guid id, CreateUpdateEquipmentFolderDto input)
+    public async Task<EquipmentFolderDto> UpdateAsync(Guid id, CreateUpdateEquipmentFolderInput input)
     {
         var folder = await folderRepository.GetAsync(id);
         folder.Rename(input.Name.Trim());
@@ -125,7 +125,7 @@ public class EquipmentAppService(
         return items.Select(e => e.ToLookupDto(showPrice)).ToList();
     }
 
-    public async Task<EquipmentDto> CreateAsync(CreateUpdateEquipmentDto input)
+    public async Task<EquipmentDto> CreateAsync(CreateUpdateEquipmentInput input)
     {
         var equipment = await equipmentManager.CreateAsync(input.Code, input.Name, input.Type, input.IsSerialized);
         await ApplyAsync(equipment, input);
@@ -133,7 +133,7 @@ public class EquipmentAppService(
         return equipment.ToDto(equipment.IsSerialized ? 0 : equipment.StockQuantity, await prices.CanSeeAsync());
     }
 
-    public async Task<EquipmentDetailDto> UpdateAsync(Guid id, CreateUpdateEquipmentDto input)
+    public async Task<EquipmentDetailDto> UpdateAsync(Guid id, CreateUpdateEquipmentInput input)
     {
         var equipment = await equipmentRepository.GetAsync(id);
         await equipmentManager.ChangeCodeAsync(equipment, input.Code);
@@ -262,7 +262,7 @@ public class EquipmentAppService(
         return items.Count;
     }
 
-    public async Task<ImportResultDto> ImportAsync(List<EquipmentImportRow> rows)
+    public async Task<ImportResultDto> ImportAsync(List<EquipmentImportInput> rows)
     {
         var folders = await folderRepository.GetListAsync();
         var showPrice = await prices.CanSeeAsync();
@@ -314,7 +314,7 @@ public class EquipmentAppService(
     /// that says sale is a sale, anything that says consumable is one - and whatever is not recognised is left
     /// as it was, because a word nobody understands is not a reason to change a product's kind.
     /// </summary>
-    private static EquipmentType TypeOf(EquipmentImportRow row, EquipmentType fallback)
+    private static EquipmentType TypeOf(EquipmentImportInput row, EquipmentType fallback)
     {
         var words = $"{row.SaleType} {row.Type}".ToLowerInvariant();
         if (words.Contains("satı") || words.Contains("sale") || words.Contains("sell") || words.Contains("sales"))
@@ -344,7 +344,7 @@ public class EquipmentAppService(
     /// A quantity-tracked product has no devices, so its code goes on the product itself - which is exactly how
     /// a label on a box of cables works here.
     /// </summary>
-    private async Task ImportDeviceAsync(Equipment equipment, EquipmentImportRow row)
+    private async Task ImportDeviceAsync(Equipment equipment, EquipmentImportInput row)
     {
         var serial = row.SerialNumber?.Trim();
         var label = row.LabelCode?.Trim();
@@ -420,7 +420,7 @@ public class EquipmentAppService(
         }
     }
 
-    private async Task ApplyAsync(Equipment equipment, CreateUpdateEquipmentDto input)
+    private async Task ApplyAsync(Equipment equipment, CreateUpdateEquipmentInput input)
     {
         equipment.Update(input.Name.Trim(), input.Brand, input.Model, input.FolderId, input.Type, input.CountryOfOrigin, input.Notes);
         equipment.SetCapacity(input.CapacityKg);
@@ -560,7 +560,7 @@ public class EquipmentUnitAppService(
 
     public Task<string> SuggestInternalRefAsync(Guid equipmentId) => unitManager.SuggestInternalRefAsync(equipmentId);
 
-    public async Task<EquipmentUnitDto> CreateAsync(CreateEquipmentUnitDto input)
+    public async Task<EquipmentUnitDto> CreateAsync(CreateEquipmentUnitInput input)
     {
         var equipment = await equipmentRepository.GetAsync(input.EquipmentId);
         var unit = await unitManager.CreateAsync(equipment, input.InternalRef, input.SerialNumber, input.StockLocationId);
@@ -577,7 +577,7 @@ public class EquipmentUnitAppService(
         return unit.ToDto(equipment);
     }
 
-    public async Task<EquipmentUnitDetailDto> UpdateAsync(Guid id, UpdateEquipmentUnitDto input)
+    public async Task<EquipmentUnitDetailDto> UpdateAsync(Guid id, UpdateEquipmentUnitInput input)
     {
         var unit = await unitRepository.GetAsync(id);
         await unitManager.ChangeInternalRefAsync(unit, input.InternalRef);
@@ -643,7 +643,7 @@ public class EquipmentUnitAppService(
     }
 
     /// <summary>Upsert by internal reference; the optional label column links an existing Rentman label.</summary>
-    public async Task<ImportResultDto> ImportAsync(List<UnitImportRow> rows)
+    public async Task<ImportResultDto> ImportAsync(List<UnitImportInput> rows)
     {
         var locations = await locationRepository.GetListAsync();
         return await importRunner.RunAsync(rows, r => r.Row, async row =>
@@ -815,7 +815,7 @@ public class LabelTemplateAppService(
     public async Task<List<LabelTemplateDto>> GetListAsync() =>
         (await templateRepository.GetListAsync()).Select(t => t.ToDto()).ToList();
 
-    public async Task<LabelTemplateDto> CreateAsync(CreateUpdateLabelTemplateDto input)
+    public async Task<LabelTemplateDto> CreateAsync(CreateUpdateLabelTemplateInput input)
     {
         var template = new LabelTemplate(Guid.CreateVersion7(), input.Name.Trim());
         Apply(template, input);
@@ -832,7 +832,7 @@ public class LabelTemplateAppService(
         return template.ToDto();
     }
 
-    public async Task<LabelTemplateDto> UpdateAsync(Guid id, CreateUpdateLabelTemplateDto input)
+    public async Task<LabelTemplateDto> UpdateAsync(Guid id, CreateUpdateLabelTemplateInput input)
     {
         var template = await templateRepository.GetAsync(id);
         Apply(template, input);
@@ -846,7 +846,7 @@ public class LabelTemplateAppService(
 
     public async Task DeleteAsync(Guid id) => await templateRepository.DeleteAsync(await templateRepository.GetAsync(id));
 
-    private static void Apply(LabelTemplate template, CreateUpdateLabelTemplateDto input)
+    private static void Apply(LabelTemplate template, CreateUpdateLabelTemplateInput input)
     {
         template.Update(input.Name.Trim(), input.WidthMm, input.HeightMm, input.QrSizeMm, input.FontSizePt);
         template.SetFields(input.ShowName, input.ShowBrand, input.ShowModel, input.ShowCode, input.ShowInternalRef,
@@ -861,14 +861,14 @@ public class StockLocationAppService(
     public async Task<List<StockLocationDto>> GetListAsync() =>
         (await locationRepository.GetListAsync()).Select(l => l.ToDto()).ToList();
 
-    public async Task<StockLocationDto> CreateAsync(CreateUpdateStockLocationDto input)
+    public async Task<StockLocationDto> CreateAsync(CreateUpdateStockLocationInput input)
     {
         var location = new StockLocation(Guid.CreateVersion7(), input.Name.Trim(), input.Type, input.Address, input.City);
         await locationRepository.InsertAsync(location);
         return location.ToDto();
     }
 
-    public async Task<StockLocationDto> UpdateAsync(Guid id, CreateUpdateStockLocationDto input)
+    public async Task<StockLocationDto> UpdateAsync(Guid id, CreateUpdateStockLocationInput input)
     {
         var location = await locationRepository.GetAsync(id);
         location.Update(input.Name.Trim(), input.Type, input.Address, input.City, input.IsActive);

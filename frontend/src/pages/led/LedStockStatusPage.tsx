@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { draftApi } from '../../api/endpoints';
-import type { LedStockLine, LedStockScreenRequest } from '../../api/designTypes';
+import type { LedStockLine, LedStockScreenInput } from '../../api/designTypes';
 import { fitShape } from './core/simulation/shape';
 import { useDraftJob } from '../draft/useDraftJob';
 
@@ -34,7 +34,7 @@ export function LedStockBody() {
   }, [overrides]);
 
   /** The screens as the stock endpoint wants them; the shape helper keeps cut-outs and corners in step. */
-  const screens = useMemo<LedStockScreenRequest[]>(
+  const screens = useMemo<LedStockScreenInput[]>(
     () =>
       walls.map((wall) => {
         const shape = fitShape(wall, true);

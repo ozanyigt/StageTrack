@@ -26,15 +26,15 @@ public class CustomersController(ICustomerAppService appService) : ControllerBas
 
     [HttpPost]
     [Authorize(StageTrackPermissions.Customers.Manage)]
-    public Task<CustomerDto> CreateAsync(CreateUpdateCustomerDto input) => appService.CreateAsync(input);
+    public Task<CustomerDto> CreateAsync(CreateUpdateCustomerInput input) => appService.CreateAsync(input);
 
     [HttpPut("{id:guid}")]
     [Authorize(StageTrackPermissions.Customers.Manage)]
-    public Task<CustomerDto> UpdateAsync(Guid id, CreateUpdateCustomerDto input) => appService.UpdateAsync(id, input);
+    public Task<CustomerDto> UpdateAsync(Guid id, CreateUpdateCustomerInput input) => appService.UpdateAsync(id, input);
 
     [HttpPost("import")]
     [Authorize(StageTrackPermissions.Customers.Manage)]
-    public Task<ImportResultDto> ImportAsync(List<CustomerImportRow> rows) => appService.ImportAsync(rows);
+    public Task<ImportResultDto> ImportAsync(List<CustomerImportInput> rows) => appService.ImportAsync(rows);
 
     [HttpDelete("{id:guid}")]
     [Authorize(StageTrackPermissions.Customers.Manage)]
@@ -58,11 +58,11 @@ public class ProjectsController(IProjectAppService appService) : ControllerBase
 
     [HttpPost]
     [Authorize(StageTrackPermissions.Projects.Manage)]
-    public Task<ProjectDto> CreateAsync(CreateUpdateProjectDto input) => appService.CreateAsync(input);
+    public Task<ProjectDto> CreateAsync(CreateUpdateProjectInput input) => appService.CreateAsync(input);
 
     [HttpPut("{id:guid}")]
     [Authorize(StageTrackPermissions.Projects.Manage)]
-    public Task<ProjectDto> UpdateAsync(Guid id, CreateUpdateProjectDto input) => appService.UpdateAsync(id, input);
+    public Task<ProjectDto> UpdateAsync(Guid id, CreateUpdateProjectInput input) => appService.UpdateAsync(id, input);
 
     [HttpDelete("{id:guid}")]
     [Authorize(StageTrackPermissions.Projects.Manage)]
@@ -169,11 +169,11 @@ public class RentalFactorProfilesController(IRentalFactorProfileAppService appSe
 
     [HttpPost]
     [Authorize(StageTrackPermissions.Settings.RentalFactors)]
-    public Task<RentalFactorProfileDto> CreateAsync(CreateUpdateRentalFactorProfileDto input) => appService.CreateAsync(input);
+    public Task<RentalFactorProfileDto> CreateAsync(CreateUpdateRentalFactorProfileInput input) => appService.CreateAsync(input);
 
     [HttpPut("{id:guid}")]
     [Authorize(StageTrackPermissions.Settings.RentalFactors)]
-    public Task<RentalFactorProfileDto> UpdateAsync(Guid id, CreateUpdateRentalFactorProfileDto input) => appService.UpdateAsync(id, input);
+    public Task<RentalFactorProfileDto> UpdateAsync(Guid id, CreateUpdateRentalFactorProfileInput input) => appService.UpdateAsync(id, input);
 
     [HttpDelete("{id:guid}")]
     [Authorize(StageTrackPermissions.Settings.RentalFactors)]

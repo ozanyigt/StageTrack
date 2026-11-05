@@ -118,7 +118,7 @@ public class GetProjectListInput : PagedRequestDto
     public Guid? CustomerId { get; set; }
 }
 
-public class CreateUpdateProjectDto
+public class CreateUpdateProjectInput
 {
     [Required, StringLength(ProjectConsts.MaxNameLength)]
     public string Name { get; set; } = null!;
@@ -274,9 +274,9 @@ public interface IProjectAppService
 
     Task<PackingSlipDto> GetPackingSlipAsync(Guid id);
 
-    Task<ProjectDto> CreateAsync(CreateUpdateProjectDto input);
+    Task<ProjectDto> CreateAsync(CreateUpdateProjectInput input);
 
-    Task<ProjectDto> UpdateAsync(Guid id, CreateUpdateProjectDto input);
+    Task<ProjectDto> UpdateAsync(Guid id, CreateUpdateProjectInput input);
 
     Task DeleteAsync(Guid id);
 

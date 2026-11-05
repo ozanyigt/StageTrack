@@ -12,7 +12,7 @@ public class DraftToJobTests
     private static readonly Guid Panel = Guid.CreateVersion7();
     private static readonly Guid CornerPanel = Guid.CreateVersion7();
 
-    private static EvaluateScreenRequest Screen(int columns, int rows, IReadOnlyList<CutoutDto>? cutouts = null,
+    private static EvaluateScreenInput Screen(int columns, int rows, IReadOnlyList<CutoutDto>? cutouts = null,
         IReadOnlyList<CornerDto>? corners = null) =>
         new("s1", Panel, columns, rows, Cutouts: cutouts, Corners: corners);
 
@@ -46,7 +46,7 @@ public class DraftToJobTests
     {
         var counted = TransportAppService.PanelsByEquipment([
             Screen(10, 6),
-            new EvaluateScreenRequest("s2", Panel, 4, 3)
+            new EvaluateScreenInput("s2", Panel, 4, 3)
         ]);
 
         Assert.Equal(72, counted[Panel]);
@@ -56,9 +56,9 @@ public class DraftToJobTests
     public void A_screen_without_a_panel_or_without_size_carries_nothing()
     {
         var counted = TransportAppService.PanelsByEquipment([
-            new EvaluateScreenRequest("s1", null, 10, 6),
-            new EvaluateScreenRequest("s2", Panel, 0, 6),
-            new EvaluateScreenRequest("s3", Panel, 10, 0)
+            new EvaluateScreenInput("s1", null, 10, 6),
+            new EvaluateScreenInput("s2", Panel, 0, 6),
+            new EvaluateScreenInput("s3", Panel, 10, 0)
         ]);
 
         Assert.Empty(counted);

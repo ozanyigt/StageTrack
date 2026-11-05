@@ -22,21 +22,21 @@ public class RoleAppService(IRoleRepository roleRepository, RoleManager roleMana
         return roles.Select(r => ToDto(r, counts.GetValueOrDefault(r.Id))).ToList();
     }
 
-    public async Task<RoleDto> CreateAsync(CreateUpdateRoleDto input)
+    public async Task<RoleDto> CreateAsync(CreateUpdateRoleInput input)
     {
         var role = await roleManager.CreateAsync(input.Name, await currentTenant.GetIdAsync());
         await roleRepository.InsertAsync(role);
         return ToDto(role, 0);
     }
 
-    public async Task<RoleDto> UpdateAsync(Guid id, CreateUpdateRoleDto input)
+    public async Task<RoleDto> UpdateAsync(Guid id, CreateUpdateRoleInput input)
     {
         var role = await GetOwnAsync(id);
         await roleManager.RenameAsync(role, input.Name);
         return ToDto(role, (await roleRepository.GetUserCountsAsync()).GetValueOrDefault(id));
     }
 
-    public async Task<RoleDto> UpdatePermissionsAsync(Guid id, UpdateRolePermissionsDto input)
+    public async Task<RoleDto> UpdatePermissionsAsync(Guid id, UpdateRolePermissionsInput input)
     {
         var role = await GetOwnAsync(id);
         roleManager.SetPermissions(role, input.Permissions);
@@ -87,7 +87,7 @@ public class UserAppService(
         return new PagedResultDto<UserDto>(total, items.Select(x => ToDto(x.User, x.RoleIds, x.CompanyIds, acting)).ToList());
     }
 
-    public async Task<UserDto> CreateAsync(CreateUserDto input)
+    public async Task<UserDto> CreateAsync(CreateUserInput input)
     {
         var acting = await GetActingUserAsync();
         var user = await userManager.CreateAsync(input.UserName, input.FullName, input.Password, input.Email, input.Language, acting.TenantId);
@@ -97,7 +97,7 @@ public class UserAppService(
         return ToDto(user, acting);
     }
 
-    public async Task<UserDto> UpdateAsync(Guid id, UpdateUserDto input)
+    public async Task<UserDto> UpdateAsync(Guid id, UpdateUserInput input)
     {
         var acting = await GetActingUserAsync();
         var user = await GetInCurrentCompanyAsync(id);
@@ -107,7 +107,7 @@ public class UserAppService(
         return ToDto(user, acting);
     }
 
-    public async Task SetActiveAsync(Guid id, SetUserActiveDto input)
+    public async Task SetActiveAsync(Guid id, SetUserActiveInput input)
     {
         var user = await GetInCurrentCompanyAsync(id);
         userManager.SetActive(user, input.IsActive, currentUser.Id!.Value);

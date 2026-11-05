@@ -9,14 +9,14 @@ public class RentalFactorProfileAppService(
     public async Task<List<RentalFactorProfileDto>> GetListAsync() =>
         (await profileRepository.GetListAsync(includeDetails: true)).Select(p => p.ToDto()).ToList();
 
-    public async Task<RentalFactorProfileDto> CreateAsync(CreateUpdateRentalFactorProfileDto input)
+    public async Task<RentalFactorProfileDto> CreateAsync(CreateUpdateRentalFactorProfileInput input)
     {
         var profile = await rentalFactorManager.CreateAsync(input.Name, input.ExtraDayFactor, ToSteps(input), input.IsDefault);
         await profileRepository.InsertAsync(profile);
         return profile.ToDto();
     }
 
-    public async Task<RentalFactorProfileDto> UpdateAsync(Guid id, CreateUpdateRentalFactorProfileDto input)
+    public async Task<RentalFactorProfileDto> UpdateAsync(Guid id, CreateUpdateRentalFactorProfileInput input)
     {
         var profile = await profileRepository.GetAsync(id);
         profile.Rename(input.Name.Trim());
@@ -45,6 +45,6 @@ public class RentalFactorProfileAppService(
             .ToList();
     }
 
-    private static List<(int Days, decimal Factor)> ToSteps(CreateUpdateRentalFactorProfileDto input) =>
+    private static List<(int Days, decimal Factor)> ToSteps(CreateUpdateRentalFactorProfileInput input) =>
         input.Steps.Select(s => (s.Days, s.Factor)).ToList();
 }

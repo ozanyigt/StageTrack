@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace StageTrack.Design;
 
 /// <summary>A processor, extender or other equipment the calculation picked, and how many.</summary>
-public sealed record DraftToJobItemRequest(Guid EquipmentId, int Count);
+public sealed record DraftToJobItemInput(Guid EquipmentId, int Count);
 
 /// <summary>
 /// A calculated LED job on its way to a real job: the screens (as the stock status sees them), the processors and
@@ -13,11 +13,11 @@ public sealed record DraftToJobItemRequest(Guid EquipmentId, int Count);
 public class DraftToJobInput
 {
     [Required]
-    public List<LedStockScreenRequest> Screens { get; set; } = [];
+    public List<LedStockScreenInput> Screens { get; set; } = [];
 
-    public List<DraftToJobItemRequest> Processors { get; set; } = [];
-    public List<DraftToJobItemRequest> Extenders { get; set; } = [];
-    public List<DraftToJobItemRequest> Equipment { get; set; } = [];
+    public List<DraftToJobItemInput> Processors { get; set; } = [];
+    public List<DraftToJobItemInput> Extenders { get; set; } = [];
+    public List<DraftToJobItemInput> Equipment { get; set; } = [];
 
     /// <summary>
     /// Section to put the lines in; null = a new section is made for them. The name is only used for a new one.

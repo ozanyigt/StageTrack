@@ -1,4 +1,4 @@
-import type { LedTransportKind, PlanStackDto, TransportGroupDto, TransportPlanResponse, TransportVehicle as TransportVehicleDto } from "../../../../api/designTypes";
+import type { LedTransportKind, PlanStackDto, TransportGroupDto, TransportPlanResultDto, TransportVehicle as TransportVehicleDto } from "../../../../api/designTypes";
 import { FALLBACK_KIND_COLOR, kindById, type TransportKindInfo } from "../transportKinds";
 
 /**
@@ -56,7 +56,7 @@ export type Groups = ReadonlyMap<string, PlanGroup>;
 export type VehicleTypes = ReadonlyMap<string, TransportVehicleDto>;
 
 /** The plan's groups by model, each with its kind (a model of an LED-panel kind counts panels, any other units). */
-export function groupsOf(plan: Pick<TransportPlanResponse, "groups">, kinds?: readonly TransportKindInfo[]): Groups {
+export function groupsOf(plan: Pick<TransportPlanResultDto, "groups">, kinds?: readonly TransportKindInfo[]): Groups {
   return new Map(
     plan.groups.map((g) => {
       const kind = kindById(kinds, g.kind);
@@ -73,12 +73,12 @@ export function groupsOf(plan: Pick<TransportPlanResponse, "groups">, kinds?: re
     }),
   );
 }
-export const typesOf = (plan: Pick<TransportPlanResponse, "vehicleTypes">): VehicleTypes => new Map(plan.vehicleTypes.map((v) => [v.id, v]));
+export const typesOf = (plan: Pick<TransportPlanResultDto, "vehicleTypes">): VehicleTypes => new Map(plan.vehicleTypes.map((v) => [v.id, v]));
 /** The plan's gap between the stacks and to the walls, in cm. */
-export const gapOf = (plan: Pick<TransportPlanResponse, "gapMm">) => plan.gapMm / 10;
+export const gapOf = (plan: Pick<TransportPlanResultDto, "gapMm">) => plan.gapMm / 10;
 
 /** The automatic plan as a layout. */
-export function layoutFromPlan(plan: TransportPlanResponse): LoadLayout {
+export function layoutFromPlan(plan: TransportPlanResultDto): LoadLayout {
   return {
     vehicles: plan.vehicles.map((v, i) => ({ uid: `v${i + 1}`, typeId: v.typeId, items: v.stacks.map((s) => ({ ...s })) })),
     unplaced: plan.unplaced.map((s) => ({ ...s })),
@@ -89,7 +89,7 @@ export function layoutFromPlan(plan: TransportPlanResponse): LoadLayout {
  * What a hand-made layout was made for: the cases of every model and the vehicle types. When this changes (other
  * screens, other case data, other vehicles) the old layout no longer fits and the automatic one is used again.
  */
-export function planSignature(plan: TransportPlanResponse, vehicleMode: VehicleMode): string {
+export function planSignature(plan: TransportPlanResultDto, vehicleMode: VehicleMode): string {
   return JSON.stringify([
     vehicleMode,
     plan.gapMm,
@@ -99,7 +99,7 @@ export function planSignature(plan: TransportPlanResponse, vehicleMode: VehicleM
 }
 
 /** The layout Lojistik shows: the one made by hand while it still fits the job, else the automatic plan. */
-export function currentLayout(plan: TransportPlanResponse, state: Pick<LogisticsState, "manual">, vehicleMode: VehicleMode): LoadLayout {
+export function currentLayout(plan: TransportPlanResultDto, state: Pick<LogisticsState, "manual">, vehicleMode: VehicleMode): LoadLayout {
   return state.manual && state.manual.signature === planSignature(plan, vehicleMode) ? state.manual.layout : layoutFromPlan(plan);
 }
 

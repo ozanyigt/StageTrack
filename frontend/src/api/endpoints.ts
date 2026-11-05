@@ -97,7 +97,7 @@ export const equipmentApi = {
   removeSupplier: (id: T.Guid, linkId: T.Guid) => del<T.EquipmentDetail>(`/equipment/${id}/suppliers/${linkId}`),
   setImage: (id: T.Guid, file: File) => upload<T.EquipmentDetail>(`/equipment/${id}/image`, file),
   removeImage: (id: T.Guid) => del<T.EquipmentDetail>(`/equipment/${id}/image`),
-  import: (rows: T.EquipmentImportRow[]) => post<T.ImportResult>('/equipment/import', rows),
+  import: (rows: T.EquipmentImportInput[]) => post<T.ImportResult>('/equipment/import', rows),
 };
 
 export const unitApi = {
@@ -126,7 +126,7 @@ export const unitApi = {
   removeImage: (id: T.Guid) => del<T.EquipmentUnitDetail>(`/equipment-units/${id}/image`),
   transfer: (unitIds: T.Guid[], targetCompanyId: T.Guid) =>
     post<T.TransferResult>('/equipment-units/transfer', { unitIds, targetCompanyId }),
-  import: (rows: T.UnitImportRow[]) => post<T.ImportResult>('/equipment-units/import', rows),
+  import: (rows: T.UnitImportInput[]) => post<T.ImportResult>('/equipment-units/import', rows),
 };
 
 export const labelApi = {
@@ -159,7 +159,7 @@ export const customerApi = {
   create: (input: Omit<T.Customer, 'id'>) => post<T.Customer>('/customers', input),
   update: (id: T.Guid, input: Omit<T.Customer, 'id'>) => put<T.Customer>(`/customers/${id}`, input),
   remove: (id: T.Guid) => del(`/customers/${id}`),
-  import: (rows: T.CustomerImportRow[]) => post<T.ImportResult>('/customers/import', rows),
+  import: (rows: T.CustomerImportInput[]) => post<T.ImportResult>('/customers/import', rows),
 };
 
 export const projectApi = {
@@ -316,8 +316,8 @@ export const firmApi = {
  */
 export const draftApi = {
   settings: () => get<L.CalcSettings>('/draft/led/calc/settings'),
-  evaluate: (input: L.EvaluateRequest) => post<L.EvaluateResponse>('/draft/led/calc/evaluate', input),
-  equipmentPower: (input: L.EquipmentPowerRequest) => post<L.EquipmentPowerResponse>('/draft/led/calc/equipment-power', input),
+  evaluate: (input: L.EvaluateInput) => post<L.EvaluateResultDto>('/draft/led/calc/evaluate', input),
+  equipmentPower: (input: L.EquipmentPowerInput) => post<L.EquipmentPowerResultDto>('/draft/led/calc/equipment-power', input),
 
   panels: (filter?: L.LedCatalogFilter) => get<L.LedPanel[]>('/draft/led/inventory/panels', filter),
   processors: (filter?: L.LedCatalogFilter) => get<L.LedProcessor[]>('/draft/led/inventory/processors', filter),
@@ -332,12 +332,12 @@ export const draftApi = {
   vehicles: () => get<L.TransportSettings>('/draft/transport/vehicles'),
   saveVehicles: (vehicles: L.SaveTransportVehicle[], gapMm?: number) =>
     put<L.TransportSettings>('/draft/transport/vehicles', { vehicles, gapMm }),
-  plan: (input: L.TransportPlanRequest) => post<L.TransportPlanResponse>('/draft/transport/plan', input),
+  plan: (input: L.TransportPlanInput) => post<L.TransportPlanResultDto>('/draft/transport/plan', input),
 
   stage: () => get<L.StageSettings>('/draft/stage'),
   saveStage: (input: L.StageSettings) => put<L.StageSettings>('/draft/stage', input),
 
-  stockStatus: (screens: L.LedStockScreenRequest[]) => post<L.LedStockStatusResponse>('/draft/led/stock-status', { screens }),
+  stockStatus: (screens: L.LedStockScreenInput[]) => post<L.LedStockStatusResultDto>('/draft/led/stock-status', { screens }),
 
   previewJob: (projectId: T.Guid, input: L.DraftToJobInput) => post<L.DraftToJobResult>(`/draft/jobs/${projectId}/preview`, input),
   transferToJob: (projectId: T.Guid, input: L.DraftToJobInput) => post<L.DraftToJobResult>(`/draft/jobs/${projectId}/transfer`, input),

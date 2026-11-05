@@ -25,7 +25,7 @@ public class TransportAppService(
     public async Task<TransportSettingsDto> GetVehiclesAsync() =>
         new((await LoadVehiclesAsync()).Select(ToDto).ToList(), await GetGapAsync());
 
-    public async Task<TransportSettingsDto> SaveVehiclesAsync(SaveTransportVehiclesRequest request)
+    public async Task<TransportSettingsDto> SaveVehiclesAsync(SaveTransportVehiclesInput request)
     {
         Validate(request);
         var existing = await LoadVehiclesAsync();
@@ -74,7 +74,7 @@ public class TransportAppService(
         return new TransportSettingsDto(result.Select(ToDto).ToList(), gap);
     }
 
-    public async Task<TransportPlanResponse> PlanAsync(TransportPlanRequest request)
+    public async Task<TransportPlanResultDto> PlanAsync(TransportPlanInput request)
     {
         Validate(request);
         var vehicles = await LoadVehiclesAsync();
@@ -138,7 +138,7 @@ public class TransportAppService(
         var gapMm = await GetGapAsync();
         var plan = LoadPlanner.Plan(caseGroups, vehicles.Select(LedSpecMapper.ToVehicleSpec).ToList(), request.VehicleId, gapMm / 10.0);
 
-        return new TransportPlanResponse(
+        return new TransportPlanResultDto(
             vehicles.Select(ToDto).ToList(),
             gapMm,
             groups,
@@ -151,7 +151,7 @@ public class TransportAppService(
     /// Panels of every model in the job: the used cells of each column (cut-outs left out), a corner column counting
     /// towards its own corner model. Screens without a panel count nothing.
     /// </summary>
-    public static Dictionary<Guid, int> PanelsByEquipment(IEnumerable<EvaluateScreenRequest> screens)
+    public static Dictionary<Guid, int> PanelsByEquipment(IEnumerable<EvaluateScreenInput> screens)
     {
         var panels = new Dictionary<Guid, int>();
         foreach (var screen in screens)
@@ -214,7 +214,7 @@ public class TransportAppService(
 
     private static PlanStackDto ToDto(PlacedStack s) => new(s.Id, s.ModelId, s.Cases, s.Panels, s.XCm, s.YCm, s.Rotated);
 
-    private static void Validate(SaveTransportVehiclesRequest request)
+    private static void Validate(SaveTransportVehiclesInput request)
     {
         var vehicles = request.Vehicles ?? [];
         var names = vehicles.Select(v => v.Name?.Trim().ToLowerInvariant()).ToList();
@@ -232,7 +232,7 @@ public class TransportAppService(
         }
     }
 
-    private static void Validate(TransportPlanRequest request)
+    private static void Validate(TransportPlanInput request)
     {
         var ok = request.Screens is { } screens
                  && screens.Count <= LedRequestGuard.MaxScreens

@@ -18,7 +18,7 @@ public static class LedCalculationEvaluator
     public const int MaxWiringPanels = 20_000;
 
     /// <param name="allowWiring">The plan has maps (feature Maps); otherwise a requested map comes back locked.</param>
-    public static EvaluateResponse Evaluate(EvaluateRequest request, LedCalculationCatalog catalog, CalcSettings settings, bool allowWiring = true)
+    public static EvaluateResultDto Evaluate(EvaluateInput request, LedCalculationCatalog catalog, CalcSettings settings, bool allowWiring = true)
     {
         var panels = catalog.Panels.ToDictionary(p => p.Id);
         var screens = new List<ScreenEvaluationDto>();
@@ -59,7 +59,7 @@ public static class LedCalculationEvaluator
             ScreenCurveDto? curve = null;
             if (screen.Curve is { } asked)
             {
-                var solved = CurveSolver.Solve(panel, screen.Columns, shape.Corners.Select(c => c.AfterColumn).ToList(), new CurveRequest(asked.Mode, asked.Value, asked.Direction));
+                var solved = CurveSolver.Solve(panel, screen.Columns, shape.Corners.Select(c => c.AfterColumn).ToList(), new CurveInput(asked.Mode, asked.Value, asked.Direction));
                 curve = new ScreenCurveDto(solved.JointAnglesDeg, solved.TargetJointDeg, solved.AppliedJointDeg, solved.AchievedArcDeg, solved.AchievedRadiusM);
                 warnings = [.. warnings, .. solved.Warnings];
             }
@@ -80,14 +80,14 @@ public static class LedCalculationEvaluator
             screens.Add(new ScreenEvaluationDto(screen.Id, true, ToDto(power, distribution, settings), processor, warnings, wiring, curve, signal));
         }
 
-        return new EvaluateResponse(screens, new JobEvaluationDto(JobPower(powered, settings), JobProcessor(processorScreens)));
+        return new EvaluateResultDto(screens, new JobEvaluationDto(JobPower(powered, settings), JobProcessor(processorScreens)));
     }
 
     /// <summary>
     /// The screen's shape, checked: cut-outs inside the screen and not covering all of it, corner columns between two
     /// columns with a corner panel model of the inventory. A problem is the request's fault (400).
     /// </summary>
-    private static ScreenShape ShapeOf(EvaluateScreenRequest screen, IReadOnlyDictionary<Guid, PanelSpec> panels)
+    private static ScreenShape ShapeOf(EvaluateScreenInput screen, IReadOnlyDictionary<Guid, PanelSpec> panels)
     {
         var cutouts = (screen.Cutouts ?? []).Select(c => new Cutout(c.Width, c.Height, c.Left, c.Bottom)).ToList();
         var cornerRequests = screen.Corners ?? [];

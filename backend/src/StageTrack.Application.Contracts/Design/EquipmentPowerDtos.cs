@@ -3,10 +3,10 @@
 namespace StageTrack.Design;
 
 /// <summary>One non-LED line of the job: an equipment model (null = not picked yet) and how many.</summary>
-public sealed record EquipmentLineRequest(string Id, Guid? EquipmentId, int Count);
+public sealed record EquipmentLineInput(string Id, Guid? EquipmentId, int Count);
 
 /// <summary>The non-LED lines (fixture groups, speaker / amplifier groups, truss and scaff material) at a voltage and power mode.</summary>
-public sealed record EquipmentPowerRequest(double Voltage, PowerMode Mode, IReadOnlyList<EquipmentLineRequest> Lines);
+public sealed record EquipmentPowerInput(double Voltage, PowerMode Mode, IReadOnlyList<EquipmentLineInput> Lines);
 
 /// <summary>
 /// One line's result. <paramref name="Found"/> false: no model picked, or not in the caller's inventory (zeros).
@@ -16,7 +16,7 @@ public sealed record EquipmentLineDto(string Id, bool Found, int Count, double W
 
 public sealed record EquipmentTotalsDto(int Count, double WeightKg, double PowerW, double CurrentA, int Circuits);
 
-public sealed record EquipmentPowerResponse(IReadOnlyList<EquipmentLineDto> Lines, EquipmentTotalsDto Total);
+public sealed record EquipmentPowerResultDto(IReadOnlyList<EquipmentLineDto> Lines, EquipmentTotalsDto Total);
 
 /// <summary>Screen calculation and the job's non-LED power, on the firm's own inventory.</summary>
 public interface ILedCalculationAppService
@@ -24,7 +24,7 @@ public interface ILedCalculationAppService
     /// <summary>The fixed constants (power factor, fuse, socapex), so the screens can show them.</summary>
     CalcSettingsDto GetSettings();
 
-    Task<EvaluateResponse> EvaluateAsync(EvaluateRequest request);
+    Task<EvaluateResultDto> EvaluateAsync(EvaluateInput request);
 
-    Task<EquipmentPowerResponse> CalculateEquipmentPowerAsync(EquipmentPowerRequest request);
+    Task<EquipmentPowerResultDto> CalculateEquipmentPowerAsync(EquipmentPowerInput request);
 }

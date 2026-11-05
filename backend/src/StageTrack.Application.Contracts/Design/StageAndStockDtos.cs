@@ -39,19 +39,19 @@ public interface IStageAppService
 // ---------------------------------------------------------------- Stock status
 
 /// <summary>A corner column of a screen and the warehouse its panels come from.</summary>
-public sealed record LedStockCornerRequest(int AfterColumn, Guid EquipmentId, Guid? StockLocationId);
+public sealed record LedStockCornerInput(int AfterColumn, Guid EquipmentId, Guid? StockLocationId);
 
 /// <summary>A screen of the job: the panel, the warehouse it comes from, its size, cut-outs and corners.</summary>
-public sealed record LedStockScreenRequest(
+public sealed record LedStockScreenInput(
     string Id,
     Guid? EquipmentId,
     Guid? StockLocationId,
     int Columns,
     int Rows,
     IReadOnlyList<CutoutDto>? Cutouts = null,
-    IReadOnlyList<LedStockCornerRequest>? Corners = null);
+    IReadOnlyList<LedStockCornerInput>? Corners = null);
 
-public sealed record LedStockStatusRequest(IReadOnlyList<LedStockScreenRequest> Screens);
+public sealed record LedStockStatusInput(IReadOnlyList<LedStockScreenInput> Screens);
 
 /// <summary>
 /// One stock line: a panel in a warehouse, what is owned there and how many of it the job's screens use
@@ -76,10 +76,10 @@ public sealed record LedStockLineDto(
 /// </summary>
 public sealed record LedStockLocationDto(Guid? Id, string Name, IReadOnlyList<LedStockLineDto> Lines);
 
-public sealed record LedStockStatusResponse(IReadOnlyList<LedStockLocationDto> Locations);
+public sealed record LedStockStatusResultDto(IReadOnlyList<LedStockLocationDto> Locations);
 
 /// <summary>What the firm owns per warehouse against what the job's screens need. Reads only.</summary>
 public interface ILedStockStatusAppService
 {
-    Task<LedStockStatusResponse> GetAsync(LedStockStatusRequest request);
+    Task<LedStockStatusResultDto> GetAsync(LedStockStatusInput request);
 }

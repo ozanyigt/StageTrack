@@ -25,7 +25,7 @@ public class CustomerAppService(
         .Select(c => new LookupDto { Id = c.Id, Name = c.Name, Code = c.TaxNumber })
         .ToList();
 
-    public async Task<CustomerDto> CreateAsync(CreateUpdateCustomerDto input)
+    public async Task<CustomerDto> CreateAsync(CreateUpdateCustomerInput input)
     {
         var customer = await customerManager.CreateAsync(input.Name, input.TaxNumber);
         Apply(customer, input);
@@ -33,7 +33,7 @@ public class CustomerAppService(
         return customer.ToDto();
     }
 
-    public async Task<CustomerDto> UpdateAsync(Guid id, CreateUpdateCustomerDto input)
+    public async Task<CustomerDto> UpdateAsync(Guid id, CreateUpdateCustomerInput input)
     {
         var customer = await customerRepository.GetAsync(id);
         await customerManager.ChangeTaxNumberAsync(customer, input.TaxNumber);
@@ -49,7 +49,7 @@ public class CustomerAppService(
     }
 
     /// <summary>Upsert: a row matches an existing customer by tax number, otherwise by name.</summary>
-    public Task<ImportResultDto> ImportAsync(List<CustomerImportRow> rows) =>
+    public Task<ImportResultDto> ImportAsync(List<CustomerImportInput> rows) =>
         importRunner.RunAsync(rows, r => r.Row, async row =>
         {
             var name = ImportRunner.Required(row.Name, "name");
@@ -74,7 +74,7 @@ public class CustomerAppService(
             return created;
         });
 
-    private static void Apply(Customer customer, CreateUpdateCustomerDto input) =>
+    private static void Apply(Customer customer, CreateUpdateCustomerInput input) =>
         customer.Update(input.Name.Trim(), input.TaxOffice, input.ContactPerson, input.Email, input.Phone,
             input.Address, input.City, input.Country, input.Notes);
 }

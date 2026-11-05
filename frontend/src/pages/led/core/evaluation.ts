@@ -1,8 +1,8 @@
 import type {
   CircuitDto,
   DistributionDto,
-  EvaluateRequest,
-  EvaluateResponse,
+  EvaluateInput,
+  EvaluateResultDto,
   JobPowerDto,
   JobProcessorDto,
   PhaseDto,
@@ -36,14 +36,14 @@ import { curveOf } from "./simulation/curve";
  * the plan feature (`allowShape`), a power layout only with maps (`allowMaps`): the server would refuse them
  * otherwise. `wiring` asks for the circuit map (Simülasyon).
  */
-export function buildEvaluateRequest(
+export function buildEvaluateInput(
   screens: WallConfig[],
   voltage: number,
   mode: HesapModu,
   prefs: ProcessorPrefs,
   allowShape = true,
   { allowMaps = true, wiring = false }: { allowMaps?: boolean; wiring?: boolean } = {},
-): EvaluateRequest {
+): EvaluateInput {
   return {
     voltage,
     mode: mode === "max" ? "Max" : "Average",
@@ -75,7 +75,7 @@ export function deviceId(row: Pick<IslemciRow, "Id" | "Marka" | "Model">): strin
 }
 
 /** The server's result for one screen (undefined while none has arrived, or for an unknown screen). */
-export function screenEvaluation(evaluation: EvaluateResponse | undefined, screenId: string) {
+export function screenEvaluation(evaluation: EvaluateResultDto | undefined, screenId: string) {
   return evaluation?.screens.find((s) => s.id === screenId);
 }
 

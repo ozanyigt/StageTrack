@@ -15,7 +15,7 @@ public enum CurveDirection
 }
 
 /// <summary>A curved screen as asked for: an arc of <paramref name="Value"/> degrees, or a radius of Value metres.</summary>
-public sealed record CurveRequest(CurveMode Mode, double Value, CurveDirection Direction);
+public sealed record CurveInput(CurveMode Mode, double Value, CurveDirection Direction);
 
 /// <summary>
 /// The curve the panels can make. <paramref name="JointAnglesDeg"/>: the angle at every joint between two columns
@@ -50,7 +50,7 @@ public static class CurveSolver
 
     private const double Tolerance = 1e-6;
 
-    public static CurveResult Solve(PanelSpec main, int columns, IReadOnlyCollection<int> cornerColumns, CurveRequest request)
+    public static CurveResult Solve(PanelSpec main, int columns, IReadOnlyCollection<int> cornerColumns, CurveInput request)
     {
         var jointCount = Math.Max(0, columns - 1);
         // Joint j is between columns j and j + 1; one next to a corner column stays straight.

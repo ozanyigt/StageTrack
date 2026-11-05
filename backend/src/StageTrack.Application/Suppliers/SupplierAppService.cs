@@ -14,7 +14,7 @@ public class SupplierAppService(ISupplierRepository supplierRepository, Supplier
     public async Task<List<LookupDto>> GetLookupAsync(string? text) =>
         (await supplierRepository.GetPagedListAsync(text, 0, 50)).Select(s => new LookupDto { Id = s.Id, Name = s.Name }).ToList();
 
-    public async Task<SupplierDto> CreateAsync(CreateUpdateSupplierDto input)
+    public async Task<SupplierDto> CreateAsync(CreateUpdateSupplierInput input)
     {
         var supplier = await supplierManager.CreateAsync(input.Name);
         Apply(supplier, input);
@@ -22,7 +22,7 @@ public class SupplierAppService(ISupplierRepository supplierRepository, Supplier
         return supplier.ToDto();
     }
 
-    public async Task<SupplierDto> UpdateAsync(Guid id, CreateUpdateSupplierDto input)
+    public async Task<SupplierDto> UpdateAsync(Guid id, CreateUpdateSupplierInput input)
     {
         var supplier = await supplierRepository.GetAsync(id);
         await supplierManager.RenameAsync(supplier, input.Name);
@@ -37,7 +37,7 @@ public class SupplierAppService(ISupplierRepository supplierRepository, Supplier
         await supplierRepository.DeleteAsync(supplier);
     }
 
-    private static void Apply(Supplier supplier, CreateUpdateSupplierDto input) =>
+    private static void Apply(Supplier supplier, CreateUpdateSupplierInput input) =>
         supplier.Update(input.ContactPerson, input.Email, input.Phone, input.TaxNumber, input.TaxOffice, input.Address,
             input.City, input.Country, input.Website, input.Notes);
 }

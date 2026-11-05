@@ -3,14 +3,14 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { draftApi, projectApi } from '../../api/endpoints';
-import type { EvaluateResponse, EvaluateScreenRequest, DraftToJobLine, DraftToJobInput } from '../../api/designTypes';
+import type { EvaluateResultDto, EvaluateScreenInput, DraftToJobLine, DraftToJobInput } from '../../api/designTypes';
 import { useErrorToast } from '../../utils/errors';
 import { useDraftJob } from './useDraftJob';
 
 interface Props {
   open: boolean;
-  screens: EvaluateScreenRequest[];
-  evaluation?: EvaluateResponse;
+  screens: EvaluateScreenInput[];
+  evaluation?: EvaluateResultDto;
   onClose: () => void;
 }
 

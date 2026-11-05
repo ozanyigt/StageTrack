@@ -18,13 +18,13 @@ public class RolesController(IRoleAppService appService) : ControllerBase
     public Task<List<RoleDto>> GetListAsync() => appService.GetListAsync();
 
     [HttpPost]
-    public Task<RoleDto> CreateAsync(CreateUpdateRoleDto input) => appService.CreateAsync(input);
+    public Task<RoleDto> CreateAsync(CreateUpdateRoleInput input) => appService.CreateAsync(input);
 
     [HttpPut("{id:guid}")]
-    public Task<RoleDto> UpdateAsync(Guid id, CreateUpdateRoleDto input) => appService.UpdateAsync(id, input);
+    public Task<RoleDto> UpdateAsync(Guid id, CreateUpdateRoleInput input) => appService.UpdateAsync(id, input);
 
     [HttpPut("{id:guid}/permissions")]
-    public Task<RoleDto> UpdatePermissionsAsync(Guid id, UpdateRolePermissionsDto input) => appService.UpdatePermissionsAsync(id, input);
+    public Task<RoleDto> UpdatePermissionsAsync(Guid id, UpdateRolePermissionsInput input) => appService.UpdatePermissionsAsync(id, input);
 
     [HttpDelete("{id:guid}")]
     public Task DeleteAsync(Guid id) => appService.DeleteAsync(id);
@@ -44,13 +44,13 @@ public class UsersController(IUserAppService appService, IRoleAppService roleApp
         (await roleAppService.GetListAsync()).Select(r => new LookupDto { Id = r.Id, Name = r.Name }).ToList();
 
     [HttpPost]
-    public Task<UserDto> CreateAsync(CreateUserDto input) => appService.CreateAsync(input);
+    public Task<UserDto> CreateAsync(CreateUserInput input) => appService.CreateAsync(input);
 
     [HttpPut("{id:guid}")]
-    public Task<UserDto> UpdateAsync(Guid id, UpdateUserDto input) => appService.UpdateAsync(id, input);
+    public Task<UserDto> UpdateAsync(Guid id, UpdateUserInput input) => appService.UpdateAsync(id, input);
 
     [HttpPost("{id:guid}/active")]
-    public Task SetActiveAsync(Guid id, SetUserActiveDto input) => appService.SetActiveAsync(id, input);
+    public Task SetActiveAsync(Guid id, SetUserActiveInput input) => appService.SetActiveAsync(id, input);
 
     [HttpPost("{id:guid}/reset-password")]
     public Task ResetPasswordAsync(Guid id, ResetPasswordDto input) => appService.ResetPasswordAsync(id, input);

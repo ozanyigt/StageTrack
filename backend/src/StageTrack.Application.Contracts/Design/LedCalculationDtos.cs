@@ -7,7 +7,7 @@ namespace StageTrack.Design;
 /// <summary>The job to calculate: voltage, power mode and the screens (a project, or an unsaved quick calculation).</summary>
 /// <param name="Wiring">Also return each screen's circuit map (Simülasyon). Plan feature Maps: without it the screens
 /// come back with <c>wiring.locked</c> and no map.</param>
-public sealed record EvaluateRequest(double Voltage, PowerMode Mode, IReadOnlyList<EvaluateScreenRequest> Screens, bool Wiring = false);
+public sealed record EvaluateInput(double Voltage, PowerMode Mode, IReadOnlyList<EvaluateScreenInput> Screens, bool Wiring = false);
 
 /// <param name="Id">The client's screen id (echoed back; results are matched by it).</param>
 /// <param name="PanelModelId">null = no panel picked yet.</param>
@@ -20,7 +20,7 @@ public sealed record EvaluateRequest(double Voltage, PowerMode Mode, IReadOnlyLi
 /// do not change (power and pixels are the same flat or curved).</param>
 /// <param name="SignalLayout">The order the data chains run through the panels; null = the power wiring's order.
 /// Changes only the suggested chains, no figure. Plan feature Maps.</param>
-public sealed record EvaluateScreenRequest(
+public sealed record EvaluateScreenInput(
     string Id,
     Guid? PanelModelId,
     int Columns,
@@ -62,7 +62,7 @@ public sealed record CornerDto(int AfterColumn, Guid PanelModelId);
 // ---------------------------------------------------------------- Response
 
 /// <summary>Every result of the job, per screen (in request order) and in total.</summary>
-public sealed record EvaluateResponse(IReadOnlyList<ScreenEvaluationDto> Screens, JobEvaluationDto Job);
+public sealed record EvaluateResultDto(IReadOnlyList<ScreenEvaluationDto> Screens, JobEvaluationDto Job);
 
 /// <param name="PanelFound">false when the requested panel model is not in the caller's inventory (then no results).</param>
 /// <param name="Power">null without a panel.</param>
