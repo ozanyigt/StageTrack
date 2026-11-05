@@ -196,8 +196,6 @@ public class EquipmentUnitRepository(StageTrackDbContext dbContext) : EfReposito
     public Task<bool> AnyInStockLocationAsync(Guid stockLocationId, CancellationToken cancellationToken = default) =>
         DbSet.AnyAsync(u => u.StockLocationId == stockLocationId && !u.IsArchived, cancellationToken);
 
-    public Task<int> CountOutOnProjectAsync(Guid projectId, CancellationToken cancellationToken = default) =>
-        DbSet.CountAsync(u => u.CurrentProjectId == projectId, cancellationToken);
 
     public Task<Dictionary<UnitStatus, int>> GetStatusCountsAsync(Guid? equipmentId = null, CancellationToken cancellationToken = default) =>
         DbSet.Where(u => !u.IsArchived && (equipmentId == null || u.EquipmentId == equipmentId))

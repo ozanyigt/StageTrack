@@ -354,6 +354,5 @@ export const sitePlanApi = {
   /** The room the job is built in; the first call creates it. */
   setVenue: (id: T.Guid, input: S.SetSiteVenueInput) => put<S.SitePlan>(`/site-plans/${id}/venue`, input),
   setVenuePlan: (id: T.Guid, input: S.SetSiteVenuePlanInput) => put<S.SitePlan>(`/site-plans/${id}/venue/plan`, input),
-  setVenueOnMap: (id: T.Guid, input: S.SetSiteVenueMapInput) => put<S.SitePlan>(`/site-plans/${id}/venue/map`, input),
   removeVenue: (id: T.Guid) => del<S.SitePlan>(`/site-plans/${id}/venue`),
 };

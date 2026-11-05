@@ -27,15 +27,6 @@ public class EquipmentLedSpecRepository(StageTrackDbContext dbContext)
     public Task<List<LedItem<LedExtenderSpec>>> GetExtendersAsync(LedCatalogFilter filter, CancellationToken cancellationToken = default) =>
         Join(DbSet.OfType<LedExtenderSpec>(), filter).ToListAsync(cancellationToken);
 
-    public Task<List<LedItem<EquipmentLedSpec>>> GetItemsAsync(IReadOnlyCollection<Guid> equipmentIds, CancellationToken cancellationToken = default)
-    {
-        var ids = equipmentIds.Distinct().ToList();
-        return (from spec in DbSet.Where(s => ids.Contains(s.EquipmentId))
-                join equipment in DbContext.Equipment on spec.EquipmentId equals equipment.Id
-                select new LedItem<EquipmentLedSpec>(equipment, spec))
-            .ToListAsync(cancellationToken);
-    }
-
     public async Task<Dictionary<(Guid EquipmentId, Guid? StockLocationId), int>> GetStockByLocationAsync(
         IReadOnlyCollection<Guid> equipmentIds, CancellationToken cancellationToken = default)
     {
@@ -122,8 +113,6 @@ public class LedTransportVehicleRepository(StageTrackDbContext dbContext)
     public Task<List<LedTransportVehicle>> GetListOrderedAsync(CancellationToken cancellationToken = default) =>
         DbSet.OrderBy(v => v.SortOrder).ThenBy(v => v.Name).ToListAsync(cancellationToken);
 
-    public async Task<int> GetNextSortOrderAsync(CancellationToken cancellationToken = default) =>
-        await DbSet.Select(v => (int?)v.SortOrder).MaxAsync(cancellationToken) + 1 ?? 1;
 }
 
 public class LedPanelFavoriteRepository(StageTrackDbContext dbContext)

@@ -34,9 +34,6 @@ public interface IEquipmentLedSpecRepository : IRepository<EquipmentLedSpec>
 
     Task<List<LedItem<LedExtenderSpec>>> GetExtendersAsync(LedCatalogFilter filter, CancellationToken cancellationToken = default);
 
-    /// <summary>The given equipment with their LED data, whatever the role; missing ids are simply not returned.</summary>
-    Task<List<LedItem<EquipmentLedSpec>>> GetItemsAsync(IReadOnlyCollection<Guid> equipmentIds, CancellationToken cancellationToken = default);
-
     /// <summary>
     /// Stock of the given equipment per warehouse: devices counted per location for serial-tracked items, the plain
     /// stock count under <c>null</c> for quantity-tracked ones (they are not kept per warehouse).
@@ -63,7 +60,6 @@ public interface ILedTransportVehicleRepository : IRepository<LedTransportVehicl
 {
     Task<List<LedTransportVehicle>> GetListOrderedAsync(CancellationToken cancellationToken = default);
 
-    Task<int> GetNextSortOrderAsync(CancellationToken cancellationToken = default);
 }
 
 public interface ILedPanelFavoriteRepository : IRepository<LedPanelFavorite>

@@ -22,8 +22,8 @@ export function useVenue(projectId: string | null) {
 
   const put = (next: SitePlan) => queryClient.setQueryData(key, next);
 
-  /** Entering a room on a job that has no plan yet makes the plan; the map side simply opens empty. */
-  const planOf = async () => plan.data ?? (await sitePlanApi.create({ projectId: projectId!, centreLat: 39.9334, centreLng: 32.8597 }));
+  /** Entering a room on a job that has no record yet makes one. */
+  const planOf = async () => plan.data ?? (await sitePlanApi.create({ projectId: projectId! }));
 
   const setVenue = useMutation({
     mutationFn: async (input: SetSiteVenueInput) => sitePlanApi.setVenue((await planOf()).id, input),

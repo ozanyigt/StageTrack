@@ -1815,15 +1815,6 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("BaseLayer")
-                        .HasColumnType("int");
-
-                    b.Property<double>("CentreLat")
-                        .HasColumnType("float");
-
-                    b.Property<double>("CentreLng")
-                        .HasColumnType("float");
-
                     b.Property<Guid>("CompanyId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1850,14 +1841,8 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<bool>("NightMode")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("Zoom")
-                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -1868,96 +1853,6 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("SitePlans");
-                });
-
-            modelBuilder.Entity("StageTrack.Sites.SitePlanItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("EquipmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Label")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<double>("Lat")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Layer")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<decimal?>("LightHeightM")
-                        .HasColumnType("decimal(12,3)");
-
-                    b.Property<int?>("LightIntensity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("LightRadiusM")
-                        .HasColumnType("decimal(12,3)");
-
-                    b.Property<double>("Lng")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<double>("RotationDeg")
-                        .HasColumnType("float");
-
-                    b.Property<Guid>("SitePlanId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EquipmentId");
-
-                    b.HasIndex("SitePlanId");
-
-                    b.ToTable("SitePlanItem");
-                });
-
-            modelBuilder.Entity("StageTrack.Sites.SitePlanZone", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Color")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
-
-                    b.Property<int>("Kind")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Layer")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("Points")
-                        .IsRequired()
-                        .HasMaxLength(16000)
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("SitePlanId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SitePlanId");
-
-                    b.ToTable("SitePlanZone");
                 });
 
             modelBuilder.Entity("StageTrack.Suppliers.Supplier", b =>
@@ -2599,15 +2494,6 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                             b1.Property<double>("DepthM")
                                 .HasColumnType("float");
 
-                            b1.Property<double>("MapRotationDeg")
-                                .HasColumnType("float");
-
-                            b1.Property<double?>("OriginLat")
-                                .HasColumnType("float");
-
-                            b1.Property<double?>("OriginLng")
-                                .HasColumnType("float");
-
                             b1.Property<Guid?>("PlanAttachmentId")
                                 .HasColumnType("uniqueidentifier");
 
@@ -2641,29 +2527,6 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         });
 
                     b.Navigation("Venue");
-                });
-
-            modelBuilder.Entity("StageTrack.Sites.SitePlanItem", b =>
-                {
-                    b.HasOne("StageTrack.Inventory.Equipment", null)
-                        .WithMany()
-                        .HasForeignKey("EquipmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("StageTrack.Sites.SitePlan", null)
-                        .WithMany("Items")
-                        .HasForeignKey("SitePlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("StageTrack.Sites.SitePlanZone", b =>
-                {
-                    b.HasOne("StageTrack.Sites.SitePlan", null)
-                        .WithMany("Zones")
-                        .HasForeignKey("SitePlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("StageTrack.Warehouse.WarehouseMovement", b =>
@@ -2726,13 +2589,6 @@ namespace StageTrack.EntityFrameworkCore.Migrations
             modelBuilder.Entity("StageTrack.Quotes.Quote", b =>
                 {
                     b.Navigation("Lines");
-                });
-
-            modelBuilder.Entity("StageTrack.Sites.SitePlan", b =>
-                {
-                    b.Navigation("Items");
-
-                    b.Navigation("Zones");
                 });
 #pragma warning restore 612, 618
         }

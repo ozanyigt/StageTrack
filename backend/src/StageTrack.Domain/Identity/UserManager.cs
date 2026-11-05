@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using StageTrack.Tenants;
 
 namespace StageTrack.Identity;
@@ -131,11 +131,4 @@ public class UserManager(
         }
     }
 
-    public void EnsureCompanyAccess(AppUser user, Guid companyId)
-    {
-        if (!user.HasCompany(companyId))
-        {
-            throw new BusinessException(StageTrackErrorCodes.CompanyAccessDenied);
-        }
-    }
 }

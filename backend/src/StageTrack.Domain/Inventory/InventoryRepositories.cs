@@ -93,7 +93,6 @@ public interface IEquipmentUnitRepository : IRepository<EquipmentUnit>
 
     Task<bool> AnyInStockLocationAsync(Guid stockLocationId, CancellationToken cancellationToken = default);
 
-    Task<int> CountOutOnProjectAsync(Guid projectId, CancellationToken cancellationToken = default);
 
     Task<Dictionary<UnitStatus, int>> GetStatusCountsAsync(Guid? equipmentId = null, CancellationToken cancellationToken = default);
 

@@ -1,4 +1,4 @@
-using StageTrack.Entities;
+﻿using StageTrack.Entities;
 
 namespace StageTrack.Inventory;
 
@@ -104,6 +104,4 @@ public class EquipmentUnit : CompanyAggregateRoot
         StockLocationId = stockLocationId;
     }
 
-    /// <summary>Devices in repair or lost are not counted as available stock.</summary>
-    public bool CountsAsStock => !IsArchived && Status is UnitStatus.InStock or UnitStatus.OnProject;
 }

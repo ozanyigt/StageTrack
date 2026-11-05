@@ -1,4 +1,4 @@
-namespace StageTrack.Sites;
+﻿namespace StageTrack.Sites;
 
 /// <summary>
 /// The room the job is built in. A satellite picture answers everything on an open field and nothing inside a
@@ -49,17 +49,6 @@ public class SiteVenue
 
     public double PlanRotationDeg { get; private set; }
 
-    /// <summary>
-    /// Where the room stands on earth, so the site plan's map and this floor are one story rather than two:
-    /// outside is the map's business (generators, trucks, cable routes), inside is this. Null until it is placed.
-    /// </summary>
-    public double? OriginLat { get; private set; }
-
-    public double? OriginLng { get; private set; }
-
-    /// <summary>Which way the room faces on the map: 0 = the audience looks north.</summary>
-    public double MapRotationDeg { get; private set; }
-
     private SiteVenue()
     {
     }
@@ -87,13 +76,6 @@ public class SiteVenue
         PlanOriginXM = Clamp(originXM, -SiteConsts.MaxVenueM, SiteConsts.MaxVenueM);
         PlanOriginZM = Clamp(originZM, -SiteConsts.MaxVenueM, SiteConsts.MaxVenueM);
         PlanRotationDeg = Clamp(rotationDeg, -360, 360);
-    }
-
-    public void SetOnMap(double? lat, double? lng, double rotationDeg)
-    {
-        OriginLat = lat is null ? null : Clamp(lat.Value, -85, 85);
-        OriginLng = lng is null ? null : Clamp(lng.Value, -180, 180);
-        MapRotationDeg = Clamp(rotationDeg, -360, 360);
     }
 
     private static double Clamp(double value, double min, double max) =>
