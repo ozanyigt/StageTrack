@@ -42,14 +42,14 @@ public class LedCalculationAppService(
 
             var spec = new EquipmentPowerSpec((double)(equipment.WeightKg ?? 0), (double?)equipment.PowerW, (double?)equipment.PowerW);
             var result = EquipmentPowerCalculator.Line(spec, line.Count, request.Mode, request.Voltage, settings);
-            return new EquipmentLineDto(line.Id, true, result.Count, result.WeightKg, result.Watt, result.UnitCurrentA,
+            return new EquipmentLineDto(line.Id, true, result.Count, result.WeightKg, result.PowerW, result.UnitCurrentA,
                 result.CurrentA, result.UnitsPerCircuit, result.Circuits);
         }).ToList();
 
         var found = lines.Where(l => l.Found).ToList();
         return new EquipmentPowerResponse(
             lines,
-            new EquipmentTotalsDto(found.Sum(l => l.Count), found.Sum(l => l.WeightKg), found.Sum(l => l.Watt),
+            new EquipmentTotalsDto(found.Sum(l => l.Count), found.Sum(l => l.WeightKg), found.Sum(l => l.PowerW),
                 found.Sum(l => l.CurrentA), found.Sum(l => l.Circuits)));
     }
 }

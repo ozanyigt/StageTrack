@@ -57,10 +57,10 @@ public sealed record TransportMissingDto(Guid EquipmentId, string Code, string N
 public sealed record PlanVehicleDto(Guid TypeId, IReadOnlyList<PlanStackDto> Stacks);
 
 /// <summary>
-/// A stack of one model's cases on the floor, in cm: X along the length from the front, Y across from the left; not
+/// A stack of one model's cases on the floor: XCm along the length from the front, YCm across from the left; not
 /// rotated = the case's depth along the length.
 /// </summary>
-public sealed record PlanStackDto(string Id, Guid EquipmentId, int Cases, int Panels, double X, double Y, bool Rotated);
+public sealed record PlanStackDto(string Id, Guid EquipmentId, int Cases, int Panels, double XCm, double YCm, bool Rotated);
 
 /// <summary>The loading plan (Lojistik): the firm's vehicles, the gap around the cases, and a job's plan.</summary>
 public interface ITransportAppService

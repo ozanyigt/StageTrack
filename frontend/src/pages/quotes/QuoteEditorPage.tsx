@@ -29,7 +29,7 @@ interface HeaderForm {
   rentalFactorProfileId?: string | null;
   manualFactor?: number | null;
   discountPercent: number;
-  vatRate: number;
+  vatPercent: number;
   notes?: string | null;
 }
 
@@ -77,7 +77,7 @@ export function QuoteEditorPage() {
       rentalFactorProfileId: q.rentalFactorProfileId ?? null,
       manualFactor: null,
       discountPercent: q.discountPercent,
-      vatRate: q.vatRate,
+      vatPercent: q.vatPercent,
       notes: q.notes,
     });
     setHeaderDirty(false);
@@ -100,7 +100,7 @@ export function QuoteEditorPage() {
         rentalFactorProfileId: v.rentalFactorProfileId ?? null,
         manualFactor: v.manualFactor || null,
         discountPercent: v.discountPercent ?? 0,
-        vatRate: v.vatRate ?? 0,
+        vatPercent: v.vatPercent ?? 0,
         notes: v.notes ?? null,
       }),
     onSuccess: (u) => { apply(u); setHeaderDirty(false); message.success(t('quotes.recalculated')); },
@@ -315,7 +315,7 @@ export function QuoteEditorPage() {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item name="vatRate" label={t('quotes.vatRate')}>
+                  <Form.Item name="vatPercent" label={t('quotes.vatPercent')}>
                     <InputNumber min={0} max={100} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
@@ -332,7 +332,7 @@ export function QuoteEditorPage() {
               <Flex justify="space-between"><span>{t('quotes.subtotal')}</span><span>{money(q.subtotal)}</span></Flex>
               <Flex justify="space-between"><span>{t('quotes.discountAmount', { percent: f.number(q.discountPercent) })}</span><span>− {money(q.discountAmount)}</span></Flex>
               <Flex justify="space-between"><span>{t('quotes.netTotal')}</span><span>{money(q.netTotal)}</span></Flex>
-              <Flex justify="space-between"><span>{t('quotes.vatAmount', { rate: f.number(q.vatRate) })}</span><span>{money(q.vatAmount)}</span></Flex>
+              <Flex justify="space-between"><span>{t('quotes.vatAmount', { rate: f.number(q.vatPercent) })}</span><span>{money(q.vatAmount)}</span></Flex>
               <Flex justify="space-between" style={{ fontSize: 18, fontWeight: 600 }}><span>{t('quotes.grandTotal')}</span><span>{money(q.grandTotal)}</span></Flex>
             </Flex>
           </Card>

@@ -242,7 +242,7 @@ export function LedStagePage() {
         <Space size="large" wrap>
           <Statistic title={t('led.screens')} value={layout?.screens.length ?? 0} valueStyle={{ fontSize: 18 }} />
           <Statistic title={t('led.weight')} value={Math.round(totals.weightKg)} suffix="kg" valueStyle={{ fontSize: 18 }} />
-          <Statistic title={t('led.totalWatt')} value={Math.round(totals.wattMax)} suffix="W" valueStyle={{ fontSize: 18 }} />
+          <Statistic title={t('led.totalWatt')} value={Math.round(totals.powerMaxW)} suffix="W" valueStyle={{ fontSize: 18 }} />
         </Space>
       </div>
 

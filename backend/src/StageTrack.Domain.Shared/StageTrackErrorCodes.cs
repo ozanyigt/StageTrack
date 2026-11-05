@@ -76,7 +76,7 @@ public static class StageTrackErrorCodes
     public const string QuoteNotEditable = "Quote.NotEditable";
     public const string QuoteProjectHasNoDates = "Quote.ProjectHasNoDates";
     public const string QuoteInvalidDiscount = "Quote.InvalidDiscount";
-    public const string QuoteInvalidVatRate = "Quote.InvalidVatRate";
+    public const string QuoteInvalidVatPercent = "Quote.InvalidVatPercent";
     public const string QuoteLineNotFound = "Quote.LineNotFound";
     public const string QuoteInvalidStatusTransition = "Quote.InvalidStatusTransition";
     public const string QuoteHasNoLines = "Quote.HasNoLines";

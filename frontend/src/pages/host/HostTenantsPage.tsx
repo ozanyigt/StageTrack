@@ -61,7 +61,7 @@ export function HostTenantsPage() {
       planName: t('host.plans.pro'),
       period: [dayjs().startOf('day'), dayjs().add(1, 'year').subtract(1, 'day')],
       modules: [],
-      location: { countryCode: 'TR', currency: 'TRY', vatRate: 20, code: 'TR' } as TenantLocationInput,
+      location: { countryCode: 'TR', currency: 'TRY', vatPercent: 20, code: 'TR' } as TenantLocationInput,
       admin: { language: 'tr' } as TenantAdminInput,
     });
     setCreateOpen(true);

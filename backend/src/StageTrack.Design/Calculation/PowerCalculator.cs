@@ -24,8 +24,8 @@ public sealed record ScreenPower(
     long ResolutionX,
     long ResolutionY,
     double TotalWeightKg,
-    double TotalWattMax,
-    double TotalWattAvg,
+    double TotalPowerMaxW,
+    double TotalPowerAvgW,
     long TotalPixels,
     double PanelCurrentA,
     int PanelsPerCircuit,
@@ -47,7 +47,7 @@ public static class PowerCalculator
 {
     private static readonly string[] PhaseNames = ["L1", "L2", "L3"];
 
-    public static double? PanelWatt(PanelSpec panel, PowerMode mode) => mode == PowerMode.Max ? panel.WattMax : panel.WattAvg;
+    public static double? PanelPowerW(PanelSpec panel, PowerMode mode) => mode == PowerMode.Max ? panel.PowerMaxW : panel.PowerAvgW;
 
     /// <summary>I = P / (V × power factor).</summary>
     public static double WattToCurrent(double watts, double voltage, double powerFactor)
@@ -59,7 +59,7 @@ public static class PowerCalculator
 
     /// <summary>Current per panel for the mode; null when the watt value is blank.</summary>
     public static double? PanelCurrent(PanelSpec panel, PowerMode mode, double voltage, double powerFactor) =>
-        PanelWatt(panel, mode) is { } watt ? WattToCurrent(watt, voltage, powerFactor) : null;
+        PanelPowerW(panel, mode) is { } watt ? WattToCurrent(watt, voltage, powerFactor) : null;
 
     /// <summary>floor(fuse × derating / panel current); 0 without a current.</summary>
     public static int PanelsPerCircuit(double panelCurrentA, double fuseAmpere, double deratingPercent)
@@ -77,7 +77,7 @@ public static class PowerCalculator
     public static (int Count, LinkSource Source) ResolvePanelsPerCircuit(PanelSpec panel, PowerMode mode, double panelCurrentA, CalcSettings settings) =>
         FixedLink(panel, mode) is { } link
             ? (link, LinkSource.Fixed)
-            : (PanelsPerCircuit(panelCurrentA, settings.FuseAmpere, settings.DeratingPercent), LinkSource.Current);
+            : (PanelsPerCircuit(panelCurrentA, settings.FuseA, settings.DeratingPercent), LinkSource.Current);
 
     public static int RequiredCircuits(int panels, int panelsPerCircuit) =>
         panelsPerCircuit <= 0 ? 0 : (int)Math.Ceiling(panels / (double)panelsPerCircuit);
@@ -120,8 +120,8 @@ public static class PowerCalculator
             ResolutionY: resolutionY,
             TotalWeightKg: panelCount * panel.WeightKg,
             // A blank watt counts as 0 (and is flagged).
-            TotalWattMax: panelCount * (panel.WattMax ?? 0),
-            TotalWattAvg: panelCount * (panel.WattAvg ?? 0),
+            TotalPowerMaxW: panelCount * (panel.PowerMaxW ?? 0),
+            TotalPowerAvgW: panelCount * (panel.PowerAvgW ?? 0),
             TotalPixels: resolutionX * resolutionY,
             PanelCurrentA: panelCurrentA,
             PanelsPerCircuit: perCircuit,
@@ -129,7 +129,7 @@ public static class PowerCalculator
             CircuitsNeeded: circuitsNeeded,
             SocapexNeeded: RequiredSocapex(circuitsNeeded, settings.CircuitsPerSocapex),
             Circuits: BuildCircuits(panelCount, panelCurrentA, perCircuit, screenId),
-            WattMissing: PanelWatt(panel, mode) is null,
+            WattMissing: PanelPowerW(panel, mode) is null,
             AreaM2: panelCount * panel.WidthMm * panel.HeightMm / 1_000_000);
     }
 
@@ -181,7 +181,7 @@ public static class PowerCalculator
         var models = ScreenGeometry.ColumnPanels(main, columns, shape.Corners);
         var uniform = shape.Corners.Count == 0;
         var byCount = uniform || source == LinkSource.Fixed;
-        var usable = settings.FuseAmpere * (settings.DeratingPercent / 100);
+        var usable = settings.FuseA * (settings.DeratingPercent / 100);
         double Amps(int cell) => PanelCurrent(models[cell / rows], mode, voltage, settings.PowerFactor) ?? 0;
 
         var runs = new List<CircuitRun>();
@@ -253,8 +253,8 @@ public static class PowerCalculator
             ResolutionX: models.Sum(m => (long)m.PixelWidth),
             ResolutionY: (long)main.PixelHeight * rows,
             TotalWeightKg: Sum(m => m.WeightKg),
-            TotalWattMax: Sum(m => m.WattMax ?? 0),
-            TotalWattAvg: Sum(m => m.WattAvg ?? 0),
+            TotalPowerMaxW: Sum(m => m.PowerMaxW ?? 0),
+            TotalPowerAvgW: Sum(m => m.PowerAvgW ?? 0),
             TotalPixels: totalPixels,
             PanelCurrentA: mainCurrent,
             PanelsPerCircuit: perCircuit,
@@ -262,7 +262,7 @@ public static class PowerCalculator
             CircuitsNeeded: circuits.Count,
             SocapexNeeded: RequiredSocapex(circuits.Count, settings.CircuitsPerSocapex),
             Circuits: circuits,
-            WattMissing: counts.Keys.Any(m => PanelWatt(m, mode) is null),
+            WattMissing: counts.Keys.Any(m => PanelPowerW(m, mode) is null),
             AreaM2: Sum(m => m.WidthMm * m.HeightMm) / 1_000_000);
         var warnings = shape.Corners.Any(c => c.Panel.HeightMm != main.HeightMm) ? new[] { CornerHeightMismatch } : [];
         return (power, warnings);
@@ -277,7 +277,7 @@ public static class PowerCalculator
         IReadOnlyList<PanelSpec> panels, int perCircuit, LinkSource source, double voltage, PowerMode mode, CalcSettings settings, string screenId)
     {
         if (panels.Count == 0 || perCircuit <= 0) return [];
-        var usable = settings.FuseAmpere * (settings.DeratingPercent / 100);
+        var usable = settings.FuseA * (settings.DeratingPercent / 100);
         var circuits = new List<Circuit>();
         var (count, load, current) = (0, 0.0, 0.0);
         foreach (var panel in panels)
@@ -322,15 +322,15 @@ public static class PowerCalculator
     public static IReadOnlyList<DistributionUnits> RecommendDistribution(int circuitsPerPhase, double circuitCurrentA, IReadOnlyList<DistributionOption> options)
     {
         var usable = options
-            .Select(o => (Option: o, PerBox: circuitCurrentA > 0 ? (int)Math.Floor(o.AmpsPerPhase / circuitCurrentA) : 0))
+            .Select(o => (Option: o, PerBox: circuitCurrentA > 0 ? (int)Math.Floor(o.PerPhaseA / circuitCurrentA) : 0))
             .Where(o => circuitCurrentA <= 0 || o.PerBox > 0)
             .ToList();
         if (circuitsPerPhase <= 0 || circuitCurrentA <= 0)
             return usable.Select(o => new DistributionUnits(o.Option.Id, 0)).ToList();
 
         var units = usable.Select(o => (int)Math.Ceiling(circuitsPerPhase / (double)o.PerBox)).ToList();
-        var singleBoxAmps = usable.Where((_, i) => units[i] == 1).Select(o => o.Option.AmpsPerPhase).DefaultIfEmpty(double.PositiveInfinity).Min();
-        return usable.Select((o, i) => new DistributionUnits(o.Option.Id, o.Option.AmpsPerPhase > singleBoxAmps ? 0 : units[i])).ToList();
+        var singleBoxAmps = usable.Where((_, i) => units[i] == 1).Select(o => o.Option.PerPhaseA).DefaultIfEmpty(double.PositiveInfinity).Min();
+        return usable.Select((o, i) => new DistributionUnits(o.Option.Id, o.Option.PerPhaseA > singleBoxAmps ? 0 : units[i])).ToList();
     }
 
     /// <summary>Phase split of the circuits, the busiest phase's current and the distribution boxes.</summary>

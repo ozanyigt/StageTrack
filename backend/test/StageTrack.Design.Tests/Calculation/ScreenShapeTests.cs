@@ -34,7 +34,7 @@ public sealed class ScreenShapeTests
 
         Assert.Equal(803, full.PanelCount);
         Assert.Equal(353, cut.PanelCount); // 803 − 450
-        Assert.Equal(353 * 140, cut.TotalWattMax);
+        Assert.Equal(353 * 140, cut.TotalPowerMaxW);
         Assert.Equal(353 * 7.8, cut.TotalWeightKg, 9);
         Assert.Equal(18, cut.CircuitsNeeded); // ceil(353 / 20)
         Assert.Equal(3, cut.SocapexNeeded);
@@ -88,7 +88,7 @@ public sealed class ScreenShapeTests
         Assert.Equal(80, screen.PanelCount);
         Assert.Equal(18 * 500 + 2 * 250, screen.WidthMm);
         Assert.Equal(18L * 192 + 2 * 96, screen.ResolutionX);
-        Assert.Equal(72 * 140 + 8 * 80, screen.TotalWattMax);
+        Assert.Equal(72 * 140 + 8 * 80, screen.TotalPowerMaxW);
         Assert.Equal(72 * 7.8 + 8 * 5, screen.TotalWeightKg, 9);
         Assert.Equal(72L * 192 * 192 + 8L * 96 * 192, screen.TotalPixels);
         // Fixed atlama (the main panel's 20): 80 panels → 4 circuits of 20, whatever the model.
@@ -99,8 +99,8 @@ public sealed class ScreenShapeTests
     public void Corners_WithAComputedAtlama_FillCircuitsByEachPanelsCurrent()
     {
         // No atlama: 16 A ÷ (230 W / 230 V = 1 A) = 16 main panels; corner panels draw 2 A.
-        var main = Main with { WattMax = 230, MaxLink = null };
-        var heavyCorner = Corner with { WattMax = 460 };
+        var main = Main with { PowerMaxW = 230, MaxLink = null };
+        var heavyCorner = Corner with { PowerMaxW = 460 };
         // 2 columns × 8 rows, the 2nd column corners: 8 × 1 A then 8 × 2 A → 8 + 4 (= 16 A), then 4.
         var screen = Calc(2, 8, new ScreenShape([], [new CornerColumn(1, heavyCorner)]), main);
         Assert.Equal([12, 4], screen.Circuits.Select(c => c.PanelCount));
@@ -124,8 +124,8 @@ public sealed class ScreenShapeTests
     {
         // 10 × 6 with a 4 × 2 cut: 52 panels at 140 W max / 45 W avg, each panel's own current.
         var cut = Calc(10, 6, Cut(new Cutout(4, 2, 3, 0)), mode: mode);
-        Assert.Equal(52 * 140, cut.TotalWattMax, 9);
-        Assert.Equal(52 * 45, cut.TotalWattAvg, 9);
+        Assert.Equal(52 * 140, cut.TotalPowerMaxW, 9);
+        Assert.Equal(52 * 45, cut.TotalPowerAvgW, 9);
         var panelCurrent = PowerCalculator.PanelCurrent(Main, mode, 230, Settings.PowerFactor)!.Value;
         Assert.Equal(panelCurrent, cut.PanelCurrentA, 9);
         Assert.Equal(52 * panelCurrent, cut.Circuits.Sum(c => c.CurrentA), 9);

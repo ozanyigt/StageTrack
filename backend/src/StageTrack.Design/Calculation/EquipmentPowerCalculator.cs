@@ -1,13 +1,13 @@
 namespace StageTrack.Design.Calculation;
 
 /// <summary>A non-LED equipment model's figures the power calculation needs (one unit).</summary>
-public sealed record EquipmentPowerSpec(double WeightKg, double? WattMax, double? WattAvg);
+public sealed record EquipmentPowerSpec(double WeightKg, double? PowerMaxW, double? PowerAvgW);
 
 /// <summary>
 /// One line of a job (a fixture group, a speaker / amplifier group, truss or scaff material): <paramref name="Count"/>
 /// units, their weight and watt, the current they draw, how many go on one circuit and the circuits they need.
 /// </summary>
-public sealed record EquipmentPowerLine(int Count, double WeightKg, double Watt, double UnitCurrentA, double CurrentA, int UnitsPerCircuit, int Circuits);
+public sealed record EquipmentPowerLine(int Count, double WeightKg, double PowerW, double UnitCurrentA, double CurrentA, int UnitsPerCircuit, int Circuits);
 
 /// <summary>
 /// Power of non-LED equipment: watt → current → circuits, with the same constants as the LED calculation
@@ -20,7 +20,7 @@ public static class EquipmentPowerCalculator
     /// None = 0 (truss, scaff, passive speakers).
     /// </summary>
     public static double UnitWatt(EquipmentPowerSpec spec, PowerMode mode) =>
-        (mode == PowerMode.Max ? spec.WattMax : spec.WattAvg ?? spec.WattMax) ?? 0;
+        (mode == PowerMode.Max ? spec.PowerMaxW : spec.PowerAvgW ?? spec.PowerMaxW) ?? 0;
 
     /// <summary>
     /// The line's figures. Units go whole onto circuits: floor(fuse × derating / unit current) per circuit; a unit that
@@ -31,7 +31,7 @@ public static class EquipmentPowerCalculator
         if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), "Adet negatif olamaz.");
         var unitWatt = UnitWatt(spec, mode);
         var unitCurrent = unitWatt > 0 ? PowerCalculator.WattToCurrent(unitWatt, voltage, settings.PowerFactor) : 0;
-        var usable = settings.FuseAmpere * (settings.DeratingPercent / 100);
+        var usable = settings.FuseA * (settings.DeratingPercent / 100);
         int perCircuit;
         int circuits;
         if (unitCurrent <= 0 || count == 0)

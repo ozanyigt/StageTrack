@@ -105,7 +105,7 @@ public class QuoteDto : QuoteListItemDto
     public int RentalDays { get; set; }
     public decimal Factor { get; set; }
     public decimal DiscountPercent { get; set; }
-    public decimal VatRate { get; set; }
+    public decimal VatPercent { get; set; }
     public string? Notes { get; set; }
     public decimal Subtotal { get; set; }
     public decimal DiscountAmount { get; set; }
@@ -188,7 +188,7 @@ public class UpdateQuoteHeaderInput
     public decimal DiscountPercent { get; set; }
 
     [Range(0, 100)]
-    public decimal VatRate { get; set; }
+    public decimal VatPercent { get; set; }
 
     [StringLength(QuoteConsts.MaxNotesLength)]
     public string? Notes { get; set; }

@@ -74,8 +74,8 @@ export function HostTenantDetailPage() {
     locationForm.resetFields();
     locationForm.setFieldsValue(
       l === 'new'
-        ? { countryCode: 'AE', currency: 'AED', vatRate: 5 }
-        : { name: l.name, code: l.code, currency: l.defaultCurrency, vatRate: l.defaultVatRate, countryCode: l.countryCode, rentmanWorkspaceId: l.rentmanWorkspaceId },
+        ? { countryCode: 'AE', currency: 'AED', vatPercent: 5 }
+        : { name: l.name, code: l.code, currency: l.defaultCurrency, vatPercent: l.defaultVatPercent, countryCode: l.countryCode, rentmanWorkspaceId: l.rentmanWorkspaceId },
     );
     setLocation(l);
   };
@@ -193,7 +193,7 @@ export function HostTenantDetailPage() {
                       { title: t('host.locationName'), dataIndex: 'name' },
                       { title: t('host.country'), dataIndex: 'countryCode', width: 90 },
                       { title: t('host.currency'), dataIndex: 'defaultCurrency', width: 100 },
-                      { title: t('host.vatRate'), dataIndex: 'defaultVatRate', width: 80 },
+                      { title: t('host.vatPercent'), dataIndex: 'defaultVatPercent', width: 80 },
                       { title: 'cmpID', dataIndex: 'rentmanWorkspaceId', width: 90, render: (v) => v ?? '—' },
                       {
                         title: '', width: 60,

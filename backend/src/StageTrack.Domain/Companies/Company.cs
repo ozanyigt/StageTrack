@@ -14,7 +14,7 @@ public class Company : AggregateRoot
     public string Name { get; private set; } = null!;
     public string Code { get; private set; } = null!;
     public string DefaultCurrency { get; private set; } = null!;
-    public decimal DefaultVatRate { get; private set; }
+    public decimal DefaultVatPercent { get; private set; }
     public string CountryCode { get; private set; } = null!;
 
     /// <summary>
@@ -27,25 +27,25 @@ public class Company : AggregateRoot
     {
     }
 
-    public Company(Guid id, string name, string code, string defaultCurrency, decimal defaultVatRate, string countryCode, Guid tenantId)
+    public Company(Guid id, string name, string code, string defaultCurrency, decimal defaultVatPercent, string countryCode, Guid tenantId)
         : base(id)
     {
         TenantId = tenantId;
         Name = name;
         Code = code;
         DefaultCurrency = defaultCurrency;
-        DefaultVatRate = defaultVatRate;
+        DefaultVatPercent = defaultVatPercent;
         CountryCode = countryCode;
     }
 
     public void SetRentmanWorkspace(int? workspaceId) => RentmanWorkspaceId = workspaceId;
 
     /// <summary>Code is fixed after creation (it may be printed on documents).</summary>
-    public void Update(string name, string defaultCurrency, decimal defaultVatRate, string countryCode)
+    public void Update(string name, string defaultCurrency, decimal defaultVatPercent, string countryCode)
     {
         Name = name.Trim();
         DefaultCurrency = defaultCurrency.Trim().ToUpperInvariant();
-        DefaultVatRate = defaultVatRate;
+        DefaultVatPercent = defaultVatPercent;
         CountryCode = countryCode.Trim().ToUpperInvariant();
     }
 }

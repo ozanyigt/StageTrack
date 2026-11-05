@@ -24,7 +24,7 @@ public class CompanyDto
     public string Name { get; set; } = null!;
     public string Code { get; set; } = null!;
     public string DefaultCurrency { get; set; } = null!;
-    public decimal DefaultVatRate { get; set; }
+    public decimal DefaultVatPercent { get; set; }
     public string CountryCode { get; set; } = null!;
 }
 

@@ -126,8 +126,8 @@ public static class LedCalculationEvaluator
         var circuits = screens.SelectMany(s => s.Circuits).ToList();
         var distribution = PowerCalculator.Distribute(circuits, settings);
         return new JobPowerDto(
-            Sum(screens.Select(s => s.TotalWattMax)),
-            Sum(screens.Select(s => s.TotalWattAvg)),
+            Sum(screens.Select(s => s.TotalPowerMaxW)),
+            Sum(screens.Select(s => s.TotalPowerAvgW)),
             Sum(circuits.Select(c => c.CurrentA)),
             screens.Sum(s => s.CircuitsNeeded),
             screens.Sum(s => s.SocapexNeeded),
@@ -157,7 +157,7 @@ public static class LedCalculationEvaluator
     }
 
     private static ScreenPowerDto ToDto(ScreenPower p, PowerDistribution d, CalcSettings settings) => new(
-        p.PanelCount, p.WidthMm, p.HeightMm, p.ResolutionX, p.ResolutionY, p.TotalWeightKg, p.TotalWattMax, p.TotalWattAvg,
+        p.PanelCount, p.WidthMm, p.HeightMm, p.ResolutionX, p.ResolutionY, p.TotalWeightKg, p.TotalPowerMaxW, p.TotalPowerAvgW,
         p.TotalPixels, p.PanelCurrentA, p.PanelsPerCircuit, p.PanelsPerCircuitSource, p.CircuitsNeeded, p.SocapexNeeded,
         p.Circuits.Select(ToDto).ToList(), p.WattMissing,
         d.Phases.Select(ToDto).ToList(), d.PerPhaseMaxA, d.Distribution.Select(u => ToDto(u, settings)).ToList(), p.AreaM2);
@@ -169,7 +169,7 @@ public static class LedCalculationEvaluator
     private static DistributionDto ToDto(DistributionUnits d, CalcSettings settings)
     {
         var option = settings.DistributionOptions.First(o => o.Id == d.OptionId);
-        return new DistributionDto(d.OptionId, option.AmpsPerPhase, option.SocapexOutputs, d.UnitsNeeded);
+        return new DistributionDto(d.OptionId, option.PerPhaseA, option.SocapexOutputs, d.UnitsNeeded);
     }
 
     private static ProcessorOptionDto ToDto(ProcessorOption o) => new(

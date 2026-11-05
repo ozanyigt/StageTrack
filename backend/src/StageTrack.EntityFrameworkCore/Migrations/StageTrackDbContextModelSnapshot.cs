@@ -256,7 +256,7 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasMaxLength(3)
                         .HasColumnType("nvarchar(3)");
 
-                    b.Property<decimal>("DefaultVatRate")
+                    b.Property<decimal>("DefaultVatPercent")
                         .HasColumnType("decimal(5,2)");
 
                     b.Property<string>("Name")
@@ -1759,7 +1759,7 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<decimal>("VatAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("VatRate")
+                    b.Property<decimal>("VatPercent")
                         .HasColumnType("decimal(5,2)");
 
                     b.HasKey("Id");
@@ -2117,13 +2117,13 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                 {
                     b.HasBaseType("StageTrack.Design.EquipmentLedSpec");
 
-                    b.Property<decimal?>("AngleMax")
+                    b.Property<decimal?>("AngleMaxDeg")
                         .HasColumnType("decimal(12,3)");
 
-                    b.Property<decimal?>("AngleMin")
+                    b.Property<decimal?>("AngleMinDeg")
                         .HasColumnType("decimal(12,3)");
 
-                    b.Property<decimal?>("AngleStep")
+                    b.Property<decimal?>("AngleStepDeg")
                         .HasColumnType("decimal(12,3)");
 
                     b.Property<int?>("AvgLink")
@@ -2166,6 +2166,12 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.Property<int>("PixelWidth")
                         .HasColumnType("int");
 
+                    b.Property<decimal?>("PowerAvgW")
+                        .HasColumnType("decimal(12,3)");
+
+                    b.Property<decimal?>("PowerMaxW")
+                        .HasColumnType("decimal(12,3)");
+
                     b.Property<int?>("PwmHz")
                         .HasColumnType("int");
 
@@ -2175,12 +2181,6 @@ namespace StageTrack.EntityFrameworkCore.Migrations
 
                     b.Property<int>("TransportKind")
                         .HasColumnType("int");
-
-                    b.Property<decimal?>("WattAvg")
-                        .HasColumnType("decimal(12,3)");
-
-                    b.Property<decimal?>("WattMax")
-                        .HasColumnType("decimal(12,3)");
 
                     b.Property<int>("WidthMm")
                         .HasColumnType("int");

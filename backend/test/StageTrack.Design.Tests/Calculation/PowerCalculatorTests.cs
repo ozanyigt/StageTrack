@@ -15,18 +15,18 @@ public sealed class PowerCalculatorTests
     [Fact]
     public void Defaults_AreTheAgreedConstants()
     {
-        Assert.Equal((1.0, 16.0, 100.0, 6), (Settings.PowerFactor, Settings.FuseAmpere, Settings.DeratingPercent, Settings.CircuitsPerSocapex));
+        Assert.Equal((1.0, 16.0, 100.0, 6), (Settings.PowerFactor, Settings.FuseA, Settings.DeratingPercent, Settings.CircuitsPerSocapex));
         Assert.Equal(
             ["32a:32:4", "63a:63:6", "125a:125:12", "powerlock:400:24"],
-            Settings.DistributionOptions.Select(o => $"{o.Id}:{o.AmpsPerPhase}:{o.SocapexOutputs}"));
+            Settings.DistributionOptions.Select(o => $"{o.Id}:{o.PerPhaseA}:{o.SocapexOutputs}"));
     }
 
     [Fact]
     public void WattAndCurrent_FollowThePowerMode()
     {
         var panel = Panel(wattMax: 230, wattAvg: 115, maxLink: 16, avgLink: 20);
-        Assert.Equal(230, PowerCalculator.PanelWatt(panel, PowerMode.Max));
-        Assert.Equal(115, PowerCalculator.PanelWatt(panel, PowerMode.Average));
+        Assert.Equal(230, PowerCalculator.PanelPowerW(panel, PowerMode.Max));
+        Assert.Equal(115, PowerCalculator.PanelPowerW(panel, PowerMode.Average));
         Assert.Equal(1.0, PowerCalculator.PanelCurrent(panel, PowerMode.Max, 230, 1)!.Value, 5);
         Assert.Equal(16, PowerCalculator.FixedLink(panel, PowerMode.Max));
         Assert.Equal(20, PowerCalculator.FixedLink(panel, PowerMode.Average));
@@ -95,7 +95,7 @@ public sealed class PowerCalculatorTests
         Assert.Equal((3000.0, 2000.0), (screen.WidthMm, screen.HeightMm));
         Assert.Equal((1152L, 768L), (screen.ResolutionX, screen.ResolutionY));
         Assert.Equal(180, screen.TotalWeightKg);
-        Assert.Equal(5520, screen.TotalWattMax);
+        Assert.Equal(5520, screen.TotalPowerMaxW);
         Assert.Equal(1.0, screen.PanelCurrentA, 5);
         Assert.Equal((16, LinkSource.Fixed, 2, 1), (screen.PanelsPerCircuit, screen.PanelsPerCircuitSource, screen.CircuitsNeeded, screen.SocapexNeeded));
     }
@@ -109,8 +109,8 @@ public sealed class PowerCalculatorTests
 
         Assert.Equal((16, LinkSource.Fixed, 8, 2), (max.PanelsPerCircuit, max.PanelsPerCircuitSource, max.CircuitsNeeded, max.SocapexNeeded));
         Assert.Equal((20, LinkSource.Fixed, 6, 1), (avg.PanelsPerCircuit, avg.PanelsPerCircuitSource, avg.CircuitsNeeded, avg.SocapexNeeded));
-        Assert.Equal(120 * 352, max.TotalWattMax);
-        Assert.Equal(120 * 120, avg.TotalWattAvg);
+        Assert.Equal(120 * 352, max.TotalPowerMaxW);
+        Assert.Equal(120 * 120, avg.TotalPowerAvgW);
         // A fixed atlama never depends on the voltage.
         Assert.Equal(8, PowerCalculator.CalcScreen("s", panel, 12, 10, 110, PowerMode.Max, Settings).CircuitsNeeded);
         // ...and a 1-panel screen still shows it.
@@ -130,7 +130,7 @@ public sealed class PowerCalculatorTests
     {
         var screen = PowerCalculator.CalcScreen("s", Panel(wattMax: null), 10, 10, 230, PowerMode.Max, Settings);
         Assert.True(screen.WattMissing);
-        Assert.Equal(0, screen.TotalWattMax);
+        Assert.Equal(0, screen.TotalPowerMaxW);
         Assert.Equal(0, screen.PanelsPerCircuit);
     }
 

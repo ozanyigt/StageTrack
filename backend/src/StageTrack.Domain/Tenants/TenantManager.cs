@@ -86,7 +86,7 @@ public class TenantProvisioningManager(
     ICurrentCompany currentCompany,
     IUnitOfWork unitOfWork)
 {
-    public record LocationSetup(string Name, string Code, string Currency, decimal VatRate, string CountryCode, int? RentmanWorkspaceId,
+    public record LocationSetup(string Name, string Code, string Currency, decimal VatPercent, string CountryCode, int? RentmanWorkspaceId,
         string WarehouseName);
 
     public record AdminSetup(string UserName, string FullName, string? Email, string Password, string Language);
@@ -115,7 +115,7 @@ public class TenantProvisioningManager(
             throw new BusinessException(StageTrackErrorCodes.CompanyCodeAlreadyExists).WithData("code", code);
         }
 
-        var company = new Company(Guid.CreateVersion7(), setup.Name.Trim(), code, setup.Currency.Trim().ToUpperInvariant(), setup.VatRate,
+        var company = new Company(Guid.CreateVersion7(), setup.Name.Trim(), code, setup.Currency.Trim().ToUpperInvariant(), setup.VatPercent,
             setup.CountryCode.Trim().ToUpperInvariant(), tenant.Id);
         company.SetRentmanWorkspace(setup.RentmanWorkspaceId);
         await companyRepository.InsertAsync(company);

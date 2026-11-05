@@ -34,7 +34,7 @@ public class QuoteManager(
         }
 
         var number = await GenerateNumberAsync(issueDate.Year);
-        var quote = new Quote(Guid.CreateVersion7(), project.Id, number, 1, issueDate, company.DefaultCurrency, company.DefaultVatRate);
+        var quote = new Quote(Guid.CreateVersion7(), project.Id, number, 1, issueDate, company.DefaultCurrency, company.DefaultVatPercent);
         await ApplyRentalPeriodAsync(quote, project.RentalDays, profileId);
 
         quote.ReplaceEquipmentLines(await BuildEquipmentLinesAsync(project, []));

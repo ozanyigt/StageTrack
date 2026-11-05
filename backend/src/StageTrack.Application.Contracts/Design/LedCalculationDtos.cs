@@ -126,7 +126,7 @@ public sealed record WiredCircuitDto(int Index, string Phase, int Socapex, IRead
 public sealed record PhaseDto(string Phase, IReadOnlyList<CircuitDto> Circuits, double TotalCurrentA);
 
 /// <summary>A distribution box size (as configured) and how many of it the load needs.</summary>
-public sealed record DistributionDto(string OptionId, double AmpsPerPhase, int SocapexOutputs, int UnitsNeeded);
+public sealed record DistributionDto(string OptionId, double PerPhaseA, int SocapexOutputs, int UnitsNeeded);
 
 public sealed record ScreenPowerDto(
     int PanelCount,
@@ -135,8 +135,8 @@ public sealed record ScreenPowerDto(
     long ResolutionX,
     long ResolutionY,
     double TotalWeightKg,
-    double TotalWattMax,
-    double TotalWattAvg,
+    double TotalPowerMaxW,
+    double TotalPowerAvgW,
     long TotalPixels,
     double PanelCurrentA,
     int PanelsPerCircuit,
@@ -170,8 +170,8 @@ public sealed record ScreenProcessorDto(IReadOnlyList<ProcessorOptionDto> Option
 /// distribution combine every screen's circuits (one box may feed several screens).
 /// </summary>
 public sealed record JobPowerDto(
-    double TotalWattMax,
-    double TotalWattAvg,
+    double TotalPowerMaxW,
+    double TotalPowerAvgW,
     double TotalCurrentA,
     int TotalCircuits,
     int TotalSocapex,
@@ -195,10 +195,10 @@ public sealed record JobEvaluationDto(JobPowerDto? Power, JobProcessorDto Proces
 /// <summary>The fixed calculation constants, for what the frontend shows itself (e.g. the inventory's current column).</summary>
 public sealed record CalcSettingsDto(
     double PowerFactor,
-    double FuseAmpere,
+    double FuseA,
     double DeratingPercent,
     int CircuitsPerSocapex,
     IReadOnlyList<DistributionOption> DistributionOptions)
 {
-    public static CalcSettingsDto From(CalcSettings s) => new(s.PowerFactor, s.FuseAmpere, s.DeratingPercent, s.CircuitsPerSocapex, s.DistributionOptions);
+    public static CalcSettingsDto From(CalcSettings s) => new(s.PowerFactor, s.FuseA, s.DeratingPercent, s.CircuitsPerSocapex, s.DistributionOptions);
 }

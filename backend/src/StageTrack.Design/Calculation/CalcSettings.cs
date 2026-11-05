@@ -1,25 +1,25 @@
 namespace StageTrack.Design.Calculation;
 
 /// <summary>A distribution box size: current per phase and socapex outputs (e.g. 63A: 63 A per phase, 6 outputs).</summary>
-public sealed record DistributionOption(string Id, double AmpsPerPhase, int SocapexOutputs);
+public sealed record DistributionOption(string Id, double PerPhaseA, int SocapexOutputs);
 
 /// <summary>
 /// Fixed calculation constants (configuration section "Calculation"; not editable in the UI).
 /// </summary>
 /// <param name="PowerFactor">Power factor of the panels (I = P / (V × power factor)).</param>
-/// <param name="FuseAmpere">Fuse of one CEE connection (16 A).</param>
+/// <param name="FuseA">Fuse of one CEE connection (16 A).</param>
 /// <param name="DeratingPercent">Usable share of the fuse, in percent.</param>
 /// <param name="CircuitsPerSocapex">CEE circuits on one socapex cable.</param>
 public sealed record CalcSettings(
     double PowerFactor,
-    double FuseAmpere,
+    double FuseA,
     double DeratingPercent,
     int CircuitsPerSocapex,
     IReadOnlyList<DistributionOption> DistributionOptions)
 {
     public static readonly CalcSettings Default = new(
         PowerFactor: 1.0,
-        FuseAmpere: 16,
+        FuseA: 16,
         DeratingPercent: 100,
         CircuitsPerSocapex: 6,
         DistributionOptions:

@@ -658,7 +658,7 @@ public class DemoDataSeeder(
         var amrQuote = await quoteManager.CreateFromProjectAsync(amr, company, null, DateTime.Today.AddDays(-12));
         amrQuote.AddLine(QuoteLineType.Crew, null, "Ses ve ışık teknik ekip (4 kişi)", 4, 7500, applyFactor: true, discountPercent: 0, section: "PERSONEL VE NAKLİYE");
         amrQuote.AddLine(QuoteLineType.Transport, null, "Nakliye - İstanbul içi (kamyon)", 2, 9000, applyFactor: false, discountPercent: 0, section: "PERSONEL VE NAKLİYE");
-        amrQuote.UpdateHeader(amrQuote.IssueDate, DateTime.Today.AddDays(-2), 10, company.DefaultVatRate, null);
+        amrQuote.UpdateHeader(amrQuote.IssueDate, DateTime.Today.AddDays(-2), 10, company.DefaultVatPercent, null);
         await quoteRepository.InsertAsync(amrQuote);
         await unitOfWork.SaveChangesAsync();
         await quoteManager.ChangeStatusAsync(amrQuote, QuoteStatus.Sent, amr);
@@ -666,7 +666,7 @@ public class DemoDataSeeder(
 
         var ellaQuote = await quoteManager.CreateFromProjectAsync(ella, company, null, DateTime.Today.AddDays(-4));
         ellaQuote.AddLine(QuoteLineType.Crew, null, "Görüntü teknisyeni", 1, 6000, applyFactor: true, discountPercent: 0, section: "PERSONEL");
-        ellaQuote.UpdateHeader(ellaQuote.IssueDate, DateTime.Today.AddDays(10), 5, company.DefaultVatRate, null);
+        ellaQuote.UpdateHeader(ellaQuote.IssueDate, DateTime.Today.AddDays(10), 5, company.DefaultVatPercent, null);
         await quoteRepository.InsertAsync(ellaQuote);
         await unitOfWork.SaveChangesAsync();
         await quoteManager.ChangeStatusAsync(ellaQuote, QuoteStatus.Sent, ella);
@@ -675,13 +675,13 @@ public class DemoDataSeeder(
         var nilQuote = await quoteManager.CreateFromProjectAsync(nil, company, null, DateTime.Today);
         nilQuote.AddLine(QuoteLineType.Crew, null, "Ses ve ışık teknik ekip (6 kişi)", 6, 7500, applyFactor: true, discountPercent: 0, section: "PERSONEL VE NAKLİYE");
         nilQuote.AddLine(QuoteLineType.Transport, null, "Nakliye - İstanbul / İzmir (tır)", 1, 45000, applyFactor: false, discountPercent: 0, section: "PERSONEL VE NAKLİYE");
-        nilQuote.UpdateHeader(DateTime.Today.AddDays(-3), DateTime.Today.AddDays(7), 0, company.DefaultVatRate, null);
+        nilQuote.UpdateHeader(DateTime.Today.AddDays(-3), DateTime.Today.AddDays(7), 0, company.DefaultVatPercent, null);
         await quoteRepository.InsertAsync(nilQuote);
         await unitOfWork.SaveChangesAsync();
         // The customer asked for a discount: revision 2 is being prepared.
         await quoteManager.ChangeStatusAsync(nilQuote, QuoteStatus.Sent, nil);
         var nilRevision = quoteManager.Revise(nilQuote, DateTime.Today);
-        nilRevision.UpdateHeader(DateTime.Today, DateTime.Today.AddDays(7), 8, company.DefaultVatRate, "Müşteri talebi: %8 iskonto.");
+        nilRevision.UpdateHeader(DateTime.Today, DateTime.Today.AddDays(7), 8, company.DefaultVatPercent, "Müşteri talebi: %8 iskonto.");
         await quoteRepository.InsertAsync(nilRevision);
         await unitOfWork.SaveChangesAsync();
 

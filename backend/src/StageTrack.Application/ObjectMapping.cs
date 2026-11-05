@@ -17,7 +17,7 @@ internal static class ObjectMapping
     public static CompanyDto ToDto(this Company c) => new()
     {
         Id = c.Id, Name = c.Name, Code = c.Code, DefaultCurrency = c.DefaultCurrency,
-        DefaultVatRate = c.DefaultVatRate, CountryCode = c.CountryCode
+        DefaultVatPercent = c.DefaultVatPercent, CountryCode = c.CountryCode
     };
 
     public static EquipmentFolderDto ToDto(this EquipmentFolder f) => new()

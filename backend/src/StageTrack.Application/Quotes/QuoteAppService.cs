@@ -46,7 +46,7 @@ public class QuoteAppService(
     public async Task<QuoteDto> UpdateHeaderAsync(Guid id, UpdateQuoteHeaderInput input)
     {
         var quote = await quoteRepository.GetAsync(id);
-        quote.UpdateHeader(input.IssueDate, input.ValidUntil, input.DiscountPercent, input.VatRate, input.Notes);
+        quote.UpdateHeader(input.IssueDate, input.ValidUntil, input.DiscountPercent, input.VatPercent, input.Notes);
         await quoteManager.ApplyRentalPeriodAsync(quote, input.RentalDays, input.RentalFactorProfileId, input.ManualFactor);
         await unitOfWork.SaveChangesAsync();
         return await BuildDtoAsync(quote);
@@ -209,7 +209,7 @@ public class QuoteAppService(
         dto.RentalDays = quote.RentalDays;
         dto.Factor = quote.Factor;
         dto.DiscountPercent = quote.DiscountPercent;
-        dto.VatRate = quote.VatRate;
+        dto.VatPercent = quote.VatPercent;
         dto.Notes = quote.Notes;
         dto.Subtotal = quote.Subtotal;
         dto.DiscountAmount = quote.DiscountAmount;

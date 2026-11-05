@@ -21,7 +21,7 @@ public class Quote : CompanyAggregateRoot
     public decimal Factor { get; private set; }
 
     public decimal DiscountPercent { get; private set; }
-    public decimal VatRate { get; private set; }
+    public decimal VatPercent { get; private set; }
     public string? Notes { get; private set; }
 
     /// <summary>Why the customer declined (price, dates, competitor…); kept for lost-business reporting.</summary>
@@ -40,14 +40,14 @@ public class Quote : CompanyAggregateRoot
     }
 
     internal Quote(Guid id, Guid projectId, string number, int revision, DateTime issueDate, string currency,
-        decimal vatRate) : base(id)
+        decimal vatPercent) : base(id)
     {
         ProjectId = projectId;
         Number = number;
         Revision = revision;
         IssueDate = issueDate;
         Currency = currency;
-        SetVatRate(vatRate);
+        SetVatPercent(vatPercent);
     }
 
     public bool IsEditable => Status == QuoteStatus.Draft;
@@ -61,7 +61,7 @@ public class Quote : CompanyAggregateRoot
         Recalculate();
     }
 
-    public void UpdateHeader(DateTime issueDate, DateTime? validUntil, decimal discountPercent, decimal vatRate, string? notes)
+    public void UpdateHeader(DateTime issueDate, DateTime? validUntil, decimal discountPercent, decimal vatPercent, string? notes)
     {
         EnsureEditable();
         if (discountPercent is < 0 or > 100)
@@ -72,7 +72,7 @@ public class Quote : CompanyAggregateRoot
         IssueDate = issueDate;
         ValidUntil = validUntil;
         DiscountPercent = discountPercent;
-        SetVatRate(vatRate);
+        SetVatPercent(vatPercent);
         Notes = notes;
         Recalculate();
     }
@@ -147,7 +147,7 @@ public class Quote : CompanyAggregateRoot
     /// <summary>Copies everything except identity and status into a new draft with the next revision number.</summary>
     internal Quote CreateRevision(Guid id, DateTime issueDate)
     {
-        var copy = new Quote(id, ProjectId, Number, Revision + 1, issueDate, Currency, VatRate)
+        var copy = new Quote(id, ProjectId, Number, Revision + 1, issueDate, Currency, VatPercent)
         {
             ValidUntil = ValidUntil,
             RentalDays = RentalDays,
@@ -180,18 +180,18 @@ public class Quote : CompanyAggregateRoot
         Subtotal = Lines.Sum(l => l.Total);
         DiscountAmount = Math.Round(Subtotal * DiscountPercent / 100m, 2, MidpointRounding.AwayFromZero);
         NetTotal = Subtotal - DiscountAmount;
-        VatAmount = Math.Round(NetTotal * VatRate / 100m, 2, MidpointRounding.AwayFromZero);
+        VatAmount = Math.Round(NetTotal * VatPercent / 100m, 2, MidpointRounding.AwayFromZero);
         GrandTotal = NetTotal + VatAmount;
     }
 
-    private void SetVatRate(decimal vatRate)
+    private void SetVatPercent(decimal vatPercent)
     {
-        if (vatRate is < 0 or > 100)
+        if (vatPercent is < 0 or > 100)
         {
-            throw new BusinessException(StageTrackErrorCodes.QuoteInvalidVatRate);
+            throw new BusinessException(StageTrackErrorCodes.QuoteInvalidVatPercent);
         }
 
-        VatRate = vatRate;
+        VatPercent = vatPercent;
     }
 
     private QuoteLine GetLine(Guid lineId) =>

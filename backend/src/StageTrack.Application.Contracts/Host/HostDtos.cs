@@ -118,7 +118,7 @@ public class TenantLocationInput
     public string Currency { get; set; } = "TRY";
 
     [Range(0, 100)]
-    public decimal VatRate { get; set; } = 20;
+    public decimal VatPercent { get; set; } = 20;
 
     [Required, StringLength(2, MinimumLength = 2)]
     public string CountryCode { get; set; } = "TR";

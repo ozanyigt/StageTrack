@@ -19,14 +19,14 @@ public static class LedSpecMapper
             spec.PixelWidth,
             spec.PixelHeight,
             (double)(equipment.WeightKg ?? 0),
-            (double?)spec.WattMax,
-            (double?)spec.WattAvg,
+            (double?)spec.PowerMaxW,
+            (double?)spec.PowerAvgW,
             spec.MaxLink,
             spec.AvgLink,
             spec.HasExclusiveProcessors ? compatibleProcessorIds ?? [] : null,
             spec.PanelType is LedPanelType.Corner or LedPanelType.CurveCorner,
-            spec.AngleMin is { } min && spec.AngleMax is { } max
-                ? new AngleRange((double)min, (double)max, (double?)spec.AngleStep)
+            spec.AngleMinDeg is { } min && spec.AngleMaxDeg is { } max
+                ? new AngleRange((double)min, (double)max, (double?)spec.AngleStepDeg)
                 : null);
 
     public static ProcessorSpec ToProcessorSpec(Equipment equipment, LedProcessorSpec spec) =>

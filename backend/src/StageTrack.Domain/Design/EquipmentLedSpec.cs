@@ -70,9 +70,9 @@ public class LedPanelSpec : EquipmentLedSpec
     public int PixelHeight { get; private set; }
 
     /// <summary>Power of one panel; the equipment's own PowerW is the maximum, this pair is what the circuits use.</summary>
-    public decimal? WattMax { get; private set; }
+    public decimal? PowerMaxW { get; private set; }
 
-    public decimal? WattAvg { get; private set; }
+    public decimal? PowerAvgW { get; private set; }
 
     /// <summary>Panels on one 16 A connection at maximum / average power; null = worked out from the current.</summary>
     public int? MaxLink { get; private set; }
@@ -83,10 +83,10 @@ public class LedPanelSpec : EquipmentLedSpec
     public LedPanelGroup Group { get; private set; }
 
     /// <summary>The angle one joint to the next panel locks at; min and max go together, the step is optional.</summary>
-    public decimal? AngleMin { get; private set; }
+    public decimal? AngleMinDeg { get; private set; }
 
-    public decimal? AngleMax { get; private set; }
-    public decimal? AngleStep { get; private set; }
+    public decimal? AngleMaxDeg { get; private set; }
+    public decimal? AngleStepDeg { get; private set; }
 
     /// <summary>Panels in one case or on one dolly; with the case size and weight it feeds the loading plan.</summary>
     public int? CasePanelCount { get; private set; }
@@ -132,8 +132,8 @@ public class LedPanelSpec : EquipmentLedSpec
             throw new BusinessException(StageTrackErrorCodes.LedAverageOverMaxWatt);
         }
 
-        WattMax = NotNegative(wattMax);
-        WattAvg = NotNegative(wattAvg);
+        PowerMaxW = NotNegative(wattMax);
+        PowerAvgW = NotNegative(wattAvg);
         MaxLink = maxLink is > 0 ? maxLink : null;
         AvgLink = avgLink is > 0 ? avgLink : null;
     }
@@ -148,9 +148,9 @@ public class LedPanelSpec : EquipmentLedSpec
             throw new BusinessException(StageTrackErrorCodes.LedInvalidAngleRange);
         }
 
-        AngleMin = min;
-        AngleMax = max;
-        AngleStep = step;
+        AngleMinDeg = min;
+        AngleMaxDeg = max;
+        AngleStepDeg = step;
     }
 
     public void SetTransport(TransportKind kind, int? casePanelCount, string? caseDimensionsCm, decimal? caseWeightKg, int? maxStack)

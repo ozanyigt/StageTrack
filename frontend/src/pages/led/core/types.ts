@@ -83,13 +83,13 @@ export type Dil = "tr" | "en";
 export interface DistributionOption {
   id: string;
   labelKey: string;
-  ampsPerPhase: number;
+  perPhaseA: number;
   socapexOutputs: number;
 }
 
 export interface Settings {
   powerFactor: number;
-  fuseAmpere: number;
+  fuseA: number;
   deratingPercent: number;
   circuitsPerSocapex: number;
   distributionOptions: DistributionOption[];
@@ -215,8 +215,8 @@ export interface ScreenPowerBlock {
  * multiple screens across L1/L2/L3.
  */
 export interface JobPowerSummary {
-  totalWattMax: number;
-  totalWattAvg: number;
+  totalPowerMaxW: number;
+  totalPowerAvgW: number;
   totalCurrentA: number;
   totalCircuits: number;
   totalSocapex: number;
@@ -235,8 +235,8 @@ export interface ScreenCalcOutputLike {
   resolutionX: number;
   resolutionY: number;
   totalWeightKg: number;
-  totalWattMax: number;
-  totalWattAvg: number;
+  totalPowerMaxW: number;
+  totalPowerAvgW: number;
   totalPixels: number;
   panelCurrentA: number;
   panelsPerCircuit: number;

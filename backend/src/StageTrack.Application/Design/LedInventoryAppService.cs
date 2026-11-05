@@ -29,15 +29,15 @@ public class LedInventoryAppService(
             dto.HeightMm = i.Spec.HeightMm;
             dto.PixelWidth = i.Spec.PixelWidth;
             dto.PixelHeight = i.Spec.PixelHeight;
-            dto.WattMax = i.Spec.WattMax;
-            dto.WattAvg = i.Spec.WattAvg;
+            dto.PowerMaxW = i.Spec.PowerMaxW;
+            dto.PowerAvgW = i.Spec.PowerAvgW;
             dto.MaxLink = i.Spec.MaxLink;
             dto.AvgLink = i.Spec.AvgLink;
             dto.PanelType = i.Spec.PanelType;
             dto.Group = i.Spec.Group;
-            dto.AngleMin = i.Spec.AngleMin;
-            dto.AngleMax = i.Spec.AngleMax;
-            dto.AngleStep = i.Spec.AngleStep;
+            dto.AngleMinDeg = i.Spec.AngleMinDeg;
+            dto.AngleMaxDeg = i.Spec.AngleMaxDeg;
+            dto.AngleStepDeg = i.Spec.AngleStepDeg;
             dto.CasePanelCount = i.Spec.CasePanelCount;
             dto.CaseDimensionsCm = i.Spec.CaseDimensionsCm;
             dto.CaseWeightKg = i.Spec.CaseWeightKg;
@@ -87,9 +87,9 @@ public class LedInventoryAppService(
         var spec = await GetOrCreateAsync<LedPanelSpec>(equipmentId, () => new LedPanelSpec(Guid.CreateVersion7(), equipmentId));
 
         spec.SetGeometry(input.PitchMm, input.WidthMm, input.HeightMm, input.PixelWidth, input.PixelHeight);
-        spec.SetPower(input.WattMax, input.WattAvg, input.MaxLink, input.AvgLink);
+        spec.SetPower(input.PowerMaxW, input.PowerAvgW, input.MaxLink, input.AvgLink);
         spec.SetShape(input.PanelType, input.Group);
-        spec.SetAngles(input.AngleMin, input.AngleMax, input.AngleStep);
+        spec.SetAngles(input.AngleMinDeg, input.AngleMaxDeg, input.AngleStepDeg);
         spec.SetTransport(input.TransportKind, input.CasePanelCount, input.CaseDimensionsCm, input.CaseWeightKg, input.MaxStack);
         spec.SetInfo(input.ReceivingCard, input.PwmHz);
 

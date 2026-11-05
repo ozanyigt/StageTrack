@@ -28,15 +28,15 @@ public class LedPanelDto : LedItemDto
     public int HeightMm { get; set; }
     public int PixelWidth { get; set; }
     public int PixelHeight { get; set; }
-    public decimal? WattMax { get; set; }
-    public decimal? WattAvg { get; set; }
+    public decimal? PowerMaxW { get; set; }
+    public decimal? PowerAvgW { get; set; }
     public int? MaxLink { get; set; }
     public int? AvgLink { get; set; }
     public LedPanelType PanelType { get; set; }
     public LedPanelGroup Group { get; set; }
-    public decimal? AngleMin { get; set; }
-    public decimal? AngleMax { get; set; }
-    public decimal? AngleStep { get; set; }
+    public decimal? AngleMinDeg { get; set; }
+    public decimal? AngleMaxDeg { get; set; }
+    public decimal? AngleStepDeg { get; set; }
     public int? CasePanelCount { get; set; }
     public string? CaseDimensionsCm { get; set; }
     public decimal? CaseWeightKg { get; set; }
@@ -94,10 +94,10 @@ public class LedPanelInput
     public int PixelHeight { get; set; }
 
     [Range(0, 100_000)]
-    public decimal? WattMax { get; set; }
+    public decimal? PowerMaxW { get; set; }
 
     [Range(0, 100_000)]
-    public decimal? WattAvg { get; set; }
+    public decimal? PowerAvgW { get; set; }
 
     [Range(1, 10_000)]
     public int? MaxLink { get; set; }
@@ -109,13 +109,13 @@ public class LedPanelInput
     public LedPanelGroup Group { get; set; } = LedPanelGroup.Indoor;
 
     [Range(-180, 180)]
-    public decimal? AngleMin { get; set; }
+    public decimal? AngleMinDeg { get; set; }
 
     [Range(-180, 180)]
-    public decimal? AngleMax { get; set; }
+    public decimal? AngleMaxDeg { get; set; }
 
     [Range(0.01, 180)]
-    public decimal? AngleStep { get; set; }
+    public decimal? AngleStepDeg { get; set; }
 
     [Range(1, 1000)]
     public int? CasePanelCount { get; set; }

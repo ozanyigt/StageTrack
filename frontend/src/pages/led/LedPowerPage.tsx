@@ -68,7 +68,7 @@ export function LedPowerPage() {
   }, new Map<EquipmentDiscipline, { watt: number; currentA: number; circuits: number; weightKg: number; count: number }>());
 
   const tradeTotals = equipmentPower.data?.total;
-  const grandWatt = (power?.totalWattMax ?? 0) + (tradeTotals?.watt ?? 0);
+  const grandWatt = (power?.totalPowerMaxW ?? 0) + (tradeTotals?.watt ?? 0);
   const grandCircuits = (power?.totalCircuits ?? 0) + (tradeTotals?.circuits ?? 0);
   const deviceName = (id: string) =>
     [...(processors.data ?? []), ...(extenders.data ?? [])].find((d) => d.equipmentId === id)?.code ?? id;
@@ -90,7 +90,7 @@ export function LedPowerPage() {
         <Flex gap={32} wrap>
           <Statistic title={t('draft.grandWatt')} value={Math.round(grandWatt)} suffix="W" />
           <Statistic title={t('draft.grandCircuits')} value={grandCircuits} />
-          <Statistic title={t('draft.ledShare')} value={Math.round(power?.totalWattMax ?? 0)} suffix="W" />
+          <Statistic title={t('draft.ledShare')} value={Math.round(power?.totalPowerMaxW ?? 0)} suffix="W" />
           <Statistic title={t('draft.tradeShare')} value={Math.round(tradeTotals?.watt ?? 0)} suffix="W" />
           <Statistic title={t('draft.tradeWeight')} value={Math.round(tradeTotals?.weightKg ?? 0)} suffix="kg" />
         </Flex>
@@ -99,7 +99,7 @@ export function LedPowerPage() {
       {settings.data && (
         <Typography.Paragraph type="secondary">
           {t('led.constants', {
-            fuse: settings.data.fuseAmpere,
+            fuse: settings.data.fuseA,
             derating: settings.data.deratingPercent,
             perSocapex: settings.data.circuitsPerSocapex,
             factor: settings.data.powerFactor,
@@ -112,8 +112,8 @@ export function LedPowerPage() {
           <Card size="small" title={t('led.jobTotals')} loading={evaluation.isFetching}>
             {power ? (
               <Flex gap={24} wrap>
-                <Statistic title={t('led.wattMax')} value={Math.round(power.totalWattMax)} suffix="W" />
-                <Statistic title={t('led.wattAvg')} value={Math.round(power.totalWattAvg)} suffix="W" />
+                <Statistic title={t('led.powerMaxW')} value={Math.round(power.totalPowerMaxW)} suffix="W" />
+                <Statistic title={t('led.powerAvgW')} value={Math.round(power.totalPowerAvgW)} suffix="W" />
                 <Statistic title={t('led.current')} value={power.totalCurrentA.toFixed(1)} suffix="A" />
                 <Statistic title={t('led.circuits')} value={power.totalCircuits} />
                 <Statistic title={t('led.socapex')} value={power.totalSocapex} />
@@ -151,7 +151,7 @@ export function LedPowerPage() {
               <Flex gap={8} wrap>
                 {power.distribution.map((d: DistributionDto) => (
                   <Tag key={d.optionId} color={d.unitsNeeded > 0 ? 'blue' : undefined}>
-                    {d.optionId.toUpperCase()} · {d.ampsPerPhase} A → {t('led.units', { count: d.unitsNeeded })}
+                    {d.optionId.toUpperCase()} · {d.perPhaseA} A → {t('led.units', { count: d.unitsNeeded })}
                   </Tag>
                 ))}
               </Flex>
@@ -264,7 +264,7 @@ export function LedPowerPage() {
                   },
                 },
                 { title: t('led.panelCountShort'), align: 'end', render: (_: unknown, s) => s.power?.panelCount ?? '—' },
-                { title: t('led.watt'), align: 'end', render: (_: unknown, s) => (s.power ? Math.round(s.power.totalWattMax) : '—') },
+                { title: t('led.watt'), align: 'end', render: (_: unknown, s) => (s.power ? Math.round(s.power.totalPowerMaxW) : '—') },
                 {
                   title: t('led.panelsPerCircuit'),
                   align: 'end',

@@ -25,7 +25,7 @@ export interface Company {
   name: string;
   code: string;
   defaultCurrency: string;
-  defaultVatRate: number;
+  defaultVatPercent: number;
   countryCode: string;
 }
 
@@ -705,7 +705,7 @@ export interface Quote extends QuoteListItem {
   rentalDays: number;
   factor: number;
   discountPercent: number;
-  vatRate: number;
+  vatPercent: number;
   notes?: string | null;
   subtotal: number;
   discountAmount: number;
@@ -745,7 +745,7 @@ export interface QuoteHeaderInput {
   issueDate: string;
   validUntil?: string | null;
   discountPercent: number;
-  vatRate: number;
+  vatPercent: number;
   notes?: string | null;
   rentalDays: number;
   rentalFactorProfileId?: Guid | null;
@@ -1072,7 +1072,7 @@ export interface TenantLocationInput {
   name: string;
   code: string;
   currency: string;
-  vatRate: number;
+  vatPercent: number;
   countryCode: string;
   rentmanWorkspaceId?: number | null;
   warehouseName?: string | null;

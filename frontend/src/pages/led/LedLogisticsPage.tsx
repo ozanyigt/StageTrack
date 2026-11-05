@@ -126,7 +126,7 @@ export function LedLogisticsPage() {
         edit((current) => {
           const vehicle = current.vehicles.find((v) => v.items.some((i) => i.id === selectedId));
           const item = vehicle?.items.find((i) => i.id === selectedId);
-          return vehicle && item ? moveItem(current, selectedId, vehicle.uid, item.x + delta[0], item.y + delta[1]) : current;
+          return vehicle && item ? moveItem(current, selectedId, vehicle.uid, item.xCm + delta[0], item.yCm + delta[1]) : current;
         });
       } else if (event.key.toLowerCase() === 'r') {
         rotate(selectedId);
@@ -362,14 +362,14 @@ export function LedLogisticsPage() {
                                 const box = (event.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect();
                                 const px = ((event.clientX - box.left) / box.width) * space.length;
                                 const py = ((event.clientY - box.top) / box.height) * space.width;
-                                dragRef.current = { id: item.id, vehicleUid: vehicle.uid, offsetX: px - item.x, offsetY: py - item.y, scale };
+                                dragRef.current = { id: item.id, vehicleUid: vehicle.uid, offsetX: px - item.xCm, offsetY: py - item.yCm, scale };
                                 setSelectedId(item.id);
                               }}
                               onDoubleClick={() => rotate(item.id)}
                             >
                               <rect
-                                x={item.x * scale}
-                                y={item.y * scale}
+                                x={item.xCm * scale}
+                                y={item.yCm * scale}
                                 width={dx * scale}
                                 height={dy * scale}
                                 fill={colorOf(item.equipmentId)}
@@ -378,8 +378,8 @@ export function LedLogisticsPage() {
                                 strokeWidth={selected || bad?.size ? 2 : 1}
                               />
                               <text
-                                x={item.x * scale + (dx * scale) / 2}
-                                y={item.y * scale + (dy * scale) / 2}
+                                x={item.xCm * scale + (dx * scale) / 2}
+                                y={item.yCm * scale + (dy * scale) / 2}
                                 fill="#fff"
                                 fontSize={11}
                                 textAnchor="middle"

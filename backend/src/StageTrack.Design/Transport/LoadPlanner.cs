@@ -42,7 +42,7 @@ public sealed record VehicleSpec(Guid Id, double LengthCm, double WidthCm, doubl
 /// A stack of cases of one model on the vehicle floor, seen from above: X along the length from the front (cab), Y across
 /// the width from the left. Not rotated = the case's depth along the length and its width across; rotated = turned 90°.
 /// </summary>
-public sealed record PlacedStack(string Id, Guid ModelId, int Cases, int Panels, double X, double Y, bool Rotated);
+public sealed record PlacedStack(string Id, Guid ModelId, int Cases, int Panels, double XCm, double YCm, bool Rotated);
 
 public sealed record LoadedVehicle(VehicleSpec Vehicle, IReadOnlyList<PlacedStack> Stacks);
 

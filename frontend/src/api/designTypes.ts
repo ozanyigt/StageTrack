@@ -52,15 +52,15 @@ export interface LedPanel extends LedItem {
   heightMm: number;
   pixelWidth: number;
   pixelHeight: number;
-  wattMax?: number | null;
-  wattAvg?: number | null;
+  powerMaxW?: number | null;
+  powerAvgW?: number | null;
   maxLink?: number | null;
   avgLink?: number | null;
   panelType: LedPanelType;
   group: LedPanelGroup;
-  angleMin?: number | null;
-  angleMax?: number | null;
-  angleStep?: number | null;
+  angleMinDeg?: number | null;
+  angleMaxDeg?: number | null;
+  angleStepDeg?: number | null;
   casePanelCount?: number | null;
   caseDimensionsCm?: string | null;
   caseWeightKg?: number | null;
@@ -166,7 +166,7 @@ export interface PhaseDto {
 
 export interface DistributionDto {
   optionId: string;
-  ampsPerPhase: number;
+  perPhaseA: number;
   socapexOutputs: number;
   unitsNeeded: number;
 }
@@ -178,8 +178,8 @@ export interface ScreenPowerDto {
   resolutionX: number;
   resolutionY: number;
   totalWeightKg: number;
-  totalWattMax: number;
-  totalWattAvg: number;
+  totalPowerMaxW: number;
+  totalPowerAvgW: number;
   totalPixels: number;
   panelCurrentA: number;
   panelsPerCircuit: number;
@@ -266,8 +266,8 @@ export interface DeviceCountDto {
 }
 
 export interface JobPowerDto {
-  totalWattMax: number;
-  totalWattAvg: number;
+  totalPowerMaxW: number;
+  totalPowerAvgW: number;
   totalCurrentA: number;
   totalCircuits: number;
   totalSocapex: number;
@@ -292,10 +292,10 @@ export interface EvaluateResponse {
 
 export interface CalcSettings {
   powerFactor: number;
-  fuseAmpere: number;
+  fuseA: number;
   deratingPercent: number;
   circuitsPerSocapex: number;
-  distributionOptions: { id: string; ampsPerPhase: number; socapexOutputs: number }[];
+  distributionOptions: { id: string; perPhaseA: number; socapexOutputs: number }[];
 }
 
 // ---------------------------------------------------------------- Non-LED power
@@ -381,8 +381,9 @@ export interface PlanStackDto {
   equipmentId: Guid;
   cases: number;
   panels: number;
-  x: number;
-  y: number;
+  /** On the vehicle floor: along the length from the cab, and across from the left. */
+  xCm: number;
+  yCm: number;
   rotated: boolean;
 }
 

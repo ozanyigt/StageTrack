@@ -97,7 +97,7 @@ public class TenantAppService(
             throw new EntityNotFoundException(typeof(Company), locationId);
         }
 
-        company.Update(input.Name, input.Currency, input.VatRate, input.CountryCode);
+        company.Update(input.Name, input.Currency, input.VatPercent, input.CountryCode);
         company.SetRentmanWorkspace(input.RentmanWorkspaceId);
         await unitOfWork.SaveChangesAsync();
         return await BuildDetailAsync(id);
@@ -122,7 +122,7 @@ public class TenantAppService(
     }
 
     private static TenantProvisioningManager.LocationSetup ToSetup(TenantLocationInput input) =>
-        new(input.Name, input.Code, input.Currency, input.VatRate, input.CountryCode, input.RentmanWorkspaceId,
+        new(input.Name, input.Code, input.Currency, input.VatPercent, input.CountryCode, input.RentmanWorkspaceId,
             string.IsNullOrWhiteSpace(input.WarehouseName) ? (input.CountryCode.Equals("TR", StringComparison.OrdinalIgnoreCase) ? "ANA DEPO" : "MAIN WAREHOUSE") : input.WarehouseName);
 
     private async Task<TenantDetailDto> BuildDetailAsync(Guid id)
@@ -137,7 +137,7 @@ public class TenantAppService(
             Name = c.Name,
             Code = c.Code,
             DefaultCurrency = c.DefaultCurrency,
-            DefaultVatRate = c.DefaultVatRate,
+            DefaultVatPercent = c.DefaultVatPercent,
             CountryCode = c.CountryCode,
             RentmanWorkspaceId = c.RentmanWorkspaceId
         }).ToList();

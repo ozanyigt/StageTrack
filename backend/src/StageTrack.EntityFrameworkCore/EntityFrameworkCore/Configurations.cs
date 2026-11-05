@@ -46,7 +46,7 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
         b.Property(x => x.Name).HasMaxLength(256).IsRequired();
         b.Property(x => x.Code).HasMaxLength(16).IsRequired();
         b.Property(x => x.DefaultCurrency).HasMaxLength(QuoteConsts.MaxCurrencyLength).IsRequired();
-        b.Property(x => x.DefaultVatRate).HasColumnType(ColumnTypes.Percent);
+        b.Property(x => x.DefaultVatPercent).HasColumnType(ColumnTypes.Percent);
         b.Property(x => x.CountryCode).HasMaxLength(2).IsRequired();
         b.HasIndex(x => new { x.TenantId, x.Code }).IsUnique();
         b.HasIndex(x => x.RentmanWorkspaceId);
@@ -473,7 +473,7 @@ public class QuoteConfiguration : IEntityTypeConfiguration<Quote>
         b.Property(x => x.RejectionReason).HasMaxLength(QuoteConsts.MaxRejectionReasonLength);
         b.Property(x => x.Factor).HasColumnType(ColumnTypes.Factor);
         b.Property(x => x.DiscountPercent).HasColumnType(ColumnTypes.Percent);
-        b.Property(x => x.VatRate).HasColumnType(ColumnTypes.Percent);
+        b.Property(x => x.VatPercent).HasColumnType(ColumnTypes.Percent);
         b.Property(x => x.Subtotal).HasColumnType(ColumnTypes.Money);
         b.Property(x => x.DiscountAmount).HasColumnType(ColumnTypes.Money);
         b.Property(x => x.NetTotal).HasColumnType(ColumnTypes.Money);

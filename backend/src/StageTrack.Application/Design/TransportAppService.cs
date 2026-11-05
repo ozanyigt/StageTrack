@@ -212,7 +212,7 @@ public class TransportAppService(
 
     private static TransportVehicleDto ToDto(TransportVehicle v) => new(v.Id, v.Name, v.LengthMm, v.WidthMm, v.HeightMm, v.CapacityKg);
 
-    private static PlanStackDto ToDto(PlacedStack s) => new(s.Id, s.ModelId, s.Cases, s.Panels, s.X, s.Y, s.Rotated);
+    private static PlanStackDto ToDto(PlacedStack s) => new(s.Id, s.ModelId, s.Cases, s.Panels, s.XCm, s.YCm, s.Rotated);
 
     private static void Validate(SaveTransportVehiclesRequest request)
     {

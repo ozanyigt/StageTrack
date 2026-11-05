@@ -34,7 +34,7 @@ public class LedSpecTests
         Assert.Equal(equipment.Id, panel.Id);
         Assert.Equal(500, panel.WidthMm);
         Assert.Equal(13.5, panel.WeightKg);
-        Assert.Equal(300, panel.WattMax);
+        Assert.Equal(300, panel.PowerMaxW);
         Assert.False(panel.IsCorner);
         Assert.Null(panel.Angles);
     }

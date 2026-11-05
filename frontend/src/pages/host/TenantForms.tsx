@@ -133,13 +133,13 @@ export function TenantFields() {
   );
 }
 
-const COUNTRY_DEFAULTS: Record<string, { currency: string; vatRate: number }> = {
-  TR: { currency: 'TRY', vatRate: 20 },
-  AE: { currency: 'AED', vatRate: 5 },
-  SA: { currency: 'SAR', vatRate: 15 },
-  DE: { currency: 'EUR', vatRate: 19 },
-  GB: { currency: 'GBP', vatRate: 20 },
-  US: { currency: 'USD', vatRate: 0 },
+const COUNTRY_DEFAULTS: Record<string, { currency: string; vatPercent: number }> = {
+  TR: { currency: 'TRY', vatPercent: 20 },
+  AE: { currency: 'AED', vatPercent: 5 },
+  SA: { currency: 'SAR', vatPercent: 15 },
+  DE: { currency: 'EUR', vatPercent: 19 },
+  GB: { currency: 'GBP', vatPercent: 20 },
+  US: { currency: 'USD', vatPercent: 0 },
 };
 
 /** Location fields; field names are prefixed (e.g. ['location', 'name']) when nested in the "new firm" form. */
@@ -169,7 +169,7 @@ export function LocationFields({ prefix = [], isNew = true }: { prefix?: string[
             onChange={(c: string) => {
               const d = COUNTRY_DEFAULTS[c];
               if (d) form.setFieldValue(n('currency'), d.currency);
-              if (d) form.setFieldValue(n('vatRate'), d.vatRate);
+              if (d) form.setFieldValue(n('vatPercent'), d.vatPercent);
             }}
           />
         </Form.Item>
@@ -180,7 +180,7 @@ export function LocationFields({ prefix = [], isNew = true }: { prefix?: string[
         </Form.Item>
       </Col>
       <Col xs={8}>
-        <Form.Item name={n('vatRate')} label={t('host.vatRate')} rules={[{ required: true, message: t('validation.required') }]}>
+        <Form.Item name={n('vatPercent')} label={t('host.vatPercent')} rules={[{ required: true, message: t('validation.required') }]}>
           <InputNumber min={0} max={100} style={{ width: '100%' }} />
         </Form.Item>
       </Col>

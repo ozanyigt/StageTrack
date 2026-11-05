@@ -62,7 +62,7 @@ export function LedDesignPage() {
           />
           {result?.job.power && (
             <Space size="large" wrap style={{ marginInlineStart: 'auto' }}>
-              <Statistic title={t('led.totalWatt')} value={Math.round(result.job.power.totalWattMax)} suffix="W" valueStyle={{ fontSize: 18 }} />
+              <Statistic title={t('led.totalWatt')} value={Math.round(result.job.power.totalPowerMaxW)} suffix="W" valueStyle={{ fontSize: 18 }} />
               <Statistic title={t('led.circuits')} value={result.job.power.totalCircuits} valueStyle={{ fontSize: 18 }} />
               <Statistic title={t('led.socapex')} value={result.job.power.totalSocapex} valueStyle={{ fontSize: 18 }} />
               <Statistic title={t('led.perPhase')} value={result.job.power.perPhaseMaxA.toFixed(1)} suffix="A" valueStyle={{ fontSize: 18 }} />

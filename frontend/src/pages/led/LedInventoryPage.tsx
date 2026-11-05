@@ -102,10 +102,10 @@ export function LedInventoryPage() {
       title: t('led.watt'),
       width: 130,
       render: (_: unknown, r: LedPanel) =>
-        r.wattMax == null && r.wattAvg == null ? (
+        r.powerMaxW == null && r.powerAvgW == null ? (
           <Typography.Text type="warning">{t('led.wattMissing')}</Typography.Text>
         ) : (
-          `${r.wattMax ?? '—'} / ${r.wattAvg ?? '—'} W`
+          `${r.powerMaxW ?? '—'} / ${r.powerAvgW ?? '—'} W`
         ),
     },
     { title: t('led.panelType'), dataIndex: 'panelType', width: 120, render: (v: string) => t(`enums.ledPanelType.${v}`) },

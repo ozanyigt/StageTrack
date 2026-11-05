@@ -139,7 +139,7 @@ const offFloor = (b: Box, space: { length: number; width: number }, g: number) =
 function boxesOf(vehicle: LoadVehicle, groups: Groups) {
   return vehicle.items.flatMap((item) => {
     const group = groups.get(item.equipmentId);
-    return group ? [{ item, group, x: item.x, y: item.y, ...footprint(item, group) }] : [];
+    return group ? [{ item, group, x: item.xCm, y: item.yCm, ...footprint(item, group) }] : [];
   });
 }
 
@@ -215,7 +215,7 @@ export function vehicleTotals(vehicle: LoadVehicle, groups: Groups, type: Transp
     weightKg += stackWeight(item, group);
     floor += (dx + g) * (dy + g);
     volume += (dx + g) * (dy + g) * stackHeight(item, group);
-    end = Math.max(end, item.x + dx + g);
+    end = Math.max(end, item.xCm + dx + g);
   }
   return {
     cases,
@@ -303,11 +303,11 @@ export function rotateItem(layout: LoadLayout, id: string, groups: Groups): Load
   const group = found && groups.get(found.item.equipmentId);
   if (!found || !group || !found.vehicle) return layout;
   const { dx, dy } = footprint(found.item, group);
-  const cx = found.item.x + dx / 2;
-  const cy = found.item.y + dy / 2;
+  const cx = found.item.xCm + dx / 2;
+  const cy = found.item.yCm + dy / 2;
   const turned = { ...found.item, rotated: !found.item.rotated };
   const next = footprint(turned, group);
-  const item = { ...turned, x: toMm(cx - next.dx / 2), y: toMm(cy - next.dy / 2) };
+  const item = { ...turned, xCm: toMm(cx - next.dx / 2), yCm: toMm(cy - next.dy / 2) };
   return {
     ...layout,
     vehicles: layout.vehicles.map((v) => (v === found.vehicle ? { ...v, items: v.items.map((i) => (i.id === id ? item : i)) } : v)),
@@ -323,7 +323,7 @@ export function sendToVehicle(layout: LoadLayout, id: string, vehicleUid: string
   if (!target) return layout;
   const end = target.items.reduce((max, i) => {
     const group = groups.get(i.equipmentId);
-    return group && i.id !== id ? Math.max(max, i.x + footprint(i, group).dx + gapCm) : max;
+    return group && i.id !== id ? Math.max(max, i.xCm + footprint(i, group).dx + gapCm) : max;
   }, gapCm);
   return moveItem(layout, id, vehicleUid, end, gapCm);
 }
@@ -522,8 +522,8 @@ const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFin
 function sanitizeItem(raw: unknown): LoadItem | null {
   const i = raw as Partial<LoadItem> | null;
   if (!i || typeof i.id !== "string" || typeof i.equipmentId !== "string") return null;
-  if (!isNum(i.cases) || !isNum(i.panels) || !isNum(i.x) || !isNum(i.y)) return null;
-  return { id: i.id, equipmentId: i.equipmentId, cases: i.cases, panels: i.panels, x: i.x, y: i.y, rotated: i.rotated === true };
+  if (!isNum(i.cases) || !isNum(i.panels) || !isNum(i.xCm) || !isNum(i.yCm)) return null;
+  return { id: i.id, equipmentId: i.equipmentId, cases: i.cases, panels: i.panels, xCm: i.xCm, yCm: i.yCm, rotated: i.rotated === true };
 }
 
 /** A stored state from an older version or another tab: anything that does not fit is dropped. */

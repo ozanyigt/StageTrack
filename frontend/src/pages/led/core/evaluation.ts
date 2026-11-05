@@ -89,7 +89,7 @@ function toPhases(phases: PhaseDto[], nameOf: (screenId: string) => string): Pha
 
 function toDistribution(distribution: DistributionDto[]): DistributionRecommendation[] {
   return distribution.map((d) => ({
-    option: { id: d.optionId, labelKey: `dist.${d.optionId}`, ampsPerPhase: d.ampsPerPhase, socapexOutputs: d.socapexOutputs },
+    option: { id: d.optionId, labelKey: `dist.${d.optionId}`, perPhaseA: d.perPhaseA, socapexOutputs: d.socapexOutputs },
     unitsNeeded: d.unitsNeeded,
   }));
 }
@@ -104,8 +104,8 @@ export function toScreenOutput(dto: ScreenPowerDto, screenName: string): ScreenC
     resolutionX: dto.resolutionX,
     resolutionY: dto.resolutionY,
     totalWeightKg: dto.totalWeightKg,
-    totalWattMax: dto.totalWattMax,
-    totalWattAvg: dto.totalWattAvg,
+    totalPowerMaxW: dto.totalPowerMaxW,
+    totalPowerAvgW: dto.totalPowerAvgW,
     totalPixels: dto.totalPixels,
     panelCurrentA: dto.panelCurrentA,
     panelsPerCircuit: dto.panelsPerCircuit,
@@ -123,8 +123,8 @@ export function toScreenPhases(dto: ScreenPowerDto, screenName: string): { phase
 
 export function toJobPowerSummary(dto: JobPowerDto, nameOf: (screenId: string) => string): JobPowerSummary {
   return {
-    totalWattMax: dto.totalWattMax,
-    totalWattAvg: dto.totalWattAvg,
+    totalPowerMaxW: dto.totalPowerMaxW,
+    totalPowerAvgW: dto.totalPowerAvgW,
     totalCurrentA: dto.totalCurrentA,
     totalCircuits: dto.totalCircuits,
     totalSocapex: dto.totalSocapex,

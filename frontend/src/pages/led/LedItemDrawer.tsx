@@ -163,12 +163,12 @@ export function LedItemDrawer({ open, role, equipmentId, onClose, onSaved }: Pro
                 </Form.Item>
               </Col>
               <Col xs={12} md={8}>
-                <Form.Item name="wattMax" label={t('led.wattMax')} extra={t('led.wattHint')}>
+                <Form.Item name="powerMaxW" label={t('led.powerMaxW')} extra={t('led.wattHint')}>
                   <InputNumber min={0} max={100000} style={{ width: '100%' }} addonAfter="W" />
                 </Form.Item>
               </Col>
               <Col xs={12} md={8}>
-                <Form.Item name="wattAvg" label={t('led.wattAvg')}>
+                <Form.Item name="powerAvgW" label={t('led.powerAvgW')}>
                   <InputNumber min={0} max={100000} style={{ width: '100%' }} addonAfter="W" />
                 </Form.Item>
               </Col>
@@ -186,17 +186,17 @@ export function LedItemDrawer({ open, role, equipmentId, onClose, onSaved }: Pro
 
             <Row gutter={12}>
               <Col xs={8}>
-                <Form.Item name="angleMin" label={t('led.angleMin')} extra={t('led.angleHint')}>
+                <Form.Item name="angleMinDeg" label={t('led.angleMinDeg')} extra={t('led.angleHint')}>
                   <InputNumber min={-180} max={180} step={0.5} style={{ width: '100%' }} addonAfter="°" />
                 </Form.Item>
               </Col>
               <Col xs={8}>
-                <Form.Item name="angleMax" label={t('led.angleMax')}>
+                <Form.Item name="angleMaxDeg" label={t('led.angleMaxDeg')}>
                   <InputNumber min={-180} max={180} step={0.5} style={{ width: '100%' }} addonAfter="°" />
                 </Form.Item>
               </Col>
               <Col xs={8}>
-                <Form.Item name="angleStep" label={t('led.angleStep')}>
+                <Form.Item name="angleStepDeg" label={t('led.angleStepDeg')}>
                   <InputNumber min={0.01} max={180} step={0.5} style={{ width: '100%' }} addonAfter="°" />
                 </Form.Item>
               </Col>

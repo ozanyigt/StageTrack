@@ -13,7 +13,7 @@ public class EquipmentPowerCalculatorTests
         var line = EquipmentPowerCalculator.Line(new EquipmentPowerSpec(5.6, 260, 180), 24, PowerMode.Max, 230, Settings);
         Assert.Equal(24, line.Count);
         Assert.Equal(134.4, line.WeightKg, 6);
-        Assert.Equal(6240, line.Watt, 6);
+        Assert.Equal(6240, line.PowerW, 6);
         Assert.Equal(260 / 230.0, line.UnitCurrentA, 6);
         Assert.Equal(6240 / 230.0, line.CurrentA, 6);
         Assert.Equal(14, line.UnitsPerCircuit);
@@ -31,7 +31,7 @@ public class EquipmentPowerCalculatorTests
     public void NoWatt_NoCurrent_NoCircuits_ButTheWeightCounts()
     {
         var truss = EquipmentPowerCalculator.Line(new EquipmentPowerSpec(15, null, null), 10, PowerMode.Max, 230, Settings);
-        Assert.Equal((150.0, 0.0, 0.0, 0), (truss.WeightKg, truss.Watt, truss.CurrentA, truss.Circuits));
+        Assert.Equal((150.0, 0.0, 0.0, 0), (truss.WeightKg, truss.PowerW, truss.CurrentA, truss.Circuits));
     }
 
     [Fact]

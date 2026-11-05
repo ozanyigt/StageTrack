@@ -156,7 +156,7 @@ public sealed class CircuitLayoutTests
     {
         var shape = new ScreenShape([], [new CornerColumn(1, Corner)]);
         var map = Map(4, 10, shape, new CircuitLayoutOptions(WiringDirection.Rows, WiringStart.BottomLeft, false), Computed);
-        var usable = Settings.FuseAmpere;
+        var usable = Settings.FuseA;
         foreach (var run in map)
         {
             var amps = run.Cells.Sum(c => (c / 10 == 1 ? 80 : 140) / 230.0);
@@ -168,7 +168,7 @@ public sealed class CircuitLayoutTests
     [Fact]
     public void NoAtlamaAndNoWatt_NoCircuits()
     {
-        var dark = Computed with { WattMax = null };
+        var dark = Computed with { PowerMaxW = null };
         Assert.Empty(Map(4, 4, ScreenShape.Plain, Default, dark));
     }
 

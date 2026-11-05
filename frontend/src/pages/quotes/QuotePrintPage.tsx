@@ -158,7 +158,7 @@ export function QuotePrintPage() {
                 <tr><td>{t('quotes.discountAmount', { percent: f.number(q.discountPercent) })}</td><td className="num">− {money(q.discountAmount)}</td></tr>
               )}
               <tr><td>{t('quotes.netTotal')}</td><td className="num">{money(q.netTotal)}</td></tr>
-              <tr><td>{t('quotes.vatAmount', { rate: f.number(q.vatRate) })}</td><td className="num">{money(q.vatAmount)}</td></tr>
+              <tr><td>{t('quotes.vatAmount', { rate: f.number(q.vatPercent) })}</td><td className="num">{money(q.vatAmount)}</td></tr>
               <tr style={{ fontSize: 14, fontWeight: 700 }}>
                 <td style={{ borderTop: '2px solid #312e81' }}>{t('quotes.grandTotal')}</td>
                 <td className="num" style={{ borderTop: '2px solid #312e81' }}>{money(q.grandTotal)}</td>

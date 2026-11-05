@@ -63,9 +63,9 @@ public class LoadPlannerTests
         var plan = LoadPlanner.Plan([group], [Truck], Truck.Id);
         var stacks = All(plan).ToList();
         Assert.Equal(8, stacks.Count);
-        Assert.Equal(new double[] { 0, 60, 120, 180 }, stacks.Take(4).Select(s => s.Y));
-        Assert.All(stacks.Take(4), s => Assert.Equal(0, s.X));
-        Assert.All(stacks.Skip(4), s => Assert.Equal(100, s.X));
+        Assert.Equal(new double[] { 0, 60, 120, 180 }, stacks.Take(4).Select(s => s.YCm));
+        Assert.All(stacks.Take(4), s => Assert.Equal(0, s.XCm));
+        Assert.All(stacks.Skip(4), s => Assert.Equal(100, s.XCm));
         AssertValid(plan, group);
     }
 
@@ -160,8 +160,8 @@ public class LoadPlannerTests
         var stacks = All(plan).ToList();
         Assert.Equal(8, stacks.Count);
         Assert.All(stacks, s => Assert.True(s.Rotated));
-        Assert.Equal(new double[] { 3, 66, 129, 192 }, stacks.Select(s => s.X).Distinct());
-        Assert.Equal(new double[] { 3, 106 }, stacks.Select(s => s.Y).Distinct());
+        Assert.Equal(new double[] { 3, 66, 129, 192 }, stacks.Select(s => s.XCm).Distinct());
+        Assert.Equal(new double[] { 3, 106 }, stacks.Select(s => s.YCm).Distinct());
         AssertValid(plan, 3, group);
     }
 
@@ -192,7 +192,7 @@ public class LoadPlannerTests
             var boxes = vehicle.Stacks.Select(s =>
             {
                 var size = groups.Single(g => g.ModelId == s.ModelId).Size;
-                return s.Rotated ? (X: s.X, Y: s.Y, Dx: size.WidthCm, Dy: size.DepthCm) : (X: s.X, Y: s.Y, Dx: size.DepthCm, Dy: size.WidthCm);
+                return s.Rotated ? (X: s.XCm, Y: s.YCm, Dx: size.WidthCm, Dy: size.DepthCm) : (X: s.XCm, Y: s.YCm, Dx: size.DepthCm, Dy: size.WidthCm);
             }).ToList();
             foreach (var b in boxes)
                 Assert.True(b.X >= gap - 1e-6 && b.Y >= gap - 1e-6 && b.X + b.Dx + gap <= vehicle.Vehicle.LengthCm + 1e-6

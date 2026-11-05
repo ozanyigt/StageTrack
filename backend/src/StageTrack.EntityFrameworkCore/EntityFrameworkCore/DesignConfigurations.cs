@@ -33,11 +33,11 @@ public class LedPanelSpecConfiguration : IEntityTypeConfiguration<LedPanelSpec>
     public void Configure(EntityTypeBuilder<LedPanelSpec> b)
     {
         b.Property(x => x.PitchMm).HasColumnType(ColumnTypes.Pitch);
-        b.Property(x => x.WattMax).HasColumnType(ColumnTypes.Measure);
-        b.Property(x => x.WattAvg).HasColumnType(ColumnTypes.Measure);
-        b.Property(x => x.AngleMin).HasColumnType(ColumnTypes.Measure);
-        b.Property(x => x.AngleMax).HasColumnType(ColumnTypes.Measure);
-        b.Property(x => x.AngleStep).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.PowerMaxW).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.PowerAvgW).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.AngleMinDeg).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.AngleMaxDeg).HasColumnType(ColumnTypes.Measure);
+        b.Property(x => x.AngleStepDeg).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.CaseWeightKg).HasColumnType(ColumnTypes.Measure);
         b.Property(x => x.CaseDimensionsCm).HasMaxLength(DesignConsts.MaxCaseDimensionsLength);
         b.Property(x => x.ReceivingCard).HasMaxLength(DesignConsts.MaxReceivingCardLength);
