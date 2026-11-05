@@ -66,7 +66,7 @@ public class RepairsController(IRepairAppService appService) : ControllerBase
     [Authorize(StageTrackPermissions.Maintenance.Manage)]
     public Task<RepairDto> UpdateAsync(Guid id, UpdateRepairInput input) => appService.UpdateAsync(id, input);
 
-    [HttpPost("{id:guid}/status")]
+    [HttpPut("{id:guid}/status")]
     [Authorize(StageTrackPermissions.Maintenance.Manage)]
     public Task<RepairDto> ChangeStatusAsync(Guid id, ChangeRepairStatusInput input) => appService.ChangeStatusAsync(id, input);
 }
@@ -114,7 +114,7 @@ public class CollaborationController(ICollaborationAppService appService) : Cont
     [HttpPut("tasks/{id:guid}")]
     public Task<TaskItemDto> UpdateTaskAsync(Guid id, CreateUpdateTaskInput input) => appService.UpdateTaskAsync(id, input);
 
-    [HttpPost("tasks/{id:guid}/completed")]
+    [HttpPut("tasks/{id:guid}/completed")]
     public Task<TaskItemDto> SetTaskCompletedAsync(Guid id, SetTaskCompletedInput input) => appService.SetTaskCompletedAsync(id, input);
 
     [HttpDelete("tasks/{id:guid}")]

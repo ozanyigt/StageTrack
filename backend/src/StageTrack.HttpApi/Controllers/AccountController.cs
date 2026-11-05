@@ -23,12 +23,12 @@ public class AccountController(IAccountAppService accountAppService) : Controlle
     public Task SetLanguageAsync(SetLanguageInput input) => accountAppService.SetLanguageAsync(input);
 
     [Authorize(StageTrackPermissions.Identity.Impersonate)]
-    [HttpPost("impersonate/{userId:guid}")]
+    [HttpPost("users/{userId:guid}/impersonate")]
     public Task<LoginResultDto> ImpersonateAsync(Guid userId) => accountAppService.ImpersonateAsync(userId);
 
     /// <summary>Only needs a valid token: the impersonated user usually lacks admin permissions.</summary>
     [Authorize]
-    [HttpPost("end-impersonation")]
+    [HttpPost("impersonation/end")]
     public Task<LoginResultDto> EndImpersonationAsync() => accountAppService.EndImpersonationAsync();
 }
 

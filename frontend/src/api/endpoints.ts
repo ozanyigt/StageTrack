@@ -23,8 +23,8 @@ export const accountApi = {
   login: (userName: string, password: string) => post<T.LoginResult>('/account/login', { userName, password }),
   me: () => get<T.CurrentUser>('/account/me'),
   setLanguage: (language: string) => put('/account/language', { language }),
-  impersonate: (userId: T.Guid) => post<T.LoginResult>(`/account/impersonate/${userId}`),
-  endImpersonation: () => post<T.LoginResult>('/account/end-impersonation'),
+  impersonate: (userId: T.Guid) => post<T.LoginResult>(`/account/users/${userId}/impersonate`),
+  endImpersonation: () => post<T.LoginResult>('/account/impersonation/end'),
 };
 
 export const roleApi = {
@@ -41,7 +41,7 @@ export const userApi = {
   assignableRoles: () => get<T.Lookup[]>('/identity/users/assignable-roles'),
   create: (input: T.CreateUserInput) => post<T.User>('/identity/users', input),
   update: (id: T.Guid, input: T.UpdateUserInput) => put<T.User>(`/identity/users/${id}`, input),
-  setActive: (id: T.Guid, isActive: boolean) => post(`/identity/users/${id}/active`, { isActive }),
+  setActive: (id: T.Guid, isActive: boolean) => put(`/identity/users/${id}/active`, { isActive }),
   resetPassword: (id: T.Guid, newPassword: string) => post(`/identity/users/${id}/reset-password`, { newPassword }),
 };
 
@@ -119,7 +119,7 @@ export const unitApi = {
     labelCode?: string | null;
   }) => post<T.EquipmentUnit>('/equipment-units', input),
   update: (id: T.Guid, input: T.UnitInput) => put<T.EquipmentUnitDetail>(`/equipment-units/${id}`, input),
-  changeStatus: (id: T.Guid, status: T.UnitStatus) => post(`/equipment-units/${id}/status`, { status }),
+  changeStatus: (id: T.Guid, status: T.UnitStatus) => put(`/equipment-units/${id}/status`, { status }),
   archive: (id: T.Guid) => post(`/equipment-units/${id}/archive`),
   restore: (id: T.Guid) => post(`/equipment-units/${id}/restore`),
   setImage: (id: T.Guid, file: File) => upload<T.EquipmentUnitDetail>(`/equipment-units/${id}/image`, file),
@@ -170,7 +170,7 @@ export const projectApi = {
   create: (input: T.ProjectInput) => post<T.Project>('/projects', input),
   update: (id: T.Guid, input: T.ProjectInput) => put<T.Project>(`/projects/${id}`, input),
   remove: (id: T.Guid) => del(`/projects/${id}`),
-  changeStatus: (id: T.Guid, status: T.ProjectStatus) => post<T.Project>(`/projects/${id}/status`, { status }),
+  changeStatus: (id: T.Guid, status: T.ProjectStatus) => put<T.Project>(`/projects/${id}/status`, { status }),
   addEquipment: (id: T.Guid, equipmentId: T.Guid, quantity: number, sectionId?: T.Guid | null, includeAccessories = false) =>
     post<T.Project>(`/projects/${id}/equipment`, { equipmentId, quantity, sectionId, includeAccessories }),
   updateEquipment: (id: T.Guid, lineId: T.Guid, quantity: number, notes?: string | null) =>
@@ -208,7 +208,7 @@ export const repairApi = {
   create: (input: T.RepairInput) => post<T.Repair>('/repairs', input),
   update: (id: T.Guid, input: { title: string; description?: string | null; supplierId?: T.Guid | null; cost?: number | null }) =>
     put<T.Repair>(`/repairs/${id}`, input),
-  changeStatus: (id: T.Guid, status: T.RepairStatus) => post<T.Repair>(`/repairs/${id}/status`, { status }),
+  changeStatus: (id: T.Guid, status: T.RepairStatus) => put<T.Repair>(`/repairs/${id}/status`, { status }),
 };
 
 export const inspectionApi = {
@@ -225,7 +225,7 @@ export const collaborationApi = {
   tasks: (type: T.OwnerType, ownerId: T.Guid) => get<T.TaskItem[]>(`/collaboration/${type}/${ownerId}/tasks`),
   addTask: (type: T.OwnerType, ownerId: T.Guid, input: T.TaskInput) => post<T.TaskItem>(`/collaboration/${type}/${ownerId}/tasks`, input),
   updateTask: (id: T.Guid, input: T.TaskInput) => put<T.TaskItem>(`/collaboration/tasks/${id}`, input),
-  setTaskCompleted: (id: T.Guid, isCompleted: boolean) => post<T.TaskItem>(`/collaboration/tasks/${id}/completed`, { isCompleted }),
+  setTaskCompleted: (id: T.Guid, isCompleted: boolean) => put<T.TaskItem>(`/collaboration/tasks/${id}/completed`, { isCompleted }),
   removeTask: (id: T.Guid) => del(`/collaboration/tasks/${id}`),
   files: (type: T.OwnerType, ownerId: T.Guid) => get<T.Attachment[]>(`/collaboration/${type}/${ownerId}/files`),
   uploadFile: (type: T.OwnerType, ownerId: T.Guid, file: File) => upload<T.Attachment>(`/collaboration/${type}/${ownerId}/files`, file),
@@ -237,11 +237,11 @@ export const collaborationApi = {
 export const warehouseApi = {
   scan: (projectId: T.Guid, code: string, direction: T.ScanDirection, allowUnplanned = false) =>
     post<T.ScanResult>('/warehouse/scan', { projectId, code, direction, allowUnplanned }),
-  scanSheet: (projectId: T.Guid) => get<T.ScanSheet>(`/warehouse/scan-sheet/${projectId}`),
+  scanSheet: (projectId: T.Guid) => get<T.ScanSheet>(`/warehouse/projects/${projectId}/scan-sheet`),
   /** Warehouse: Prepped / OnLocation / Returned without project access. */
   setProjectStatus: (projectId: T.Guid, status: T.ProjectStatus) =>
-    post<T.ScanSheet>(`/warehouse/projects/${projectId}/status`, { status }),
-  packingList: (projectId: T.Guid) => get<T.PackingList>(`/warehouse/packing-list/${projectId}`),
+    put<T.ScanSheet>(`/warehouse/projects/${projectId}/status`, { status }),
+  packingList: (projectId: T.Guid) => get<T.PackingList>(`/warehouse/projects/${projectId}/packing-list`),
   board: (params: { date?: string; stockLocationId?: T.Guid }) => get<T.WarehouseBoard>('/warehouse/board', params),
   movements: (params: T.PagedRequest & { text?: string; projectId?: T.Guid; equipmentId?: T.Guid; unitId?: T.Guid; action?: T.MovementAction }) =>
     get<T.PagedResult<T.Movement>>('/warehouse/movements', params),
@@ -265,7 +265,7 @@ export const quoteApi = {
   updateLine: (id: T.Guid, lineId: T.Guid, input: T.QuoteLineInput) => put<T.Quote>(`/quotes/${id}/lines/${lineId}`, input),
   removeLine: (id: T.Guid, lineId: T.Guid) => del<T.Quote>(`/quotes/${id}/lines/${lineId}`),
   changeStatus: (id: T.Guid, status: T.QuoteStatus, reason?: string | null) =>
-    post<T.Quote>(`/quotes/${id}/status`, { status, reason }),
+    put<T.Quote>(`/quotes/${id}/status`, { status, reason }),
   revise: (id: T.Guid) => post<T.Quote>(`/quotes/${id}/revise`),
   /** Sales list: one row per job (project) with its newest quote. */
   jobs: (params: T.PagedRequest & { text?: string; view: T.QuoteJobView }) => get<T.PagedResult<T.QuoteJob>>('/quotes/jobs', params),
@@ -284,7 +284,7 @@ export const hostApi = {
   create: (input: T.TenantInput & { location: T.TenantLocationInput; admin: T.TenantAdminInput }) =>
     post<T.TenantDetail>('/host/tenants', input),
   update: (id: T.Guid, input: T.TenantInput) => put<T.TenantDetail>(`/host/tenants/${id}`, input),
-  setActive: (id: T.Guid, isActive: boolean) => post<T.TenantDetail>(`/host/tenants/${id}/active`, { isActive }),
+  setActive: (id: T.Guid, isActive: boolean) => put<T.TenantDetail>(`/host/tenants/${id}/active`, { isActive }),
   addLocation: (id: T.Guid, input: T.TenantLocationInput) => post<T.TenantDetail>(`/host/tenants/${id}/locations`, input),
   updateLocation: (id: T.Guid, locationId: T.Guid, input: T.TenantLocationInput) =>
     put<T.TenantDetail>(`/host/tenants/${id}/locations/${locationId}`, input),

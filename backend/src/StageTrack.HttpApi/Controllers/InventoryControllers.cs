@@ -138,7 +138,7 @@ public class EquipmentUnitsController(IEquipmentUnitAppService appService) : Con
     [Authorize(StageTrackPermissions.Equipment.Manage)]
     public Task<EquipmentUnitDetailDto> UpdateAsync(Guid id, UpdateEquipmentUnitInput input) => appService.UpdateAsync(id, input);
 
-    [HttpPost("{id:guid}/status")]
+    [HttpPut("{id:guid}/status")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
     public Task ChangeStatusAsync(Guid id, ChangeUnitStatusInput input) => appService.ChangeStatusAsync(id, input);
 

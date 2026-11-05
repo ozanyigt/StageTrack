@@ -68,7 +68,7 @@ public class ProjectsController(IProjectAppService appService) : ControllerBase
     [Authorize(StageTrackPermissions.Projects.Manage)]
     public Task DeleteAsync(Guid id) => appService.DeleteAsync(id);
 
-    [HttpPost("{id:guid}/status")]
+    [HttpPut("{id:guid}/status")]
     [Authorize(StageTrackPermissions.Projects.ChangeStatus)]
     public Task<ProjectDto> ChangeStatusAsync(Guid id, ChangeProjectStatusInput input) => appService.ChangeStatusAsync(id, input);
 
@@ -138,15 +138,20 @@ public class WarehouseController(IWarehouseAppService appService) : ControllerBa
     [Authorize(StageTrackPermissions.Warehouse.Scan)]
     public Task<ScanResultDto> ScanAsync(ScanInput input) => appService.ScanAsync(input);
 
-    [HttpGet("scan-sheet/{projectId:guid}")]
+    [HttpGet("projects/{projectId:guid}/scan-sheet")]
     public Task<ScanSheetDto> GetScanSheetAsync(Guid projectId) => appService.GetScanSheetAsync(projectId);
 
-    [HttpPost("projects/{projectId:guid}/status")]
+    /// <summary>
+    /// The same field as PUT /api/projects/{id}/status, deliberately a second route: the warehouse may set only
+    /// the statuses its work produces, with the scan permission rather than the project one, and it gets the
+    /// refreshed scan sheet back instead of the project.
+    /// </summary>
+    [HttpPut("projects/{projectId:guid}/status")]
     [Authorize(StageTrackPermissions.Warehouse.Scan)]
     public Task<ScanSheetDto> SetProjectStatusAsync(Guid projectId, SetWarehouseProjectStatusInput input) =>
         appService.SetProjectStatusAsync(projectId, input);
 
-    [HttpGet("packing-list/{projectId:guid}")]
+    [HttpGet("projects/{projectId:guid}/packing-list")]
     public Task<PackingListDto> GetPackingListAsync(Guid projectId) => appService.GetPackingListAsync(projectId);
 
     [HttpGet("board")]
@@ -212,7 +217,7 @@ public class QuotesController(IQuoteAppService appService) : ControllerBase
     [Authorize(StageTrackPermissions.Quotes.Manage)]
     public Task<QuoteDto> RemoveLineAsync(Guid id, Guid lineId) => appService.RemoveLineAsync(id, lineId);
 
-    [HttpPost("{id:guid}/status")]
+    [HttpPut("{id:guid}/status")]
     [Authorize(StageTrackPermissions.Quotes.Manage)]
     public Task<QuoteDto> ChangeStatusAsync(Guid id, ChangeQuoteStatusInput input) => appService.ChangeStatusAsync(id, input);
 

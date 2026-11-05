@@ -28,7 +28,7 @@ public class HostTenantsController(ITenantAppService appService, IAccountAppServ
     [HttpPut("{id:guid}")]
     public Task<TenantDetailDto> UpdateAsync(Guid id, UpdateTenantInput input) => appService.UpdateAsync(id, input);
 
-    [HttpPost("{id:guid}/active")]
+    [HttpPut("{id:guid}/active")]
     public Task<TenantDetailDto> SetActiveAsync(Guid id, SetTenantActiveInput input) => appService.SetActiveAsync(id, input);
 
     [HttpPost("{id:guid}/locations")]

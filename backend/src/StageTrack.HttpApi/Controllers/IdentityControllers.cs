@@ -49,7 +49,7 @@ public class UsersController(IUserAppService appService, IRoleAppService roleApp
     [HttpPut("{id:guid}")]
     public Task<UserDto> UpdateAsync(Guid id, UpdateUserInput input) => appService.UpdateAsync(id, input);
 
-    [HttpPost("{id:guid}/active")]
+    [HttpPut("{id:guid}/active")]
     public Task SetActiveAsync(Guid id, SetUserActiveInput input) => appService.SetActiveAsync(id, input);
 
     [HttpPost("{id:guid}/reset-password")]
