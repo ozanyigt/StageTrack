@@ -16,6 +16,11 @@
     "yes": "نعم",
     "selectDate": "اختر التاريخ"
   },
+  "table": {
+    "columns": "الأعمدة",
+    "columnsHint": "حدّد ما تريد عرضه؛ اسحب من المقبض لتغيير الترتيب.",
+    "resetColumns": "العودة إلى الافتراضي"
+  },
   "validation": {
     "required": "هذا الحقل مطلوب",
     "invalid": "قيمة غير صالحة",
@@ -1298,8 +1303,6 @@
     "unitsFile": "الأجهزة المؤرشفة"
   },
   "equipmentList": {
-    "columns": "الأعمدة",
-    "resetColumns": "العودة إلى الافتراضي",
     "more": "المزيد",
     "exportAll": "تصدير الكل إلى Excel",
     "exportSelected": "تصدير إلى Excel",

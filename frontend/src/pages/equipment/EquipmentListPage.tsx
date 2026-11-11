@@ -1,5 +1,5 @@
-import { BorderOuterOutlined, DeleteOutlined, DownOutlined, FileExcelOutlined, FolderOutlined, InboxOutlined, MoreOutlined, PlusOutlined, PrinterOutlined, UploadOutlined } from '@ant-design/icons';
-import { App, Button, Card, Checkbox, Dropdown, Flex, Input, Popover, Select, Space, Table, Tag, Typography, theme, type TableColumnsType } from 'antd';
+import { BorderOuterOutlined, DeleteOutlined, DownOutlined, FileExcelOutlined, FolderOutlined, InboxOutlined, PlusOutlined, PrinterOutlined, UploadOutlined } from '@ant-design/icons';
+import { App, Button, Card, Dropdown, Flex, Input, Select, Space, Table, Tag, Typography, theme } from 'antd';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import { equipmentApi, folderApi, unitApi } from '../../api/endpoints';
 import { EQUIPMENT_DISCIPLINES, type Equipment, type EquipmentDiscipline, type EquipmentImportInput } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { ImportButton } from '../../components/ExcelButtons';
+import { useTableLayout } from '../../components/TableLayout';
 import { useLabelGenerator } from '../../components/LabelGenerator';
 import { UnitStatusTag } from '../../components/StatusTags';
 import { useErrorToast } from '../../utils/errors';
@@ -19,7 +20,6 @@ import { BulkLedRoleModal, MoveToFolderModal } from './BulkClassifyModals';
 import { EquipmentFormDrawer } from './EquipmentFormDrawer';
 
 const PAGE_SIZE = 25;
-const COLUMNS_KEY = 'stagetrack.equipmentColumns';
 
 const ALL_COLUMNS = [
   'code', 'name', 'brand', 'model', 'folder', 'discipline', 'type', 'tracking', 'stock', 'price', 'weight', 'volume', 'dimensions', 'power',
@@ -27,25 +27,6 @@ const ALL_COLUMNS = [
 ] as const;
 type ColumnKey = (typeof ALL_COLUMNS)[number];
 const DEFAULT_COLUMNS: ColumnKey[] = ['code', 'name', 'brand', 'model', 'tracking', 'stock', 'price'];
-
-function readColumns(): ColumnKey[] {
-  try {
-    const raw = localStorage.getItem(COLUMNS_KEY);
-    const parsed = raw ? (JSON.parse(raw) as string[]) : null;
-    const valid = parsed?.filter((c): c is ColumnKey => (ALL_COLUMNS as readonly string[]).includes(c));
-    return valid && valid.length > 0 ? valid : DEFAULT_COLUMNS;
-  } catch {
-    return DEFAULT_COLUMNS;
-  }
-}
-
-function writeColumns(columns: ColumnKey[]) {
-  try {
-    localStorage.setItem(COLUMNS_KEY, JSON.stringify(columns));
-  } catch {
-    /* storage unavailable: the choice lasts for this page only */
-  }
-}
 
 interface ColumnDef {
   title: string;
@@ -72,7 +53,6 @@ export function EquipmentListPage() {
   const [page, setPage] = useState(1);
   const [pageFolder, setPageFolder] = useState(folderId);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [visible, setVisible] = useState<ColumnKey[]>(readColumns);
   const [selected, setSelected] = useState<Map<string, Equipment>>(new Map());
   const [exporting, setExporting] = useState(false);
   const [trade, setTrade] = useState<EquipmentDiscipline | undefined>();
@@ -118,7 +98,7 @@ export function EquipmentListPage() {
       render: (e) => (
         <>
           <div>{e.name}</div>
-          {visible.includes('containedIn') ? null : <ContainedIn e={e} />}
+          {shownColumns.includes('containedIn') ? null : <ContainedIn e={e} />}
         </>
       ),
       excel: (e) => e.name,
@@ -192,28 +172,27 @@ export function EquipmentListPage() {
   };
 
   const available = ALL_COLUMNS.filter((c) => c !== 'price' || showPrice);
-  const shown = available.filter((c) => visible.includes(c));
 
-  const columns: TableColumnsType<Equipment> = shown.map((key) => ({
-    key,
-    title: defs[key].title,
-    width: defs[key].width,
-    align: defs[key].align,
-    ellipsis: key === 'name' ? false : undefined,
-    render: (_: unknown, e: Equipment) => defs[key].render(e),
-  }));
+  // The shared layout owns which columns are shown, in what order and how wide; this page only says what
+  // columns there are and which two name the row.
+  const table = useTableLayout<Equipment>(
+    available.map((key) => ({
+      key,
+      title: defs[key].title,
+      width: defs[key].width,
+      align: defs[key].align,
+      ellipsis: key === 'name' ? false : undefined,
+      render: (_: unknown, e: Equipment) => defs[key].render(e),
+    })),
+    { name: 'equipment', locked: ['code', 'name'], defaultHidden: available.filter((c) => !DEFAULT_COLUMNS.includes(c)) },
+  );
+  const shownColumns = table.visibleKeys as ColumnKey[];
 
-  const excelColumns: ExcelColumn<Equipment>[] = shown.map((key) => ({
+  const excelColumns: ExcelColumn<Equipment>[] = shownColumns.map((key) => ({
     header: defs[key].title,
     value: defs[key].excel,
     width: key === 'name' ? 40 : undefined,
   }));
-
-  const setColumns = (next: ColumnKey[]) => {
-    const ordered = ALL_COLUMNS.filter((c) => next.includes(c));
-    setVisible(ordered);
-    writeColumns(ordered);
-  };
 
   const runExport = async (rows: () => Promise<Equipment[]>) => {
     setExporting(true);
@@ -300,26 +279,6 @@ export function EquipmentListPage() {
     ...(showPrice ? [{ key: 'rentalPrice', header: t('equipment.dailyPrice'), type: 'number' as const }] : []),
   ];
 
-  const columnChooser = (
-    <div style={{ width: 240 }}>
-      <Flex vertical gap={4} style={{ maxHeight: 360, overflow: 'auto' }}>
-        {available.map((key) => (
-          <Checkbox
-            key={key}
-            checked={visible.includes(key)}
-            disabled={key === 'code' || key === 'name'}
-            onChange={(e) => setColumns(e.target.checked ? [...visible, key] : visible.filter((c) => c !== key))}
-          >
-            {defs[key].title}
-          </Checkbox>
-        ))}
-      </Flex>
-      <Button type="link" size="small" style={{ paddingInline: 0, marginTop: 8 }} onClick={() => setColumns(DEFAULT_COLUMNS)}>
-        {t('equipmentList.resetColumns')}
-      </Button>
-    </div>
-  );
-
   return (
     <>
       <div className="page-header">
@@ -388,9 +347,7 @@ export function EquipmentListPage() {
             }}
             options={EQUIPMENT_DISCIPLINES.map((d) => ({ value: d, label: t(`enums.equipmentDiscipline.${d}`) }))}
           />
-          <Popover trigger="click" placement="bottomRight" title={t('equipmentList.columns')} content={columnChooser}>
-            <Button type="text" icon={<MoreOutlined />} aria-label={t('equipmentList.columns')} title={t('equipmentList.columns')} />
-          </Popover>
+          {table.button}
         </Flex>
 
         {selected.size > 0 && (
@@ -435,7 +392,8 @@ export function EquipmentListPage() {
           rowKey="id"
           loading={list.isFetching}
           dataSource={list.data?.items}
-          scroll={{ x: Math.max(760, shown.length * 120) }}
+          scroll={{ x: Math.max(760, table.scrollX) }}
+          components={table.components}
           rowSelection={{
             selectedRowKeys: [...selected.keys()],
             preserveSelectedRowKeys: true,
@@ -460,7 +418,7 @@ export function EquipmentListPage() {
             style: { cursor: 'pointer' },
           })}
           pagination={{ current: page, pageSize: PAGE_SIZE, total: list.data?.totalCount, onChange: setPage, showSizeChanger: false }}
-          columns={columns}
+          columns={table.columns}
         />
       </Card>
 

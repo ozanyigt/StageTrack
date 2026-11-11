@@ -16,6 +16,11 @@
     "yes": "Yes",
     "selectDate": "Select date"
   },
+  "table": {
+    "columns": "Columns",
+    "columnsHint": "Tick what to show; drag by the grip to change the order.",
+    "resetColumns": "Back to the default"
+  },
   "validation": {
     "required": "This field is required",
     "invalid": "Invalid value",
@@ -1298,8 +1303,6 @@
     "unitsFile": "Archived devices"
   },
   "equipmentList": {
-    "columns": "Columns",
-    "resetColumns": "Reset to default",
     "more": "More",
     "exportAll": "Export all to Excel",
     "exportSelected": "Export to Excel",

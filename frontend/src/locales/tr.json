@@ -16,6 +16,11 @@
     "yes": "Evet",
     "selectDate": "Tarih seçin"
   },
+  "table": {
+    "columns": "Sütunlar",
+    "columnsHint": "Göstermek istediklerinizi işaretleyin; tutamaçtan sürükleyerek sırayı değiştirin.",
+    "resetColumns": "Varsayılana dön"
+  },
   "validation": {
     "required": "Bu alan zorunludur",
     "invalid": "Geçersiz değer",
@@ -1298,8 +1303,6 @@
     "unitsFile": "Arşivlenen cihazlar"
   },
   "equipmentList": {
-    "columns": "Kolonlar",
-    "resetColumns": "Varsayılana dön",
     "more": "Diğer",
     "exportAll": "Tümünü Excel'e aktar",
     "exportSelected": "Excel'e aktar",

@@ -13,6 +13,7 @@ import { fetchAllPages } from '../../utils/excel';
 import { useFormat } from '../../utils/format';
 import { useDebounced } from '../../utils/useDebounced';
 import { ProjectFormModal } from '../projects/ProjectFormModal';
+import { useTableLayout } from '../../components/TableLayout';
 import { QuoteStatusControl } from './QuoteStatusControl';
 
 const PAGE_SIZE = 25;
@@ -53,6 +54,72 @@ export function QuoteListPage() {
       <Typography.Text type="secondary">{t('salesJobs.noQuote')}</Typography.Text>
     );
 
+  // Width, visibility and order come from the shared layout; the number and the job name stay, because
+  // without them a row says nothing.
+  const table = useTableLayout<QuoteJob>(
+    [
+
+            { key: 'number', title: '#', width: 70, render: (_, j) => j.project.number },
+            {
+              key: 'job',
+              title: t('salesJobs.job'),
+              width: 280,
+              ellipsis: true,
+              render: (_, j) => (
+                <Space size={6}>
+                  <span style={{ width: 10, height: 10, borderRadius: 3, background: j.project.color, display: 'inline-block' }} />
+                  {j.project.name}
+                </Space>
+              ),
+            },
+            { key: 'customer', title: t('quotes.customer'), width: 200, ellipsis: true, render: (_, j) => j.project.customerName },
+            { key: 'period', title: t('projects.planPeriod'), width: 200, render: (_, j) => f.period(j.project.planStart, j.project.planEnd) },
+            {
+              key: 'latestQuote',
+              title: t('salesJobs.latestQuote'),
+              width: 260,
+              render: (_, j) => (
+                <Space size={4} style={{ whiteSpace: 'nowrap' }}>
+                  {quoteCell(j.latestQuote)}
+                  {j.quotes.length > 1 && (
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                      {t('salesJobs.revisionCount', { count: j.quotes.length })}
+                    </Typography.Text>
+                  )}
+                </Space>
+              ),
+            },
+            {
+              key: 'status',
+              title: t('quotes.status'),
+              width: 170,
+              render: (_, j) => {
+                const q = j.latestQuote;
+                if (!q) return null;
+                const control = can(Permissions.QuotesManage) ? (
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <QuoteStatusControl quoteId={q.id} status={q.status} allowedStatuses={q.allowedStatuses} size="small" />
+                  </span>
+                ) : (
+                  <QuoteStatusTag status={q.status} />
+                );
+                return q.rejectionReason ? <Tooltip title={q.rejectionReason}><span>{control}</span></Tooltip> : control;
+              },
+            },
+            ...(view === 'Active'
+              ? []
+              : [{ key: 'jobStatus', title: t('salesJobs.jobStatus'), width: 120, render: (_: unknown, j: QuoteJob) => <ProjectStatusTag status={j.project.status} /> }]),
+            {
+              key: 'grandTotal',
+              title: t('quotes.grandTotal'),
+              width: 150,
+              align: 'end' as const,
+              render: (_: unknown, j: QuoteJob) => (j.latestQuote ? f.money(j.latestQuote.grandTotal, j.latestQuote.currency) : '—'),
+            },
+    ],
+    { name: 'quotes', locked: ['number', 'job'] },
+  );
+
   return (
     <>
       <div className="page-header">
@@ -73,6 +140,7 @@ export function QuoteListPage() {
               { header: t('salesJobs.rejectionReason'), value: (j: QuoteJob) => j.latestQuote?.rejectionReason ?? '', width: 36 },
             ]}
           />
+          {table.button}
           {can(Permissions.QuotesManage) && can(Permissions.ProjectsManage) && (
             <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
               {t('salesJobs.newQuote')}
@@ -106,7 +174,8 @@ export function QuoteListPage() {
           rowKey={(j) => j.project.id}
           loading={list.isFetching}
           dataSource={list.data?.items}
-          scroll={{ x: 1150 }}
+          scroll={{ x: table.scrollX }}
+          components={table.components}
           onRow={(j) => ({ onClick: () => openJob(j), style: { cursor: 'pointer' } })}
           pagination={{ current: page, pageSize: PAGE_SIZE, total: list.data?.totalCount, onChange: setPage, showSizeChanger: false }}
           expandable={{
@@ -127,60 +196,7 @@ export function QuoteListPage() {
               />
             ),
           }}
-          columns={[
-            { title: '#', width: 70, render: (_, j) => j.project.number },
-            {
-              title: t('salesJobs.job'),
-              ellipsis: true,
-              render: (_, j) => (
-                <Space size={6}>
-                  <span style={{ width: 10, height: 10, borderRadius: 3, background: j.project.color, display: 'inline-block' }} />
-                  {j.project.name}
-                </Space>
-              ),
-            },
-            { title: t('quotes.customer'), width: 200, ellipsis: true, render: (_, j) => j.project.customerName },
-            { title: t('projects.planPeriod'), width: 200, render: (_, j) => f.period(j.project.planStart, j.project.planEnd) },
-            {
-              title: t('salesJobs.latestQuote'),
-              width: 260,
-              render: (_, j) => (
-                <Space size={4} style={{ whiteSpace: 'nowrap' }}>
-                  {quoteCell(j.latestQuote)}
-                  {j.quotes.length > 1 && (
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {t('salesJobs.revisionCount', { count: j.quotes.length })}
-                    </Typography.Text>
-                  )}
-                </Space>
-              ),
-            },
-            {
-              title: t('quotes.status'),
-              width: 170,
-              render: (_, j) => {
-                const q = j.latestQuote;
-                if (!q) return null;
-                const control = can(Permissions.QuotesManage) ? (
-                  <span onClick={(e) => e.stopPropagation()}>
-                    <QuoteStatusControl quoteId={q.id} status={q.status} allowedStatuses={q.allowedStatuses} size="small" />
-                  </span>
-                ) : (
-                  <QuoteStatusTag status={q.status} />
-                );
-                return q.rejectionReason ? <Tooltip title={q.rejectionReason}><span>{control}</span></Tooltip> : control;
-              },
-            },
-            ...(view === 'Active'
-              ? []
-              : [{ title: t('salesJobs.jobStatus'), width: 120, render: (_: unknown, j: QuoteJob) => <ProjectStatusTag status={j.project.status} /> }]),
-            {
-              title: t('quotes.grandTotal'),
-              width: 150,
-              align: 'end' as const,
-              render: (_: unknown, j: QuoteJob) => (j.latestQuote ? f.money(j.latestQuote.grandTotal, j.latestQuote.currency) : '—'),
-            },
-          ]}
+          columns={table.columns}
         />
       </Card>
       <ProjectFormModal

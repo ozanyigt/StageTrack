@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { projectApi } from '../../api/endpoints';
-import { CONFIRMED_PROJECT_STATUSES, type ProjectStatus } from '../../api/types';
+import { CONFIRMED_PROJECT_STATUSES, type ProjectListItem, type ProjectStatus } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { ExportButton } from '../../components/ExcelButtons';
+import { useTableLayout } from '../../components/TableLayout';
 import { ProjectStatusTag } from '../../components/StatusTags';
 import { fetchAllPages } from '../../utils/excel';
 import { useFormat } from '../../utils/format';
@@ -35,6 +36,21 @@ export function ProjectListPage() {
     placeholderData: keepPreviousData,
   });
 
+  const table = useTableLayout<ProjectListItem>(
+    [
+      { key: 'color', title: '', dataIndex: 'color', width: 36, render: (c: string) => <Badge color={c} /> },
+      { key: 'number', title: t('projects.number'), dataIndex: 'number', width: 80 },
+      { key: 'name', title: t('projects.name'), dataIndex: 'name', width: 280, ellipsis: true },
+      { key: 'status', title: t('projects.status'), dataIndex: 'status', width: 130, render: (s) => <ProjectStatusTag status={s} /> },
+      { key: 'customerName', title: t('projects.customer'), dataIndex: 'customerName', width: 200, ellipsis: true },
+      { key: 'venueName', title: t('projects.venue'), dataIndex: 'venueName', width: 180, ellipsis: true },
+      { key: 'planStart', title: t('projects.planStart'), dataIndex: 'planStart', width: 110, render: (v) => f.date(v) },
+      { key: 'planEnd', title: t('projects.planEnd'), dataIndex: 'planEnd', width: 110, render: (v) => f.date(v) },
+      { key: 'plannedQuantity', title: t('projects.plannedQuantity'), dataIndex: 'plannedQuantity', width: 90, align: 'end' },
+    ],
+    { name: 'projects', locked: ['number', 'name'] },
+  );
+
   return (
     <>
       <div className="page-header">
@@ -56,6 +72,7 @@ export function ProjectListPage() {
               { header: t('projects.plannedQuantity'), value: (p) => p.plannedQuantity, width: 10 },
             ]}
           />
+          {table.button}
           {!crewOnly && <Typography.Text type="secondary">{t('salesJobs.projectsHint')}</Typography.Text>}
         </Space>
       </div>
@@ -72,20 +89,11 @@ export function ProjectListPage() {
           rowKey="id"
           loading={list.isFetching}
           dataSource={list.data?.items}
-          scroll={{ x: 1000 }}
+          scroll={{ x: table.scrollX }}
+          components={table.components}
           onRow={(p) => ({ onClick: () => navigate(`/projects/${p.id}`), style: { cursor: 'pointer' } })}
           pagination={{ current: page, pageSize: PAGE_SIZE, total: list.data?.totalCount, onChange: setPage, showSizeChanger: false }}
-          columns={[
-            { title: '', dataIndex: 'color', width: 36, render: (c: string) => <Badge color={c} /> },
-            { title: t('projects.number'), dataIndex: 'number', width: 80 },
-            { title: t('projects.name'), dataIndex: 'name', ellipsis: true },
-            { title: t('projects.status'), dataIndex: 'status', width: 130, render: (s) => <ProjectStatusTag status={s} /> },
-            { title: t('projects.customer'), dataIndex: 'customerName', width: 200, ellipsis: true },
-            { title: t('projects.venue'), dataIndex: 'venue', width: 180, ellipsis: true, responsive: ['xl'] },
-            { title: t('projects.planStart'), dataIndex: 'planStart', width: 110, render: (v) => f.date(v) },
-            { title: t('projects.planEnd'), dataIndex: 'planEnd', width: 110, render: (v) => f.date(v) },
-            { title: t('projects.plannedQuantity'), dataIndex: 'plannedQuantity', width: 90, align: 'end' },
-          ]}
+          columns={table.columns}
         />
       </Card>
     </>
