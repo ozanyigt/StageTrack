@@ -203,7 +203,7 @@ export function EquipmentDetailPage() {
                 }
               />
             )}
-            {!e.isSerialized && <EquipmentLabels equipment={e} />}
+            {e.isSerialized ? <UnitLabelsButton equipment={e} /> : <EquipmentLabels equipment={e} />}
           </Flex>
         </Flex>
       </Card>
@@ -223,6 +223,26 @@ export function EquipmentDetailPage() {
         <CollaborationPanel ownerType="Equipment" ownerId={e.id} />
       </Card>
     </>
+  );
+}
+
+/**
+ * Labels of serial-tracked equipment live on its devices, not on the record, so the header offers the same
+ * drawer the devices tab does - with every device of this equipment already picked.
+ */
+function UnitLabelsButton({ equipment }: { equipment: EquipmentDetail }) {
+  const { t } = useTranslation();
+  const labels = useLabelGenerator();
+  return (
+    <div>
+      <Typography.Text strong>{t('labels.equipmentLabels')}</Typography.Text>
+      <Flex gap={6} wrap align="center" style={{ marginTop: 4 }}>
+        <Button size="small" icon={<PrinterOutlined />} onClick={() => labels.open({ equipmentIds: [equipment.id] })}>
+          {t('equipmentDetail.createLabel')}
+        </Button>
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('labels.unitHint')}</Typography.Text>
+      </Flex>
+    </div>
   );
 }
 

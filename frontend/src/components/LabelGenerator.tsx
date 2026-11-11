@@ -1,7 +1,7 @@
 import { CloseOutlined, FilePdfOutlined } from '@ant-design/icons';
 import {
-  Alert, App, Button, Checkbox, ConfigProvider, Drawer, Empty, Flex, Form, Input, InputNumber, Select, Skeleton, Space, Tabs,
-  Typography, theme,
+  Alert, App, Button, Checkbox, Collapse, ConfigProvider, Drawer, Empty, Flex, Form, Input, InputNumber, Select, Skeleton,
+  Space, Tabs, Tag, Typography, theme,
 } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -121,7 +121,10 @@ interface Group {
   code: string;
   name: string;
   isSerialized: boolean;
+  /** Devices in use: everything that is neither archived nor written off. */
   units: EquipmentUnit[];
+  /** Archived or lost devices; listed behind a fold and never pre-selected. */
+  retired: EquipmentUnit[];
   preChecked: string[];
 }
 
@@ -133,9 +136,15 @@ async function loadGroups(request: LabelRequest): Promise<Group[]> {
   return Promise.all(
     equipmentIds.map(async (equipmentId) => {
       const equipment = await equipmentApi.get(equipmentId);
-      const units = equipment.isSerialized
-        ? (await unitApi.list({ equipmentId, maxResultCount: 500 })).items.sort((a, b) => a.internalRef.localeCompare(b.internalRef, undefined, { numeric: true }))
+      // Archived and lost devices are fetched too: a label for one of them is a mistake, but hiding them
+      // altogether leaves the warehouse wondering where the fourth device went.
+      const all = equipment.isSerialized
+        ? (await unitApi.list({ equipmentId, includeArchived: true, maxResultCount: 500 })).items
+            .sort((a, b) => a.internalRef.localeCompare(b.internalRef, undefined, { numeric: true }))
         : [];
+      const inUse = (u: EquipmentUnit) => !u.isArchived && u.status !== 'Lost';
+      const units = all.filter(inUse);
+      const retired = all.filter((u) => !inUse(u));
       const fromEquipment = request.equipmentIds?.includes(equipmentId) ?? false;
       return {
         equipmentId,
@@ -143,7 +152,9 @@ async function loadGroups(request: LabelRequest): Promise<Group[]> {
         name: equipment.name,
         isSerialized: equipment.isSerialized,
         units,
-        preChecked: fromEquipment ? units.map((u) => u.id) : unitIds.filter((id) => units.some((u) => u.id === id)),
+        retired,
+        // Asked for by equipment: everything in use. Asked for by device: exactly those, retired or not.
+        preChecked: fromEquipment ? units.map((u) => u.id) : unitIds.filter((id) => all.some((u) => u.id === id)),
       };
     }),
   );
@@ -181,7 +192,11 @@ function LabelDrawer({ request, onClose, onGenerated }: { request: LabelRequest;
     if (!groups.data) return;
     setCheckedUnits(new Set(groups.data.flatMap((g) => g.preChecked)));
     setCheckedBulk(new Set(groups.data.filter((g) => !g.isSerialized).map((g) => g.equipmentId)));
-    setCopies(Object.fromEntries(groups.data.filter((g) => !g.isSerialized).map((g) => [g.equipmentId, 1])));
+    // One copy of everything to start with, devices and quantity-tracked equipment alike.
+    setCopies(Object.fromEntries(groups.data.flatMap((g) => [
+      ...(g.isSerialized ? [] : [[g.equipmentId, 1] as const]),
+      ...[...g.units, ...g.retired].map((u) => [u.id, 1] as const),
+    ])));
   }, [groups.data]);
 
   // Once the hidden labels are on the page, turn each into an image and put one label per PDF page.
@@ -223,7 +238,9 @@ function LabelDrawer({ request, onClose, onGenerated }: { request: LabelRequest;
   }, [pending, onGenerated, onClose, showError]);
 
   const template = templates.data?.find((x) => x.id === templateId);
-  const selectedCount = checkedUnits.size + [...checkedBulk].reduce((s, id) => s + (copies[id] ?? 1), 0);
+  const copiesOf = (id: string) => copies[id] ?? 1;
+  // Labels, not rows: four devices with two copies each is eight labels.
+  const selectedCount = [...checkedUnits, ...checkedBulk].reduce((sum, id) => sum + copiesOf(id), 0);
 
   const generate = async () => {
     if (!template || !groups.data) return;
@@ -232,7 +249,7 @@ function LabelDrawer({ request, onClose, onGenerated }: { request: LabelRequest;
       const items = await labelApi.preparePrint({ unitIds: [...checkedUnits], equipmentIds: [...checkedBulk], createMissing: true });
       const created = items.filter((x) => x.isNew).length;
       if (created > 0) message.info(t('labelPrint.newCreated', { count: created }));
-      const labels = items.flatMap((item) => (item.unitId ? [item] : Array.from({ length: copies[item.equipmentId] ?? 1 }, () => item)));
+      const labels = items.flatMap((item) => Array.from({ length: copiesOf(item.unitId ?? item.equipmentId) }, () => item));
       if (labels.length === 0) {
         setBusy(false);
         return;
@@ -256,12 +273,45 @@ function LabelDrawer({ request, onClose, onGenerated }: { request: LabelRequest;
       return next;
     });
 
-  const setGroup = (g: Group, on: boolean) =>
+  /** Quick selections over a group's devices in use; what is folded away is left as the user set it. */
+  const selectUnits = (g: Group, pick: (unit: EquipmentUnit) => boolean) =>
     setCheckedUnits((set) => {
       const next = new Set(set);
-      g.units.forEach((u) => (on ? next.add(u.id) : next.delete(u.id)));
+      g.units.forEach((u) => (pick(u) ? next.add(u.id) : next.delete(u.id)));
       return next;
     });
+
+  /** Where a device stands, in the few words that fit on one row. */
+  const whereIs = (u: EquipmentUnit) =>
+    u.status === 'OnProject' && u.currentProjectNumber
+      ? t('labelGen.onProject', { number: u.currentProjectNumber })
+      : t(`enums.unitStatus.${u.status}`);
+
+  const unitRow = (u: EquipmentUnit) => (
+    <Flex key={u.id} align="center" gap={8} wrap style={{ padding: '6px 10px', borderBottom: '1px solid rgba(128,128,128,0.12)' }}>
+      <Checkbox checked={checkedUnits.has(u.id)} onChange={(e) => toggleUnit(u.id, e.target.checked)} />
+      <Typography.Text strong style={{ minWidth: 92 }}>{u.internalRef}</Typography.Text>
+      <Typography.Text type="secondary" style={{ flex: '1 1 90px', minWidth: 0 }} ellipsis>
+        {u.serialNumber ? `S/N ${u.serialNumber}` : ''}
+      </Typography.Text>
+      <Tag bordered={false} color={u.status === 'InStock' ? 'green' : u.status === 'OnProject' ? 'blue' : 'orange'}>
+        {whereIs(u)}
+      </Tag>
+      <Tag bordered={false} color={u.labelCount > 0 ? 'default' : 'gold'}>
+        {u.labelCount > 0 ? t('labelGen.hasLabel') : t('labelGen.noLabel')}
+      </Tag>
+      <InputNumber
+        min={1}
+        max={100}
+        size="small"
+        value={copiesOf(u.id)}
+        disabled={!checkedUnits.has(u.id)}
+        onChange={(v) => setCopies((c) => ({ ...c, [u.id]: v ?? 1 }))}
+        aria-label={t('labelGen.copies')}
+        style={{ width: 62 }}
+      />
+    </Flex>
+  );
 
   return (
     <Drawer
@@ -302,33 +352,42 @@ function LabelDrawer({ request, onClose, onGenerated }: { request: LabelRequest;
           const checkedInGroup = g.units.filter((u) => checkedUnits.has(u.id)).length;
           return (
             <div key={g.equipmentId} style={{ marginBottom: 16 }}>
-              <Flex justify="space-between" align="center" style={{ marginBottom: 4 }}>
+              <Flex justify="space-between" align="center" wrap gap={8} style={{ marginBottom: 4 }}>
                 <Typography.Text strong>
                   {g.code} · {g.name}
                 </Typography.Text>
                 {g.isSerialized && g.units.length > 0 && (
-                  <Checkbox
-                    checked={checkedInGroup === g.units.length}
-                    indeterminate={checkedInGroup > 0 && checkedInGroup < g.units.length}
-                    onChange={(e) => setGroup(g, e.target.checked)}
-                  >
-                    {t('labelGen.selectAll')}
-                  </Checkbox>
+                  <Space size={4} wrap>
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>{checkedInGroup}/{g.units.length}</Typography.Text>
+                    <Button size="small" type="link" onClick={() => selectUnits(g, () => true)}>{t('labelGen.pickAll')}</Button>
+                    <Button size="small" type="link" onClick={() => selectUnits(g, () => false)}>{t('labelGen.pickNone')}</Button>
+                    <Button size="small" type="link" onClick={() => selectUnits(g, (u) => u.labelCount === 0)}>{t('labelGen.pickUnlabelled')}</Button>
+                  </Space>
                 )}
               </Flex>
               {g.isSerialized ? (
-                g.units.length === 0 ? (
+                g.units.length === 0 && g.retired.length === 0 ? (
                   <Typography.Text type="secondary">{t('labelGen.noDevices')}</Typography.Text>
                 ) : (
-                  <div style={{ maxHeight: 280, overflow: 'auto', border: '1px solid rgba(128,128,128,0.25)', borderRadius: 6 }}>
-                    {g.units.map((u) => (
-                      <Flex key={u.id} align="center" gap={10} style={{ padding: '6px 10px', borderBottom: '1px solid rgba(128,128,128,0.12)' }}>
-                        <Checkbox checked={checkedUnits.has(u.id)} onChange={(e) => toggleUnit(u.id, e.target.checked)} />
-                        <Typography.Text strong style={{ minWidth: 110 }}>{u.internalRef}</Typography.Text>
-                        <Typography.Text type="secondary">{u.serialNumber ? `S/N ${u.serialNumber}` : ''}</Typography.Text>
-                      </Flex>
-                    ))}
-                  </div>
+                  <>
+                    {g.units.length > 0 && (
+                      <div style={{ maxHeight: 280, overflow: 'auto', border: '1px solid rgba(128,128,128,0.25)', borderRadius: 6 }}>
+                        {g.units.map(unitRow)}
+                      </div>
+                    )}
+                    {g.retired.length > 0 && (
+                      // Out of service, so folded away: visible when someone is looking for them, never in the count.
+                      <Collapse
+                        ghost
+                        size="small"
+                        items={[{
+                          key: 'retired',
+                          label: <Typography.Text type="secondary">{t('labelGen.retired', { count: g.retired.length })}</Typography.Text>,
+                          children: <div style={{ border: '1px solid rgba(128,128,128,0.25)', borderRadius: 6 }}>{g.retired.map(unitRow)}</div>,
+                        }]}
+                      />
+                    )}
+                  </>
                 )
               ) : (
                 <Flex align="center" gap={10}>

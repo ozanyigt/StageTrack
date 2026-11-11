@@ -302,7 +302,8 @@
     "addTitle": "Add a label for {{target}}",
     "addHint": "Scan the barcode/QR label you used in your previous system; it is linked to this record and keeps working as it is.",
     "showQr": "Show QR",
-    "none": "No labels on this record"
+    "none": "No labels on this record",
+    "unitHint": "On serial-tracked equipment a label belongs to each device."
   },
   "quotes": {
     "title": "Quotes",
@@ -1369,7 +1370,14 @@
     "generate": "Generate",
     "docTitle": "{{code}} · Labels ({{count}})",
     "docTitleMany": "Labels ({{count}})",
-    "closeAll": "Close all"
+    "closeAll": "Close all",
+    "pickAll": "All",
+    "pickNone": "None",
+    "pickUnlabelled": "Only unlabelled",
+    "hasLabel": "Has a label",
+    "noLabel": "No label",
+    "onProject": "on job {{number}}",
+    "retired": "Archived and lost ({{count}})"
   },
   "equipmentQuote": {
     "showInQuotes": "Show in quotes",

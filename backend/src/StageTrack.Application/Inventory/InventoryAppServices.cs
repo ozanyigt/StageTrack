@@ -1011,8 +1011,12 @@ public class LabelAppService(
         return result;
     }
 
-    /// <summary>The label to print: an existing Rentman label first (it is already on the device), then our own.</summary>
-    private static EquipmentLabel? PickLabel(IEnumerable<EquipmentLabel> labels) =>
+    /// <summary>
+    /// The label to print for one device or one equipment: an existing Rentman label first (it is already
+    /// stuck on the thing), then one of ours, oldest first. Null means there is none yet, and only then does
+    /// printing create one - a device that already carries a label keeps the code it carries.
+    /// </summary>
+    public static EquipmentLabel? PickLabel(IEnumerable<EquipmentLabel> labels) =>
         labels.OrderBy(l => l.Type == LabelType.ImportedQr ? 0 : l.Type == LabelType.Qr ? 1 : 2).ThenBy(l => l.CreationTime).FirstOrDefault();
 
     private async Task<(EquipmentLabel? Label, bool IsNew)> GetOrCreateAsync(EquipmentLabel? existing, Equipment equipment, EquipmentUnit? unit, bool create)

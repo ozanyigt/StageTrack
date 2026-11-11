@@ -302,7 +302,8 @@
     "addTitle": "{{target}} için etiket ekle",
     "addHint": "Eski sisteminizde kullandığınız barkodu/QR etiketi okutun; etiket bu kayda bağlanır ve olduğu gibi kullanılmaya devam eder.",
     "showQr": "QR göster",
-    "none": "Bu kayıtta etiket yok"
+    "none": "Bu kayıtta etiket yok",
+    "unitHint": "Seri takipli ekipmanda etiket her cihaza ayrı bağlanır."
   },
   "quotes": {
     "title": "Teklifler",
@@ -1369,7 +1370,14 @@
     "generate": "Oluştur",
     "docTitle": "{{code}} · Etiketler ({{count}})",
     "docTitleMany": "Etiketler ({{count}})",
-    "closeAll": "Tümünü kapat"
+    "closeAll": "Tümünü kapat",
+    "pickAll": "Tümü",
+    "pickNone": "Hiçbiri",
+    "pickUnlabelled": "Sadece etiketsizler",
+    "hasLabel": "Etiketi var",
+    "noLabel": "Etiketsiz",
+    "onProject": "{{number}} projesinde",
+    "retired": "Arşiv ve kayıp ({{count}})"
   },
   "equipmentQuote": {
     "showInQuotes": "Teklifte göster",
