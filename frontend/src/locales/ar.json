@@ -767,7 +767,10 @@
       "UnitMismatch": "هذا الجهاز لا يخص المعدة المختارة ({{unit}}).",
       "UnitTaken": "{{unit}} موجود بالفعل في {{case}}.",
       "UnitQuantityFixed": "سطر الجهاز هو جهاز واحد دائمًا.",
-      "IsOut": "الصندوق في مهمة ({{code}})؛ عدّله بعد عودته."
+      "IsOut": "الصندوق في مهمة ({{code}})؛ عدّله بعد عودته.",
+      "UnitOnProject": "{{unit}} في مهمة: {{project}}.",
+      "UnitNotAvailable": "{{unit}} ليس في المستودع (الحالة: {{status}}).",
+      "UnitAlreadyHere": "{{unit}} موجود بالفعل في هذا الصندوق."
     }
   },
   "roles": {
@@ -2002,6 +2005,18 @@
     "pickEquipment": "ابحث عن معدة",
     "pickUnit": "أي جهاز سيوضع؟",
     "inCase": "في {{name}}",
-    "noUnits": "لا توجد أجهزة لهذه المعدة."
+    "noUnits": "لا توجد أجهزة لهذه المعدة.",
+    "noWeight": "بلا وزن",
+    "atLeast": "{{weight}} على الأقل",
+    "unknownWeight": "{{count}} عناصر بلا وزن",
+    "unknownWeightTitle": "عناصر بلا وزن",
+    "scanHint": "امسح ملصق الجهاز أو اكتب الرمز",
+    "scanAdded": "أُضيف إلى الصندوق",
+    "scanIncreased": "الكمية الآن {{count}}",
+    "scanAlreadyHere": "هذا الجهاز موجود بالفعل في هذا الصندوق",
+    "moveTitle": "الجهاز في صندوق آخر",
+    "moveQuestion": "{{unit}} موجود الآن في {{case}}. هل تخرجه وتضعه هنا؟",
+    "moveYes": "أخرجه وأضفه هنا",
+    "moved": "أُخرج من {{case}}"
   }
 }

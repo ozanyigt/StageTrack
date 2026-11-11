@@ -107,6 +107,9 @@ public static class StageTrackErrorCodes
     public const string CaseUnitTaken = "Case.UnitTaken";
     public const string CaseUnitQuantityFixed = "Case.UnitQuantityFixed";
     public const string CaseIsOut = "Case.IsOut";
+    public const string CaseUnitOnProject = "Case.UnitOnProject";
+    public const string CaseUnitNotAvailable = "Case.UnitNotAvailable";
+    public const string CaseUnitAlreadyHere = "Case.UnitAlreadyHere";
 
     public const string RelationSelf = "Relation.Self";
     public const string RelationDuplicate = "Relation.Duplicate";

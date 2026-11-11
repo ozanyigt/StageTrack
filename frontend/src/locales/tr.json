@@ -767,7 +767,10 @@
       "UnitMismatch": "Bu cihaz seçilen ekipmana ait değil ({{unit}}).",
       "UnitTaken": "{{unit}} zaten {{case}} içinde.",
       "UnitQuantityFixed": "Cihaz satırının adedi değiştirilemez.",
-      "IsOut": "Case sahada ({{code}}); dönünce düzenleyebilirsiniz."
+      "IsOut": "Case sahada ({{code}}); dönünce düzenleyebilirsiniz.",
+      "UnitOnProject": "{{unit}} şu anda işte: {{project}}.",
+      "UnitNotAvailable": "{{unit}} depoda değil (durum: {{status}}).",
+      "UnitAlreadyHere": "{{unit}} zaten bu case’in içinde."
     }
   },
   "roles": {
@@ -2002,6 +2005,18 @@
     "pickEquipment": "Ekipman arayın",
     "pickUnit": "Hangi cihaz konuyor?",
     "inCase": "{{name}} içinde",
-    "noUnits": "Bu ekipmanın cihazı yok."
+    "noUnits": "Bu ekipmanın cihazı yok.",
+    "noWeight": "ağırlık yok",
+    "atLeast": "en az {{weight}}",
+    "unknownWeight": "{{count}} kalemin ağırlığı girilmemiş",
+    "unknownWeightTitle": "Ağırlığı girilmemiş kalemler",
+    "scanHint": "Cihaz barkodunu okutun veya kodu yazın",
+    "scanAdded": "Case’e eklendi",
+    "scanIncreased": "Adet {{count}} oldu",
+    "scanAlreadyHere": "Bu cihaz zaten bu case’in içinde",
+    "moveTitle": "Cihaz başka bir case’de",
+    "moveQuestion": "{{unit}} şu anda {{case}} içinde. Oradan çıkarıp buraya ekle?",
+    "moveYes": "Çıkar ve buraya ekle",
+    "moved": "{{case}} içinden alındı"
   }
 }

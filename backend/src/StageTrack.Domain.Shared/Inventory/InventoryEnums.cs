@@ -35,6 +35,22 @@ public enum UnitStatus
     Lost = 4
 }
 
+/// <summary>What scanning a label at an open case did, so the screen can say it in one line.</summary>
+public enum CaseScanOutcome
+{
+    /// <summary>A new line: the device, or the first pieces of a counted item.</summary>
+    Added = 1,
+
+    /// <summary>A counted item that was already in the box; its count went up by one.</summary>
+    Increased = 2,
+
+    /// <summary>This very device is already in this box; nothing changed.</summary>
+    AlreadyHere = 3,
+
+    /// <summary>The device sits in another case; the user has to say whether to move it.</summary>
+    NeedsConfirmation = 4
+}
+
 /// <summary>
 /// Origin of a physical label. Existing Rentman QR codes are kept as <see cref="ImportedQr"/>;
 /// labels printed by this system are <see cref="Qr"/>. RFID tags can be added later without schema changes.

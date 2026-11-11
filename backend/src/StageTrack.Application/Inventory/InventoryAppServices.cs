@@ -619,6 +619,73 @@ public class EquipmentAppService(
         return await BuildCaseContentsAsync(box);
     }
 
+    /// <summary>
+    /// Packing by scanning: the same labels the warehouse reads, read at an open case. A device goes in by
+    /// name, a counted item raises its count by one, and anything that cannot go in says why - including the
+    /// one case that is a question rather than a refusal, a device sitting in another box.
+    /// </summary>
+    public async Task<CaseScanResultDto> ScanCaseContentAsync(Guid id, CaseScanInput input)
+    {
+        var box = await GetCaseAsync(id);
+        await EnsureCaseIsHomeAsync(box);
+
+        var target = await labelManager.ResolveAsync(input.Code)
+            ?? throw new BusinessException(StageTrackErrorCodes.LabelNotFound).WithData("code", LabelManager.Normalize(input.Code));
+
+        var result = new CaseScanResultDto
+        {
+            EquipmentCode = target.Equipment.Code,
+            EquipmentName = target.Equipment.Name,
+            UnitInternalRef = target.Unit?.InternalRef,
+            Quantity = 1,
+        };
+
+        if (target.Unit is { } unit)
+        {
+            var current = await caseContentRepository.FindByUnitAsync(unit.Id);
+            if (current is not null && current.CaseEquipmentId == box.Id)
+            {
+                result.Outcome = CaseScanOutcome.AlreadyHere;
+                result.Contents = await BuildCaseContentsAsync(box);
+                return result;
+            }
+
+            if (current is not null)
+            {
+                var other = await equipmentRepository.FindAsync(current.CaseEquipmentId, includeDetails: false);
+                if (!input.MoveFromOtherCase)
+                {
+                    // Not a refusal: moving a device between boxes is normal packing, but it is the user's call.
+                    result.Outcome = CaseScanOutcome.NeedsConfirmation;
+                    result.OtherCaseName = other?.Name;
+                    return result;
+                }
+
+                // The box it leaves has to be in the warehouse too, or its packing list would change behind its back.
+                if (other is not null)
+                {
+                    CaseManager.EnsureNotOut(other, await movementRepository.IsOutOnProjectAsync(other.Id));
+                }
+
+                await caseContentRepository.DeleteAsync(current);
+            }
+        }
+
+        var line = await caseManager.AddAsync(box, target.Equipment.Id, target.Unit?.Id, 1);
+        var isNew = await caseContentRepository.FindAsync(line.Id) is null;
+        if (isNew)
+        {
+            await caseContentRepository.InsertAsync(line);
+        }
+
+        await unitOfWork.SaveChangesAsync();
+
+        result.Outcome = isNew ? CaseScanOutcome.Added : CaseScanOutcome.Increased;
+        result.Quantity = line.Quantity;
+        result.Contents = await BuildCaseContentsAsync(box);
+        return result;
+    }
+
     private async Task<Equipment> GetCaseAsync(Guid id)
     {
         var equipment = await equipmentRepository.GetAsync(id);
@@ -668,13 +735,16 @@ public class EquipmentAppService(
             };
         }).ToList();
 
+        var weight = CaseWeight.Of(box.EmptyWeightKg, dtoLines.Select(l => (l.WeightKg, l.Quantity)));
+
         return new CaseContentsDto
         {
             CaseEquipmentId = box.Id,
             Lines = dtoLines,
             ItemCount = dtoLines.Sum(l => l.Quantity),
             EmptyWeightKg = box.EmptyWeightKg,
-            LoadedWeightKg = CaseWeight.Of(box.EmptyWeightKg, dtoLines.Select(l => (l.WeightKg, l.Quantity))),
+            LoadedWeightKg = weight.TotalKg,
+            UnknownWeightCount = weight.UnknownLines,
             ContentPriceTotal = showPrice
                 ? lines.Sum(l => (equipment.GetValueOrDefault(l.EquipmentId)?.RentalPrice ?? 0) * l.Quantity)
                 : null,

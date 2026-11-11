@@ -1,3 +1,4 @@
+using StageTrack.Projects;
 using StageTrack.Repositories;
 
 namespace StageTrack.Inventory;
@@ -13,7 +14,8 @@ public sealed record CaseContentItem(CaseContent Line, Equipment Equipment, Equi
 public class CaseManager(
     IEquipmentRepository equipmentRepository,
     IEquipmentUnitRepository unitRepository,
-    ICaseContentRepository contentRepository)
+    ICaseContentRepository contentRepository,
+    IProjectRepository projectRepository)
 {
     /// <summary>A case is a single box: never serial-tracked, always one in stock.</summary>
     public static void ApplyCaseRules(Equipment equipment)
@@ -100,6 +102,8 @@ public class CaseManager(
                     .WithData("case", holder?.Name ?? "?");
             }
 
+            EnsureUnitFree(unit, await DescribeProjectAsync(unit.CurrentProjectId));
+
             return new CaseContent(Guid.CreateVersion7(), caseEquipment.Id, equipment.Id, id, 1, next);
         }
 
@@ -110,6 +114,40 @@ public class CaseManager(
         }
 
         return new CaseContent(Guid.CreateVersion7(), caseEquipment.Id, equipment.Id, null, quantity, next);
+    }
+
+    /// <summary>
+    /// Only a device standing in the warehouse can be packed. One that is out on a job, in repair or lost is
+    /// refused by name and with its reason, whether it was picked from the list or scanned at the case.
+    /// </summary>
+    /// <param name="onProjectName">The job it is out on, for the message; resolved by the caller.</param>
+    public static void EnsureUnitFree(EquipmentUnit unit, string? onProjectName)
+    {
+        if (unit.Status == UnitStatus.OnProject || unit.CurrentProjectId.HasValue)
+        {
+            throw new BusinessException(StageTrackErrorCodes.CaseUnitOnProject)
+                .WithData("unit", unit.InternalRef)
+                .WithData("project", onProjectName ?? "?");
+        }
+
+        if (unit.Status != UnitStatus.InStock)
+        {
+            throw new BusinessException(StageTrackErrorCodes.CaseUnitNotAvailable)
+                .WithData("unit", unit.InternalRef)
+                .WithData("status", unit.Status.ToString());
+        }
+    }
+
+    /// <summary>"number - name" of a job, for the messages that have to name it.</summary>
+    public async Task<string?> DescribeProjectAsync(Guid? projectId)
+    {
+        if (projectId is not { } id)
+        {
+            return null;
+        }
+
+        var project = await projectRepository.FindAsync(id, includeDetails: false);
+        return project is null ? null : $"{project.Number} \u00b7 {project.Name}";
     }
 
     /// <summary>

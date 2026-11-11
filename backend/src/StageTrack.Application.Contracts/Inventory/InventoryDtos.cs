@@ -288,8 +288,11 @@ public class CaseContentsDto
     public int ItemCount { get; set; }
     public decimal? EmptyWeightKg { get; set; }
 
-    /// <summary>Empty weight plus everything inside.</summary>
+    /// <summary>Empty weight plus everything inside; a lower bound when <see cref="UnknownWeightCount"/> is not zero.</summary>
     public decimal LoadedWeightKg { get; set; }
+
+    /// <summary>Content lines whose equipment has no weight entered, so the loaded weight is "at least".</summary>
+    public int UnknownWeightCount { get; set; }
 
     /// <summary>Catalogue price of the contents; shown as information, never as the case's own price.</summary>
     public decimal? ContentPriceTotal { get; set; }
@@ -305,6 +308,34 @@ public class AddCaseContentInput
 
     [Range(1, 10_000)]
     public int Quantity { get; set; } = 1;
+}
+
+/// <summary>A label read at an open case: a handheld scanner, the camera, or a code typed by hand.</summary>
+public class CaseScanInput
+{
+    [Required]
+    public string Code { get; set; } = null!;
+
+    /// <summary>Answer to "it is in another case - take it out and put it here?".</summary>
+    public bool MoveFromOtherCase { get; set; }
+}
+
+/// <summary>What one scan at the case did, said in the words the screen needs.</summary>
+public class CaseScanResultDto
+{
+    public CaseScanOutcome Outcome { get; set; }
+    public string EquipmentCode { get; set; } = null!;
+    public string EquipmentName { get; set; } = null!;
+    public string? UnitInternalRef { get; set; }
+
+    /// <summary>The case it has to be taken out of first; set when the outcome is a question.</summary>
+    public string? OtherCaseName { get; set; }
+
+    /// <summary>How many of this line are in the box now.</summary>
+    public int Quantity { get; set; }
+
+    /// <summary>The whole content after the scan; null while the question is unanswered.</summary>
+    public CaseContentsDto? Contents { get; set; }
 }
 
 public class SetCaseContentQuantityInput

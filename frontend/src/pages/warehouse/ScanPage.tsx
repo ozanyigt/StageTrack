@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ExportOutlined, ImportOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ExportOutlined, ImportOutlined } from '@ant-design/icons';
 import { Alert, App, Button, Card, Col, Empty, Flex, Progress, Row, Segmented, Select, Space, Tag, Typography, theme } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -10,25 +10,12 @@ import { ApiError } from '../../api/http';
 import type { ProjectListItem, ProjectStatus, ScanDirection, ScanResult, ScanSheet, ScanSheetLine } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { LabelAssignModal } from '../../components/LabelAssignModal';
+import { ScanFeedback, scanSignal, type ScanFeedbackValue } from '../../components/ScanFeedback';
 import { ScanInput, type ScanInputHandle } from '../../components/ScanInput';
 import { ProjectStatusTag } from '../../components/StatusTags';
 import { translateError, useErrorToast } from '../../utils/errors';
 
-interface Feedback {
-  kind: 'ok' | 'warn' | 'error';
-  title: string;
-  detail?: string;
-}
-
 const SCANNABLE: ProjectStatus[] = ['Confirmed', 'Prepped', 'OnLocation'];
-
-function vibrate(pattern: number | number[]) {
-  try {
-    navigator.vibrate?.(pattern);
-  } catch {
-    /* not supported */
-  }
-}
 
 interface SectionGroup {
   key: string;
@@ -67,7 +54,7 @@ export function ScanPage() {
   const inputRef = useRef<ScanInputHandle>(null);
 
   const [direction, setDirection] = useState<ScanDirection>('Out');
-  const [last, setLast] = useState<Feedback | null>(null);
+  const [last, setLast] = useState<ScanFeedbackValue | null>(null);
   const [highlight, setHighlight] = useState<string | null>(null);
   const [unknownCode, setUnknownCode] = useState<string | null>(null);
 
@@ -109,7 +96,7 @@ export function ScanPage() {
       warehouseApi.scan(projectId!, code, direction, allowUnplanned ?? false),
     onSuccess: (r, vars) => {
       if (r.requiresConfirmation) {
-        vibrate([60, 40, 60]);
+        scanSignal('warn');
         modal.confirm({
           title: t('scanSheet.confirmTitle'),
           content: `${describe(r)} — ${t(r.warnings.includes('NotPlanned') ? 'scanSheet.confirmNotPlanned' : 'scanSheet.confirmOverPlanned')}`,
@@ -122,11 +109,11 @@ export function ScanPage() {
       }
 
       if (r.alreadyScanned) {
-        vibrate([60, 40, 60]);
+        scanSignal('warn');
         setLast({ kind: 'warn', title: describe(r), detail: t('scan.alreadyScanned') });
       } else {
-        vibrate(60);
         const warnings = vars.allowUnplanned ? [t('scanSheet.addedToExtras')] : [];
+        scanSignal(warnings.length ? 'warn' : 'ok');
         setLast({
           kind: warnings.length ? 'warn' : 'ok',
           title: describe(r),
@@ -137,7 +124,7 @@ export function ScanPage() {
       queryClient.invalidateQueries({ queryKey: sheetKey });
     },
     onError: (error, vars) => {
-      vibrate([200, 80, 200]);
+      scanSignal('error');
       if (error instanceof ApiError && error.code === 'Label.NotFound' && can(Permissions.LabelsAssign)) {
         setUnknownCode(vars.code);
       }
@@ -266,26 +253,7 @@ export function ScanPage() {
         {s && !SCANNABLE.includes(s.status) && (
           <Alert type="warning" showIcon style={{ marginTop: 12 }} message={t('scan.notScannable', { status: t(`enums.projectStatus.${s.status}`) })} />
         )}
-        {last && (
-          <Flex
-            gap={10}
-            align="center"
-            style={{
-              marginTop: 12,
-              padding: '8px 12px',
-              borderRadius: 8,
-              border: `2px solid ${last.kind === 'ok' ? '#52c41a' : last.kind === 'warn' ? '#faad14' : '#ff4d4f'}`,
-            }}
-          >
-            {last.kind === 'ok' && <CheckCircleFilled style={{ color: '#52c41a', fontSize: 24 }} />}
-            {last.kind === 'warn' && <ExclamationCircleFilled style={{ color: '#faad14', fontSize: 24 }} />}
-            {last.kind === 'error' && <CloseCircleFilled style={{ color: '#ff4d4f', fontSize: 24 }} />}
-            <div>
-              <Typography.Text strong>{last.title}</Typography.Text>
-              {last.detail && <div><Typography.Text type="secondary">{last.detail}</Typography.Text></div>}
-            </div>
-          </Flex>
-        )}
+        {last && <ScanFeedback value={last} style={{ marginTop: 12 }} />}
       </Card>
 
       {!projectId ? (

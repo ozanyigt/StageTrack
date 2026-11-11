@@ -767,7 +767,10 @@
       "UnitMismatch": "That device belongs to different equipment ({{unit}}).",
       "UnitTaken": "{{unit}} is already in {{case}}.",
       "UnitQuantityFixed": "A device line is always one device.",
-      "IsOut": "The case is out on a job ({{code}}); edit it when it is back."
+      "IsOut": "The case is out on a job ({{code}}); edit it when it is back.",
+      "UnitOnProject": "{{unit}} is out on a job: {{project}}.",
+      "UnitNotAvailable": "{{unit}} is not in the warehouse (status: {{status}}).",
+      "UnitAlreadyHere": "{{unit}} is already in this case."
     }
   },
   "roles": {
@@ -2002,6 +2005,18 @@
     "pickEquipment": "Search equipment",
     "pickUnit": "Which device goes in?",
     "inCase": "in {{name}}",
-    "noUnits": "This equipment has no devices."
+    "noUnits": "This equipment has no devices.",
+    "noWeight": "no weight",
+    "atLeast": "at least {{weight}}",
+    "unknownWeight": "{{count}} items with no weight",
+    "unknownWeightTitle": "Items with no weight",
+    "scanHint": "Scan a device label or type the code",
+    "scanAdded": "Added to the case",
+    "scanIncreased": "Quantity is now {{count}}",
+    "scanAlreadyHere": "This device is already in this case",
+    "moveTitle": "The device is in another case",
+    "moveQuestion": "{{unit}} is in {{case}} right now. Take it out and put it here?",
+    "moveYes": "Take out and add here",
+    "moved": "Taken out of {{case}}"
   }
 }

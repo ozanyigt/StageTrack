@@ -111,6 +111,10 @@ public class EquipmentController(IEquipmentAppService appService) : ControllerBa
     public Task<CaseContentsDto> SetCaseContentQuantityAsync(Guid id, Guid lineId, SetCaseContentQuantityInput input) =>
         appService.SetCaseContentQuantityAsync(id, lineId, input);
 
+    [HttpPost("{id:guid}/case-contents/scan")]
+    [Authorize(StageTrackPermissions.Equipment.Manage)]
+    public Task<CaseScanResultDto> ScanCaseContentAsync(Guid id, CaseScanInput input) => appService.ScanCaseContentAsync(id, input);
+
     [HttpDelete("{id:guid}/case-contents/{lineId:guid}")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
     public Task<CaseContentsDto> RemoveCaseContentAsync(Guid id, Guid lineId) => appService.RemoveCaseContentAsync(id, lineId);

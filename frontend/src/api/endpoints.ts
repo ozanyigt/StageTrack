@@ -108,6 +108,8 @@ export const equipmentApi = {
   setCaseContentQuantity: (id: T.Guid, lineId: T.Guid, quantity: number) =>
     put<T.CaseContents>(`/equipment/${id}/case-contents/${lineId}`, { quantity }),
   removeCaseContent: (id: T.Guid, lineId: T.Guid) => del<T.CaseContents>(`/equipment/${id}/case-contents/${lineId}`),
+  scanCaseContent: (id: T.Guid, code: string, moveFromOtherCase = false) =>
+    post<T.CaseScanResult>(`/equipment/${id}/case-contents/scan`, { code, moveFromOtherCase }),
 };
 
 export const unitApi = {

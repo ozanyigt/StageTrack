@@ -9,6 +9,8 @@ const ENUM_DETAIL_NAMESPACE: Record<string, string> = {
   Project: 'enums.projectStatus',
   Warehouse: 'enums.projectStatus',
   Quote: 'enums.quoteStatus',
+  // A case refuses a device by its device status ("in repair"), never by a project status.
+  Case: 'enums.unitStatus',
 };
 
 export function translateError(t: TFunction, error: unknown): string {

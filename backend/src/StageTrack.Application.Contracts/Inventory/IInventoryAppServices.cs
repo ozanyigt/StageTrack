@@ -71,6 +71,9 @@ public interface IEquipmentAppService
     Task<CaseContentsDto> SetCaseContentQuantityAsync(Guid id, Guid lineId, SetCaseContentQuantityInput input);
 
     Task<CaseContentsDto> RemoveCaseContentAsync(Guid id, Guid lineId);
+
+    /// <summary>Puts into the case whatever label was read, or says why it cannot go in.</summary>
+    Task<CaseScanResultDto> ScanCaseContentAsync(Guid id, CaseScanInput input);
 }
 
 public interface IEquipmentUnitAppService

@@ -147,10 +147,28 @@ export interface CaseContents {
   lines: CaseContentLine[];
   itemCount: number;
   emptyWeightKg?: number | null;
-  /** Empty weight plus everything inside. */
+  /** Empty weight plus everything inside; a lower bound when unknownWeightCount is not zero. */
   loadedWeightKg: number;
+  /** Lines whose equipment has no weight entered, so the loaded weight is "at least". */
+  unknownWeightCount: number;
   /** Catalogue price of the contents; information only, never the case's own price. */
   contentPriceTotal?: number | null;
+}
+
+export const CASE_SCAN_OUTCOMES = ['Added', 'Increased', 'AlreadyHere', 'NeedsConfirmation'] as const;
+export type CaseScanOutcome = (typeof CASE_SCAN_OUTCOMES)[number];
+
+/** What one scan at an open case did. */
+export interface CaseScanResult {
+  outcome: CaseScanOutcome;
+  equipmentCode: string;
+  equipmentName: string;
+  unitInternalRef?: string | null;
+  /** The case it has to be taken out of first; set when the outcome is a question. */
+  otherCaseName?: string | null;
+  quantity: number;
+  /** The whole content after the scan; null while the question is unanswered. */
+  contents?: CaseContents | null;
 }
 
 /** A device offered to a case, with the reason it may not be free. */

@@ -1,12 +1,14 @@
-import { DeleteOutlined, InboxOutlined, PlusOutlined } from '@ant-design/icons';
-import { App, Button, Empty, Flex, InputNumber, Modal, Popconfirm, Radio, Select, Space, Table, Tag, Typography } from 'antd';
+import { DeleteOutlined, InboxOutlined, PlusOutlined, WarningFilled } from '@ant-design/icons';
+import { App, Button, Empty, Flex, InputNumber, Modal, Popconfirm, Popover, Radio, Select, Space, Table, Tag, Typography } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { equipmentApi } from '../../api/endpoints';
-import type { CaseContentLine, CaseContents, CaseUnitOption, EquipmentDetail, Guid } from '../../api/types';
+import type { CaseContentLine, CaseContents, CaseScanResult, CaseUnitOption, EquipmentDetail, Guid } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
-import { useErrorToast } from '../../utils/errors';
+import { ScanFeedback, scanSignal, type ScanFeedbackValue } from '../../components/ScanFeedback';
+import { ScanInput, type ScanInputHandle } from '../../components/ScanInput';
+import { translateError, useErrorToast } from '../../utils/errors';
 import { useFormat } from '../../utils/format';
 
 /**
@@ -17,11 +19,13 @@ export function CaseContentTab({ equipment }: { equipment: EquipmentDetail }) {
   const { t } = useTranslation();
   const { can, company } = useAuth();
   const f = useFormat();
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const showError = useErrorToast();
   const queryClient = useQueryClient();
   const manage = can(Permissions.EquipmentManage);
   const [adding, setAdding] = useState(false);
+  const [last, setLast] = useState<ScanFeedbackValue | null>(null);
+  const scanRef = useRef<ScanInputHandle>(null);
 
   const key = ['case-contents', equipment.id];
   const { data, isLoading } = useQuery({ queryKey: key, queryFn: () => equipmentApi.caseContents(equipment.id) });
@@ -39,13 +43,96 @@ export function CaseContentTab({ equipment }: { equipment: EquipmentDetail }) {
     onError: showError,
   });
 
+  const describe = (r: CaseScanResult) => `${r.equipmentCode} · ${r.equipmentName}${r.unitInternalRef ? ` — ${r.unitInternalRef}` : ''}`;
+
+  const scan = useMutation({
+    mutationFn: ({ code, fromCase }: { code: string; fromCase?: string }) =>
+      equipmentApi.scanCaseContent(equipment.id, code, fromCase !== undefined),
+    onSuccess: (r, vars) => {
+      if (r.outcome === 'NeedsConfirmation') {
+        scanSignal('warn');
+        modal.confirm({
+          title: t('caseContent.moveTitle'),
+          content: t('caseContent.moveQuestion', { unit: r.unitInternalRef ?? r.equipmentName, case: r.otherCaseName ?? '?' }),
+          okText: t('caseContent.moveYes'),
+          cancelText: t('common.no'),
+          onOk: () => scan.mutate({ code: vars.code, fromCase: r.otherCaseName ?? '' }),
+          afterClose: () => scanRef.current?.focus(),
+        });
+        return;
+      }
+
+      if (r.contents) put(r.contents);
+      const kind = r.outcome === 'AlreadyHere' ? 'warn' : 'ok';
+      scanSignal(kind);
+      setLast({
+        kind,
+        title: describe(r),
+        detail: r.outcome === 'AlreadyHere'
+          ? t('caseContent.scanAlreadyHere')
+          : r.outcome === 'Increased'
+            ? t('caseContent.scanIncreased', { count: r.quantity })
+            : vars.fromCase
+              ? t('caseContent.moved', { case: vars.fromCase })
+              : t('caseContent.scanAdded'),
+      });
+    },
+    onError: (error, vars) => {
+      scanSignal('error');
+      setLast({ kind: 'error', title: vars.code, detail: translateError(t, error) });
+    },
+    onSettled: () => scanRef.current?.focus(),
+  });
+
+  const unknown = data?.lines.filter((l) => l.weightKg == null) ?? [];
+  const loaded = `${f.number(data?.loadedWeightKg ?? 0)} kg`;
+
   return (
     <>
+      {manage && (
+        // Packing by scanning: the same label reader as the warehouse screen, pointed at this box.
+        <Flex gap={12} wrap align="center" style={{ marginBottom: 12 }}>
+          <div style={{ flex: '1 1 320px', maxWidth: 480 }}>
+            <ScanInput
+              ref={scanRef}
+              size="middle"
+              disabled={scan.isPending}
+              placeholder={t('caseContent.scanHint')}
+              onScan={(code) => scan.mutate({ code })}
+            />
+          </div>
+          {last && <ScanFeedback value={last} style={{ flex: '1 1 280px' }} />}
+        </Flex>
+      )}
+
       <Flex align="center" justify="space-between" wrap gap={8} style={{ marginBottom: 12 }}>
         <Space size={16} wrap>
           <Summary label={t('caseContent.items')} value={String(data?.itemCount ?? 0)} />
           <Summary label={t('caseContent.emptyWeight')} value={data?.emptyWeightKg != null ? `${f.number(data.emptyWeightKg)} kg` : '—'} />
-          <Summary label={t('caseContent.loadedWeight')} value={`${f.number(data?.loadedWeightKg ?? 0)} kg`} strong />
+          <Summary
+            label={t('caseContent.loadedWeight')}
+            value={unknown.length > 0 ? t('caseContent.atLeast', { weight: loaded }) : loaded}
+            strong
+          />
+          {unknown.length > 0 && (
+            // The total is a floor, so the lines it could not count are one click away.
+            <Popover
+              title={t('caseContent.unknownWeightTitle')}
+              content={
+                <Flex vertical gap={2} style={{ maxWidth: 280 }}>
+                  {unknown.map((l) => (
+                    <Typography.Text key={l.id} style={{ fontSize: 12 }}>
+                      {l.equipmentCode} · {l.equipmentName}{l.unitInternalRef ? ` — ${l.unitInternalRef}` : ''}
+                    </Typography.Text>
+                  ))}
+                </Flex>
+              }
+            >
+              <Tag color="warning" icon={<WarningFilled />} style={{ cursor: 'pointer', marginInlineEnd: 0 }}>
+                {t('caseContent.unknownWeight', { count: unknown.length })}
+              </Tag>
+            </Popover>
+          )}
           {data?.contentPriceTotal != null && (
             <Summary label={t('caseContent.contentPrice')} value={f.money(data.contentPriceTotal, company?.defaultCurrency ?? '')} />
           )}
@@ -98,7 +185,12 @@ export function CaseContentTab({ equipment }: { equipment: EquipmentDetail }) {
               title: t('caseContent.weight'),
               width: 120,
               align: 'end',
-              render: (_: unknown, l: CaseContentLine) => (l.weightKg != null ? `${f.number(l.weightKg * l.quantity)} kg` : '—'),
+              render: (_: unknown, l: CaseContentLine) =>
+                l.weightKg != null ? (
+                  `${f.number(l.weightKg * l.quantity)} kg`
+                ) : (
+                  <Typography.Text type="secondary" italic style={{ fontSize: 12 }}>{t('caseContent.noWeight')}</Typography.Text>
+                ),
             },
             ...(manage
               ? [{

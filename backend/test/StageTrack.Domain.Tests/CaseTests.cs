@@ -84,14 +84,66 @@ public class CaseTests
         decimal?[] weights = [18m, 7.5m, null];
         var contents = new (decimal? WeightKg, int Quantity)[] { (weights[1], 2), (weights[2], 4), (3m, 1) };
 
+        var weight = CaseWeight.Of(weights[0], contents);
+
         // 18 empty + 2 x 7,5 + 4 x (unknown = 0) + 1 x 3
-        Assert.Equal(36m, CaseWeight.Of(weights[0], contents));
+        Assert.Equal(36m, weight.TotalKg);
+    }
+
+    [Fact]
+    public void A_case_says_how_many_of_its_lines_have_no_weight()
+    {
+        var contents = new (decimal? WeightKg, int Quantity)[] { (7.5m, 2), (null, 4), (null, 1), (3m, 1) };
+
+        var weight = CaseWeight.Of(18m, contents);
+
+        // Two lines have no weight, so 36 kg is a floor and not the answer.
+        Assert.Equal(2, weight.UnknownLines);
+        Assert.True(weight.IsAtLeast);
+    }
+
+    [Fact]
+    public void A_case_whose_contents_are_all_weighed_says_so()
+    {
+        var weight = CaseWeight.Of(18m, [(7.5m, 2), (3m, 1)]);
+
+        Assert.Equal(0, weight.UnknownLines);
+        Assert.False(weight.IsAtLeast);
     }
 
     [Fact]
     public void An_empty_case_weighs_what_the_box_weighs()
     {
-        Assert.Equal(18m, CaseWeight.Of(18m, []));
-        Assert.Equal(0m, CaseWeight.Of(null, []));
+        Assert.Equal(18m, CaseWeight.Of(18m, []).TotalKg);
+        Assert.Equal(0m, CaseWeight.Of(null, []).TotalKg);
+        Assert.False(CaseWeight.Of(null, []).IsAtLeast);
+    }
+
+    [Fact]
+    public void Only_a_device_standing_in_the_warehouse_can_be_packed()
+    {
+        CaseManager.EnsureUnitFree(Unit(UnitStatus.InStock), null);
+
+        Assert.Throws<BusinessException>(() => CaseManager.EnsureUnitFree(Unit(UnitStatus.InRepair), null));
+        Assert.Throws<BusinessException>(() => CaseManager.EnsureUnitFree(Unit(UnitStatus.Lost), null));
+        Assert.Throws<BusinessException>(() => CaseManager.EnsureUnitFree(Unit(UnitStatus.OnProject), "2393"));
+    }
+
+    [Fact]
+    public void A_device_still_pointing_at_a_job_is_not_packed_either()
+    {
+        // Its status says in stock but it was never checked back in; the job wins.
+        var unit = Unit(UnitStatus.InStock, Guid.CreateVersion7());
+
+        Assert.Throws<BusinessException>(() => CaseManager.EnsureUnitFree(unit, "2393"));
+    }
+
+    private static EquipmentUnit Unit(UnitStatus status, Guid? projectId = null)
+    {
+        var unit = (EquipmentUnit)Activator.CreateInstance(typeof(EquipmentUnit), true)!;
+        typeof(EquipmentUnit).GetProperty(nameof(EquipmentUnit.Status))!.SetValue(unit, status);
+        typeof(EquipmentUnit).GetProperty(nameof(EquipmentUnit.CurrentProjectId))!.SetValue(unit, projectId);
+        typeof(EquipmentUnit).GetProperty(nameof(EquipmentUnit.InternalRef))!.SetValue(unit, "VID063 001");
+        return unit;
     }
 }
