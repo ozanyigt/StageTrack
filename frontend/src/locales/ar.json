@@ -1733,6 +1733,18 @@
   "stage3d": {
     "audience": "الجمهور",
     "noWebgl": "هذا المتصفح لا يدعم العرض ثلاثي الأبعاد.",
+    "dim": {
+      "width": "العرض {{value}}",
+      "height": "الارتفاع {{value}}",
+      "bottom": "الحافة السفلية {{value}}",
+      "stageWidth": "عرض المسرح {{value}}",
+      "stageDepth": "عمق المسرح {{value}}"
+    },
+    "carrierLabel": {
+      "LedFrame": "هيكل LED {{value}}",
+      "Scaffold": "سقالة {{value}}",
+      "Flown": "معلّق {{value}}"
+    },
     "bom": {
       "basePlates": "ألواح القاعدة",
       "diagonals": "أقطار",

@@ -1733,6 +1733,18 @@
   "stage3d": {
     "audience": "Seyirci",
     "noWebgl": "Tarayıcınız 3D görüntülemeyi desteklemiyor.",
+    "dim": {
+      "width": "Genişlik {{value}}",
+      "height": "Yükseklik {{value}}",
+      "bottom": "Alt kot {{value}}",
+      "stageWidth": "Sahne genişliği {{value}}",
+      "stageDepth": "Sahne derinliği {{value}}"
+    },
+    "carrierLabel": {
+      "LedFrame": "LED demiri {{value}}",
+      "Scaffold": "İskele (Scaff) {{value}}",
+      "Flown": "Asılı {{value}}"
+    },
     "bom": {
       "basePlates": "Taban plakası",
       "diagonals": "Çapraz",

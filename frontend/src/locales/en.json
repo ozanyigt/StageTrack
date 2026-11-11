@@ -1733,6 +1733,18 @@
   "stage3d": {
     "audience": "Audience",
     "noWebgl": "This browser cannot show 3D.",
+    "dim": {
+      "width": "Width {{value}}",
+      "height": "Height {{value}}",
+      "bottom": "Bottom edge {{value}}",
+      "stageWidth": "Stage width {{value}}",
+      "stageDepth": "Stage depth {{value}}"
+    },
+    "carrierLabel": {
+      "LedFrame": "LED frame {{value}}",
+      "Scaffold": "Scaffold {{value}}",
+      "Flown": "Flown {{value}}"
+    },
     "bom": {
       "basePlates": "Base plates",
       "diagonals": "Diagonals",
