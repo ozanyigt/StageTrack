@@ -202,6 +202,23 @@ public class EquipmentConfiguration : IEntityTypeConfiguration<Equipment>
     }
 }
 
+public class CaseContentConfiguration : IEntityTypeConfiguration<CaseContent>
+{
+    public void Configure(EntityTypeBuilder<CaseContent> b)
+    {
+        b.ToTable("CaseContents");
+
+        // A device is in one case or in none; the filter keeps a deleted line from holding it hostage.
+        b.HasIndex(x => new { x.CompanyId, x.UnitId }).IsUnique().HasFilter("[IsDeleted] = 0 AND [UnitId] IS NOT NULL");
+        b.HasIndex(x => new { x.CompanyId, x.CaseEquipmentId, x.SortOrder });
+
+        // Restrict both ways: emptying the case is a decision, not something a delete does quietly.
+        b.HasOne<Equipment>().WithMany().HasForeignKey(x => x.CaseEquipmentId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<Equipment>().WithMany().HasForeignKey(x => x.EquipmentId).OnDelete(DeleteBehavior.Restrict);
+        b.HasOne<EquipmentUnit>().WithMany().HasForeignKey(x => x.UnitId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
 public class EquipmentRelationConfiguration : IEntityTypeConfiguration<EquipmentRelation>
 {
     public void Configure(EntityTypeBuilder<EquipmentRelation> b)

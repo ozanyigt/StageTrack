@@ -75,6 +75,19 @@ public class EquipmentUnitListItem
     public int? InspectionIntervalMonths { get; init; }
 }
 
+public interface ICaseContentRepository : IRepository<CaseContent>
+{
+    /// <summary>What is in the case, in display order.</summary>
+    Task<List<CaseContent>> GetListByCaseAsync(Guid caseEquipmentId, CancellationToken cancellationToken = default);
+
+    /// <summary>The case a device sits in, if any; a device can be in one case only.</summary>
+    Task<CaseContent?> FindByUnitAsync(Guid unitId, CancellationToken cancellationToken = default);
+
+    /// <summary>For a set of devices: which case each one sits in (devices in no case are absent).</summary>
+    Task<Dictionary<Guid, (Guid CaseEquipmentId, string CaseCode, string CaseName)>> GetCasesOfUnitsAsync(
+        IReadOnlyCollection<Guid> unitIds, CancellationToken cancellationToken = default);
+}
+
 public interface IEquipmentUnitRepository : IRepository<EquipmentUnit>
 {
     /// <summary>Internal references are unique per equipment (TR-001 of a monitor and TR-001 of a converter may both exist).</summary>

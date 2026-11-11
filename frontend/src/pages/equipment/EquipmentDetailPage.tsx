@@ -16,6 +16,7 @@ import { useFormat } from '../../utils/format';
 import { EquipmentInspectionTab, EquipmentRepairsTab } from './EquipmentMaintenanceTabs';
 import { EquipmentLedTab } from './EquipmentLedTab';
 import { EquipmentPropertiesTab } from './EquipmentPropertiesTab';
+import { CaseContentTab } from './CaseContentTab';
 import { EquipmentRelationsTab, EquipmentSuppliersTab } from './EquipmentRelationsTab';
 import { UnitGrid } from './UnitGrid';
 
@@ -63,15 +64,19 @@ export function EquipmentDetailPage() {
       label: t('equipmentDetail.tabs.properties'),
       children: <EquipmentPropertiesTab equipment={e} onLeaveGuard={(fn) => (propertiesGuard.current = fn)} />,
     },
-    // Serial numbers only for serial-tracked equipment; quantity-tracked items keep just a stock count.
-    ...(e.isSerialized
+    // Serial numbers only for serial-tracked equipment; quantity-tracked items keep just a stock count, and
+    // a case is one box - it has no devices of its own, only the ones inside it.
+    ...(e.isSerialized && e.type !== 'Case'
       ? [{ key: 'units', label: `${t('equipmentDetail.tabs.manufacturerSerials')} (${e.stock})`, children: <UnitGrid equipmentId={e.id} canManage={manage} /> }]
       : []),
-    {
-      key: 'content',
-      label: `${t('equipmentDetail.tabs.content')} (${e.relations.filter((r) => r.kind === 'Content').length})`,
-      children: <EquipmentRelationsTab equipment={e} kind="Content" />,
-    },
+    // A case's content is the devices in the box; everything else's content is the model's recipe.
+    e.type === 'Case'
+      ? { key: 'content', label: t('equipmentDetail.tabs.content'), children: <CaseContentTab equipment={e} /> }
+      : {
+          key: 'content',
+          label: `${t('equipmentDetail.tabs.content')} (${e.relations.filter((r) => r.kind === 'Content').length})`,
+          children: <EquipmentRelationsTab equipment={e} kind="Content" />,
+        },
     {
       key: 'accessories',
       label: `${t('equipmentDetail.tabs.accessories')} (${e.relations.filter((r) => r.kind === 'Accessory').length})`,
@@ -84,7 +89,8 @@ export function EquipmentDetailPage() {
     },
     { key: 'suppliers', label: `${t('equipmentDetail.tabs.suppliers')} (${e.suppliers.length})`, children: <EquipmentSuppliersTab equipment={e} /> },
     // Only for a firm that bought the LED module: the server strips the permission otherwise and the tab goes with it.
-    ...(can(Permissions.Design) ? [{ key: 'led', label: t('equipmentDetail.tabs.led'), children: <EquipmentLedTab equipment={e} /> }] : []),
+    // A case is a box, not a panel or a processor: it never carries LED data.
+    ...(can(Permissions.Design) && e.type !== 'Case' ? [{ key: 'led', label: t('equipmentDetail.tabs.led'), children: <EquipmentLedTab equipment={e} /> }] : []),
     { key: 'inspection', label: t('equipmentDetail.tabs.inspection'), children: <EquipmentInspectionTab equipment={e} /> },
     ...(can(Permissions.Maintenance) ? [{ key: 'repairs', label: t('equipmentDetail.tabs.repairs'), children: <EquipmentRepairsTab equipment={e} /> }] : []),
     { key: 'history', label: t('equipmentDetail.tabs.history'), children: <HistoryTab equipmentId={e.id} /> },

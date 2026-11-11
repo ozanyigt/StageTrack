@@ -84,6 +84,7 @@ public class LedInventoryAppService(
     public async Task<LedPanelDto> SavePanelAsync(Guid equipmentId, LedPanelInput input)
     {
         var equipment = await equipmentRepository.GetAsync(equipmentId);
+        EnsureNotACase(equipment);
         var spec = await GetOrCreateAsync<LedPanelSpec>(equipmentId, () => new LedPanelSpec(Guid.CreateVersion7(), equipmentId));
 
         spec.SetGeometry(input.PitchMm, input.WidthMm, input.HeightMm, input.PixelWidth, input.PixelHeight);
@@ -103,7 +104,7 @@ public class LedInventoryAppService(
 
     public async Task<LedProcessorDto> SaveProcessorAsync(Guid equipmentId, LedProcessorInput input)
     {
-        await equipmentRepository.GetAsync(equipmentId);
+        EnsureNotACase(await equipmentRepository.GetAsync(equipmentId));
         var spec = await GetOrCreateAsync<LedProcessorSpec>(equipmentId, () => new LedProcessorSpec(Guid.CreateVersion7(), equipmentId));
         spec.Set(input.TotalPixels, input.EthernetPorts, input.PixelsPerPort, input.OptPorts);
         await unitOfWork.SaveChangesAsync();
@@ -112,11 +113,20 @@ public class LedInventoryAppService(
 
     public async Task<LedExtenderDto> SaveExtenderAsync(Guid equipmentId, LedExtenderInput input)
     {
-        await equipmentRepository.GetAsync(equipmentId);
+        EnsureNotACase(await equipmentRepository.GetAsync(equipmentId));
         var spec = await GetOrCreateAsync<LedExtenderSpec>(equipmentId, () => new LedExtenderSpec(Guid.CreateVersion7(), equipmentId));
         spec.Set(input.EthernetPorts, input.FiberPorts, input.MaxPixels);
         await unitOfWork.SaveChangesAsync();
         return (await GetExtendersAsync(new GetLedCatalogInput { IncludeArchived = true })).First(e => e.EquipmentId == equipmentId);
+    }
+
+    /// <summary>A case is a box that carries LED gear; it is not LED gear itself.</summary>
+    private static void EnsureNotACase(Equipment equipment)
+    {
+        if (equipment.Type == EquipmentType.Case)
+        {
+            throw new BusinessException(StageTrackErrorCodes.NotACase).WithData("code", equipment.Code);
+        }
     }
 
     public async Task RemoveAsync(Guid equipmentId)

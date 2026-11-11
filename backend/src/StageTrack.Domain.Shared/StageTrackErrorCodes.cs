@@ -97,6 +97,17 @@ public static class StageTrackErrorCodes
     public const string CompanyCodeAlreadyExists = "Company.CodeAlreadyExists";
     public const string QuoteJobAlreadyDecided = "Quote.JobAlreadyDecided";
 
+    public const string NotACase = "Case.NotACase";
+    public const string CaseNotEmpty = "Case.NotEmpty";
+    public const string CaseHasUnits = "Case.HasUnits";
+    public const string CaseHasDefaultContent = "Case.HasDefaultContent";
+    public const string CaseInsideCase = "Case.InsideCase";
+    public const string CaseNeedsUnit = "Case.NeedsUnit";
+    public const string CaseUnitMismatch = "Case.UnitMismatch";
+    public const string CaseUnitTaken = "Case.UnitTaken";
+    public const string CaseUnitQuantityFixed = "Case.UnitQuantityFixed";
+    public const string CaseIsOut = "Case.IsOut";
+
     public const string RelationSelf = "Relation.Self";
     public const string RelationDuplicate = "Relation.Duplicate";
     public const string SupplierNameAlreadyExists = "Supplier.NameAlreadyExists";

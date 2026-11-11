@@ -4,7 +4,13 @@ public enum EquipmentType
 {
     Physical = 1,
     Consumable = 2,
-    ForSale = 3
+    ForSale = 3,
+
+    /// <summary>
+    /// A box that travels with several devices inside it (a rack, a flight case). One record is one physical
+    /// box: never serial-tracked, always one in stock, and what is inside it is named device by device.
+    /// </summary>
+    Case = 4
 }
 
 /// <summary>

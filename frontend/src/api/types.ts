@@ -58,7 +58,7 @@ export interface LoginResult {
 }
 
 // Inventory
-export const EQUIPMENT_TYPES = ['Physical', 'Consumable', 'ForSale'] as const;
+export const EQUIPMENT_TYPES = ['Physical', 'Consumable', 'ForSale', 'Case'] as const;
 export type EquipmentType = (typeof EQUIPMENT_TYPES)[number];
 
 export const UNIT_STATUSES = ['InStock', 'OnProject', 'InRepair', 'Lost'] as const;
@@ -125,6 +125,44 @@ export interface Equipment {
   purchaseSupplierName?: string | null;
   /** Cases/sets whose default content includes this equipment. */
   containedIn: EquipmentRef[];
+}
+
+/** One line of what is in a case: a named device, or a count of something. */
+export interface CaseContentLine {
+  id: Guid;
+  equipmentId: Guid;
+  equipmentCode: string;
+  equipmentName: string;
+  unitId?: Guid | null;
+  unitInternalRef?: string | null;
+  unitSerialNumber?: string | null;
+  quantity: number;
+  sortOrder: number;
+  /** Weight of one piece. */
+  weightKg?: number | null;
+}
+
+export interface CaseContents {
+  caseEquipmentId: Guid;
+  lines: CaseContentLine[];
+  itemCount: number;
+  emptyWeightKg?: number | null;
+  /** Empty weight plus everything inside. */
+  loadedWeightKg: number;
+  /** Catalogue price of the contents; information only, never the case's own price. */
+  contentPriceTotal?: number | null;
+}
+
+/** A device offered to a case, with the reason it may not be free. */
+export interface CaseUnitOption {
+  unitId: Guid;
+  internalRef: string;
+  serialNumber?: string | null;
+  status: UnitStatus;
+  stockLocationName?: string | null;
+  inCaseName?: string | null;
+  onProjectName?: string | null;
+  isAvailable: boolean;
 }
 
 export interface EquipmentRef {

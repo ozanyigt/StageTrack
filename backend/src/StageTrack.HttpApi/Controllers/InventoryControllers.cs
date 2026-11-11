@@ -95,6 +95,26 @@ public class EquipmentController(IEquipmentAppService appService) : ControllerBa
     [Authorize(StageTrackPermissions.Equipment.Manage)]
     public Task<int> MoveAsync(MoveEquipmentInput input) => appService.MoveAsync(input);
 
+    [HttpGet("{id:guid}/case-contents")]
+    public Task<CaseContentsDto> GetCaseContentsAsync(Guid id) => appService.GetCaseContentsAsync(id);
+
+    [HttpGet("{id:guid}/case-contents/options/{equipmentId:guid}")]
+    public Task<List<CaseUnitOptionDto>> GetCaseUnitOptionsAsync(Guid id, Guid equipmentId) =>
+        appService.GetCaseUnitOptionsAsync(id, equipmentId);
+
+    [HttpPost("{id:guid}/case-contents")]
+    [Authorize(StageTrackPermissions.Equipment.Manage)]
+    public Task<CaseContentsDto> AddCaseContentAsync(Guid id, AddCaseContentInput input) => appService.AddCaseContentAsync(id, input);
+
+    [HttpPut("{id:guid}/case-contents/{lineId:guid}")]
+    [Authorize(StageTrackPermissions.Equipment.Manage)]
+    public Task<CaseContentsDto> SetCaseContentQuantityAsync(Guid id, Guid lineId, SetCaseContentQuantityInput input) =>
+        appService.SetCaseContentQuantityAsync(id, lineId, input);
+
+    [HttpDelete("{id:guid}/case-contents/{lineId:guid}")]
+    [Authorize(StageTrackPermissions.Equipment.Manage)]
+    public Task<CaseContentsDto> RemoveCaseContentAsync(Guid id, Guid lineId) => appService.RemoveCaseContentAsync(id, lineId);
+
     [HttpPost("import")]
     [Authorize(StageTrackPermissions.Equipment.Manage)]
     public Task<ImportResultDto> ImportAsync(List<EquipmentImportInput> rows) => appService.ImportAsync(rows);

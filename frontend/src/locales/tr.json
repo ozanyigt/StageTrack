@@ -466,7 +466,8 @@
     "equipmentType": {
       "Physical": "Kiralık ekipman",
       "Consumable": "Sarf malzeme",
-      "ForSale": "Satış ürünü"
+      "ForSale": "Satış ürünü",
+      "Case": "Case (kutu)"
     },
     "labelType": {
       "RentmanQr": "QR etiketi",
@@ -755,6 +756,18 @@
     },
     "ProjectVenue": {
       "RoomNotSet": "Önce mekân ölçülerini girin."
+    },
+    "Case": {
+      "NotACase": "Bu ekipman bir case değil.",
+      "NotEmpty": "Önce case içeriğini boşaltın ({{code}}).",
+      "HasUnits": "Cihazı olan ekipman case yapılamaz ({{code}}).",
+      "HasDefaultContent": "Varsayılan içeriği olan ekipman case yapılamaz ({{code}}).",
+      "InsideCase": "Case içine case konamaz ({{code}}).",
+      "NeedsUnit": "Seri takipli ekipmanda cihaz seçin ({{code}}).",
+      "UnitMismatch": "Bu cihaz seçilen ekipmana ait değil ({{unit}}).",
+      "UnitTaken": "{{unit}} zaten {{case}} içinde.",
+      "UnitQuantityFixed": "Cihaz satırının adedi değiştirilemez.",
+      "IsOut": "Case sahada ({{code}}); dönünce düzenleyebilirsiniz."
     }
   },
   "roles": {
@@ -1974,5 +1987,21 @@
     "state": "Durum",
     "scans": "Hareketler",
     "by": "{{name}}"
+  },
+  "caseContent": {
+    "add": "İçeriğe ekle",
+    "empty": "Case boş. İçine konan cihazları buradan ekleyin.",
+    "items": "Kalem",
+    "emptyWeight": "Boş",
+    "loadedWeight": "Dolu",
+    "contentPrice": "İçerik toplamı",
+    "quantity": "Adet",
+    "weight": "Ağırlık",
+    "removeConfirm": "Bu kalem case içeriğinden çıkarılsın mı?",
+    "removed": "Kalem case'ten çıkarıldı",
+    "pickEquipment": "Ekipman arayın",
+    "pickUnit": "Hangi cihaz konuyor?",
+    "inCase": "{{name}} içinde",
+    "noUnits": "Bu ekipmanın cihazı yok."
   }
 }

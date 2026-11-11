@@ -59,6 +59,18 @@ public interface IEquipmentAppService
     Task<EquipmentDetailDto> RemoveImageAsync(Guid id);
 
     Task<ImportResultDto> ImportAsync(List<EquipmentImportInput> rows);
+
+    /// <summary>What is physically in this case, with its weight and the catalogue price of the contents.</summary>
+    Task<CaseContentsDto> GetCaseContentsAsync(Guid id);
+
+    /// <summary>The devices of one equipment offered to this case, each with the reason it may not be free.</summary>
+    Task<List<CaseUnitOptionDto>> GetCaseUnitOptionsAsync(Guid id, Guid equipmentId);
+
+    Task<CaseContentsDto> AddCaseContentAsync(Guid id, AddCaseContentInput input);
+
+    Task<CaseContentsDto> SetCaseContentQuantityAsync(Guid id, Guid lineId, SetCaseContentQuantityInput input);
+
+    Task<CaseContentsDto> RemoveCaseContentAsync(Guid id, Guid lineId);
 }
 
 public interface IEquipmentUnitAppService

@@ -466,7 +466,8 @@
     "equipmentType": {
       "Physical": "Rental equipment",
       "Consumable": "Consumable",
-      "ForSale": "Sale item"
+      "ForSale": "Sale item",
+      "Case": "Case"
     },
     "labelType": {
       "RentmanQr": "QR label",
@@ -755,6 +756,18 @@
     },
     "ProjectVenue": {
       "RoomNotSet": "Enter the room’s measurements first."
+    },
+    "Case": {
+      "NotACase": "This equipment is not a case.",
+      "NotEmpty": "Empty the case first ({{code}}).",
+      "HasUnits": "Equipment with devices cannot become a case ({{code}}).",
+      "HasDefaultContent": "Equipment with default content cannot become a case ({{code}}).",
+      "InsideCase": "A case cannot go inside a case ({{code}}).",
+      "NeedsUnit": "Pick the device for serial-tracked equipment ({{code}}).",
+      "UnitMismatch": "That device belongs to different equipment ({{unit}}).",
+      "UnitTaken": "{{unit}} is already in {{case}}.",
+      "UnitQuantityFixed": "A device line is always one device.",
+      "IsOut": "The case is out on a job ({{code}}); edit it when it is back."
     }
   },
   "roles": {
@@ -1974,5 +1987,21 @@
     "state": "State",
     "scans": "Scans",
     "by": "{{name}}"
+  },
+  "caseContent": {
+    "add": "Add to the case",
+    "empty": "The case is empty. Add what is inside it here.",
+    "items": "Items",
+    "emptyWeight": "Empty",
+    "loadedWeight": "Loaded",
+    "contentPrice": "Content total",
+    "quantity": "Quantity",
+    "weight": "Weight",
+    "removeConfirm": "Take this out of the case?",
+    "removed": "Taken out of the case",
+    "pickEquipment": "Search equipment",
+    "pickUnit": "Which device goes in?",
+    "inCase": "in {{name}}",
+    "noUnits": "This equipment has no devices."
   }
 }

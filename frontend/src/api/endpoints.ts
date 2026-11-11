@@ -98,6 +98,16 @@ export const equipmentApi = {
   setImage: (id: T.Guid, file: File) => upload<T.EquipmentDetail>(`/equipment/${id}/image`, file),
   removeImage: (id: T.Guid) => del<T.EquipmentDetail>(`/equipment/${id}/image`),
   import: (rows: T.EquipmentImportInput[]) => post<T.ImportResult>('/equipment/import', rows),
+
+  /** What is physically inside a case, with its weight. */
+  caseContents: (id: T.Guid) => get<T.CaseContents>(`/equipment/${id}/case-contents`),
+  caseUnitOptions: (id: T.Guid, equipmentId: T.Guid) =>
+    get<T.CaseUnitOption[]>(`/equipment/${id}/case-contents/options/${equipmentId}`),
+  addCaseContent: (id: T.Guid, input: { equipmentId: T.Guid; unitId?: T.Guid | null; quantity: number }) =>
+    post<T.CaseContents>(`/equipment/${id}/case-contents`, input),
+  setCaseContentQuantity: (id: T.Guid, lineId: T.Guid, quantity: number) =>
+    put<T.CaseContents>(`/equipment/${id}/case-contents/${lineId}`, { quantity }),
+  removeCaseContent: (id: T.Guid, lineId: T.Guid) => del<T.CaseContents>(`/equipment/${id}/case-contents/${lineId}`),
 };
 
 export const unitApi = {

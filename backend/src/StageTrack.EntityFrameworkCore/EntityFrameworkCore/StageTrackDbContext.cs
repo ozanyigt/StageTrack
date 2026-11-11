@@ -33,6 +33,7 @@ public class StageTrackDbContext(
     public DbSet<Equipment> Equipment => Set<Equipment>();
     public DbSet<EquipmentUnit> EquipmentUnits => Set<EquipmentUnit>();
     public DbSet<EquipmentLabel> EquipmentLabels => Set<EquipmentLabel>();
+    public DbSet<CaseContent> CaseContents => Set<CaseContent>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<ProjectEquipment> ProjectEquipment => Set<ProjectEquipment>();

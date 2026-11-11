@@ -39,6 +39,7 @@ public static class StageTrackEntityFrameworkCoreModule
         services.AddScoped<IEquipmentFolderRepository, EquipmentFolderRepository>();
         services.AddScoped<IEquipmentRepository, EquipmentRepository>();
         services.AddScoped<IEquipmentUnitRepository, EquipmentUnitRepository>();
+        services.AddScoped<ICaseContentRepository, CaseContentRepository>();
         services.AddScoped<IEquipmentLabelRepository, EquipmentLabelRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();

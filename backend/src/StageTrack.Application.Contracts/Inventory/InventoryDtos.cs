@@ -263,6 +263,74 @@ public class EquipmentLookupDto
     public decimal? RentalPrice { get; set; }
 }
 
+/// <summary>One line of what is in a case: a named device, or a count of something.</summary>
+public class CaseContentDto
+{
+    public Guid Id { get; set; }
+    public Guid EquipmentId { get; set; }
+    public string EquipmentCode { get; set; } = null!;
+    public string EquipmentName { get; set; } = null!;
+    public Guid? UnitId { get; set; }
+    public string? UnitInternalRef { get; set; }
+    public string? UnitSerialNumber { get; set; }
+    public int Quantity { get; set; }
+    public int SortOrder { get; set; }
+
+    /// <summary>Weight of one piece; null when nobody entered one.</summary>
+    public decimal? WeightKg { get; set; }
+}
+
+/// <summary>What is in a case and what it adds up to, as the case page shows it.</summary>
+public class CaseContentsDto
+{
+    public Guid CaseEquipmentId { get; set; }
+    public List<CaseContentDto> Lines { get; set; } = [];
+    public int ItemCount { get; set; }
+    public decimal? EmptyWeightKg { get; set; }
+
+    /// <summary>Empty weight plus everything inside.</summary>
+    public decimal LoadedWeightKg { get; set; }
+
+    /// <summary>Catalogue price of the contents; shown as information, never as the case's own price.</summary>
+    public decimal? ContentPriceTotal { get; set; }
+}
+
+public class AddCaseContentInput
+{
+    [Required]
+    public Guid EquipmentId { get; set; }
+
+    /// <summary>Required for serial-tracked equipment: which device goes in.</summary>
+    public Guid? UnitId { get; set; }
+
+    [Range(1, 10_000)]
+    public int Quantity { get; set; } = 1;
+}
+
+public class SetCaseContentQuantityInput
+{
+    [Range(1, 10_000)]
+    public int Quantity { get; set; } = 1;
+}
+
+/// <summary>A device offered to a case, with the reason it may not be free.</summary>
+public class CaseUnitOptionDto
+{
+    public Guid UnitId { get; set; }
+    public string InternalRef { get; set; } = null!;
+    public string? SerialNumber { get; set; }
+    public UnitStatus Status { get; set; }
+    public string? StockLocationName { get; set; }
+
+    /// <summary>The case this device already sits in, if any.</summary>
+    public string? InCaseName { get; set; }
+
+    /// <summary>The job it is out on, if any.</summary>
+    public string? OnProjectName { get; set; }
+
+    public bool IsAvailable { get; set; }
+}
+
 /// <summary>One scan under a job row of the device's working life.</summary>
 public sealed record UnitJobScanDto(Guid Id, DateTime At, MovementAction Action, string? UserName, string? Note);
 

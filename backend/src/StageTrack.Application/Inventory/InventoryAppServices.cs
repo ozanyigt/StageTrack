@@ -62,7 +62,11 @@ public class EquipmentAppService(
     IStockLocationRepository locationRepository,
     ISupplierRepository supplierRepository,
     IAttachmentRepository attachmentRepository,
+    ICaseContentRepository caseContentRepository,
+    IProjectRepository projectRepository,
+    IWarehouseMovementRepository movementRepository,
     EquipmentManager equipmentManager,
+    CaseManager caseManager,
     EquipmentFolderManager folderManager,
     EquipmentUnitManager unitManager,
     LabelManager labelManager,
@@ -129,6 +133,8 @@ public class EquipmentAppService(
     {
         var equipment = await equipmentManager.CreateAsync(input.Code, input.Name, input.Type, input.IsSerialized);
         await ApplyAsync(equipment, input);
+        // A case is one box: the form's serial-tracking and stock answers do not apply to it.
+        CaseManager.ApplyCaseRules(equipment);
         await equipmentRepository.InsertAsync(equipment);
         return equipment.ToDto(equipment.IsSerialized ? 0 : equipment.StockQuantity, await prices.CanSeeAsync());
     }
@@ -137,13 +143,34 @@ public class EquipmentAppService(
     {
         var equipment = await equipmentRepository.GetAsync(id);
         await equipmentManager.ChangeCodeAsync(equipment, input.Code);
-        await equipmentManager.SetSerializedAsync(equipment, input.IsSerialized);
+        await caseManager.EnsureTypeChangeAllowedAsync(equipment, input.Type);
+        if (input.Type != EquipmentType.Case)
+        {
+            await equipmentManager.SetSerializedAsync(equipment, input.IsSerialized);
+        }
+
         await ApplyAsync(equipment, input);
+        CaseManager.ApplyCaseRules(equipment);
         await unitOfWork.SaveChangesAsync();
         return await BuildDetailAsync(equipment);
     }
 
-    public async Task ArchiveAsync(Guid id) => await equipmentManager.ArchiveAsync(await equipmentRepository.GetAsync(id));
+    public async Task ArchiveAsync(Guid id)
+    {
+        var equipment = await equipmentRepository.GetAsync(id);
+        if (equipment.Type == EquipmentType.Case)
+        {
+            // Archiving a case that is on a job would lose track of what went out with it; empty it first,
+            // so the devices inside are free again rather than held by a box nobody can see.
+            CaseManager.EnsureNotOut(equipment, await movementRepository.IsOutOnProjectAsync(equipment.Id));
+            foreach (var line in await caseContentRepository.GetListByCaseAsync(equipment.Id))
+            {
+                await caseContentRepository.DeleteAsync(line);
+            }
+        }
+
+        await equipmentManager.ArchiveAsync(equipment);
+    }
 
     public async Task RestoreAsync(Guid id) => (await equipmentRepository.GetAsync(id)).Restore();
 
@@ -525,6 +552,133 @@ public class EquipmentAppService(
         }
 
         return names.Count == 0 ? null : string.Join(" / ", names);
+    }
+
+    // ---- Case contents ------------------------------------------------------------------------------------
+
+    public async Task<CaseContentsDto> GetCaseContentsAsync(Guid id) => await BuildCaseContentsAsync(await GetCaseAsync(id));
+
+    public async Task<List<CaseUnitOptionDto>> GetCaseUnitOptionsAsync(Guid id, Guid equipmentId)
+    {
+        await GetCaseAsync(id);
+        var units = await unitRepository.GetListByEquipmentAsync(equipmentId, includeArchived: false);
+        var cases = await caseContentRepository.GetCasesOfUnitsAsync(units.Select(u => u.Id).ToList());
+        var locations = (await locationRepository.GetListAsync()).ToDictionary(l => l.Id, l => l.Name);
+        var projects = (await projectRepository.GetListByIdsAsync(units.Where(u => u.CurrentProjectId.HasValue)
+            .Select(u => u.CurrentProjectId!.Value).Distinct())).ToDictionary(p => p.Id, p => $"{p.Number} · {p.Name}");
+
+        return units.Select(unit =>
+        {
+            var inCase = cases.TryGetValue(unit.Id, out var holder) ? holder : default;
+            var onProject = unit.CurrentProjectId.HasValue ? projects.GetValueOrDefault(unit.CurrentProjectId.Value) : null;
+            return new CaseUnitOptionDto
+            {
+                UnitId = unit.Id,
+                InternalRef = unit.InternalRef,
+                SerialNumber = unit.SerialNumber,
+                Status = unit.Status,
+                StockLocationName = unit.StockLocationId.HasValue ? locations.GetValueOrDefault(unit.StockLocationId.Value) : null,
+                InCaseName = inCase.CaseName,
+                OnProjectName = onProject,
+                // Free means: in stock, in no case and not already out on a job.
+                IsAvailable = unit.Status == UnitStatus.InStock && inCase.CaseName is null && onProject is null,
+            };
+        }).OrderBy(o => o.InternalRef).ToList();
+    }
+
+    public async Task<CaseContentsDto> AddCaseContentAsync(Guid id, AddCaseContentInput input)
+    {
+        var box = await GetCaseAsync(id);
+        await EnsureCaseIsHomeAsync(box);
+        var line = await caseManager.AddAsync(box, input.EquipmentId, input.UnitId, input.Quantity);
+        if (await caseContentRepository.FindAsync(line.Id) is null)
+        {
+            await caseContentRepository.InsertAsync(line);
+        }
+
+        await unitOfWork.SaveChangesAsync();
+        return await BuildCaseContentsAsync(box);
+    }
+
+    public async Task<CaseContentsDto> SetCaseContentQuantityAsync(Guid id, Guid lineId, SetCaseContentQuantityInput input)
+    {
+        var box = await GetCaseAsync(id);
+        await EnsureCaseIsHomeAsync(box);
+        var line = await GetCaseLineAsync(box, lineId);
+        line.SetQuantity(input.Quantity);
+        await unitOfWork.SaveChangesAsync();
+        return await BuildCaseContentsAsync(box);
+    }
+
+    public async Task<CaseContentsDto> RemoveCaseContentAsync(Guid id, Guid lineId)
+    {
+        var box = await GetCaseAsync(id);
+        await EnsureCaseIsHomeAsync(box);
+        await caseContentRepository.DeleteAsync(await GetCaseLineAsync(box, lineId));
+        await unitOfWork.SaveChangesAsync();
+        return await BuildCaseContentsAsync(box);
+    }
+
+    private async Task<Equipment> GetCaseAsync(Guid id)
+    {
+        var equipment = await equipmentRepository.GetAsync(id);
+        if (equipment.Type != EquipmentType.Case)
+        {
+            throw new BusinessException(StageTrackErrorCodes.NotACase).WithData("code", equipment.Code);
+        }
+
+        return equipment;
+    }
+
+    private async Task<CaseContent> GetCaseLineAsync(Equipment box, Guid lineId)
+    {
+        var line = await caseContentRepository.GetAsync(lineId);
+        return line.CaseEquipmentId == box.Id ? line : throw new EntityNotFoundException(typeof(CaseContent), lineId);
+    }
+
+    /// <summary>What goes in and out of a case is decided in the warehouse, not while the case is on a job.</summary>
+    private async Task EnsureCaseIsHomeAsync(Equipment box) =>
+        CaseManager.EnsureNotOut(box, await movementRepository.IsOutOnProjectAsync(box.Id));
+
+    private async Task<CaseContentsDto> BuildCaseContentsAsync(Equipment box)
+    {
+        var lines = await caseContentRepository.GetListByCaseAsync(box.Id);
+        var equipment = (await equipmentRepository.GetListByIdsAsync(lines.Select(l => l.EquipmentId).Distinct()))
+            .ToDictionary(e => e.Id);
+        var units = (await unitRepository.GetListByIdsAsync(lines.Where(l => l.UnitId.HasValue).Select(l => l.UnitId!.Value)))
+            .ToDictionary(u => u.Id);
+        var showPrice = await prices.CanSeeAsync();
+
+        var dtoLines = lines.Select(line =>
+        {
+            var item = equipment.GetValueOrDefault(line.EquipmentId);
+            var unit = line.UnitId.HasValue ? units.GetValueOrDefault(line.UnitId.Value) : null;
+            return new CaseContentDto
+            {
+                Id = line.Id,
+                EquipmentId = line.EquipmentId,
+                EquipmentCode = item?.Code ?? "?",
+                EquipmentName = item?.Name ?? "?",
+                UnitId = line.UnitId,
+                UnitInternalRef = unit?.InternalRef,
+                UnitSerialNumber = unit?.SerialNumber,
+                Quantity = line.Quantity,
+                SortOrder = line.SortOrder,
+                WeightKg = item?.WeightKg,
+            };
+        }).ToList();
+
+        return new CaseContentsDto
+        {
+            CaseEquipmentId = box.Id,
+            Lines = dtoLines,
+            ItemCount = dtoLines.Sum(l => l.Quantity),
+            EmptyWeightKg = box.EmptyWeightKg,
+            LoadedWeightKg = CaseWeight.Of(box.EmptyWeightKg, dtoLines.Select(l => (l.WeightKg, l.Quantity))),
+            ContentPriceTotal = showPrice
+                ? lines.Sum(l => (equipment.GetValueOrDefault(l.EquipmentId)?.RentalPrice ?? 0) * l.Quantity)
+                : null,
+        };
     }
 }
 

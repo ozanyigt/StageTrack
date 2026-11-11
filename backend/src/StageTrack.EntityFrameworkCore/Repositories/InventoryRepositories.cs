@@ -146,6 +146,28 @@ public class EquipmentFolderRepository(StageTrackDbContext dbContext) : EfReposi
             .ToDictionaryAsync(x => x.FolderId, x => x.Count, cancellationToken);
 }
 
+public class CaseContentRepository(StageTrackDbContext dbContext) : EfRepository<CaseContent>(dbContext), ICaseContentRepository
+{
+    public Task<List<CaseContent>> GetListByCaseAsync(Guid caseEquipmentId, CancellationToken cancellationToken = default) =>
+        DbSet.Where(c => c.CaseEquipmentId == caseEquipmentId).OrderBy(c => c.SortOrder).ToListAsync(cancellationToken);
+
+    public Task<CaseContent?> FindByUnitAsync(Guid unitId, CancellationToken cancellationToken = default) =>
+        DbSet.FirstOrDefaultAsync(c => c.UnitId == unitId, cancellationToken);
+
+    public async Task<Dictionary<Guid, (Guid CaseEquipmentId, string CaseCode, string CaseName)>> GetCasesOfUnitsAsync(
+        IReadOnlyCollection<Guid> unitIds, CancellationToken cancellationToken = default)
+    {
+        var ids = unitIds.Distinct().ToList();
+        var rows = await (from content in DbSet.Where(c => c.UnitId != null && ids.Contains(c.UnitId!.Value))
+                          join equipment in DbContext.Equipment on content.CaseEquipmentId equals equipment.Id
+                          select new { UnitId = content.UnitId!.Value, equipment.Id, equipment.Code, equipment.Name })
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return rows.ToDictionary(r => r.UnitId, r => (r.Id, r.Code, r.Name));
+    }
+}
+
 public class EquipmentUnitRepository(StageTrackDbContext dbContext) : EfRepository<EquipmentUnit>(dbContext), IEquipmentUnitRepository
 {
     public Task<bool> InternalRefExistsAsync(Guid equipmentId, string internalRef, Guid? excludeId = null, CancellationToken cancellationToken = default) =>

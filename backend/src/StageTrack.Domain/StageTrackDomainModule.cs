@@ -23,6 +23,7 @@ public static class StageTrackDomainModule
         services.AddScoped<UserManager>();
         services.AddScoped<RoleManager>();
         services.AddScoped<EquipmentManager>();
+        services.AddScoped<CaseManager>();
         services.AddScoped<EquipmentFolderManager>();
         services.AddScoped<EquipmentUnitManager>();
         services.AddScoped<LabelManager>();

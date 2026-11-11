@@ -84,6 +84,9 @@ public interface IWarehouseMovementRepository : IRepository<WarehouseMovement>
 
     Task<long> GetCountAsync(MovementFilter filter, CancellationToken cancellationToken = default);
 
+    /// <summary>Whether this equipment is out on a job right now: more was checked out than came back.</summary>
+    Task<bool> IsOutOnProjectAsync(Guid equipmentId, CancellationToken cancellationToken = default);
+
     /// <summary>Every scan of one device, with the job it was scanned against; oldest first.</summary>
     Task<List<UnitMovementRow>> GetUnitHistoryAsync(Guid unitId, CancellationToken cancellationToken = default);
 }

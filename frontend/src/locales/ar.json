@@ -466,7 +466,8 @@
     "equipmentType": {
       "Physical": "معدات للإيجار",
       "Consumable": "مواد مستهلكة",
-      "ForSale": "منتج للبيع"
+      "ForSale": "منتج للبيع",
+      "Case": "صندوق"
     },
     "labelType": {
       "RentmanQr": "ملصق QR",
@@ -755,6 +756,18 @@
     },
     "ProjectVenue": {
       "RoomNotSet": "أدخل قياسات القاعة أولاً."
+    },
+    "Case": {
+      "NotACase": "هذه المعدة ليست صندوقًا.",
+      "NotEmpty": "أفرغ الصندوق أولًا ({{code}}).",
+      "HasUnits": "لا يمكن تحويل معدة لها أجهزة إلى صندوق ({{code}}).",
+      "HasDefaultContent": "لا يمكن تحويل معدة لها محتوى افتراضي إلى صندوق ({{code}}).",
+      "InsideCase": "لا يمكن وضع صندوق داخل صندوق ({{code}}).",
+      "NeedsUnit": "اختر الجهاز للمعدات المتتبعة بالرقم التسلسلي ({{code}}).",
+      "UnitMismatch": "هذا الجهاز لا يخص المعدة المختارة ({{unit}}).",
+      "UnitTaken": "{{unit}} موجود بالفعل في {{case}}.",
+      "UnitQuantityFixed": "سطر الجهاز هو جهاز واحد دائمًا.",
+      "IsOut": "الصندوق في مهمة ({{code}})؛ عدّله بعد عودته."
     }
   },
   "roles": {
@@ -1974,5 +1987,21 @@
     "state": "الحالة",
     "scans": "الحركات",
     "by": "{{name}}"
+  },
+  "caseContent": {
+    "add": "إضافة إلى الصندوق",
+    "empty": "الصندوق فارغ. أضف محتوياته من هنا.",
+    "items": "عناصر",
+    "emptyWeight": "فارغ",
+    "loadedWeight": "محمّل",
+    "contentPrice": "إجمالي المحتوى",
+    "quantity": "الكمية",
+    "weight": "الوزن",
+    "removeConfirm": "إخراج هذا من الصندوق؟",
+    "removed": "أُخرج من الصندوق",
+    "pickEquipment": "ابحث عن معدة",
+    "pickUnit": "أي جهاز سيوضع؟",
+    "inCase": "في {{name}}",
+    "noUnits": "لا توجد أجهزة لهذه المعدة."
   }
 }

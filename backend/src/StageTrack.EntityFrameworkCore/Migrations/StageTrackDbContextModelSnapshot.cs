@@ -751,6 +751,64 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                     b.ToTable("UserRoles", (string)null);
                 });
 
+            modelBuilder.Entity("StageTrack.Inventory.CaseContent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CaseEquipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EquipmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("UnitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseEquipmentId");
+
+                    b.HasIndex("EquipmentId");
+
+                    b.HasIndex("UnitId");
+
+                    b.HasIndex("CompanyId", "UnitId")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0 AND [UnitId] IS NOT NULL");
+
+                    b.HasIndex("CompanyId", "CaseEquipmentId", "SortOrder");
+
+                    b.ToTable("CaseContents", (string)null);
+                });
+
             modelBuilder.Entity("StageTrack.Inventory.Equipment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2377,6 +2435,32 @@ namespace StageTrack.EntityFrameworkCore.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("StageTrack.Inventory.CaseContent", b =>
+                {
+                    b.HasOne("StageTrack.Inventory.Equipment", null)
+                        .WithMany()
+                        .HasForeignKey("CaseEquipmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StageTrack.Companies.Company", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StageTrack.Inventory.Equipment", null)
+                        .WithMany()
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("StageTrack.Inventory.EquipmentUnit", null)
+                        .WithMany()
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("StageTrack.Inventory.Equipment", b =>

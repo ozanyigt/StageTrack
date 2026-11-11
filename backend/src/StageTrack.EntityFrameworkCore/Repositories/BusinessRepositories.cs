@@ -228,6 +228,18 @@ public class WarehouseMovementRepository(StageTrackDbContext dbContext) : EfRepo
     public Task<long> GetCountAsync(MovementFilter filter, CancellationToken cancellationToken = default) =>
         ApplyFilter(filter).LongCountAsync(cancellationToken);
 
+    public async Task<bool> IsOutOnProjectAsync(Guid equipmentId, CancellationToken cancellationToken = default)
+    {
+        var perProject = await DbSet
+            .Where(m => m.EquipmentId == equipmentId && m.ProjectId != null
+                        && (m.Action == MovementAction.CheckedOut || m.Action == MovementAction.CheckedIn))
+            .GroupBy(m => m.ProjectId)
+            .Select(g => g.Sum(m => m.Action == MovementAction.CheckedOut ? m.Quantity : -m.Quantity))
+            .ToListAsync(cancellationToken);
+
+        return perProject.Any(balance => balance > 0);
+    }
+
     public Task<List<UnitMovementRow>> GetUnitHistoryAsync(Guid unitId, CancellationToken cancellationToken = default) =>
         (from movement in DbSet.Where(m => m.UnitId == unitId)
          join project in DbContext.Projects on movement.ProjectId equals project.Id into projects
