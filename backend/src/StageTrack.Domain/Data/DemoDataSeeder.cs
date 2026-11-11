@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using StageTrack.Companies;
 using StageTrack.Customers;
+using StageTrack.Design;
 using StageTrack.Identity;
 using StageTrack.Inventory;
 using StageTrack.Maintenance;
@@ -55,6 +56,7 @@ public class DemoDataSeeder(
     IUnitInspectionRepository inspectionRepository,
     LabelTemplateManager labelTemplateManager,
     ILabelTemplateRepository labelTemplateRepository,
+    IEquipmentLedSpecRepository specRepository,
     IUnitOfWork unitOfWork,
     ICurrentCompany currentCompany,
     ILogger<DemoDataSeeder> logger)
@@ -84,6 +86,8 @@ public class DemoDataSeeder(
     {
         if (await tenantRepository.CodeExistsAsync("STARAS"))
         {
+            // The demo set is already there; only what it is still missing is added, which today is the LED data.
+            await SeedDesignDataAsync();
             return;
         }
 
@@ -123,9 +127,190 @@ public class DemoDataSeeder(
             await SeedDubaiAsync(ae);
         }
 
+        await SeedDesignDataAsync();
+
         logger.LogInformation("Demo data seeded. Turkish label codes {First} … {Last}.",
             LabelCodeParser.Format(TurkeyRentmanWorkspace, false, FirstLabelNumber.ToString()),
             LabelCodeParser.Format(TurkeyRentmanWorkspace, false, "9002xx"));
+    }
+
+    // ---- The LED side of the inventory ----------------------------------------------------------------------
+
+    /// <summary>Labels of the gear created by the design pass, well clear of the 900.000 block of the main set.</summary>
+    private const int FirstDesignLabelNumber = 905_000;
+
+    /// <summary>
+    /// Gives the demo inventory its LED data, so Pixel Map, the simulation, the 3D stage, the loading plan and
+    /// stock status open on something. Runs on both paths - a fresh database and one that was seeded before a
+    /// version that had this - and is idempotent: equipment that already carries a spec is left alone, so the
+    /// second start writes nothing. <see cref="DesignDemoData"/> holds the figures.
+    /// </summary>
+    private async Task SeedDesignDataAsync()
+    {
+        var tenant = (await tenantRepository.GetListAsync()).FirstOrDefault(t => t.Code == "STARAS");
+        if (tenant is null)
+        {
+            return;
+        }
+
+        foreach (var company in await companyRepository.GetListByTenantAsync(tenant.Id))
+        {
+            if (DesignDemoData.ForCompany(company.Code) is not { } set)
+            {
+                continue;
+            }
+
+            // The company has to be the current one: the spec rows carry its id and the inventory is filtered by it.
+            using (currentCompany.Change(company.Id))
+            {
+                _labelWorkspace = company.RentmanWorkspaceId ?? TurkeyRentmanWorkspace;
+                _nextLabel = FirstDesignLabelNumber;
+                await SeedDesignDataForCompanyAsync(set);
+            }
+        }
+    }
+
+    private async Task SeedDesignDataForCompanyAsync(DesignDemoData.DesignSeedSet set)
+    {
+        foreach (var item in set.NewEquipment)
+        {
+            if (await equipmentRepository.FindByCodeAsync(item.Code) is null)
+            {
+                await CreateDesignEquipmentAsync(item);
+            }
+        }
+
+        await unitOfWork.SaveChangesAsync();
+
+        // One pass to find the equipment the set speaks about, one query for the specs that are already there.
+        var byCode = new Dictionary<string, Equipment>(StringComparer.OrdinalIgnoreCase);
+        foreach (var code in set.Codes)
+        {
+            if (await equipmentRepository.FindByCodeAsync(code) is { } equipment)
+            {
+                byCode[code] = equipment;
+            }
+        }
+
+        if (byCode.Count == 0)
+        {
+            return;
+        }
+
+        await CorrectPanelWeightsAsync(set, byCode);
+
+        var codeById = byCode.ToDictionary(pair => pair.Value.Id, pair => pair.Key);
+        var existing = await specRepository.GetListByEquipmentAsync([.. codeById.Keys]);
+        var missing = DesignDemoData.MissingSpecs(set, existing.Select(spec => codeById[spec.EquipmentId]));
+        if (missing.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var seed in set.Panels.Where(p => missing.Contains(p.Code) && byCode.ContainsKey(p.Code)))
+        {
+            var spec = new LedPanelSpec(Guid.CreateVersion7(), byCode[seed.Code].Id);
+            spec.SetGeometry(seed.PitchMm, seed.WidthMm, seed.HeightMm, seed.PixelWidth, seed.PixelHeight);
+            // The datasheet's own panels-per-circuit figures; without them the engine falls back to the current.
+            spec.SetPower(seed.PowerMaxW, seed.PowerAvgW, seed.MaxLinkPanels, seed.AvgLinkPanels);
+            spec.SetShape(seed.PanelType, seed.Group);
+            spec.SetAngles(seed.AngleMinDeg, seed.AngleMaxDeg, seed.AngleStepDeg);
+            spec.SetTransport(seed.TransportKind, seed.CasePanelCount, seed.CaseDimensionsCm, seed.CaseWeightKg, seed.MaxStack);
+            spec.SetInfo(seed.ReceivingCard, seed.PwmHz);
+            await specRepository.InsertAsync(spec);
+        }
+
+        foreach (var seed in set.Processors.Where(p => missing.Contains(p.Code) && byCode.ContainsKey(p.Code)))
+        {
+            var spec = new LedProcessorSpec(Guid.CreateVersion7(), byCode[seed.Code].Id);
+            spec.Set(seed.TotalPixels, seed.EthernetPorts, seed.PixelsPerPort, seed.OptPorts);
+            await specRepository.InsertAsync(spec);
+        }
+
+        foreach (var seed in set.Extenders.Where(e => missing.Contains(e.Code) && byCode.ContainsKey(e.Code)))
+        {
+            var spec = new LedExtenderSpec(Guid.CreateVersion7(), byCode[seed.Code].Id);
+            spec.Set(seed.EthernetPorts, seed.FiberPorts, seed.MaxPixels);
+            await specRepository.InsertAsync(spec);
+        }
+
+        await unitOfWork.SaveChangesAsync();
+        logger.LogInformation("Demo LED data added for {Company}: {Codes}.", set.CompanyCode, string.Join(", ", missing));
+    }
+
+    /// <summary>
+    /// What one panel weighs, on the equipment record where the design screens look for it. Two cases are put
+    /// right: a panel that never had a weight (a zero in every rigging and vehicle total) and the ROE floor,
+    /// whose row held the weight of a ten-tile dolly instead of a tile. Anything else a firm entered is left
+    /// alone, so a second start changes nothing.
+    /// </summary>
+    private async Task CorrectPanelWeightsAsync(DesignDemoData.DesignSeedSet set, Dictionary<string, Equipment> byCode)
+    {
+        var corrected = new List<string>();
+        foreach (var seed in set.Panels)
+        {
+            if (!byCode.TryGetValue(seed.Code, out var equipment))
+            {
+                continue;
+            }
+
+            var current = equipment.WeightKg;
+            if (current is not null && current != seed.WeightKgToCorrect)
+            {
+                continue;
+            }
+
+            equipment.UpdatePhysical(equipment.LengthCm, equipment.WidthCm, equipment.HeightCm, seed.WeightKgPerPanel,
+                equipment.VolumeM3, equipment.PowerW, equipment.CurrentA, equipment.PackedPer);
+            corrected.Add($"{seed.Code} {current?.ToString() ?? "-"} -> {seed.WeightKgPerPanel} kg");
+        }
+
+        if (corrected.Count == 0)
+        {
+            return;
+        }
+
+        await unitOfWork.SaveChangesAsync();
+        logger.LogInformation("Demo LED weights put right for {Company}: {Corrected}.", set.CompanyCode, string.Join(", ", corrected));
+    }
+
+    /// <summary>
+    /// The LED gear the warehouse set never had, created the way the rest of the demo inventory is: in the trade's
+    /// own folder, with devices in the first warehouse and a Rentman-shaped label on each.
+    /// </summary>
+    private async Task CreateDesignEquipmentAsync(DesignDemoData.NewEquipmentSeed item)
+    {
+        var folders = await folderRepository.GetListAsync();
+        var folderId = EquipmentDisciplines.FoldersOf(folders, EquipmentDiscipline.Led).FirstOrDefault();
+        if (folderId == Guid.Empty || await stockLocationRepository.FindFirstWarehouseAsync() is not { } warehouse)
+        {
+            logger.LogWarning("Demo LED data: no LED folder or warehouse for {Code}; skipped.", item.Code);
+            return;
+        }
+
+        var equipment = await equipmentManager.CreateAsync(item.Code, item.Name, EquipmentType.Physical, isSerialized: true);
+        equipment.Update(item.Name, item.Brand, item.Model, folderId, EquipmentType.Physical, null, null);
+        equipment.UpdatePhysical(item.LengthCm, item.WidthCm, item.HeightCm, item.WeightKg, null, item.PowerW, null, item.PackedPer);
+        equipment.SetRentalPrice(item.PriceTry);
+        await equipmentRepository.InsertAsync(equipment);
+        await unitOfWork.SaveChangesAsync();
+
+        var random = new Random(item.Code.GetHashCode(StringComparison.Ordinal));
+        for (var i = 1; i <= item.Units; i++)
+        {
+            var serial = $"{random.Next(1_000_000, 9_999_999)}{random.Next(100, 999)}";
+            var unit = await unitManager.CreateAsync(equipment, $"{item.UnitPrefix} {i:000}", serial, warehouse.Id);
+            var purchased = DateTime.Today.AddDays(-random.Next(120, 900)).Date;
+            unit.UpdateDetails(purchased, purchased.AddYears(2), purchased.AddYears(8), null);
+            await unitRepository.InsertAsync(unit);
+            await unitOfWork.SaveChangesAsync();
+
+            var label = await labelManager.AssignAsync(NextLabel(), LabelType.ImportedQr, null, unit.Id);
+            await labelRepository.InsertAsync(label);
+            _unitLabels[unit.Id] = label.Code;
+        }
+
+        await unitOfWork.SaveChangesAsync();
     }
 
     // ---- Identity -------------------------------------------------------------------------------------------
