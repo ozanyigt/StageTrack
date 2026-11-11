@@ -1,8 +1,9 @@
 // Verifies that tr/en/ar locale files have identical keys, that every static t('...') key used in
-// src exists, and that every backend error code has a frontend translation.
+// src exists, that keys built at runtime (t(`a.b.${x}`)) have a group to resolve into, and that every
+// backend error code has a frontend translation.
 // Usage: npm run check:i18n
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -43,6 +44,29 @@ for (const file of files) {
 }
 for (const key of used) if (!keys.tr.has(key)) report(`"${key}" is used in code but missing from the locale files`);
 
+// Keys the code builds at runtime: t(`stage3d.dim.${kind}`). The exact key cannot be known here, but the
+// prefix can, and a prefix with no keys under it means every one of them resolves to its own name on screen -
+// which is how the 3D stage spent months labelling itself "stage3d.dim.stageWidth". A prefix that does exist is
+// only listed: whether it covers every member of the union is the type checker's business, not this script's.
+const dynamic = new Map();
+for (const file of files) {
+  const text = readFileSync(file, 'utf8');
+  for (const match of text.matchAll(/\bt\(\s*`([A-Za-z0-9_.]*\.)\$\{/g)) {
+    const line = text.slice(0, match.index).split('\n').length;
+    const where = `${relative(root, file).replace(/\\/g, '/')}:${line}`;
+    const prefix = match[1];
+    if (!dynamic.has(prefix)) dynamic.set(prefix, []);
+    dynamic.get(prefix).push(where);
+  }
+}
+
+const prefixes = [...dynamic.keys()].sort();
+for (const prefix of prefixes) {
+  if (![...keys.tr].some((key) => key.startsWith(prefix))) {
+    report(`no key starts with "${prefix}", built at ${dynamic.get(prefix).join(', ')}`);
+  }
+}
+
 const backendCodes = readFileSync(join(root, '../backend/src/StageTrack.Domain.Shared/StageTrackErrorCodes.cs'), 'utf8')
   .matchAll(/=\s*"([A-Za-z]+\.[A-Za-z]+)"/g);
 for (const [, code] of backendCodes) if (!keys.tr.has(`errors.${code}`)) report(`backend error code "${code}" has no translation`);
@@ -52,3 +76,7 @@ if (problems) {
   process.exit(1);
 }
 console.log(`✓ ${keys.tr.size} keys, identical in ${languages.join('/')}; ${used.size} keys used in code are all defined.`);
+console.log(`ℹ ${[...dynamic.values()].reduce((n, at) => n + at.length, 0)} key(s) built at runtime, all with a group to resolve into:`);
+for (const prefix of prefixes) {
+  console.log(`  ${prefix}* — ${dynamic.get(prefix).join(', ')}`);
+}

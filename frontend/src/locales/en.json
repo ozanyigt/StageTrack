@@ -1705,14 +1705,22 @@
     "zoomOut": "Zoom out",
     "tipHover": "Panel type",
     "addSideHint": "Add the same screen on this side (Shift: keep the selection)",
+    "addSide": {
+      "top": "Add the same screen above",
+      "right": "Add the same screen to the right",
+      "bottom": "Add the same screen below",
+      "left": "Add the same screen to the left"
+    },
     "cut": {
       "tool": "Cut",
       "hint": "Panel cutting mode",
       "hintOn": "Click panels or drag a box, then press \"Cut\".",
       "picked": "{{count}} panels picked",
       "locked": "This feature is off",
-      "all": "The whole screen cannot be cut away.",
-      "tooMany": "That makes too many cut-out areas."
+      "error": {
+        "all": "The whole screen cannot be cut away.",
+        "tooMany": "That makes too many cut-out areas."
+      }
     },
     "merge": {
       "tool": "Merge",

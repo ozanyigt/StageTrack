@@ -1705,14 +1705,22 @@
     "zoomOut": "Uzaklaştır",
     "tipHover": "Panel tipi",
     "addSideHint": "Aynı ekranı bu kenara ekle (Shift: seçim kalsın)",
+    "addSide": {
+      "top": "Üstte aynı ekranı ekle",
+      "right": "Sağda aynı ekranı ekle",
+      "bottom": "Altta aynı ekranı ekle",
+      "left": "Solda aynı ekranı ekle"
+    },
     "cut": {
       "tool": "Kırp",
       "hint": "Panel kırpma modu",
       "hintOn": "Panelleri tıklayın veya kutu çizin; sonra \"Kırp\"a basın.",
       "picked": "{{count}} panel seçili",
       "locked": "Bu özellik kapalı",
-      "all": "Ekranın tamamı kırpılamaz.",
-      "tooMany": "Çok fazla kırpma alanı oluştu."
+      "error": {
+        "all": "Ekranın tamamı kırpılamaz.",
+        "tooMany": "Çok fazla kırpma alanı oluştu."
+      }
     },
     "merge": {
       "tool": "Birleştir",
