@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { dashboardApi } from '../api/endpoints';
-import { PROJECT_STATUSES, UNIT_STATUSES } from '../api/types';
+import { UNIT_STATUSES, type ProjectStatus } from '../api/types';
 import { Permissions, useAuth } from '../auth/AuthContext';
 import { ProjectStatusTag } from '../components/StatusTags';
 import { useFormat } from '../utils/format';
@@ -18,7 +18,9 @@ export function DashboardPage() {
 
   if (isLoading || !data) return <Skeleton active />;
 
-  const activeStatuses = PROJECT_STATUSES.filter((s) => !['Returned', 'Cancelled', 'Draft'].includes(s));
+  // The three questions the dashboard answers: what is confirmed, what is still waiting for an answer, and
+  // what is out on a site. Prepped is a step inside the warehouse's own board, not a headline of its own.
+  const cardStatuses: ProjectStatus[] = ['Confirmed', 'Pending', 'OnLocation'];
 
   // Crew members only see the confirmed projects they are assigned to.
   if (!can(Permissions.Projects) && can(Permissions.AssignedProjects)) {
@@ -72,8 +74,8 @@ export function DashboardPage() {
 
       {can(Permissions.Projects) && (
       <Row gutter={[12, 12]}>
-        {activeStatuses.map((s) => (
-          <Col xs={12} md={6} key={s}>
+        {cardStatuses.map((s) => (
+          <Col xs={24} sm={8} key={s}>
             <Card size="small" hoverable onClick={() => navigate(`/projects?status=${s}`)}>
               <Statistic title={t(`enums.projectStatus.${s}`)} value={data.projectsByStatus[s] ?? 0} />
             </Card>
@@ -84,7 +86,7 @@ export function DashboardPage() {
 
       {can(Permissions.Maintenance) && (
         <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
-          <Col xs={12} md={6}>
+          <Col xs={24} sm={8}>
             <Card size="small" hoverable onClick={() => navigate('/maintenance/repairs')}>
               <Statistic
                 title={t('dashboard.openRepairs')}
@@ -94,7 +96,7 @@ export function DashboardPage() {
               />
             </Card>
           </Col>
-          <Col xs={12} md={6}>
+          <Col xs={24} sm={8}>
             <Card size="small" hoverable onClick={() => navigate('/equipment/units')}>
               <Statistic
                 title={t('dashboard.overdueInspections')}

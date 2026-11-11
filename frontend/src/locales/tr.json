@@ -439,7 +439,7 @@
   "enums": {
     "projectStatus": {
       "Draft": "Taslak",
-      "Pending": "Opsiyonlu",
+      "Pending": "Onay bekleyen",
       "Confirmed": "Onaylı",
       "Prepped": "Hazırlandı",
       "OnLocation": "Sahada",
