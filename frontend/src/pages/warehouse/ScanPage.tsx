@@ -1,4 +1,4 @@
-import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ExportOutlined, ImportOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, ExportOutlined, ImportOutlined } from '@ant-design/icons';
 import { Alert, App, Button, Card, Col, Empty, Flex, Progress, Row, Segmented, Select, Space, Tag, Typography, theme } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -204,7 +204,11 @@ export function ScanPage() {
 
   return (
     <>
-      <Typography.Title level={3} style={{ marginTop: 0 }}>{t('scan.title')}</Typography.Title>
+      {/* Scanning is opened from the board, so the way back is beside the title. */}
+      <Space align="center" style={{ marginBottom: 8 }}>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/warehouse')}>{t('nav.warehouseBoard')}</Button>
+        <Typography.Title level={3} style={{ margin: 0 }}>{t('scan.title')}</Typography.Title>
+      </Space>
 
       {/* Top bar: job, direction, scanner, warehouse status buttons */}
       <Card size="small" style={{ marginBottom: 12 }}>

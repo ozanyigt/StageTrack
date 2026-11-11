@@ -137,7 +137,8 @@ function AppRoutes() {
         <Route path="projects" element={<Guard permission={ProjectAccess}><ProjectListPage /></Guard>} />
         <Route path="projects/:id" element={<Guard permission={ProjectAccess}><ProjectDetailPage /></Guard>} />
         <Route path="warehouse" element={<Guard permission={Permissions.Warehouse}><WarehouseBoardPage /></Guard>} />
-        <Route path="warehouse/scan" element={<Guard permission={Permissions.WarehouseScan}><ScanPage /></Guard>} />
+        {/* Scanning needs a job; without one there is nothing to scan against, so the board answers instead. */}
+        <Route path="warehouse/scan" element={<Navigate to="/warehouse" replace />} />
         <Route path="warehouse/scan/:projectId" element={<Guard permission={Permissions.WarehouseScan}><ScanPage /></Guard>} />
         <Route path="warehouse/movements" element={<Guard permission={Permissions.Warehouse}><MovementsPage /></Guard>} />
         <Route path="equipment" element={<Guard permission={Permissions.Equipment}><EquipmentLayout /></Guard>}>

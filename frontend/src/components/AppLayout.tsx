@@ -16,7 +16,6 @@ import {
   LogoutOutlined,
   MoonOutlined,
   ProjectOutlined,
-  ScanOutlined,
   SettingOutlined,
   SunOutlined,
   TagsOutlined,
@@ -76,7 +75,7 @@ export function AppLayout() {
       permission: Permissions.Warehouse,
       children: [
         { key: '/warehouse', icon: <AppstoreOutlined />, label: t('nav.warehouseBoard') },
-        { key: '/warehouse/scan', icon: <ScanOutlined />, label: t('nav.scan'), permission: Permissions.WarehouseScan },
+        // Scanning is not a menu entry: it always belongs to one job, and the board is where a job is picked.
         { key: '/warehouse/movements', icon: <HistoryOutlined />, label: t('nav.movements') },
       ].filter((i) => !('permission' in i) || can(i.permission as string)),
     },
@@ -144,7 +143,7 @@ export function AppLayout() {
 
   const path = location.pathname;
   const selected =
-    ['/warehouse/scan', '/warehouse/movements', '/equipment/archive',
+    ['/warehouse/movements', '/equipment/archive',
       '/draft/design/led', '/draft/design/sound', '/draft/design/light', '/draft/design/truss', '/draft/design/scaff',
       '/draft/pixel-map', '/draft/simulation', '/draft/stage', '/draft/power', '/draft/plan', '/draft/stock', '/draft/logistics',
       '/maintenance/repairs', '/settings/users', '/settings/roles', '/settings/rental-factors', '/settings/stock-locations', '/settings/label-templates', '/settings/audit-log', '/settings/firm', '/calendar']
