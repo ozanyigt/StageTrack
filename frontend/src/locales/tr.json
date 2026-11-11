@@ -565,6 +565,11 @@
       "Light": "Işık",
       "Truss": "Truss",
       "Scaffold": "Scaff"
+    },
+    "unitJobState": {
+      "Out": "Sahada",
+      "Returned": "Döndü",
+      "Overdue": "Gecikmiş"
     }
   },
   "errors": {
@@ -1959,5 +1964,15 @@
     "sameValuesWarning": "Aşağıdaki değerler seçili ürünlerin hepsine aynı yazılır.",
     "sameValuesHint": "Bu yüzden yalnız aynı modelden birden fazla kaydınız varsa kullanın. Farklı pitch’teki kabinleri birlikte işaretlerseniz hesaplar sessizce yanlış çıkar.",
     "roleAfterHint": "Kalan teknik veriler (watt, kasa, açı, uyumlu işlemci) her ürünün kartındaki LED sekmesinden girilir."
+  },
+  "unitJobs": {
+    "tab": "İş geçmişi",
+    "empty": "Bu cihaz henüz hiçbir işe çıkmadı.",
+    "out": "Çıkış",
+    "in": "Dönüş",
+    "days": "Sahada (gün)",
+    "state": "Durum",
+    "scans": "Hareketler",
+    "by": "{{name}}"
   }
 }

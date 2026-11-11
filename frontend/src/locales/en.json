@@ -565,6 +565,11 @@
       "Light": "Light",
       "Truss": "Truss",
       "Scaffold": "Scaff"
+    },
+    "unitJobState": {
+      "Out": "On site",
+      "Returned": "Back",
+      "Overdue": "Overdue"
     }
   },
   "errors": {
@@ -1959,5 +1964,15 @@
     "sameValuesWarning": "The values below are written to every selected product.",
     "sameValuesHint": "So use it only when several records are the same model. Marking cabinets of different pitch together makes every calculation quietly wrong.",
     "roleAfterHint": "The rest of the technical data (watts, case, angles, compatible processors) is entered on each product’s LED tab."
+  },
+  "unitJobs": {
+    "tab": "Job history",
+    "empty": "This device has not been out on a job yet.",
+    "out": "Out",
+    "in": "Back",
+    "days": "On site (days)",
+    "state": "State",
+    "scans": "Scans",
+    "by": "{{name}}"
   }
 }

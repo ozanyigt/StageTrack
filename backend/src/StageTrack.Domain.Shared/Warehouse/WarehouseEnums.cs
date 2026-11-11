@@ -20,6 +20,14 @@ public enum MovementAction
     TransferredIn = 6
 }
 
+/// <summary>Where a device stands on one job: still out, back, or out past the day the job should have ended.</summary>
+public enum UnitJobState
+{
+    Out = 1,
+    Returned = 2,
+    Overdue = 3
+}
+
 /// <summary>Non-blocking warnings returned with a successful scan.</summary>
 public enum ScanWarning
 {

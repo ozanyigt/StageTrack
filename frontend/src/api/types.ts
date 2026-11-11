@@ -356,6 +356,36 @@ export interface Customer {
 }
 
 // Projects
+export const UNIT_JOB_STATES = ['Out', 'Returned', 'Overdue'] as const;
+export type UnitJobState = (typeof UNIT_JOB_STATES)[number];
+
+/** One scan under a job row of a device's working life. */
+export interface UnitJobScan {
+  id: Guid;
+  at: string;
+  action: MovementAction;
+  userName?: string | null;
+  note?: string | null;
+}
+
+/** A device's stay on one job: out, back, and how long it was on site. */
+export interface UnitJob {
+  projectId: Guid;
+  projectNumber?: number | null;
+  projectName?: string | null;
+  customerName?: string | null;
+  projectStatus?: ProjectStatus | null;
+  planStart?: string | null;
+  planEnd?: string | null;
+  outAt?: string | null;
+  outBy?: string | null;
+  inAt?: string | null;
+  inBy?: string | null;
+  days: number;
+  state: UnitJobState;
+  scans: UnitJobScan[];
+}
+
 export const PROJECT_STATUSES = ['Draft', 'Pending', 'Confirmed', 'Prepped', 'OnLocation', 'Returned', 'Cancelled'] as const;
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 

@@ -83,4 +83,7 @@ public interface IWarehouseMovementRepository : IRepository<WarehouseMovement>
     Task<List<MovementListItem>> GetPagedListAsync(MovementFilter filter, int skip, int take, CancellationToken cancellationToken = default);
 
     Task<long> GetCountAsync(MovementFilter filter, CancellationToken cancellationToken = default);
+
+    /// <summary>Every scan of one device, with the job it was scanned against; oldest first.</summary>
+    Task<List<UnitMovementRow>> GetUnitHistoryAsync(Guid unitId, CancellationToken cancellationToken = default);
 }

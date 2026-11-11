@@ -79,6 +79,9 @@ public interface IEquipmentUnitAppService
 
     Task<List<LabelDto>> GetLabelsAsync(Guid id);
 
+    /// <summary>The jobs this device has been out on, newest first, read from its scans.</summary>
+    Task<List<UnitJobDto>> GetJobHistoryAsync(Guid id);
+
     Task<EquipmentUnitDetailDto> SetImageAsync(Guid id, UploadFileInput file);
 
     Task<EquipmentUnitDetailDto> RemoveImageAsync(Guid id);

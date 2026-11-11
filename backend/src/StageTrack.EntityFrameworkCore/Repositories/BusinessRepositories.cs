@@ -228,6 +228,31 @@ public class WarehouseMovementRepository(StageTrackDbContext dbContext) : EfRepo
     public Task<long> GetCountAsync(MovementFilter filter, CancellationToken cancellationToken = default) =>
         ApplyFilter(filter).LongCountAsync(cancellationToken);
 
+    public Task<List<UnitMovementRow>> GetUnitHistoryAsync(Guid unitId, CancellationToken cancellationToken = default) =>
+        (from movement in DbSet.Where(m => m.UnitId == unitId)
+         join project in DbContext.Projects on movement.ProjectId equals project.Id into projects
+         from project in projects.DefaultIfEmpty()
+         join customer in DbContext.Customers on project.CustomerId equals customer.Id into customers
+         from customer in customers.DefaultIfEmpty()
+         join user in DbContext.Users on movement.UserId equals user.Id into users
+         from user in users.DefaultIfEmpty()
+         orderby movement.CreationTime
+         select new UnitMovementRow(
+             movement.Id,
+             movement.CreationTime,
+             movement.Action,
+             movement.ProjectId,
+             project != null ? project.Number : null,
+             project != null ? project.Name : null,
+             customer != null ? customer.Name : null,
+             project != null ? project.Status : null,
+             project != null ? project.PlanStart : null,
+             project != null ? project.PlanEnd : null,
+             user != null ? user.FullName : null,
+             movement.Note))
+        .AsNoTracking()
+        .ToListAsync(cancellationToken);
+
     private IQueryable<WarehouseMovement> ApplyFilter(MovementFilter filter)
     {
         IQueryable<WarehouseMovement> query = DbSet;

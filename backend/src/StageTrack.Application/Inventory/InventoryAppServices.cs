@@ -534,6 +534,7 @@ public class EquipmentUnitAppService(
     IEquipmentLabelRepository labelRepository,
     IStockLocationRepository locationRepository,
     IAttachmentRepository attachmentRepository,
+    IWarehouseMovementRepository movementRepository,
     EquipmentUnitManager unitManager,
     LabelManager labelManager,
     AttachmentManager attachmentManager,
@@ -596,6 +597,17 @@ public class EquipmentUnitAppService(
 
     public async Task<List<LabelDto>> GetLabelsAsync(Guid id) =>
         (await labelRepository.GetListByUnitAsync(id)).Select(l => l.ToDto()).ToList();
+
+    /// <summary>The device's working life: its scans folded into one line per job (see <see cref="UnitJobHistory"/>).</summary>
+    public async Task<List<UnitJobDto>> GetJobHistoryAsync(Guid id)
+    {
+        await unitRepository.GetAsync(id, includeDetails: false);
+        var jobs = UnitJobHistory.Build(await movementRepository.GetUnitHistoryAsync(id), DateTime.UtcNow);
+        return jobs.Select(j => new UnitJobDto(
+            j.ProjectId, j.ProjectNumber, j.ProjectName, j.CustomerName, j.ProjectStatus, j.PlanStart, j.PlanEnd,
+            j.OutAt, j.OutBy, j.InAt, j.InBy, j.Days, j.State,
+            j.Movements.Select(m => new UnitJobScanDto(m.Id, m.At, m.Action, m.UserName, m.Note)).ToList())).ToList();
+    }
 
     public async Task<EquipmentUnitDetailDto> SetImageAsync(Guid id, UploadFileInput file)
     {

@@ -127,6 +127,9 @@ public class EquipmentUnitsController(IEquipmentUnitAppService appService) : Con
     [HttpGet("{id:guid}")]
     public Task<EquipmentUnitDetailDto> GetAsync(Guid id) => appService.GetAsync(id);
 
+    [HttpGet("{id:guid}/jobs")]
+    public Task<List<UnitJobDto>> GetJobHistoryAsync(Guid id) => appService.GetJobHistoryAsync(id);
+
     [HttpGet("{id:guid}/labels")]
     public Task<List<LabelDto>> GetLabelsAsync(Guid id) => appService.GetLabelsAsync(id);
 

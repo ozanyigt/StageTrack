@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using StageTrack.Projects;
+using StageTrack.Warehouse;
 using StageTrack.Dtos;
 
 namespace StageTrack.Inventory;
@@ -260,6 +262,26 @@ public class EquipmentLookupDto
     public bool IsSerialized { get; set; }
     public decimal? RentalPrice { get; set; }
 }
+
+/// <summary>One scan under a job row of the device's working life.</summary>
+public sealed record UnitJobScanDto(Guid Id, DateTime At, MovementAction Action, string? UserName, string? Note);
+
+/// <summary>A device's stay on one job, as the serial number page shows it.</summary>
+public sealed record UnitJobDto(
+    Guid ProjectId,
+    int? ProjectNumber,
+    string? ProjectName,
+    string? CustomerName,
+    ProjectStatus? ProjectStatus,
+    DateTime? PlanStart,
+    DateTime? PlanEnd,
+    DateTime? OutAt,
+    string? OutBy,
+    DateTime? InAt,
+    string? InBy,
+    int Days,
+    UnitJobState State,
+    IReadOnlyList<UnitJobScanDto> Scans);
 
 public class GetAvailabilityInput
 {

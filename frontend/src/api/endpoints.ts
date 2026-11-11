@@ -108,6 +108,8 @@ export const unitApi = {
   /** Proposed internal reference of the next device (1, 2, 3… or TR-004 after TR-003). */
   nextInternalRef: (equipmentId: T.Guid) => get<string>('/equipment-units/next-internal-ref', { equipmentId }),
   labels: (id: T.Guid) => get<T.Label[]>(`/equipment-units/${id}/labels`),
+  /** One line per job the device has been out on, newest first. */
+  jobs: (id: T.Guid) => get<T.UnitJob[]>(`/equipment-units/${id}/jobs`),
   create: (input: {
     equipmentId: T.Guid;
     internalRef: string;

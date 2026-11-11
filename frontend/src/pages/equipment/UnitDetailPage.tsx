@@ -17,6 +17,7 @@ import {
   DatePicker,
   Descriptions,
   Dropdown,
+  Empty,
   Flex,
   Form,
   Input,
@@ -37,12 +38,13 @@ import {
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
+import { useTableLayout } from '../../components/TableLayout';
 import { useGuardedForm } from '../../components/useGuardedModal';
 import { useTranslation } from 'react-i18next';
 import { useLabelGenerator } from '../../components/LabelGenerator';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { inspectionApi, labelApi, repairApi, unitApi, warehouseApi } from '../../api/endpoints';
-import { LABEL_TYPES, type EquipmentUnitDetail, type LabelType, type Repair, type RepairStatus } from '../../api/types';
+import { LABEL_TYPES, type EquipmentUnitDetail, type LabelType, type Repair, type RepairStatus, type UnitJob, type UnitJobScan, type UnitJobState } from '../../api/types';
 import { Permissions, useAuth } from '../../auth/AuthContext';
 import { AuthImage } from '../../components/AuthImage';
 import { CollaborationPanel } from '../../components/CollaborationPanel';
@@ -189,6 +191,7 @@ export function UnitDetailPage() {
                   ),
                 },
                 { key: 'repairs', label: t('unitDetail.tabRepairs'), children: <RepairsTab unit={unit} onChanged={refresh} /> },
+                { key: 'jobs', label: t('unitJobs.tab'), children: <JobHistoryTab unitId={id} /> },
                 { key: 'history', label: t('unitDetail.tabHistory'), children: <HistoryTab unitId={id} /> },
               ]}
             />
@@ -660,6 +663,78 @@ function RepairsTab({ unit, onChanged }: { unit: EquipmentUnitDetail; onChanged:
         </Form>
       </Modal>
     </Space>
+  );
+}
+
+/**
+ * The device's working life: one line per job, read from its scans. The scans themselves are under the row,
+ * because the question after "when did it go out" is usually "who took it".
+ */
+function JobHistoryTab({ unitId }: { unitId: string }) {
+  const { t } = useTranslation();
+  const f = useFormat();
+  const { data, isLoading } = useQuery({ queryKey: ['unit-jobs', unitId], queryFn: () => unitApi.jobs(unitId) });
+
+  const colour: Record<UnitJobState, string> = { Out: 'blue', Returned: 'green', Overdue: 'red' };
+  const table = useTableLayout<UnitJob>(
+    [
+      {
+        key: 'project',
+        title: t('movements.project'),
+        width: 210,
+        ellipsis: true,
+        render: (_: unknown, j: UnitJob) => <Link to={`/projects/${j.projectId}`} onClick={(e) => e.stopPropagation()}>{j.projectNumber} · {j.projectName}</Link>,
+      },
+      { key: 'customer', title: t('projects.customer'), width: 150, ellipsis: true, render: (_: unknown, j: UnitJob) => j.customerName ?? '—' },
+      { key: 'period', title: t('projects.planPeriod'), width: 175, render: (_: unknown, j: UnitJob) => (j.planStart && j.planEnd ? f.period(j.planStart, j.planEnd) : '—') },
+      {
+        key: 'out',
+        title: t('unitJobs.out'),
+        width: 150,
+        render: (_: unknown, j: UnitJob) => (j.outAt ? <>{formatDateTime(j.outAt)}<div style={{ fontSize: 12, opacity: 0.65 }}>{j.outBy ?? t('movements.system')}</div></> : '—'),
+      },
+      {
+        key: 'in',
+        title: t('unitJobs.in'),
+        width: 150,
+        render: (_: unknown, j: UnitJob) => (j.inAt ? <>{formatDateTime(j.inAt)}<div style={{ fontSize: 12, opacity: 0.65 }}>{j.inBy ?? t('movements.system')}</div></> : '—'),
+      },
+      { key: 'days', title: t('unitJobs.days'), width: 100, align: 'end', render: (_: unknown, j: UnitJob) => j.days },
+      { key: 'state', title: t('unitJobs.state'), width: 105, render: (_: unknown, j: UnitJob) => <Tag color={colour[j.state]}>{t(`enums.unitJobState.${j.state}`)}</Tag> },
+    ],
+    { name: 'unitJobs', locked: ['project'] },
+  );
+
+  if (!isLoading && (data?.length ?? 0) === 0) return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('unitJobs.empty')} />;
+
+  return (
+    <Table<UnitJob>
+      size="small"
+      rowKey="projectId"
+      loading={isLoading}
+      dataSource={data}
+      pagination={false}
+      scroll={{ x: table.scrollX }}
+      components={table.components}
+      columns={table.columns}
+      expandable={{
+        rowExpandable: (j) => j.scans.length > 0,
+        expandedRowRender: (j) => (
+          <Table<UnitJobScan>
+            size="small"
+            rowKey="id"
+            pagination={false}
+            dataSource={j.scans}
+            columns={[
+              { title: t('movements.time'), width: 160, render: (_, m) => formatDateTime(m.at) },
+              { title: t('movements.action'), width: 150, render: (_, m) => <Tag>{t(`enums.movementAction.${m.action}`)}</Tag> },
+              { title: t('movements.user'), width: 180, render: (_, m) => m.userName ?? t('movements.system') },
+              { title: t('unitDetail.note'), render: (_, m) => m.note ?? '' },
+            ]}
+          />
+        ),
+      }}
+    />
   );
 }
 
