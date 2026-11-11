@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { ApiError } from '../api/http';
+import { ModuleLoadError } from './lazyModule';
 
 // Detail values that are enum names are translated before they are put into the message.
 const ENUM_DETAIL_NAMESPACE: Record<string, string> = {
@@ -14,6 +15,11 @@ const ENUM_DETAIL_NAMESPACE: Record<string, string> = {
 };
 
 export function translateError(t: TFunction, error: unknown): string {
+  // A library that did not arrive is not a failure of what the user asked for; reloading fixes it.
+  if (error instanceof ModuleLoadError) {
+    return t('errors.Common.ModuleLoad');
+  }
+
   if (!(error instanceof ApiError)) {
     return t('errors.Common.Unexpected');
   }

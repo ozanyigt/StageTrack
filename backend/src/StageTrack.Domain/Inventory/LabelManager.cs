@@ -63,24 +63,37 @@ public class LabelManager(
     /// <summary>
     /// A new label printed by this system, in the same JSON format as Rentman's
     /// (<c>{"ID":"80000001","cmpID":16,"isCase":0}</c>), so every scanner and phone reads old and new labels alike.
+    ///
+    /// A case says so on its label. Rentman marks the label of a box with isCase, and our own labels have to
+    /// agree: the same physical rack must not read as a case when its label came from Rentman and as a single
+    /// item when we printed it.
     /// </summary>
     public async Task<EquipmentLabel> CreateOwnLabelAsync(Equipment equipment, EquipmentUnit? unit)
     {
         var company = await companyRepository.GetAsync(currentCompany.Id!.Value);
         var workspace = company.RentmanWorkspaceId ?? 0;
 
-        var lastNumber = (await labelRepository.GetCodesByTypeAsync(LabelType.Qr))
-            .Select(code => LabelCodeParser.Parse(code))
-            .Select(p => long.TryParse(p.Code.Split(':').Last(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var n) ? n : 0)
-            .DefaultIfEmpty(FirstOwnLabelNumber - 1)
-            .Max();
-        var id = Math.Max(lastNumber + 1, FirstOwnLabelNumber).ToString(CultureInfo.InvariantCulture);
-
-        var raw = $"{{\"ID\":\"{id}\",\"cmpID\":{workspace},\"isCase\":0}}";
+        var number = NextOwnNumber(await labelRepository.GetCodesByTypeAsync(LabelType.Qr));
+        var raw = OwnLabelValue(number, workspace, equipment.Type == EquipmentType.Case);
         var code = LabelCodeParser.Parse(raw).Code;
         await EnsureFreeAsync(code);
         return new EquipmentLabel(Guid.CreateVersion7(), code, raw, LabelType.Qr, equipment.Id, unit?.Id);
     }
+
+    /// <summary>The next number of our own, continuing above every label we have printed so far.</summary>
+    public static long NextOwnNumber(IEnumerable<string> ownCodes)
+    {
+        var last = ownCodes
+            .Select(code => LabelCodeParser.Parse(code))
+            .Select(p => long.TryParse(p.Code.Split(':').Last(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var n) ? n : 0)
+            .DefaultIfEmpty(FirstOwnLabelNumber - 1)
+            .Max();
+        return Math.Max(last + 1, FirstOwnLabelNumber);
+    }
+
+    /// <summary>The QR text itself, in Rentman's shape; a box is marked as one.</summary>
+    public static string OwnLabelValue(long number, int workspaceId, bool isCase) =>
+        $"{{\"ID\":\"{number.ToString(CultureInfo.InvariantCulture)}\",\"cmpID\":{workspaceId},\"isCase\":{(isCase ? 1 : 0)}}}";
 
     private async Task EnsureFreeAsync(string code)
     {

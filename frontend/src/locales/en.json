@@ -586,7 +586,8 @@
       "Unauthorized": "Your session has expired. Please sign in again.",
       "Forbidden": "You do not have permission for this action.",
       "Unexpected": "An unexpected error occurred. Please try again.",
-      "Network": "The server could not be reached. Check your connection."
+      "Network": "The server could not be reached. Check your connection.",
+      "ModuleLoad": "The part needed for this could not be loaded. Reload the page and try again."
     },
     "Account": {
       "InvalidCredentials": "Username or password is incorrect.",

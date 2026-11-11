@@ -586,7 +586,8 @@
       "Unauthorized": "Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.",
       "Forbidden": "Bu işlem için yetkiniz yok.",
       "Unexpected": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.",
-      "Network": "Sunucuya ulaşılamadı. Bağlantınızı kontrol edin."
+      "Network": "Sunucuya ulaşılamadı. Bağlantınızı kontrol edin.",
+      "ModuleLoad": "Bu işlem için gereken bileşen yüklenemedi. Sayfayı yenileyip tekrar deneyin."
     },
     "Account": {
       "InvalidCredentials": "Kullanıcı adı veya şifre hatalı.",

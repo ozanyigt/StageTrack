@@ -10,6 +10,7 @@ import { equipmentApi, labelApi, labelTemplateApi, unitApi } from '../api/endpoi
 import type { EquipmentUnit, LabelTemplate, PrintLabelItem } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { LabelPreview } from '../pages/equipment/LabelPreview';
+import { loadModule } from '../utils/lazyModule';
 import { useErrorToast } from '../utils/errors';
 
 export interface LabelRequest {
@@ -190,7 +191,10 @@ function LabelDrawer({ request, onClose, onGenerated }: { request: LabelRequest;
     const run = async () => {
       try {
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-        const [{ jsPDF }, { toPng }] = await Promise.all([import('jspdf'), import('html-to-image')]);
+        const [{ jsPDF }, { toPng }] = await Promise.all([
+          loadModule('jspdf', () => import('jspdf')),
+          loadModule('html-to-image', () => import('html-to-image')),
+        ]);
         const { widthMm: w, heightMm: h } = pending.template;
         const orientation = w >= h ? 'landscape' : 'portrait';
         const pdf = new jsPDF({ orientation, unit: 'mm', format: [w, h] });

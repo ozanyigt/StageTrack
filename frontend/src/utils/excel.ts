@@ -1,4 +1,5 @@
 // Excel export/import helpers (exceljs is loaded on demand so it does not weigh on the first page load).
+import { loadModule } from './lazyModule';
 
 export interface ExcelColumn<T> {
   /** Translated column header. */
@@ -10,7 +11,7 @@ export interface ExcelColumn<T> {
 
 /** Writes rows to a single-sheet .xlsx file and starts the download. */
 export async function exportToExcel<T>(fileName: string, columns: ExcelColumn<T>[], rows: T[], sheetName = 'Sheet1') {
-  const { default: ExcelJS } = await import('exceljs');
+  const { default: ExcelJS } = await loadModule('exceljs', () => import('exceljs'));
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet(sheetName.slice(0, 31));
   sheet.columns = columns.map((c) => ({ header: c.header, width: c.width ?? Math.max(12, Math.min(48, c.header.length + 4)) }));
@@ -56,7 +57,7 @@ export async function downloadImportTemplate(fileName: string, fields: ImportFie
  * Each row gets its Excel row number in `row`.
  */
 export async function readExcelRows(file: File, fields: ImportField[]): Promise<Record<string, unknown>[]> {
-  const { default: ExcelJS } = await import('exceljs');
+  const { default: ExcelJS } = await loadModule('exceljs', () => import('exceljs'));
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(await file.arrayBuffer());
   const sheet = workbook.worksheets[0];
