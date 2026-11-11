@@ -571,6 +571,12 @@
       "Out": "On site",
       "Returned": "Back",
       "Overdue": "Overdue"
+    },
+    "caseSkipReason": {
+      "OnAnotherProject": "out on another job",
+      "NotAvailable": "not in the warehouse",
+      "NotOut": "did not go out with the case",
+      "AlreadyOut": "already out"
     }
   },
   "errors": {
@@ -1466,7 +1472,18 @@
     "confirmNotPlanned": "is not on the quote.",
     "confirmOverPlanned": "is being scanned above the planned quantity.",
     "confirmYes": "Yes, add it",
-    "addedToExtras": "Added to \"Added products\""
+    "addedToExtras": "Added to \"Added products\"",
+    "confirmTakeOutOfCase": "{{unit}} is packed in {{case}}. Take it out and scan it on its own?",
+    "takeOutYes": "Take out and scan",
+    "confirmPartialTitle": "The case will go out incomplete",
+    "confirmPartial": "{{count}} of {{total}} items cannot go out. Send the case with the rest?",
+    "partialYes": "Send with the rest",
+    "caseOut": "{{count}} items went out with the case",
+    "caseIn": "{{count}} items came back with the case",
+    "caseLeftBehind": "{{count}} items stayed behind",
+    "caseMissing": "{{count}} items are not in the case",
+    "takenOutOfCase": "Taken out of the case",
+    "insideCaseTitle": "The device is packed in a case"
   },
   "led": {
     "inventoryTitle": "LED inventory",

@@ -571,6 +571,12 @@
       "Out": "في الموقع",
       "Returned": "عاد",
       "Overdue": "متأخر"
+    },
+    "caseSkipReason": {
+      "OnAnotherProject": "في مهمة أخرى",
+      "NotAvailable": "ليس في المستودع",
+      "NotOut": "لم يخرج مع الصندوق",
+      "AlreadyOut": "خرج بالفعل"
     }
   },
   "errors": {
@@ -1466,7 +1472,18 @@
     "confirmNotPlanned": "غير موجود في عرض السعر.",
     "confirmOverPlanned": "يُمسح بأكثر من الكمية المخططة.",
     "confirmYes": "نعم، أضفه",
-    "addedToExtras": "أُضيف إلى \"منتجات مضافة\""
+    "addedToExtras": "أُضيف إلى \"منتجات مضافة\"",
+    "confirmTakeOutOfCase": "{{unit}} معبأ في {{case}}. هل تخرجه وتمسحه وحده؟",
+    "takeOutYes": "أخرجه وامسحه",
+    "confirmPartialTitle": "سيخرج الصندوق ناقصًا",
+    "confirmPartial": "{{count}} من {{total}} عنصرًا لا يمكنها الخروج. هل ترسل الصندوق بالباقي؟",
+    "partialYes": "أرسل بالباقي",
+    "caseOut": "خرج {{count}} عنصرًا مع الصندوق",
+    "caseIn": "عاد {{count}} عنصرًا مع الصندوق",
+    "caseLeftBehind": "بقي {{count}} عنصرًا",
+    "caseMissing": "{{count}} عنصرًا ليست في الصندوق",
+    "takenOutOfCase": "أُخرج من الصندوق",
+    "insideCaseTitle": "الجهاز معبأ في صندوق"
   },
   "led": {
     "inventoryTitle": "مخزون LED",

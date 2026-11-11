@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using StageTrack.Dtos;
 using StageTrack.Inventory;
 using StageTrack.Projects;
+using StageTrack.Warehouse;
 
 namespace StageTrack.Warehouse;
 
@@ -17,6 +18,12 @@ public class ScanInput
 
     /// <summary>Confirmed by the user: an unplanned (or extra) item is added to the "added products" section.</summary>
     public bool AllowUnplanned { get; set; }
+
+    /// <summary>Confirmed by the user: the device is taken out of the case it is packed in and scanned on its own.</summary>
+    public bool TakeOutOfCase { get; set; }
+
+    /// <summary>Confirmed by the user: the case goes out without the content that cannot travel.</summary>
+    public bool AllowPartial { get; set; }
 }
 
 public class ScanResultDto
@@ -36,6 +43,21 @@ public class ScanResultDto
 
     /// <summary>Nothing was recorded: ask "not on the quote / more than planned — add it?" and scan again with AllowUnplanned.</summary>
     public bool RequiresConfirmation { get; set; }
+
+    /// <summary>The case the scanned device is packed in; set with the InsideCase warning.</summary>
+    public string? CaseName { get; set; }
+
+    /// <summary>What happened to each line of a scanned case; empty for a normal scan.</summary>
+    public List<CaseScanLineDto> CaseLines { get; set; } = [];
+}
+
+/// <summary>One line of a scanned case: what travelled with the box, and what did not.</summary>
+public class CaseScanLineDto
+{
+    public string Label { get; set; } = null!;
+    public int Quantity { get; set; }
+    public bool Moved { get; set; }
+    public CaseScanSkipReason? Reason { get; set; }
 }
 
 /// <summary>Scan screen: the planned list in the quote's sections with what is out / back, per line.</summary>

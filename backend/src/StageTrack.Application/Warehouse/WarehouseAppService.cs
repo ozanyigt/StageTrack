@@ -12,6 +12,7 @@ public class WarehouseAppService(
     IEquipmentUnitRepository unitRepository,
     ICustomerRepository customerRepository,
     IWarehouseMovementRepository movementRepository,
+    ICaseContentRepository caseContentRepository,
     WarehouseManager warehouseManager,
     ProjectManager projectManager,
     ICurrentUser currentUser) : IWarehouseAppService
@@ -19,13 +20,20 @@ public class WarehouseAppService(
     public async Task<ScanResultDto> ScanAsync(ScanInput input)
     {
         var project = await projectRepository.GetAsync(input.ProjectId);
-        var (outcome, movement) = await warehouseManager.ScanAsync(project, input.Code, input.Direction, currentUser.Id, input.AllowUnplanned);
-        if (movement is not null)
+        var effects = await warehouseManager.ScanAsync(project, input.Code, input.Direction, currentUser.Id,
+            input.AllowUnplanned, input.TakeOutOfCase, input.AllowPartial);
+
+        foreach (var movement in effects.Movements)
         {
             await movementRepository.InsertAsync(movement);
         }
 
-        return outcome.ToDto();
+        if (effects.RemovedFromCase is { } line)
+        {
+            await caseContentRepository.DeleteAsync(line);
+        }
+
+        return effects.Outcome.ToDto();
     }
 
     public async Task<PackingListDto> GetPackingListAsync(Guid projectId)

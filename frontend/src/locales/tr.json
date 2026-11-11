@@ -571,6 +571,12 @@
       "Out": "Sahada",
       "Returned": "Döndü",
       "Overdue": "Gecikmiş"
+    },
+    "caseSkipReason": {
+      "OnAnotherProject": "başka işte",
+      "NotAvailable": "depoda değil",
+      "NotOut": "case ile çıkmamış",
+      "AlreadyOut": "zaten çıkmış"
     }
   },
   "errors": {
@@ -1466,7 +1472,18 @@
     "confirmNotPlanned": "teklifte yok.",
     "confirmOverPlanned": "planlanan adetten fazla okutuluyor.",
     "confirmYes": "Evet, ekle",
-    "addedToExtras": "\"Eklenen ürünler\" bölümüne eklendi"
+    "addedToExtras": "\"Eklenen ürünler\" bölümüne eklendi",
+    "confirmTakeOutOfCase": "{{unit}} şu anda {{case}} içinde. Case’ten çıkarıp tek başına okutayım mı?",
+    "takeOutYes": "Çıkar ve okut",
+    "confirmPartialTitle": "Case eksik çıkacak",
+    "confirmPartial": "{{total}} kalemden {{count}} tanesi çıkamıyor. Kalanla çıkalım mı?",
+    "partialYes": "Kalanla çıkar",
+    "caseOut": "{{count}} kalem case ile çıktı",
+    "caseIn": "{{count}} kalem case ile döndü",
+    "caseLeftBehind": "{{count}} kalem çıkamadı",
+    "caseMissing": "{{count}} kalem case’de değil",
+    "takenOutOfCase": "Case’ten çıkarıldı",
+    "insideCaseTitle": "Cihaz bir case içinde"
   },
   "led": {
     "inventoryTitle": "LED envanteri",

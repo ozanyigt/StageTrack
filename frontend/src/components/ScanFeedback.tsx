@@ -1,10 +1,12 @@
 import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled } from '@ant-design/icons';
-import { Flex, Typography } from 'antd';
+import { Flex, Tag, Typography } from 'antd';
 
 export interface ScanFeedbackValue {
   kind: 'ok' | 'warn' | 'error';
   title: string;
   detail?: string;
+  /** Named lines behind the headline, e.g. what travelled in a case and what stayed behind. */
+  lines?: { label: string; ok: boolean; note?: string }[];
 }
 
 const COLOR = { ok: '#52c41a', warn: '#faad14', error: '#ff4d4f' } as const;
@@ -61,9 +63,19 @@ export function ScanFeedback({ value, style }: { value: ScanFeedbackValue; style
       {value.kind === 'ok' && <CheckCircleFilled style={{ color: COLOR.ok, fontSize: 24 }} />}
       {value.kind === 'warn' && <ExclamationCircleFilled style={{ color: COLOR.warn, fontSize: 24 }} />}
       {value.kind === 'error' && <CloseCircleFilled style={{ color: COLOR.error, fontSize: 24 }} />}
-      <div>
+      <div style={{ minWidth: 0 }}>
         <Typography.Text strong>{value.title}</Typography.Text>
         {value.detail && <div><Typography.Text type="secondary">{value.detail}</Typography.Text></div>}
+        {value.lines && value.lines.length > 0 && (
+          // A case moves many things at once; each of them is named, so nobody has to guess what went.
+          <Flex wrap gap={4} style={{ marginTop: 6, maxHeight: 92, overflow: 'auto' }}>
+            {value.lines.map((line, index) => (
+              <Tag key={`${line.label}-${index}`} color={line.ok ? 'green' : 'orange'} bordered={false} style={{ marginInlineEnd: 0 }}>
+                {line.label}{line.note ? ` · ${line.note}` : ''}
+              </Tag>
+            ))}
+          </Flex>
+        )}
       </div>
     </Flex>
   );

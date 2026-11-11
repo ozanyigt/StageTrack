@@ -249,8 +249,9 @@ export const collaborationApi = {
 };
 
 export const warehouseApi = {
-  scan: (projectId: T.Guid, code: string, direction: T.ScanDirection, allowUnplanned = false) =>
-    post<T.ScanResult>('/warehouse/scan', { projectId, code, direction, allowUnplanned }),
+  scan: (projectId: T.Guid, code: string, direction: T.ScanDirection,
+         answers: { allowUnplanned?: boolean; takeOutOfCase?: boolean; allowPartial?: boolean } = {}) =>
+    post<T.ScanResult>('/warehouse/scan', { projectId, code, direction, ...answers }),
   scanSheet: (projectId: T.Guid) => get<T.ScanSheet>(`/warehouse/projects/${projectId}/scan-sheet`),
   /** Warehouse: Prepped / OnLocation / Returned without project access. */
   setProjectStatus: (projectId: T.Guid, status: T.ProjectStatus) =>

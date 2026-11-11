@@ -218,7 +218,11 @@ internal static class ObjectMapping
         OutQuantity = o.OutQuantity,
         AlreadyScanned = o.AlreadyScanned,
         Warnings = o.Warnings,
-        RequiresConfirmation = o.RequiresConfirmation
+        RequiresConfirmation = o.RequiresConfirmation,
+        CaseName = o.CaseName,
+        CaseLines = o.CaseLines
+            .Select(l => new CaseScanLineDto { Label = l.Label, Quantity = l.Quantity, Moved = l.Moved, Reason = l.Reason })
+            .ToList()
     };
 
     public static RentalFactorProfileDto ToDto(this RentalFactorProfile p) => new()

@@ -594,7 +594,18 @@ export interface ProjectInput {
 
 // Warehouse
 export type ScanDirection = 'Out' | 'In';
-export type ScanWarning = 'NotPlanned' | 'OverPlanned';
+export type ScanWarning = 'NotPlanned' | 'OverPlanned' | 'InsideCase' | 'CaseContentUnavailable' | 'CaseReturnIncomplete';
+
+export const CASE_SKIP_REASONS = ['OnAnotherProject', 'NotAvailable', 'NotOut', 'AlreadyOut'] as const;
+export type CaseSkipReason = (typeof CASE_SKIP_REASONS)[number];
+
+/** One line of a scanned case: what travelled with the box, and what did not. */
+export interface CaseScanLine {
+  label: string;
+  quantity: number;
+  moved: boolean;
+  reason?: CaseSkipReason | null;
+}
 export const MOVEMENT_ACTIONS = ['CheckedOut', 'CheckedIn', 'LabelAssigned', 'ProjectStatusChanged', 'TransferredOut', 'TransferredIn'] as const;
 export type MovementAction = (typeof MOVEMENT_ACTIONS)[number];
 
@@ -613,6 +624,10 @@ export interface ScanResult {
   warnings: ScanWarning[];
   /** Nothing recorded: ask "not on the quote / more than planned — add it?", then scan again with allowUnplanned. */
   requiresConfirmation: boolean;
+  /** The case the scanned device is packed in; set with the InsideCase warning. */
+  caseName?: string | null;
+  /** What happened to each line of a scanned case; empty for a normal scan. */
+  caseLines: CaseScanLine[];
 }
 
 export interface ScanSheetSection {

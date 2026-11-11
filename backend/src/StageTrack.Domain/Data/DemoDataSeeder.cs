@@ -809,8 +809,8 @@ public class DemoDataSeeder(
 
             foreach (var code in codes)
             {
-                var (_, movement) = await warehouseManager.ScanAsync(project, code, ScanDirection.Out, null);
-                if (movement is not null)
+                var effects = await warehouseManager.ScanAsync(project, code, ScanDirection.Out, null);
+                foreach (var movement in effects.Movements)
                 {
                     await movementRepository.InsertAsync(movement);
                     await unitOfWork.SaveChangesAsync();
@@ -830,9 +830,12 @@ public class DemoDataSeeder(
 
             foreach (var code in codes)
             {
-                var (_, movement) = await warehouseManager.ScanAsync(project, code, ScanDirection.In, null);
-                await movementRepository.InsertAsync(movement!);
-                await unitOfWork.SaveChangesAsync();
+                var effects = await warehouseManager.ScanAsync(project, code, ScanDirection.In, null);
+                foreach (var movement in effects.Movements)
+                {
+                    await movementRepository.InsertAsync(movement);
+                    await unitOfWork.SaveChangesAsync();
+                }
             }
         }
     }

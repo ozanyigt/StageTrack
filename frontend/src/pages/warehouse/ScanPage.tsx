@@ -91,18 +91,64 @@ export function ScanPage() {
 
   const describe = (r: ScanResult) => `${r.equipmentCode} · ${r.equipmentName}${r.unitInternalRef ? ` — ${r.unitInternalRef}` : ''}`;
 
+  /** What a scanned case did, line by line, for the feedback card. */
+  const caseLines = (r: ScanResult) =>
+    r.caseLines.map((l) => ({
+      label: l.quantity > 1 ? `${l.label} × ${l.quantity}` : l.label,
+      ok: l.moved,
+      note: l.reason ? t(`enums.caseSkipReason.${l.reason}`) : undefined,
+    }));
+
   const scan = useMutation({
-    mutationFn: ({ code, allowUnplanned }: { code: string; allowUnplanned?: boolean }) =>
-      warehouseApi.scan(projectId!, code, direction, allowUnplanned ?? false),
+    mutationFn: ({ code, ...answers }: { code: string; allowUnplanned?: boolean; takeOutOfCase?: boolean; allowPartial?: boolean }) =>
+      warehouseApi.scan(projectId!, code, direction, answers),
     onSuccess: (r, vars) => {
       if (r.requiresConfirmation) {
         scanSignal('warn');
+
+        // A device packed in a case does not walk out on its own without being taken out of it first.
+        if (r.warnings.includes('InsideCase')) {
+          modal.confirm({
+            title: t('scanSheet.insideCaseTitle'),
+            content: t('scanSheet.confirmTakeOutOfCase', { unit: r.unitInternalRef ?? r.equipmentName, case: r.caseName ?? '?' }),
+            okText: t('scanSheet.takeOutYes'),
+            cancelText: t('common.no'),
+            onOk: () => scan.mutate({ ...vars, takeOutOfCase: true }),
+            afterClose: () => inputRef.current?.focus(),
+          });
+          return;
+        }
+
+        // A case that cannot go out whole: the blocked lines are named before anything is written.
+        if (r.warnings.includes('CaseContentUnavailable')) {
+          const blocked = r.caseLines.filter((l) => !l.moved && l.reason !== 'AlreadyOut');
+          modal.confirm({
+            title: t('scanSheet.confirmPartialTitle'),
+            width: 520,
+            content: (
+              <div>
+                <div>{t('scanSheet.confirmPartial', { count: blocked.length, total: r.caseLines.length })}</div>
+                <ul style={{ margin: '8px 0 0', paddingInlineStart: 20 }}>
+                  {blocked.map((l) => (
+                    <li key={l.label}>{l.label} — {t(`enums.caseSkipReason.${l.reason!}`)}</li>
+                  ))}
+                </ul>
+              </div>
+            ),
+            okText: t('scanSheet.partialYes'),
+            cancelText: t('common.no'),
+            onOk: () => scan.mutate({ ...vars, allowPartial: true }),
+            afterClose: () => inputRef.current?.focus(),
+          });
+          return;
+        }
+
         modal.confirm({
           title: t('scanSheet.confirmTitle'),
           content: `${describe(r)} — ${t(r.warnings.includes('NotPlanned') ? 'scanSheet.confirmNotPlanned' : 'scanSheet.confirmOverPlanned')}`,
           okText: t('scanSheet.confirmYes'),
           cancelText: t('common.no'),
-          onOk: () => scan.mutate({ code: vars.code, allowUnplanned: true }),
+          onOk: () => scan.mutate({ ...vars, allowUnplanned: true }),
           afterClose: () => inputRef.current?.focus(),
         });
         return;
@@ -111,8 +157,27 @@ export function ScanPage() {
       if (r.alreadyScanned) {
         scanSignal('warn');
         setLast({ kind: 'warn', title: describe(r), detail: t('scan.alreadyScanned') });
+      } else if (r.caseLines.length > 0) {
+        // A case reports what it took with it, or brought back, instead of a single count.
+        const moved = r.caseLines.filter((l) => l.moved).length;
+        const left = r.caseLines.filter((l) => !l.moved && l.reason !== 'AlreadyOut').length;
+        const kind = left > 0 ? 'warn' : 'ok';
+        scanSignal(kind);
+        setLast({
+          kind,
+          title: describe(r),
+          detail: [
+            t(r.direction === 'Out' ? 'scanSheet.caseOut' : 'scanSheet.caseIn', { count: moved }),
+            ...(left > 0 ? [t(r.direction === 'Out' ? 'scanSheet.caseLeftBehind' : 'scanSheet.caseMissing', { count: left })] : []),
+          ].join(' · '),
+          lines: caseLines(r),
+        });
+        setHighlight(r.equipmentId);
       } else {
-        const warnings = vars.allowUnplanned ? [t('scanSheet.addedToExtras')] : [];
+        const warnings = [
+          ...(vars.allowUnplanned ? [t('scanSheet.addedToExtras')] : []),
+          ...(vars.takeOutOfCase ? [t('scanSheet.takenOutOfCase')] : []),
+        ];
         scanSignal(warnings.length ? 'warn' : 'ok');
         setLast({
           kind: warnings.length ? 'warn' : 'ok',

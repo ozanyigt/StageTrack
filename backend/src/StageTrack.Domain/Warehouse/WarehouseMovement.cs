@@ -38,6 +38,17 @@ public class WarehouseMovement : AggregateRoot, IMultiCompany, IHasCreationTime
         UserId = userId;
     }
 
+    /// <summary>
+    /// Log line for something that moved inside a case rather than on its own scan. The note holds the case it
+    /// travelled in, which is what the movement list and the device's job history have to show.
+    /// </summary>
+    internal static WarehouseMovement CreateInCase(MovementAction action, Guid equipmentId, Guid? unitId, Guid projectId,
+        int quantity, Guid? userId, string caseName) =>
+        new(Guid.CreateVersion7(), action, equipmentId, unitId, projectId, quantity, null, userId)
+        {
+            Note = caseName
+        };
+
     /// <summary>Log line for a device sent to (or received from) another location; the company is set explicitly.</summary>
     internal static WarehouseMovement CreateTransfer(MovementAction action, Guid companyId, Guid equipmentId, Guid unitId,
         Guid? userId, string otherLocation) =>
