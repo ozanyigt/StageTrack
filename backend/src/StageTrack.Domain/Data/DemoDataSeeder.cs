@@ -86,7 +86,8 @@ public class DemoDataSeeder(
     {
         if (await tenantRepository.CodeExistsAsync("STARAS"))
         {
-            // The demo set is already there; only what it is still missing is added, which today is the LED data.
+            // The demo set is already there; only what it is still missing is added.
+            await SeedVideoTradeAsync();
             await SeedDesignDataAsync();
             return;
         }
@@ -127,11 +128,92 @@ public class DemoDataSeeder(
             await SeedDubaiAsync(ae);
         }
 
+        await SeedVideoTradeAsync();
         await SeedDesignDataAsync();
 
         logger.LogInformation("Demo data seeded. Turkish label codes {First} … {Last}.",
             LabelCodeParser.Format(TurkeyRentmanWorkspace, false, FirstLabelNumber.ToString()),
             LabelCodeParser.Format(TurkeyRentmanWorkspace, false, "9002xx"));
+    }
+
+    /// <summary>Folders of the demo set that the video trade needs, by the name they were created with.</summary>
+    private const string VideoFolderName = "VIDEO";
+    private const string LedFolderName = "Led Screen";
+    private const string ProcessorFolderName = "Processor";
+
+    /// <summary>The processors and the fibre converter, which belong beside the screens rather than under LED.</summary>
+    private static readonly string[] ProcessorCodes = ["VID-053", "VID-054", "VID-055"];
+
+    /// <summary>
+    /// Puts the video trade on a demo set that was seeded before it existed: VIDEO becomes video, Led Screen stays
+    /// LED underneath it, and the processors move into a folder of their own. Runs on every start and writes only
+    /// what is not already so, because the firm may have arranged these folders differently since.
+    /// </summary>
+    private async Task SeedVideoTradeAsync()
+    {
+        var tenant = (await tenantRepository.GetListAsync()).FirstOrDefault(t => t.Code == "STARAS");
+        if (tenant is null)
+        {
+            return;
+        }
+
+        foreach (var company in await companyRepository.GetListByTenantAsync(tenant.Id))
+        {
+            using (currentCompany.Change(company.Id))
+            {
+                await SeedVideoTradeForCompanyAsync();
+            }
+        }
+    }
+
+    private async Task SeedVideoTradeForCompanyAsync()
+    {
+        var folders = await folderRepository.GetListAsync();
+        if (folders.FirstOrDefault(f => f.ParentId is null && f.Name == VideoFolderName) is not { } video)
+        {
+            return;
+        }
+
+        var changed = new List<string>();
+
+        if (video.Discipline is null)
+        {
+            video.SetDiscipline(EquipmentDiscipline.Video);
+            changed.Add(VideoFolderName);
+        }
+
+        // Without its own tag the LED screens would follow VIDEO upwards and leave the LED screens.
+        if (folders.FirstOrDefault(f => f.ParentId == video.Id && f.Name == LedFolderName) is { Discipline: null } led)
+        {
+            led.SetDiscipline(EquipmentDiscipline.Led);
+            changed.Add(LedFolderName);
+        }
+
+        var processorFolder = folders.FirstOrDefault(f => f.ParentId == video.Id && f.Name == ProcessorFolderName);
+        if (processorFolder is null)
+        {
+            processorFolder = await folderManager.CreateAsync(ProcessorFolderName, video.Id);
+            await folderRepository.InsertAsync(processorFolder);
+            changed.Add(ProcessorFolderName);
+        }
+
+        foreach (var code in ProcessorCodes)
+        {
+            if (await equipmentRepository.FindByCodeAsync(code) is { } equipment && equipment.FolderId != processorFolder.Id)
+            {
+                equipment.Update(equipment.Name, equipment.Brand, equipment.Model, processorFolder.Id, equipment.Type,
+                    equipment.CountryOfOrigin, equipment.Notes);
+                changed.Add(code);
+            }
+        }
+
+        if (changed.Count == 0)
+        {
+            return;
+        }
+
+        await unitOfWork.SaveChangesAsync();
+        logger.LogInformation("Demo video trade put in place: {Changed}.", string.Join(", ", changed));
     }
 
     // ---- The LED side of the inventory ----------------------------------------------------------------------
@@ -399,14 +481,17 @@ public class DemoDataSeeder(
             ("light", "LIGHT", null), ("moving", "Moving Head", "light"), ("wash", "Wash", "light"), ("profile", "Profil / Strobe", "light"),
             ("console-l", "Işık Konsolu", "light"), ("cable-l", "Kablo", "light"),
             ("video", "VIDEO", null), ("display", "Display", "video"), ("led", "Led Screen", "video"), ("projection", "Projeksiyon", "video"),
-            ("media", "Media Server", "video"), ("network", "Network", "video"),
+            ("media", "Media Server", "video"), ("network", "Network", "video"), ("processor", "Processor", "video"),
             ("truss", "TRUSS", null), ("rigging", "Motor / Vinç", "truss"),
             ("scaff", "SCAFF", null), ("scaff-deck", "Platform / Dikme", "scaff"));
 
         // The trades, tagged once at the top: everything below follows, so the design tabs know a speaker from a fixture.
+        // VIDEO carries the video trade and Led Screen says LED inside it: the nearest tag above a product wins,
+        // so a panel under Led Screen stays LED while everything else under VIDEO is video.
         await TagDisciplinesAsync(folders,
             ("audio", EquipmentDiscipline.Sound), ("light", EquipmentDiscipline.Light),
-            ("led", EquipmentDiscipline.Led), ("truss", EquipmentDiscipline.Truss), ("scaff", EquipmentDiscipline.Scaffold));
+            ("video", EquipmentDiscipline.Video), ("led", EquipmentDiscipline.Led),
+            ("truss", EquipmentDiscipline.Truss), ("scaff", EquipmentDiscipline.Scaffold));
 
         // key, code, name, brand, model, folder, units (0 = quantity tracked), stock, daily price (TRY), unit ref prefix
         await SeedEquipmentAsync(folders, gunesli.Id, suppliers,

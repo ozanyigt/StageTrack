@@ -13,6 +13,7 @@ import { DisciplineDesign } from './DisciplineDesign';
 /** The URL says the trade, so every door is a link a user can keep, and the back button works between them. */
 const BY_PATH: Record<string, EquipmentDiscipline> = {
   led: 'Led',
+  video: 'Video',
   sound: 'Sound',
   light: 'Light',
   truss: 'Truss',
@@ -22,7 +23,7 @@ const BY_PATH: Record<string, EquipmentDiscipline> = {
 export const DESIGN_PATHS = Object.keys(BY_PATH);
 
 /**
- * One design screen per trade, behind five doors in the menu. LED keeps its own designer - a wall is drawn, and
+ * One design screen per trade, behind six doors in the menu. LED keeps its own designer - a wall is drawn, and
  * the server answers with panels, circuits and processors. The other four are chosen rather than drawn, so they
  * share one list. Both write into the same job, which is what the power, stock, 3D and quote screens read.
  */

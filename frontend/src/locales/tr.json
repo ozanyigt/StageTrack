@@ -80,6 +80,7 @@
     "ledStage": "3D sahne",
     "quoteDraft": "Teklif Taslağı Hazırla",
     "designLed": "LED tasarımı",
+    "designVideo": "Video tasarımı",
     "designSound": "Ses tasarımı",
     "designLight": "Işık tasarımı",
     "designTruss": "Truss tasarımı",
@@ -563,6 +564,7 @@
     },
     "equipmentDiscipline": {
       "Led": "LED",
+      "Video": "Video",
       "Sound": "Ses",
       "Light": "Işık",
       "Truss": "Truss",

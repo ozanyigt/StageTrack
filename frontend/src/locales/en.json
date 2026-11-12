@@ -80,6 +80,7 @@
     "ledStage": "3D stage",
     "quoteDraft": "Prepare a quote draft",
     "designLed": "LED design",
+    "designVideo": "Video design",
     "designSound": "Sound design",
     "designLight": "Lighting design",
     "designTruss": "Truss design",
@@ -563,6 +564,7 @@
     },
     "equipmentDiscipline": {
       "Led": "LED",
+      "Video": "Video",
       "Sound": "Sound",
       "Light": "Light",
       "Truss": "Truss",

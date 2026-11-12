@@ -24,7 +24,10 @@ public enum EquipmentDiscipline
     Sound = 2,
     Light = 3,
     Truss = 4,
-    Scaffold = 5
+    Scaffold = 5,
+
+    /// <summary>Screens, projectors, media servers and the processing between them - LED walls excepted.</summary>
+    Video = 6
 }
 
 public enum UnitStatus

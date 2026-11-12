@@ -5,6 +5,7 @@ import {
   BulbOutlined,
   PrinterOutlined,
   SoundOutlined,
+  VideoCameraOutlined,
   ColumnHeightOutlined,
   TableOutlined,
   InboxOutlined,
@@ -102,8 +103,9 @@ export function AppLayout() {
       label: t('nav.quoteDraft'),
       permission: Permissions.Design,
       children: [
-        // Five doors, one page: the trade is in the URL, so each is a link of its own.
+        // Six doors, one page: the trade is in the URL, so each is a link of its own.
         { key: '/draft/design/led', icon: <BorderOuterOutlined />, label: t('nav.designLed'), permission: Permissions.DesignDraft },
+        { key: '/draft/design/video', icon: <VideoCameraOutlined />, label: t('nav.designVideo'), permission: Permissions.DesignDraft },
         { key: '/draft/design/sound', icon: <SoundOutlined />, label: t('nav.designSound'), permission: Permissions.DesignDraft },
         { key: '/draft/design/light', icon: <BulbOutlined />, label: t('nav.designLight'), permission: Permissions.DesignDraft },
         { key: '/draft/design/truss', icon: <ColumnHeightOutlined />, label: t('nav.designTruss'), permission: Permissions.DesignDraft },

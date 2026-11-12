@@ -80,6 +80,7 @@
     "ledStage": "المسرح ثلاثي الأبعاد",
     "quoteDraft": "إعداد مسودة عرض سعر",
     "designLed": "تصميم LED",
+    "designVideo": "تصميم الفيديو",
     "designSound": "تصميم الصوت",
     "designLight": "تصميم الإضاءة",
     "designTruss": "تصميم الترس",
@@ -563,6 +564,7 @@
     },
     "equipmentDiscipline": {
       "Led": "LED",
+      "Video": "فيديو",
       "Sound": "الصوت",
       "Light": "الإضاءة",
       "Truss": "الترس",

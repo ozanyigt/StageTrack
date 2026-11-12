@@ -74,9 +74,9 @@ export const RELATION_KINDS = ['Content', 'Accessory', 'Alternative'] as const;
 export type RelationKind = (typeof RELATION_KINDS)[number];
 
 /** The trade a product belongs to; the firm tags folders, not products. */
-export type EquipmentDiscipline = 'Led' | 'Sound' | 'Light' | 'Truss' | 'Scaffold';
+export type EquipmentDiscipline = 'Led' | 'Video' | 'Sound' | 'Light' | 'Truss' | 'Scaffold';
 
-export const EQUIPMENT_DISCIPLINES: EquipmentDiscipline[] = ['Led', 'Sound', 'Light', 'Truss', 'Scaffold'];
+export const EQUIPMENT_DISCIPLINES: EquipmentDiscipline[] = ['Led', 'Video', 'Sound', 'Light', 'Truss', 'Scaffold'];
 
 export interface EquipmentFolder {
   id: Guid;

@@ -44,6 +44,8 @@ const MAX_BODIES = 8;
 /** When the firm has not measured a product, something of the right order rather than nothing. */
 const DEFAULT_SIZE: Record<EquipmentDiscipline, { w: number; h: number; d: number }> = {
   Led: { w: 0.5, h: 0.5, d: 0.08 },
+  // A screen, a projector or a rack unit: wider than it is deep, and nothing like a panel.
+  Video: { w: 0.8, h: 0.5, d: 0.2 },
   Sound: { w: 0.6, h: 0.9, d: 0.5 },
   Light: { w: 0.3, h: 0.5, d: 0.3 },
   Truss: { w: 0.3, h: 0.3, d: 3 },
@@ -53,6 +55,7 @@ const DEFAULT_SIZE: Record<EquipmentDiscipline, { w: number; h: number; d: numbe
 /** The colours of the trade tabs, so a layer list and the scene agree at a glance. */
 export const TRADE_COLOR: Record<EquipmentDiscipline, string> = {
   Led: '#a78bfa',
+  Video: '#22d3ee',
   Sound: '#38bdf8',
   Light: '#f59e0b',
   Truss: '#a1a1aa',
